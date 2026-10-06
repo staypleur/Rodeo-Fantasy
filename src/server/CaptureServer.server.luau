@@ -56,6 +56,7 @@ local function sendState(player, state, message)
 	remote:FireClient(player, "State", {
 		phase = state and state.phase or "Idle",
 		started = state and state.started or now(),
+		captureAt = state and state.captureAt,
 		widths = state and state.widths,
 		message = message,
 		count = inventories[player] or 0,
@@ -179,8 +180,12 @@ remote.OnServerEvent:Connect(function(player, action, payload)
 		end
 	elseif action == "Press" then
 		local state = states[player]
-		if not state or state.phase ~= "Minigame" then return end
+		if not state or (state.phase ~= "Minigame" and state.phase ~= "Holding") then return end
 		if not state.humanoid.Parent or state.humanoid.Health <= 0 or not state.monster.Parent then return end
+		if state.captureAt and clock >= state.captureAt then
+			capture(player)
+			return
+		end
 		-- The client never supplies a success/colour/count. Server receipt time is authoritative.
 		local position = Rules.position(clock - state.started, tuning.BarRoundTripSeconds)
 		local zone = Rules.zone(position, state.widths)
@@ -188,7 +193,9 @@ remote.OnServerEvent:Connect(function(player, action, payload)
 		if zone == "Orange" then
 			capture(player)
 		elseif zone == "Yellow" then
-			state.phase, state.started = "Holding", clock
+			-- Keep the bar's original clock and the first yellow's deadline.
+			state.phase = "Holding"
+			state.captureAt = state.captureAt or (clock + Config.Capture.HoldSeconds)
 			sendState(player, state)
 		else
 			release(player, "흰색 판정! 떨어졌어요. 다시 클릭해 도전하세요.")
@@ -228,7 +235,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 			if state.phase == "Riding" and clock - state.started >= Config.Capture.RideSeconds then
 				state.phase, state.started = "Minigame", clock
 				sendState(player, state)
-			elseif state.phase == "Holding" and clock - state.started >= Config.Capture.HoldSeconds then
+			elseif state.phase == "Holding" and clock >= state.captureAt then
 				capture(player)
 			end
 		end

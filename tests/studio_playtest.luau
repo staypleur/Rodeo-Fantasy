@@ -67,10 +67,11 @@ local function mount()
 	return monster
 end
 local function pressAt(position)
-	untilTrue(function() return state.phase == "Minigame" end, "no minigame")
+	untilTrue(function() return state.phase == "Minigame" or state.phase == "Holding" end, "no minigame")
 	local duration = config.Prototype.BarRoundTripSeconds
 	local target = state.started + duration * position / 2
-	while target <= workspace:GetServerTimeNow() + 0.05 do target += duration end
+	-- Leave room for the input cooldown; a near-immediate next colour uses the next pass.
+	while target <= workspace:GetServerTimeNow() + 0.18 do target += duration end
 	task.wait(math.max(0, target - workspace:GetServerTimeNow()))
 	remote:FireServer("Press")
 end
@@ -101,18 +102,38 @@ local success, problem = pcall(function()
 	pressAt(0.9)
 	untilTrue(function() return state.phase == "Holding" end, "yellow did not enter hold")
 	check(lastZone == "Yellow" and state.count == 0, "yellow must wait before capture")
-	remote:FireServer("Press")
-	task.wait(1)
-	check(state.phase == "Holding" and state.count == 0, "duplicate press must not bypass hold")
+	local firstDeadline, barStarted = state.captureAt, state.started
+	local captureBar = player.PlayerGui.RodeoCaptureUI:FindFirstChild("CaptureBar", true)
+	check(captureBar and captureBar.Visible, "bar must stay visible while holding")
+	pressAt(0.9)
+	task.wait(0.15)
+	check(state.phase == "Holding" and state.count == 0, "second yellow must continue holding")
+	check(state.captureAt == firstDeadline, "second yellow must not restart the five-second timer")
+	check(state.started == barStarted, "second yellow must not reset the moving bar")
 	untilTrue(function() return state.phase == "Idle" end, "yellow did not capture", 7)
+	check(workspace:GetServerTimeNow() < firstDeadline + 0.5, "capture must use the first deadline")
 	check(state.count == 1 and player:GetAttribute("EmberratCount") == 1, "yellow must capture exactly one")
 	task.wait(1.2)
 	mount()
 	check(state.widths.White == 0.8 and state.widths.Orange == 0.03, "repeat widths must change")
+	pressAt(0.9)
+	untilTrue(function() return state.phase == "Holding" end, "repeat yellow must start holding")
+	local orangeDeadline = state.captureAt
 	pressAt(0.985)
 	untilTrue(function() return state.phase == "Idle" end, "orange did not capture")
 	check(lastZone == "Orange" and state.count == 2, "orange must capture exactly one immediately")
+	check(workspace:GetServerTimeNow() < orangeDeadline, "orange during holding must finish before deadline")
 	check(not character.HumanoidRootPart.Anchored, "capture must restore player movement")
+	task.wait(1.2)
+	mount()
+	pressAt(0.9)
+	untilTrue(function() return state.phase == "Holding" end, "yellow before white test")
+	local failedDeadline = state.captureAt
+	pressAt(0.2)
+	untilTrue(function() return state.phase == "Idle" end, "white during holding must dismount")
+	check(lastZone == "White" and state.count == 2, "white during holding must not capture")
+	task.wait(math.max(0, failedDeadline - workspace:GetServerTimeNow()) + 0.3)
+	check(player:GetAttribute("EmberratCount") == 2, "failed hold must not capture later")
 end)
 driver:InvokeServer("Finish", success and ("PASS: " .. checks .. " Studio play checks") or ("FAIL: " .. tostring(problem)))
 ]==]
