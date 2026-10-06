@@ -7,12 +7,17 @@ Config.Monster = {
 	Design = "B",
 }
 
--- Confirmed growth design; merging/evolution and zoo income are not implemented yet.
--- Income amounts and payment rules must be confirmed before implementation.
+-- Merging/evolution remain pending.
 Config.Growth = {
 	MaxStars = 10,
 	CopiesPerUpgrade = 3,
 	EvolutionStars = { 3, 6, 9 },
+}
+
+Config.Zoo = {
+	Slots = 4,
+	IncomeSeconds = 2,
+	IncomeAmount = 1,
 }
 
 Config.Capture = {

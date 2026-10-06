@@ -16,6 +16,7 @@ scripts = {
 expected = {
     "Config": "src/shared/Config.luau",
     "CaptureRules": "src/shared/CaptureRules.luau",
+    "ZooRules": "src/shared/ZooRules.luau",
     "CaptureServer": "src/server/CaptureServer.server.luau",
     "CaptureClient": "src/client/CaptureClient.client.luau",
 }
@@ -24,7 +25,7 @@ for name, source in expected.items():
     assert scripts[name] == (root / source).read_text(encoding="utf-8"), name
 assert place.find("Item[@class='ServerScriptService']/Item[@class='Script']") is not None
 assert place.find("Item[@class='StarterPlayer']/Item[@class='StarterPlayerScripts']/Item[@class='LocalScript']") is not None
-print("PASS: XML structure, unique references, script placement and all 4 embedded sources")
+print(f"PASS: XML structure, unique references, script placement and all {len(expected)} embedded sources")
 
 standalone = ET.parse(root / "dist/Emberrat-B.rbxmx").getroot()
 model = standalone.find("Item[@class='Model']")
