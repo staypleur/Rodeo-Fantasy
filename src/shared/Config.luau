@@ -23,8 +23,8 @@ Config.Capture = {
 -- These are tuning values for testing, not finalized game balance/art.
 Config.Prototype = {
 	MetersPerStud = 0.28,
-	ForwardStudsPerSecond = 18,
-	SidewaysStudsPerSecond = 12,
+	ForwardStudsPerSecond = 40,
+	SidewaysStudsPerSecond = 22,
 	JumpSeconds = 0.45,
 	JumpArcStuds = 3,
 	BarRoundTripSeconds = 2.4,
