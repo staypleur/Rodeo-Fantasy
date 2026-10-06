@@ -1,0 +1,807 @@
+<?xml version='1.0' encoding='utf-8'?>
+<roblox version="4">
+  <Item class="Workspace" referent="RBX1">
+    <Properties>
+      <string name="Name">Workspace</string>
+      <bool name="StreamingEnabled">false</bool>
+    </Properties>
+    <Item class="Folder" referent="RBX2">
+      <Properties>
+        <string name="Name">RodeoPrototype</string>
+      </Properties>
+      <Item class="Folder" referent="RBX3">
+        <Properties>
+          <string name="Name">Monsters</string>
+        </Properties>
+      </Item>
+      <Item class="Part" referent="RBX4">
+        <Properties>
+          <string name="Name">PreviewGround</string>
+          <bool name="Anchored">true</bool>
+          <Vector3 name="size">
+            <X>100</X>
+            <Y>2</Y>
+            <Z>256</Z>
+          </Vector3>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>-1</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Color3 name="Color">
+            <R>0.7647058823529411</R>
+            <G>0.6509803921568628</G>
+            <B>0.4666666666666667</B>
+          </Color3>
+          <token name="TopSurface">0</token>
+          <token name="BottomSurface">0</token>
+          <token name="Material">1296</token>
+        </Properties>
+      </Item>
+      <Item class="SpawnLocation" referent="RBX5">
+        <Properties>
+          <string name="Name">Spawn</string>
+          <bool name="Anchored">true</bool>
+          <Vector3 name="size">
+            <X>5</X>
+            <Y>0.2</Y>
+            <Z>5</Z>
+          </Vector3>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>0.1</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Color3 name="Color">
+            <R>0.7647058823529411</R>
+            <G>0.6509803921568628</G>
+            <B>0.4666666666666667</B>
+          </Color3>
+          <token name="TopSurface">0</token>
+          <token name="BottomSurface">0</token>
+          <bool name="Neutral">true</bool>
+          <bool name="CanCollide">false</bool>
+          <float name="Transparency">1</float>
+          <int name="Duration">0</int>
+        </Properties>
+      </Item>
+      <Item class="Model" referent="RBX6">
+        <Properties>
+          <string name="Name">PreviewMonster</string>
+          <Ref name="PrimaryPart">RBX7</Ref>
+        </Properties>
+        <Item class="Part" referent="RBX7">
+          <Properties>
+            <string name="Name">Body</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>3</X>
+              <Y>3</Y>
+              <Z>4</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>2</Y>
+              <Z>-8</Z>
+              <R00>1</R00>
+              <R01>0</R01>
+              <R02>0</R02>
+              <R10>0</R10>
+              <R11>1</R11>
+              <R12>0</R12>
+              <R20>0</R20>
+              <R21>0</R21>
+              <R22>1</R22>
+            </CoordinateFrame>
+            <Color3 name="Color">
+              <R>0.6470588235294118</R>
+              <G>0.6470588235294118</G>
+              <B>0.6470588235294118</B>
+            </Color3>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+          </Properties>
+          <Item class="BillboardGui" referent="RBX8">
+            <Properties>
+              <string name="Name">Nameplate</string>
+              <UDim2 name="Size">
+                <XS>0</XS>
+                <XO>240</XO>
+                <YS>0</YS>
+                <YO>65</YO>
+              </UDim2>
+              <Vector3 name="StudsOffset">
+                <X>0</X>
+                <Y>4</Y>
+                <Z>0</Z>
+              </Vector3>
+              <bool name="AlwaysOnTop">true</bool>
+            </Properties>
+            <Item class="TextLabel" referent="RBX9">
+              <Properties>
+                <string name="Name">Label</string>
+                <UDim2 name="Size">
+                  <XS>1</XS>
+                  <XO>0</XO>
+                  <YS>1</YS>
+                  <YO>0</YO>
+                </UDim2>
+                <float name="BackgroundTransparency">1</float>
+                <string name="Text">앰버랫
+불 · 포유류 / 외형 미정</string>
+                <float name="TextSize">18</float>
+                <Color3 name="TextColor3">
+                  <R>1</R>
+                  <G>1</G>
+                  <B>1</B>
+                </Color3>
+                <float name="TextStrokeTransparency">0.3</float>
+              </Properties>
+            </Item>
+          </Item>
+        </Item>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="ReplicatedStorage" referent="RBX10">
+    <Properties>
+      <string name="Name">ReplicatedStorage</string>
+    </Properties>
+    <Item class="Folder" referent="RBX11">
+      <Properties>
+        <string name="Name">RodeoFantasy</string>
+      </Properties>
+      <Item class="ModuleScript" referent="RBX12">
+        <Properties>
+          <string name="Name">Config</string>
+          <ProtectedString name="Source">-- Confirmed rules and adjustable prototype presentation values are kept separate.
+local Config = {}
+
+Config.Monster = {
+	Id = "Emberrat",
+	Name = "앰버랫",
+	AttackType = "Melee",
+	Synergies = { "Fire", "Mammal" },
+	SynergyNames = { "불", "포유류" },
+	MaxEnergy = 40,
+	EnergyPerAttack = 10,
+	Skill = { Name = "불꽃 이빨", Target = "OneEnemyInFront" },
+}
+
+Config.Capture = {
+	JumpMeters = 3,
+	RideSeconds = 3,
+	HoldSeconds = 5,
+	First = { White = 0.85, Yellow = 0.14, Orange = 0.01 },
+	Repeat = { White = 0.80, Yellow = 0.17, Orange = 0.03 },
+}
+
+-- These are tuning values for testing, not finalized game balance/art.
+Config.Prototype = {
+	MetersPerStud = 0.28,
+	ForwardStudsPerSecond = 18,
+	SidewaysStudsPerSecond = 12,
+	JumpSeconds = 0.45,
+	JumpArcStuds = 3,
+	BarRoundTripSeconds = 2.4,
+	RoadHalfWidth = 40,
+	GroundChunkStuds = 256,
+	RideHeightStuds = 4,
+	RespawnSeconds = 1,
+}
+
+return Config
+</ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX13">
+        <Properties>
+          <string name="Name">CaptureRules</string>
+          <ProtectedString name="Source">-- Pure logic: used by both the UI and server, and executable without Roblox.
+local Rules = {}
+
+function Rules.position(elapsed, roundTripSeconds)
+	local phase = (math.max(0, elapsed) / roundTripSeconds) % 1
+	return 1 - math.abs(2 * phase - 1)
+end
+
+function Rules.zone(position, widths)
+	if position &lt; widths.White then
+		return "White"
+	elseif position &lt; 1 - widths.Orange then
+		return "Yellow"
+	else
+		return "Orange"
+	end
+end
+
+function Rules.inRange(dx, dy, dz, range)
+	return dx * dx + dy * dy + dz * dz &lt;= range * range
+end
+
+return Rules
+</ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="RemoteEvent" referent="RBX14">
+        <Properties>
+          <string name="Name">CaptureRemote</string>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="ServerStorage" referent="RBX15">
+    <Properties>
+      <string name="Name">ServerStorage</string>
+    </Properties>
+    <Item class="Model" referent="RBX16">
+      <Properties>
+        <string name="Name">RodeoMonsterTemplate</string>
+        <Ref name="PrimaryPart">RBX17</Ref>
+      </Properties>
+      <Item class="Part" referent="RBX17">
+        <Properties>
+          <string name="Name">Body</string>
+          <bool name="Anchored">true</bool>
+          <Vector3 name="size">
+            <X>3</X>
+            <Y>3</Y>
+            <Z>4</Z>
+          </Vector3>
+          <CoordinateFrame name="CFrame">
+            <X>0</X>
+            <Y>0</Y>
+            <Z>0</Z>
+            <R00>1</R00>
+            <R01>0</R01>
+            <R02>0</R02>
+            <R10>0</R10>
+            <R11>1</R11>
+            <R12>0</R12>
+            <R20>0</R20>
+            <R21>0</R21>
+            <R22>1</R22>
+          </CoordinateFrame>
+          <Color3 name="Color">
+            <R>0.6470588235294118</R>
+            <G>0.6470588235294118</G>
+            <B>0.6470588235294118</B>
+          </Color3>
+          <token name="TopSurface">0</token>
+          <token name="BottomSurface">0</token>
+          <bool name="CanCollide">false</bool>
+        </Properties>
+        <Item class="BillboardGui" referent="RBX18">
+          <Properties>
+            <string name="Name">Nameplate</string>
+            <UDim2 name="Size">
+              <XS>0</XS>
+              <XO>240</XO>
+              <YS>0</YS>
+              <YO>65</YO>
+            </UDim2>
+            <Vector3 name="StudsOffset">
+              <X>0</X>
+              <Y>4</Y>
+              <Z>0</Z>
+            </Vector3>
+            <bool name="AlwaysOnTop">true</bool>
+          </Properties>
+          <Item class="TextLabel" referent="RBX19">
+            <Properties>
+              <string name="Name">Label</string>
+              <UDim2 name="Size">
+                <XS>1</XS>
+                <XO>0</XO>
+                <YS>1</YS>
+                <YO>0</YO>
+              </UDim2>
+              <float name="BackgroundTransparency">1</float>
+              <string name="Text">앰버랫
+불 · 포유류 / 외형 미정</string>
+              <float name="TextSize">18</float>
+              <Color3 name="TextColor3">
+                <R>1</R>
+                <G>1</G>
+                <B>1</B>
+              </Color3>
+              <float name="TextStrokeTransparency">0.3</float>
+            </Properties>
+          </Item>
+        </Item>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="ServerScriptService" referent="RBX20">
+    <Properties>
+      <string name="Name">ServerScriptService</string>
+    </Properties>
+    <Item class="Script" referent="RBX21">
+      <Properties>
+        <string name="Name">CaptureServer</string>
+        <ProtectedString name="Source">local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+
+local package = ReplicatedStorage:WaitForChild("RodeoFantasy")
+local Config = require(package:WaitForChild("Config"))
+local Rules = require(package:WaitForChild("CaptureRules"))
+local remote = package:WaitForChild("CaptureRemote")
+local tuning = Config.Prototype
+local world = workspace:WaitForChild("RodeoPrototype")
+local monsters = world:WaitForChild("Monsters")
+local template = game:GetService("ServerStorage"):WaitForChild("RodeoMonsterTemplate")
+local states, owners, inventories, rateLimits, chunks = {}, {}, {}, {}, {}
+local initialPosition = Vector3.new(0, 2, -8)
+local jumpRange = Config.Capture.JumpMeters / tuning.MetersPerStud
+local preview = world:FindFirstChild("PreviewMonster")
+if preview then preview:Destroy() end
+chunks[0] = world:FindFirstChild("PreviewGround")
+
+local function now()
+	return workspace:GetServerTimeNow()
+end
+
+local function groundAt(z)
+	local center = math.floor(z / tuning.GroundChunkStuds + 0.5)
+	for index = center - 1, center + 1 do
+		if not chunks[index] then
+			local floor = Instance.new("Part")
+			floor.Name = "TestGround_" .. index
+			floor.Anchored = true
+			floor.Size = Vector3.new(100, 2, tuning.GroundChunkStuds)
+			floor.Position = Vector3.new(0, -1, index * tuning.GroundChunkStuds)
+			floor.Material = Enum.Material.Sand
+			floor.Color = Color3.fromRGB(195, 166, 119)
+			floor.Parent = world
+			chunks[index] = floor
+		end
+	end
+end
+
+local function spawnMonster(position)
+	local monster = template:Clone()
+	monster.Name = Config.Monster.Id
+	monster:SetAttribute("MonsterId", Config.Monster.Id)
+	monster:SetAttribute("Occupied", false)
+	monster:PivotTo(CFrame.new(position))
+	monster.Parent = monsters
+	return monster
+end
+
+local function notify(player, message)
+	remote:FireClient(player, "Notice", { message = message })
+end
+
+local function sendState(player, state, message)
+	remote:FireClient(player, "State", {
+		phase = state and state.phase or "Idle",
+		started = state and state.started or now(),
+		widths = state and state.widths,
+		message = message,
+		count = inventories[player] or 0,
+	})
+end
+
+local function clearRope(state)
+	for _, item in ipairs(state.rope or {}) do
+		item:Destroy()
+	end
+	state.rope = nil
+end
+
+local function release(player, message)
+	local state = states[player]
+	if not state then return end
+	states[player] = nil
+	clearRope(state)
+	owners[state.monster] = nil
+	if state.monster.Parent then
+		state.monster:SetAttribute("Occupied", false)
+	end
+	local root, humanoid = state.root, state.humanoid
+	if root.Parent and humanoid.Parent then
+		local p = root.Position
+		if state.monster.Parent then p = state.monster:GetPivot().Position end
+		groundAt(p.Z)
+		root.CFrame = CFrame.new(math.clamp(p.X + 5, -44, 44), 5, p.Z)
+		root.AssemblyLinearVelocity = Vector3.zero
+		root.AssemblyAngularVelocity = Vector3.zero
+		root.Anchored = state.wasAnchored
+		humanoid.AutoRotate = state.autoRotate
+		humanoid.PlatformStand = state.platformStand
+		if humanoid.Health &gt; 0 then
+			humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
+		end
+	end
+	if player.Parent then sendState(player, nil, message) end
+end
+
+local function capture(player)
+	local state = states[player]
+	if not state or state.phase ~= "Holding" and state.phase ~= "Minigame" then return end
+	local monster = state.monster
+	local position = monster:GetPivot().Position
+	inventories[player] = (inventories[player] or 0) + 1
+	player:SetAttribute("EmberratCount", inventories[player])
+	release(player, "포획 성공! 앰버랫이 추가됐어요.")
+	monster:Destroy()
+	-- Repeatable test fixture; this is not the final wild-monster spawn system.
+	task.delay(tuning.RespawnSeconds, function() spawnMonster(position) end)
+end
+
+local function mount(player, monster)
+	if states[player] then return end
+	if typeof(monster) ~= "Instance" or not monster:IsA("Model") then return end
+	if monster.Parent ~= monsters or monster:GetAttribute("MonsterId") ~= Config.Monster.Id then return end
+	if owners[monster] then notify(player, "다른 플레이어가 타고 있어요.") return end
+	local character = player.Character
+	local root = character and character:FindFirstChild("HumanoidRootPart")
+	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
+	if not root or not humanoid or humanoid.Health &lt;= 0 then return end
+	local target = monster.PrimaryPart
+	if not target then return end
+	local difference = target.Position - root.Position
+	if not Rules.inRange(difference.X, difference.Y, difference.Z, jumpRange) then
+		notify(player, "앰버랫에게 더 가까이 가세요. 점프 범위는 3m예요.")
+		return
+	end
+	local rayParams = RaycastParams.new()
+	rayParams.FilterType = Enum.RaycastFilterType.Exclude
+	rayParams.FilterDescendantsInstances = { character, monster }
+	if workspace:Raycast(root.Position, difference, rayParams) then
+		notify(player, "사이에 장애물이 있어 줄을 던질 수 없어요.")
+		return
+	end
+	local state = {
+		phase = "Jumping", started = now(), monster = monster,
+		root = root, humanoid = humanoid, steer = 0, steerAt = now(),
+		origin = root.CFrame, wasAnchored = root.Anchored,
+		autoRotate = humanoid.AutoRotate, platformStand = humanoid.PlatformStand,
+		widths = (inventories[player] or 0) &gt; 0 and Config.Capture.Repeat or Config.Capture.First,
+	}
+	states[player], owners[monster] = state, player
+	monster:SetAttribute("Occupied", true)
+	root.Anchored = true
+	humanoid.AutoRotate = false
+	humanoid.PlatformStand = true
+	local start = Instance.new("Attachment")
+	start.Position = Vector3.new(1, 0, 0)
+	start.Parent = root
+	local finish = Instance.new("Attachment")
+	finish.Parent = target
+	local rope = Instance.new("Beam")
+	rope.Attachment0, rope.Attachment1 = start, finish
+	rope.Width0, rope.Width1 = 0.1, 0.1
+	rope.FaceCamera = true
+	rope.Color = ColorSequence.new(Color3.fromRGB(166, 119, 65))
+	rope.Parent = root
+	state.rope = { rope, start, finish }
+	sendState(player, state)
+end
+
+remote.OnServerEvent:Connect(function(player, action, payload)
+	if type(action) ~= "string" then return end
+	if action ~= "Sync" and action ~= "Mount" and action ~= "Steer" and action ~= "Press" then return end
+	local clock = now()
+	local limits = rateLimits[player]
+	if not limits then limits = {} rateLimits[player] = limits end
+	local interval = action == "Steer" and 0.04 or action == "Press" and 0.1 or 0.25
+	if clock - (limits[action] or -math.huge) &lt; interval then return end
+	limits[action] = clock
+	if action == "Sync" then
+		sendState(player, states[player])
+	elseif action == "Mount" then
+		mount(player, payload)
+	elseif action == "Steer" then
+		local state = states[player]
+		if state and (payload == -1 or payload == 0 or payload == 1) then
+			state.steer, state.steerAt = payload, clock
+		end
+	elseif action == "Press" then
+		local state = states[player]
+		if not state or state.phase ~= "Minigame" then return end
+		if not state.humanoid.Parent or state.humanoid.Health &lt;= 0 or not state.monster.Parent then return end
+		-- The client never supplies a success/colour/count. Server receipt time is authoritative.
+		local position = Rules.position(clock - state.started, tuning.BarRoundTripSeconds)
+		local zone = Rules.zone(position, state.widths)
+		remote:FireClient(player, "Judged", { zone = zone, position = position })
+		if zone == "Orange" then
+			capture(player)
+		elseif zone == "Yellow" then
+			state.phase, state.started = "Holding", clock
+			sendState(player, state)
+		else
+			release(player, "흰색 판정! 떨어졌어요. 다시 클릭해 도전하세요.")
+		end
+	end
+end)
+
+RunService.Heartbeat:Connect(function(deltaTime)
+	local clock = now()
+	for player, state in pairs(states) do
+		if not state.root.Parent or not state.humanoid.Parent or state.humanoid.Health &lt;= 0
+			or not state.monster.Parent or player.Character ~= state.root.Parent then
+			release(player, "다시 탑승할 수 있어요.")
+			continue
+		end
+		local monsterFrame = state.monster:GetPivot()
+		local saddle = monsterFrame * CFrame.new(0, tuning.RideHeightStuds, 0)
+		if state.phase == "Jumping" then
+			local alpha = math.clamp((clock - state.started) / tuning.JumpSeconds, 0, 1)
+			state.root.CFrame = state.origin:Lerp(saddle, alpha) + Vector3.new(0, math.sin(alpha * math.pi) * tuning.JumpArcStuds, 0)
+			if alpha &gt;= 1 then
+				clearRope(state)
+				state.phase, state.started = "Riding", clock
+				sendState(player, state)
+			end
+		else
+			local p = monsterFrame.Position
+			local steering = clock - state.steerAt &lt; 0.5 and state.steer or 0
+			local dt = math.min(deltaTime, 0.1)
+			local x = math.clamp(p.X + steering * tuning.SidewaysStudsPerSecond * dt, -tuning.RoadHalfWidth, tuning.RoadHalfWidth)
+			local z = p.Z - tuning.ForwardStudsPerSecond * dt
+			groundAt(z)
+			local newFrame = CFrame.new(x, p.Y, z)
+			state.monster:PivotTo(newFrame)
+			state.root.CFrame = newFrame * CFrame.new(0, tuning.RideHeightStuds, 0)
+			state.root.AssemblyLinearVelocity = Vector3.zero
+			if state.phase == "Riding" and clock - state.started &gt;= Config.Capture.RideSeconds then
+				state.phase, state.started = "Minigame", clock
+				sendState(player, state)
+			elseif state.phase == "Holding" and clock - state.started &gt;= Config.Capture.HoldSeconds then
+				capture(player)
+			end
+		end
+	end
+end)
+
+local function playerAdded(player)
+	inventories[player] = 0
+	player:SetAttribute("EmberratCount", 0)
+	player.CharacterRemoving:Connect(function() release(player) end)
+end
+
+Players.PlayerAdded:Connect(playerAdded)
+Players.PlayerRemoving:Connect(function(player)
+	release(player)
+	inventories[player], rateLimits[player] = nil, nil
+end)
+for _, player in ipairs(Players:GetPlayers()) do playerAdded(player) end
+groundAt(0)
+spawnMonster(initialPosition)
+</ProtectedString>
+        <bool name="Disabled">false</bool>
+      </Properties>
+    </Item>
+  </Item>
+  <Item class="StarterPlayer" referent="RBX22">
+    <Properties>
+      <string name="Name">StarterPlayer</string>
+      <float name="CameraMaxZoomDistance">40</float>
+      <float name="CameraMinZoomDistance">8</float>
+    </Properties>
+    <Item class="StarterPlayerScripts" referent="RBX23">
+      <Properties>
+        <string name="Name">StarterPlayerScripts</string>
+      </Properties>
+      <Item class="LocalScript" referent="RBX24">
+        <Properties>
+          <string name="Name">CaptureClient</string>
+          <ProtectedString name="Source">local Players = game:GetService("Players")
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local RunService = game:GetService("RunService")
+local UserInputService = game:GetService("UserInputService")
+local ContextActionService = game:GetService("ContextActionService")
+
+local player = Players.LocalPlayer
+local package = ReplicatedStorage:WaitForChild("RodeoFantasy")
+local Config = require(package:WaitForChild("Config"))
+local Rules = require(package:WaitForChild("CaptureRules"))
+local remote = package:WaitForChild("CaptureRemote")
+local monsters = workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
+local mouse = player:GetMouse()
+local phase, started, widths = "Idle", 0, Config.Capture.First
+local left, right, pressed, lastSteer = false, false, false, 0
+local noticeUntil, savedCameraType, savedCameraSubject = 0, nil, nil
+
+local function make(className, properties, parent)
+	local item = Instance.new(className)
+	for key, value in pairs(properties) do item[key] = value end
+	item.Parent = parent
+	return item
+end
+
+local gui = make("ScreenGui", { Name = "RodeoCaptureUI", ResetOnSpawn = false, DisplayOrder = 10 }, player:WaitForChild("PlayerGui"))
+local panel = make("Frame", {
+	AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -24),
+	Size = UDim2.new(0.9, 0, 0, 192), BackgroundColor3 = Color3.fromRGB(27, 24, 23),
+	BackgroundTransparency = 0.08, BorderSizePixel = 0,
+}, gui)
+make("UISizeConstraint", { MaxSize = Vector2.new(720, 192) }, panel)
+make("UICorner", { CornerRadius = UDim.new(0, 14) }, panel)
+local function label(parent, text, position, size, fontSize, color)
+	return make("TextLabel", {
+		Text = text, Position = position, Size = size, TextSize = fontSize,
+		Font = Enum.Font.GothamMedium, TextColor3 = color or Color3.fromRGB(249, 242, 225),
+		BackgroundTransparency = 1, TextWrapped = true,
+	}, parent)
+end
+label(panel, "RODEO FANTASY · 앰버랫 포획 테스트", UDim2.fromOffset(12, 8), UDim2.new(1, -24, 0, 26), 18)
+local status = label(panel, "3m 안의 앰버랫 블록을 클릭하세요", UDim2.fromOffset(12, 40), UDim2.new(1, -24, 0, 34), 19)
+local detail = label(panel, "WASD 이동 · 마우스 클릭으로 줄 던지기", UDim2.fromOffset(12, 78), UDim2.new(1, -24, 0, 24), 14)
+local bar = make("Frame", { Position = UDim2.new(0, 24, 0, 115), Size = UDim2.new(1, -48, 0, 26), BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(241, 238, 228), Visible = false }, panel)
+local yellow = make("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(250, 208, 65) }, bar)
+local orange = make("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(255, 116, 30) }, bar)
+local marker = make("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0, 0.5), Size = UDim2.new(0, 3, 1, 12), BackgroundColor3 = Color3.fromRGB(34, 31, 29), BorderSizePixel = 0, ZIndex = 3 }, bar)
+local collection = label(panel, "이번 접속 포획: 0마리 · 불 / 포유류 · 근접형", UDim2.fromOffset(12, 156), UDim2.new(1, -24, 0, 24), 14, Color3.fromRGB(230, 190, 126))
+label(gui, "기능 테스트용 블록 · 앰버랫 외형은 추후 제작\n포획 기록은 이번 접속에서만 유지됩니다", UDim2.fromOffset(16, 12), UDim2.fromOffset(400, 54), 14)
+local highlight = make("Highlight", { Enabled = false, FillTransparency = 0.85, OutlineTransparency = 0, DepthMode = Enum.HighlightDepthMode.Occluded }, gui)
+
+local function targetMonster()
+	local target = mouse.Target
+	if not target then return nil end
+	local model = target:FindFirstAncestorOfClass("Model")
+	if model and model.Parent == monsters then return model end
+	return nil
+end
+
+local function sendSteer()
+	remote:FireServer("Steer", (right and 1 or 0) - (left and 1 or 0))
+	lastSteer = os.clock()
+end
+
+local function inputAction(_, inputState, input)
+	if inputState == Enum.UserInputState.Cancel then
+		left, right = false, false
+		sendSteer()
+		return Enum.ContextActionResult.Sink
+	end
+	local down = inputState == Enum.UserInputState.Begin
+	if inputState ~= Enum.UserInputState.Begin and inputState ~= Enum.UserInputState.End then
+		return Enum.ContextActionResult.Sink
+	end
+	if UserInputService:GetFocusedTextBox() and down then return Enum.ContextActionResult.Pass end
+	if input.KeyCode == Enum.KeyCode.A then left = down sendSteer() end
+	if input.KeyCode == Enum.KeyCode.D then right = down sendSteer() end
+	if input.KeyCode == Enum.KeyCode.Space and down and phase == "Minigame" and not pressed then
+		pressed = true
+		remote:FireServer("Press")
+	end
+	return Enum.ContextActionResult.Sink
+end
+
+local function toggleRide(active)
+	local camera = workspace.CurrentCamera
+	if active then
+		if savedCameraType == nil then
+			savedCameraType, savedCameraSubject = camera.CameraType, camera.CameraSubject
+			ContextActionService:BindActionAtPriority("RodeoRide", inputAction, false, Enum.ContextActionPriority.High.Value + 1,
+				Enum.KeyCode.A, Enum.KeyCode.D, Enum.KeyCode.W, Enum.KeyCode.S, Enum.KeyCode.Space)
+		end
+		camera.CameraType = Enum.CameraType.Scriptable
+	else
+		ContextActionService:UnbindAction("RodeoRide")
+		if savedCameraType then
+			camera.CameraType = savedCameraType
+			if savedCameraSubject and savedCameraSubject.Parent then camera.CameraSubject = savedCameraSubject end
+		end
+		savedCameraType, savedCameraSubject = nil, nil
+		left, right = false, false
+	end
+end
+
+UserInputService.InputBegan:Connect(function(input, processed)
+	if processed or phase ~= "Idle" or input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+	local target = targetMonster()
+	if target then remote:FireServer("Mount", target) end
+end)
+UserInputService.WindowFocusReleased:Connect(function()
+	left, right = false, false
+	if phase ~= "Idle" then sendSteer() end
+end)
+UserInputService.TextBoxFocused:Connect(function()
+	left, right = false, false
+	if phase ~= "Idle" then sendSteer() end
+end)
+
+remote.OnClientEvent:Connect(function(kind, data)
+	if kind == "Notice" then
+		status.Text, noticeUntil = data.message, os.clock() + 3
+	elseif kind == "Judged" then
+		marker.Position = UDim2.fromScale(data.position, 0.5)
+	elseif kind == "State" then
+		phase, started, pressed = data.phase, data.started, false
+		widths = data.widths or Config.Capture.First
+		bar.Visible = phase == "Minigame"
+		yellow.Position, yellow.Size = UDim2.fromScale(widths.White, 0), UDim2.fromScale(widths.Yellow, 1)
+		orange.Position, orange.Size = UDim2.fromScale(1 - widths.Orange, 0), UDim2.fromScale(widths.Orange, 1)
+		collection.Text = string.format("이번 접속 포획: %d마리 · 불 / 포유류 · 근접형", data.count)
+		noticeUntil = 0
+		if data.message then status.Text, noticeUntil = data.message, os.clock() + 3 end
+		toggleRide(phase ~= "Idle")
+	end
+end)
+
+player.CharacterAdded:Connect(function()
+	phase = "Idle"
+	toggleRide(false)
+	remote:FireServer("Sync")
+end)
+
+RunService.RenderStepped:Connect(function(dt)
+	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+	local elapsed = workspace:GetServerTimeNow() - started
+	if phase ~= "Idle" and root then
+		local camera = workspace.CurrentCamera
+		local goal = CFrame.lookAt(root.Position + Vector3.new(0, 12, 20), root.Position + Vector3.new(0, 0, -10))
+		camera.CFrame = camera.CFrame:Lerp(goal, 1 - math.exp(-10 * dt))
+		if os.clock() - lastSteer &gt;= 0.15 then sendSteer() end
+	end
+	highlight.Enabled = false
+	if phase == "Idle" then
+		local target = targetMonster()
+		if target and target.PrimaryPart and root then
+			local distance = (target.PrimaryPart.Position - root.Position).Magnitude * Config.Prototype.MetersPerStud
+			highlight.Adornee, highlight.Enabled = target, true
+			local available = distance &lt;= Config.Capture.JumpMeters and not target:GetAttribute("Occupied")
+			highlight.OutlineColor = available and Color3.fromRGB(136, 229, 165) or Color3.fromRGB(245, 105, 89)
+			detail.Text = string.format("앰버랫까지 %.1fm / 점프 범위 3m · 클릭하여 탑승", distance)
+		else
+			detail.Text = "WASD 이동 · 마우스 클릭으로 줄 던지기"
+		end
+		if os.clock() &gt;= noticeUntil then status.Text = "3m 안의 앰버랫 블록을 클릭하세요" end
+	elseif phase == "Jumping" then
+		status.Text, detail.Text = "줄을 던져 탑승 중…", "앰버랫 · 불 / 포유류"
+	elseif phase == "Riding" then
+		status.Text = string.format("미니게임까지 %.1f초", math.max(0, Config.Capture.RideSeconds - elapsed))
+		detail.Text = "자동 전진 중 · A / D로 좌우 이동"
+	elseif phase == "Minigame" then
+		status.Text = pressed and "판정 중…" or "노란색이나 주황색에서 스페이스바!"
+		detail.Text = string.format("흰색 %d%% 실패 · 노란색 %d%% 5초 버티기 · 주황색 %d%% 즉시 포획", math.floor(widths.White * 100 + 0.5), math.floor(widths.Yellow * 100 + 0.5), math.floor(widths.Orange * 100 + 0.5))
+		if not pressed then marker.Position = UDim2.fromScale(Rules.position(elapsed, Config.Prototype.BarRoundTripSeconds), 0.5) end
+	elseif phase == "Holding" then
+		status.Text = string.format("노란색 성공! 포획까지 %.1f초", math.max(0, Config.Capture.HoldSeconds - elapsed))
+		detail.Text = "추가 입력 없이 타고 있으면 포획돼요 · A / D 이동 가능"
+	end
+end)
+
+remote:FireServer("Sync")
+</ProtectedString>
+          <bool name="Disabled">false</bool>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="Lighting" referent="RBX25">
+    <Properties>
+      <string name="Name">Lighting</string>
+      <float name="ClockTime">14</float>
+      <float name="Brightness">2</float>
+      <Color3 name="Ambient">
+        <R>0.5</R>
+        <G>0.5</G>
+        <B>0.5</B>
+      </Color3>
+    </Properties>
+  </Item>
+</roblox>

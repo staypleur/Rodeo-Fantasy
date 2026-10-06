@@ -1,0 +1,20 @@
+-- Run with Studio's documented --task RunScript option in the generated place.
+local package = game:GetService("ReplicatedStorage"):FindFirstChild("RodeoFantasy")
+assert(package, "RodeoFantasy package missing")
+local config = require(package.Config)
+local rules = require(package.CaptureRules)
+assert(config.Monster.MaxEnergy == 40)
+assert(rules.zone(0.97, config.Capture.Repeat) == "Orange")
+assert(package.CaptureRemote:IsA("RemoteEvent"))
+assert(game:GetService("ServerScriptService").CaptureServer:IsA("Script"))
+assert(game:GetService("StarterPlayer").StarterPlayerScripts.CaptureClient:IsA("LocalScript"))
+local world = workspace.RodeoPrototype
+assert(world.Spawn:IsA("SpawnLocation"))
+assert(world.PreviewGround.Size.Z == 256)
+local template = game:GetService("ServerStorage").RodeoMonsterTemplate
+local clone = template:Clone()
+clone:PivotTo(CFrame.new(0, 2, -8))
+assert((clone.PrimaryPart.Position - Vector3.new(0, 2, -8)).Magnitude < 0.01)
+assert(clone.PrimaryPart.Anchored)
+clone:Destroy()
+print("RODEO_STUDIO_SMOKE_PASS: place loaded; module logic, hierarchy, model pivot validated")
