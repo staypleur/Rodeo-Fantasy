@@ -39,14 +39,14 @@ local function label(parent, text, position, size, fontSize, color)
 	}, parent)
 end
 label(panel, "RODEO FANTASY · 앰버랫 포획 테스트", UDim2.fromOffset(12, 8), UDim2.new(1, -24, 0, 26), 18)
-local status = label(panel, "3m 안의 앰버랫 블록을 클릭하세요", UDim2.fromOffset(12, 40), UDim2.new(1, -24, 0, 34), 19)
+local status = label(panel, "3m 안의 앰버랫을 클릭하세요", UDim2.fromOffset(12, 40), UDim2.new(1, -24, 0, 34), 19)
 local detail = label(panel, "WASD 이동 · 마우스 클릭으로 줄 던지기", UDim2.fromOffset(12, 78), UDim2.new(1, -24, 0, 24), 14)
 local bar = make("Frame", { Name = "CaptureBar", Position = UDim2.new(0, 24, 0, 115), Size = UDim2.new(1, -48, 0, 26), BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(241, 238, 228), Visible = false }, panel)
 local yellow = make("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(250, 208, 65) }, bar)
 local orange = make("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(255, 116, 30) }, bar)
 local marker = make("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0, 0.5), Size = UDim2.new(0, 3, 1, 12), BackgroundColor3 = Color3.fromRGB(34, 31, 29), BorderSizePixel = 0, ZIndex = 3 }, bar)
 local collection = label(panel, "이번 접속 앰버랫 포획: 0마리", UDim2.fromOffset(12, 156), UDim2.new(1, -24, 0, 24), 14, Color3.fromRGB(230, 190, 126))
-label(gui, "기능 테스트용 블록 · 앰버랫 외형은 추후 제작\n포획 기록은 이번 접속에서만 유지됩니다", UDim2.fromOffset(16, 12), UDim2.fromOffset(400, 54), 14)
+label(gui, "앰버랫 B · 기본형 모델\n포획 기록은 이번 접속에서만 유지됩니다", UDim2.fromOffset(16, 12), UDim2.fromOffset(400, 54), 14)
 local highlight = make("Highlight", { Enabled = false, FillTransparency = 0.85, OutlineTransparency = 0, DepthMode = Enum.HighlightDepthMode.Occluded }, gui)
 
 local function targetMonster()
@@ -168,7 +168,7 @@ RunService.RenderStepped:Connect(function(dt)
 		else
 			detail.Text = "WASD 이동 · 마우스 클릭으로 줄 던지기"
 		end
-		if os.clock() >= noticeUntil then status.Text = "3m 안의 앰버랫 블록을 클릭하세요" end
+		if os.clock() >= noticeUntil then status.Text = "3m 안의 앰버랫을 클릭하세요" end
 	elseif phase == "Jumping" then
 		status.Text, detail.Text = "줄을 던져 탑승 중…", "앰버랫"
 	elseif phase == "Riding" then

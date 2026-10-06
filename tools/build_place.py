@@ -1,6 +1,9 @@
 """Build the self-contained Studio place using only Python's standard library."""
 from pathlib import Path
+import copy
+import math
 import xml.etree.ElementTree as ET
+from emberrat_model import components
 
 ROOT = Path(__file__).resolve().parents[1]
 document = ET.Element("roblox", version="4")
@@ -30,16 +33,21 @@ def vector(x, y, z):
     return dict(X=x, Y=y, Z=z)
 
 
-def frame(x, y, z):
-    return dict(X=x, Y=y, Z=z, R00=1, R01=0, R02=0, R10=0, R11=1, R12=0, R20=0, R21=0, R22=1)
+def frame(x, y, z, rotation=(0, 0, 0)):
+    rx, ry, rz = [math.radians(value) for value in rotation]
+    cx, cy, cz, sx, sy, sz = math.cos(rx), math.cos(ry), math.cos(rz), math.sin(rx), math.sin(ry), math.sin(rz)
+    return dict(X=x, Y=y, Z=z,
+                R00=cy*cz+sy*sx*sz, R01=-cy*sz+sy*sx*cz, R02=sy*cx,
+                R10=cx*sz, R11=cx*cz, R12=-sx,
+                R20=-sy*cz+cy*sx*sz, R21=sy*sz+cy*sx*cz, R22=cy*cx)
 
 
-def part(parent, name, position, size, color, kind="Part"):
+def part(parent, name, position, size, color, kind="Part", rotation=(0, 0, 0)):
     node, properties = item(parent, kind, name)
     prop(properties, "bool", "Anchored", True)
     prop(properties, "Vector3", "size", vector(*size))
-    prop(properties, "CoordinateFrame", "CFrame", frame(*position))
-    prop(properties, "Color3", "Color", dict(R=color[0] / 255, G=color[1] / 255, B=color[2] / 255))
+    prop(properties, "CoordinateFrame", "CFrame", frame(*position, rotation))
+    prop(properties, "Color3uint8", "Color3uint8", (color[0] << 16) | (color[1] << 8) | color[2])
     prop(properties, "token", "TopSurface", 0)
     prop(properties, "token", "BottomSurface", 0)
     return node, properties
@@ -55,17 +63,43 @@ def script(parent, kind, name, path):
 
 def monster(parent, name, position):
     node, properties = item(parent, "Model", name)
-    body, body_props = part(node, "Body", position, (3, 3, 4), (165, 165, 165))
-    prop(body_props, "bool", "CanCollide", False)
-    prop(properties, "Ref", "PrimaryPart", body.attrib["referent"])
-    billboard, bill_props = item(body, "BillboardGui", "Nameplate")
+    root, root_props = part(node, "MountRoot", position, (2.5, 2, 4.6), (175, 77, 36))
+    prop(root_props, "float", "Transparency", 1)
+    prop(root_props, "bool", "CanCollide", False)
+    prop(root_props, "bool", "CanQuery", False)
+    prop(root_props, "bool", "CanTouch", False)
+    prop(properties, "Ref", "PrimaryPart", root.attrib["referent"])
+    for component in components():
+        component_position = tuple(position[i] + component["position"][i] for i in range(3))
+        shape = component["shape"]
+        body, body_props = part(node, component["name"], component_position,
+                               component["size"], component["color"],
+                               "WedgePart" if shape == "Wedge" else "Part", component["rotation"])
+        prop(body_props, "bool", "CanCollide", False)
+        prop(body_props, "bool", "CanTouch", False)
+        prop(body_props, "token", "Material", 288 if component["neon"] else 272)
+        if shape == "Sphere":
+            mesh, mesh_props = item(body, "SpecialMesh", "Shape")
+            prop(mesh_props, "token", "MeshType", 3)  # Enum.MeshType.Sphere
+            prop(mesh_props, "Vector3", "Scale", vector(1, 1, 1))
+        if component["flame"]:
+            flame, flame_props = item(body, "Fire", "EmberFlame")
+            prop(flame_props, "float", "size", 2)
+            prop(flame_props, "float", "heat_xml", 0.5)
+            prop(flame_props, "Color3", "Color", dict(R=1, G=0.36, B=0.06))
+            prop(flame_props, "Color3", "SecondaryColor", dict(R=1, G=0.88, B=0.28))
+            light, light_props = item(body, "PointLight", "EmberGlow")
+            prop(light_props, "Color3", "Color", dict(R=1, G=0.49, B=0.13))
+            prop(light_props, "float", "Brightness", 0.35)
+            prop(light_props, "float", "Range", 4)
+    billboard, bill_props = item(root, "BillboardGui", "Nameplate")
     prop(bill_props, "UDim2", "Size", dict(XS=0, XO=240, YS=0, YO=65))
-    prop(bill_props, "Vector3", "StudsOffset", vector(0, 4, 0))
+    prop(bill_props, "Vector3", "StudsOffset", vector(0, 4.8, 0))
     prop(bill_props, "bool", "AlwaysOnTop", True)
     label, label_props = item(billboard, "TextLabel", "Label")
     prop(label_props, "UDim2", "Size", dict(XS=1, XO=0, YS=1, YO=0))
     prop(label_props, "float", "BackgroundTransparency", 1)
-    prop(label_props, "string", "Text", "앰버랫\n외형 미정")
+    prop(label_props, "string", "Text", "앰버랫")
     prop(label_props, "float", "TextSize", 18)
     prop(label_props, "Color3", "TextColor3", dict(R=1, G=1, B=1))
     prop(label_props, "float", "TextStrokeTransparency", 0.3)
@@ -91,7 +125,7 @@ script(package, "ModuleScript", "Config", "src/shared/Config.luau")
 script(package, "ModuleScript", "CaptureRules", "src/shared/CaptureRules.luau")
 item(package, "RemoteEvent", "CaptureRemote")
 server_storage, _ = item(document, "ServerStorage", "ServerStorage")
-monster(server_storage, "RodeoMonsterTemplate", (0, 0, 0))
+model_template = monster(server_storage, "RodeoMonsterTemplate", (0, 0, 0))
 server_scripts, _ = item(document, "ServerScriptService", "ServerScriptService")
 script(server_scripts, "Script", "CaptureServer", "src/server/CaptureServer.server.luau")
 starter, starter_props = item(document, "StarterPlayer", "StarterPlayer")
@@ -109,3 +143,13 @@ output = ROOT / "dist" / "RodeoFantasy-Capture.rbxlx"
 output.parent.mkdir(exist_ok=True)
 ET.ElementTree(document).write(output, encoding="utf-8", xml_declaration=True)
 print(f"Built {output.name} ({output.stat().st_size:,} bytes)")
+
+# A standalone, editable model is included for reuse in the future zoo scene.
+model_document = ET.Element("roblox", version="4")
+model_copy = copy.deepcopy(model_template)
+model_copy.find("Properties/string[@name='Name']").text = "Emberrat_B"
+model_document.append(model_copy)
+ET.indent(model_document, space="  ")
+model_output = output.parent / "Emberrat-B.rbxmx"
+ET.ElementTree(model_document).write(model_output, encoding="utf-8", xml_declaration=True)
+print(f"Built {model_output.name} ({len(components())} visual parts)")

@@ -4,6 +4,7 @@ local Config = {}
 Config.Monster = {
 	Id = "Emberrat",
 	Name = "앰버랫",
+	Design = "B",
 }
 
 -- Confirmed growth design; merging/evolution and zoo income are not implemented yet.

@@ -25,3 +25,13 @@ for name, source in expected.items():
 assert place.find("Item[@class='ServerScriptService']/Item[@class='Script']") is not None
 assert place.find("Item[@class='StarterPlayer']/Item[@class='StarterPlayerScripts']/Item[@class='LocalScript']") is not None
 print("PASS: XML structure, unique references, script placement and all 4 embedded sources")
+
+standalone = ET.parse(root / "dist/Emberrat-B.rbxmx").getroot()
+model = standalone.find("Item[@class='Model']")
+assert model is not None and model.find("Properties/string[@name='Name']").text == "Emberrat_B"
+model_refs = {node.attrib["referent"] for node in model.iter("Item")}
+for ref in model.iter("Ref"):
+    assert ref.text in model_refs, "standalone model must not depend on the place"
+assert not any(node.attrib["class"] in ("Script", "LocalScript", "ModuleScript", "MeshPart") for node in model.iter("Item"))
+assert len(list(model.iter("Item"))) > 60
+print("PASS: standalone model has complete local references and no scripts or uploaded meshes")
