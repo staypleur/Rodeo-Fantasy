@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <roblox version="4">
-  <Item class="Model" referent="RBX141">
+  <Item class="Model" referent="RBX142">
     <Properties>
       <string name="Name">Emberrat_B</string>
-      <Ref name="PrimaryPart">RBX142</Ref>
+      <Ref name="PrimaryPart">RBX143</Ref>
     </Properties>
-    <Item class="Part" referent="RBX142">
+    <Item class="Part" referent="RBX143">
       <Properties>
         <string name="Name">MountRoot</string>
         <bool name="Anchored">true</bool>
@@ -36,7 +36,7 @@
         <bool name="CanQuery">false</bool>
         <bool name="CanTouch">false</bool>
       </Properties>
-      <Item class="BillboardGui" referent="RBX268">
+      <Item class="BillboardGui" referent="RBX269">
         <Properties>
           <string name="Name">Nameplate</string>
           <UDim2 name="Size">
@@ -52,7 +52,7 @@
           </Vector3>
           <bool name="AlwaysOnTop">true</bool>
         </Properties>
-        <Item class="TextLabel" referent="RBX269">
+        <Item class="TextLabel" referent="RBX270">
           <Properties>
             <string name="Name">Label</string>
             <UDim2 name="Size">
@@ -74,7 +74,7 @@
         </Item>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX143">
+    <Item class="Part" referent="RBX144">
       <Properties>
         <string name="Name">Body</string>
         <bool name="Anchored">true</bool>
@@ -104,7 +104,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX144">
+      <Item class="SpecialMesh" referent="RBX145">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -116,7 +116,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX145">
+    <Item class="Part" referent="RBX146">
       <Properties>
         <string name="Name">Belly</string>
         <bool name="Anchored">true</bool>
@@ -146,7 +146,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX146">
+      <Item class="SpecialMesh" referent="RBX147">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -158,7 +158,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX147">
+    <Item class="Part" referent="RBX148">
       <Properties>
         <string name="Name">Shoulders</string>
         <bool name="Anchored">true</bool>
@@ -188,7 +188,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX148">
+      <Item class="SpecialMesh" referent="RBX149">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -200,7 +200,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX149">
+    <Item class="Part" referent="RBX150">
       <Properties>
         <string name="Name">Chest</string>
         <bool name="Anchored">true</bool>
@@ -230,7 +230,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX150">
+      <Item class="SpecialMesh" referent="RBX151">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -242,7 +242,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX151">
+    <Item class="Part" referent="RBX152">
       <Properties>
         <string name="Name">Head</string>
         <bool name="Anchored">true</bool>
@@ -272,7 +272,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX152">
+      <Item class="SpecialMesh" referent="RBX153">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -284,7 +284,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX153">
+    <Item class="Part" referent="RBX154">
       <Properties>
         <string name="Name">Muzzle</string>
         <bool name="Anchored">true</bool>
@@ -314,7 +314,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX154">
+      <Item class="SpecialMesh" referent="RBX155">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -326,7 +326,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX155">
+    <Item class="Part" referent="RBX156">
       <Properties>
         <string name="Name">Nose</string>
         <bool name="Anchored">true</bool>
@@ -356,7 +356,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX156">
+      <Item class="SpecialMesh" referent="RBX157">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -368,7 +368,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX157">
+    <Item class="Part" referent="RBX158">
       <Properties>
         <string name="Name">Chin</string>
         <bool name="Anchored">true</bool>
@@ -398,7 +398,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX158">
+      <Item class="SpecialMesh" referent="RBX159">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -410,7 +410,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX159">
+    <Item class="Part" referent="RBX160">
       <Properties>
         <string name="Name">LeftEar</string>
         <bool name="Anchored">true</bool>
@@ -440,7 +440,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX160">
+      <Item class="SpecialMesh" referent="RBX161">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -452,7 +452,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX161">
+    <Item class="Part" referent="RBX162">
       <Properties>
         <string name="Name">LeftInnerEar</string>
         <bool name="Anchored">true</bool>
@@ -482,7 +482,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX162">
+      <Item class="SpecialMesh" referent="RBX163">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -494,7 +494,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX163">
+    <Item class="Part" referent="RBX164">
       <Properties>
         <string name="Name">LeftCheek</string>
         <bool name="Anchored">true</bool>
@@ -524,7 +524,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX164">
+      <Item class="SpecialMesh" referent="RBX165">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -536,7 +536,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX165">
+    <Item class="Part" referent="RBX166">
       <Properties>
         <string name="Name">LeftEyeRim</string>
         <bool name="Anchored">true</bool>
@@ -566,7 +566,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX166">
+      <Item class="SpecialMesh" referent="RBX167">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -578,7 +578,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX167">
+    <Item class="Part" referent="RBX168">
       <Properties>
         <string name="Name">LeftEyeWhite</string>
         <bool name="Anchored">true</bool>
@@ -608,7 +608,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX168">
+      <Item class="SpecialMesh" referent="RBX169">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -620,7 +620,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX169">
+    <Item class="Part" referent="RBX170">
       <Properties>
         <string name="Name">LeftIris</string>
         <bool name="Anchored">true</bool>
@@ -650,7 +650,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX170">
+      <Item class="SpecialMesh" referent="RBX171">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -662,7 +662,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX171">
+    <Item class="Part" referent="RBX172">
       <Properties>
         <string name="Name">LeftPupil</string>
         <bool name="Anchored">true</bool>
@@ -692,7 +692,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX172">
+      <Item class="SpecialMesh" referent="RBX173">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -704,7 +704,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX173">
+    <Item class="Part" referent="RBX174">
       <Properties>
         <string name="Name">LeftEyeShine</string>
         <bool name="Anchored">true</bool>
@@ -734,7 +734,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX174">
+      <Item class="SpecialMesh" referent="RBX175">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -746,7 +746,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX175">
+    <Item class="Part" referent="RBX176">
       <Properties>
         <string name="Name">LeftBrow</string>
         <bool name="Anchored">true</bool>
@@ -776,7 +776,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX176">
+      <Item class="SpecialMesh" referent="RBX177">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -788,7 +788,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX177">
+    <Item class="Part" referent="RBX178">
       <Properties>
         <string name="Name">LeftFrontLeg</string>
         <bool name="Anchored">true</bool>
@@ -818,7 +818,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX178">
+      <Item class="SpecialMesh" referent="RBX179">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -830,7 +830,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX179">
+    <Item class="Part" referent="RBX180">
       <Properties>
         <string name="Name">LeftFrontPaw</string>
         <bool name="Anchored">true</bool>
@@ -860,7 +860,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX180">
+      <Item class="SpecialMesh" referent="RBX181">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -872,7 +872,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX181">
+    <Item class="Part" referent="RBX182">
       <Properties>
         <string name="Name">LeftFrontToe0</string>
         <bool name="Anchored">true</bool>
@@ -902,7 +902,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX182">
+      <Item class="SpecialMesh" referent="RBX183">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -914,7 +914,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX183">
+    <Item class="Part" referent="RBX184">
       <Properties>
         <string name="Name">LeftFrontToe1</string>
         <bool name="Anchored">true</bool>
@@ -944,7 +944,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX184">
+      <Item class="SpecialMesh" referent="RBX185">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -956,7 +956,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX185">
+    <Item class="Part" referent="RBX186">
       <Properties>
         <string name="Name">LeftFrontToe2</string>
         <bool name="Anchored">true</bool>
@@ -986,7 +986,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX186">
+      <Item class="SpecialMesh" referent="RBX187">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -998,7 +998,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX187">
+    <Item class="Part" referent="RBX188">
       <Properties>
         <string name="Name">LeftBackLeg</string>
         <bool name="Anchored">true</bool>
@@ -1028,7 +1028,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX188">
+      <Item class="SpecialMesh" referent="RBX189">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1040,7 +1040,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX189">
+    <Item class="Part" referent="RBX190">
       <Properties>
         <string name="Name">LeftBackPaw</string>
         <bool name="Anchored">true</bool>
@@ -1070,7 +1070,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX190">
+      <Item class="SpecialMesh" referent="RBX191">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1082,7 +1082,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX191">
+    <Item class="Part" referent="RBX192">
       <Properties>
         <string name="Name">LeftBackToe0</string>
         <bool name="Anchored">true</bool>
@@ -1112,7 +1112,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX192">
+      <Item class="SpecialMesh" referent="RBX193">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1124,7 +1124,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX193">
+    <Item class="Part" referent="RBX194">
       <Properties>
         <string name="Name">LeftBackToe1</string>
         <bool name="Anchored">true</bool>
@@ -1154,7 +1154,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX194">
+      <Item class="SpecialMesh" referent="RBX195">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1166,7 +1166,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX195">
+    <Item class="Part" referent="RBX196">
       <Properties>
         <string name="Name">LeftBackToe2</string>
         <bool name="Anchored">true</bool>
@@ -1196,7 +1196,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX196">
+      <Item class="SpecialMesh" referent="RBX197">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1208,7 +1208,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX197">
+    <Item class="Part" referent="RBX198">
       <Properties>
         <string name="Name">LeftHaunch</string>
         <bool name="Anchored">true</bool>
@@ -1238,7 +1238,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX198">
+      <Item class="SpecialMesh" referent="RBX199">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1250,7 +1250,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX199">
+    <Item class="Part" referent="RBX200">
       <Properties>
         <string name="Name">LeftEmberMark0</string>
         <bool name="Anchored">true</bool>
@@ -1281,7 +1281,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX200">
+    <Item class="Part" referent="RBX201">
       <Properties>
         <string name="Name">LeftEmberMark1</string>
         <bool name="Anchored">true</bool>
@@ -1312,7 +1312,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="WedgePart" referent="RBX201">
+    <Item class="WedgePart" referent="RBX202">
       <Properties>
         <string name="Name">LeftRearTuft</string>
         <bool name="Anchored">true</bool>
@@ -1343,7 +1343,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX202">
+    <Item class="Part" referent="RBX203">
       <Properties>
         <string name="Name">RightEar</string>
         <bool name="Anchored">true</bool>
@@ -1373,7 +1373,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX203">
+      <Item class="SpecialMesh" referent="RBX204">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1385,7 +1385,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX204">
+    <Item class="Part" referent="RBX205">
       <Properties>
         <string name="Name">RightInnerEar</string>
         <bool name="Anchored">true</bool>
@@ -1415,7 +1415,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX205">
+      <Item class="SpecialMesh" referent="RBX206">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1427,7 +1427,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX206">
+    <Item class="Part" referent="RBX207">
       <Properties>
         <string name="Name">RightCheek</string>
         <bool name="Anchored">true</bool>
@@ -1457,7 +1457,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX207">
+      <Item class="SpecialMesh" referent="RBX208">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1469,7 +1469,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX208">
+    <Item class="Part" referent="RBX209">
       <Properties>
         <string name="Name">RightEyeRim</string>
         <bool name="Anchored">true</bool>
@@ -1499,7 +1499,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX209">
+      <Item class="SpecialMesh" referent="RBX210">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1511,7 +1511,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX210">
+    <Item class="Part" referent="RBX211">
       <Properties>
         <string name="Name">RightEyeWhite</string>
         <bool name="Anchored">true</bool>
@@ -1541,7 +1541,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX211">
+      <Item class="SpecialMesh" referent="RBX212">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1553,7 +1553,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX212">
+    <Item class="Part" referent="RBX213">
       <Properties>
         <string name="Name">RightIris</string>
         <bool name="Anchored">true</bool>
@@ -1583,7 +1583,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX213">
+      <Item class="SpecialMesh" referent="RBX214">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1595,7 +1595,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX214">
+    <Item class="Part" referent="RBX215">
       <Properties>
         <string name="Name">RightPupil</string>
         <bool name="Anchored">true</bool>
@@ -1625,7 +1625,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX215">
+      <Item class="SpecialMesh" referent="RBX216">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1637,7 +1637,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX216">
+    <Item class="Part" referent="RBX217">
       <Properties>
         <string name="Name">RightEyeShine</string>
         <bool name="Anchored">true</bool>
@@ -1667,7 +1667,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX217">
+      <Item class="SpecialMesh" referent="RBX218">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1679,7 +1679,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX218">
+    <Item class="Part" referent="RBX219">
       <Properties>
         <string name="Name">RightBrow</string>
         <bool name="Anchored">true</bool>
@@ -1709,7 +1709,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX219">
+      <Item class="SpecialMesh" referent="RBX220">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1721,7 +1721,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX220">
+    <Item class="Part" referent="RBX221">
       <Properties>
         <string name="Name">RightFrontLeg</string>
         <bool name="Anchored">true</bool>
@@ -1751,7 +1751,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX221">
+      <Item class="SpecialMesh" referent="RBX222">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1763,7 +1763,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX222">
+    <Item class="Part" referent="RBX223">
       <Properties>
         <string name="Name">RightFrontPaw</string>
         <bool name="Anchored">true</bool>
@@ -1793,7 +1793,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX223">
+      <Item class="SpecialMesh" referent="RBX224">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1805,7 +1805,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX224">
+    <Item class="Part" referent="RBX225">
       <Properties>
         <string name="Name">RightFrontToe0</string>
         <bool name="Anchored">true</bool>
@@ -1835,7 +1835,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX225">
+      <Item class="SpecialMesh" referent="RBX226">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1847,7 +1847,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX226">
+    <Item class="Part" referent="RBX227">
       <Properties>
         <string name="Name">RightFrontToe1</string>
         <bool name="Anchored">true</bool>
@@ -1877,7 +1877,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX227">
+      <Item class="SpecialMesh" referent="RBX228">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1889,7 +1889,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX228">
+    <Item class="Part" referent="RBX229">
       <Properties>
         <string name="Name">RightFrontToe2</string>
         <bool name="Anchored">true</bool>
@@ -1919,7 +1919,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX229">
+      <Item class="SpecialMesh" referent="RBX230">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1931,7 +1931,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX230">
+    <Item class="Part" referent="RBX231">
       <Properties>
         <string name="Name">RightBackLeg</string>
         <bool name="Anchored">true</bool>
@@ -1961,7 +1961,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX231">
+      <Item class="SpecialMesh" referent="RBX232">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -1973,7 +1973,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX232">
+    <Item class="Part" referent="RBX233">
       <Properties>
         <string name="Name">RightBackPaw</string>
         <bool name="Anchored">true</bool>
@@ -2003,7 +2003,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX233">
+      <Item class="SpecialMesh" referent="RBX234">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -2015,7 +2015,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX234">
+    <Item class="Part" referent="RBX235">
       <Properties>
         <string name="Name">RightBackToe0</string>
         <bool name="Anchored">true</bool>
@@ -2045,7 +2045,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX235">
+      <Item class="SpecialMesh" referent="RBX236">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -2057,7 +2057,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX236">
+    <Item class="Part" referent="RBX237">
       <Properties>
         <string name="Name">RightBackToe1</string>
         <bool name="Anchored">true</bool>
@@ -2087,7 +2087,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX237">
+      <Item class="SpecialMesh" referent="RBX238">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -2099,7 +2099,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX238">
+    <Item class="Part" referent="RBX239">
       <Properties>
         <string name="Name">RightBackToe2</string>
         <bool name="Anchored">true</bool>
@@ -2129,7 +2129,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX239">
+      <Item class="SpecialMesh" referent="RBX240">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -2141,7 +2141,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX240">
+    <Item class="Part" referent="RBX241">
       <Properties>
         <string name="Name">RightHaunch</string>
         <bool name="Anchored">true</bool>
@@ -2171,7 +2171,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX241">
+      <Item class="SpecialMesh" referent="RBX242">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -2183,7 +2183,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX242">
+    <Item class="Part" referent="RBX243">
       <Properties>
         <string name="Name">RightEmberMark0</string>
         <bool name="Anchored">true</bool>
@@ -2214,7 +2214,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX243">
+    <Item class="Part" referent="RBX244">
       <Properties>
         <string name="Name">RightEmberMark1</string>
         <bool name="Anchored">true</bool>
@@ -2245,7 +2245,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="WedgePart" referent="RBX244">
+    <Item class="WedgePart" referent="RBX245">
       <Properties>
         <string name="Name">RightRearTuft</string>
         <bool name="Anchored">true</bool>
@@ -2276,7 +2276,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="WedgePart" referent="RBX245">
+    <Item class="WedgePart" referent="RBX246">
       <Properties>
         <string name="Name">HeadTuft0</string>
         <bool name="Anchored">true</bool>
@@ -2307,7 +2307,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="WedgePart" referent="RBX246">
+    <Item class="WedgePart" referent="RBX247">
       <Properties>
         <string name="Name">HeadTuft1</string>
         <bool name="Anchored">true</bool>
@@ -2338,7 +2338,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="WedgePart" referent="RBX247">
+    <Item class="WedgePart" referent="RBX248">
       <Properties>
         <string name="Name">HeadTuft2</string>
         <bool name="Anchored">true</bool>
@@ -2369,7 +2369,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX248">
+    <Item class="Part" referent="RBX249">
       <Properties>
         <string name="Name">TailSegment0</string>
         <bool name="Anchored">true</bool>
@@ -2399,7 +2399,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX249">
+      <Item class="SpecialMesh" referent="RBX250">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -2411,7 +2411,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX250">
+    <Item class="Part" referent="RBX251">
       <Properties>
         <string name="Name">TailSegment1</string>
         <bool name="Anchored">true</bool>
@@ -2441,7 +2441,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX251">
+      <Item class="SpecialMesh" referent="RBX252">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -2453,7 +2453,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX252">
+    <Item class="Part" referent="RBX253">
       <Properties>
         <string name="Name">TailSegment2</string>
         <bool name="Anchored">true</bool>
@@ -2483,7 +2483,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX253">
+      <Item class="SpecialMesh" referent="RBX254">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -2495,7 +2495,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX254">
+    <Item class="Part" referent="RBX255">
       <Properties>
         <string name="Name">TailSegment3</string>
         <bool name="Anchored">true</bool>
@@ -2525,7 +2525,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX255">
+      <Item class="SpecialMesh" referent="RBX256">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -2537,7 +2537,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX256">
+    <Item class="Part" referent="RBX257">
       <Properties>
         <string name="Name">TailSegment4</string>
         <bool name="Anchored">true</bool>
@@ -2567,7 +2567,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX257">
+      <Item class="SpecialMesh" referent="RBX258">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -2579,7 +2579,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX258">
+    <Item class="Part" referent="RBX259">
       <Properties>
         <string name="Name">TailSegment5</string>
         <bool name="Anchored">true</bool>
@@ -2609,7 +2609,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
       </Properties>
-      <Item class="SpecialMesh" referent="RBX259">
+      <Item class="SpecialMesh" referent="RBX260">
         <Properties>
           <string name="Name">Shape</string>
           <token name="MeshType">3</token>
@@ -2621,7 +2621,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="WedgePart" referent="RBX260">
+    <Item class="WedgePart" referent="RBX261">
       <Properties>
         <string name="Name">TailFlame</string>
         <bool name="Anchored">true</bool>
@@ -2651,7 +2651,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">288</token>
       </Properties>
-      <Item class="Fire" referent="RBX261">
+      <Item class="Fire" referent="RBX262">
         <Properties>
           <string name="Name">EmberFlame</string>
           <float name="size">2</float>
@@ -2668,7 +2668,7 @@
           </Color3>
         </Properties>
       </Item>
-      <Item class="PointLight" referent="RBX262">
+      <Item class="PointLight" referent="RBX263">
         <Properties>
           <string name="Name">EmberGlow</string>
           <Color3 name="Color">
@@ -2681,7 +2681,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="WedgePart" referent="RBX263">
+    <Item class="WedgePart" referent="RBX264">
       <Properties>
         <string name="Name">TailFlameCore</string>
         <bool name="Anchored">true</bool>
@@ -2712,7 +2712,7 @@
         <token name="Material">288</token>
       </Properties>
     </Item>
-    <Item class="WedgePart" referent="RBX264">
+    <Item class="WedgePart" referent="RBX265">
       <Properties>
         <string name="Name">HeadFlame</string>
         <bool name="Anchored">true</bool>
@@ -2742,7 +2742,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">288</token>
       </Properties>
-      <Item class="Fire" referent="RBX265">
+      <Item class="Fire" referent="RBX266">
         <Properties>
           <string name="Name">EmberFlame</string>
           <float name="size">2</float>
@@ -2759,7 +2759,7 @@
           </Color3>
         </Properties>
       </Item>
-      <Item class="PointLight" referent="RBX266">
+      <Item class="PointLight" referent="RBX267">
         <Properties>
           <string name="Name">EmberGlow</string>
           <Color3 name="Color">
@@ -2772,7 +2772,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="WedgePart" referent="RBX267">
+    <Item class="WedgePart" referent="RBX268">
       <Properties>
         <string name="Name">HeadFlameCore</string>
         <bool name="Anchored">true</bool>
