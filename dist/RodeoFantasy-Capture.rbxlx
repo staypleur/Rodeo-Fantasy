@@ -2908,8 +2908,7 @@ Config.Growth = {
 	EvolutionStars = { 3, 6, 9 },
 }
 
-Config.Zoo = {
-	Slots = 4,
+Config.BagIncome = {
 	IncomeSeconds = 2,
 	IncomeAmount = 1,
 }
@@ -2971,51 +2970,35 @@ return Rules
       </Item>
       <Item class="ModuleScript" referent="RBX139">
         <Properties>
-          <string name="Name">ZooRules</string>
-          <ProtectedString name="Source">-- Session-only economy. No persistence, evolution, offline rewards or purchases.
-local ZooRules = {}
+          <string name="Name">BagRules</string>
+          <ProtectedString name="Source">-- Session-only bag income. Summoning/display never affects income.
+local BagRules = {}
 
-function ZooRules.new(slotCount)
-	local slots = {}
-	for index = 1, slotCount do slots[index] = { monster = nil, pending = 0, lastIncome = 0 } end
-	return { available = 0, balance = 0, slots = slots }
+function BagRules.new()
+	return { monsters = {}, pending = 0, balance = 0 }
 end
 
-function ZooRules.grant(session)
-	session.available += 1
+function BagRules.grant(session, monsterId, clock)
+	table.insert(session.monsters, { monsterId = monsterId, stars = 1, lastIncome = clock })
 end
 
-function ZooRules.place(session, index, clock, monsterId)
-	if type(index) ~= "number" or index ~= math.floor(index) then return false, "InvalidSlot" end
-	local slot = session.slots[index]
-	if not slot then return false, "InvalidSlot" end
-	if slot.monster then return false, "Occupied" end
-	if session.available &lt; 1 then return false, "NoMonster" end
-	session.available -= 1
-	slot.monster, slot.lastIncome = monsterId, clock
-	return true
-end
-
-function ZooRules.accrue(session, clock, seconds, amount)
-	for _, slot in ipairs(session.slots) do
-		if slot.monster then
-			local ticks = math.floor(math.max(0, clock - slot.lastIncome) / seconds)
-			slot.pending += ticks * amount
-			slot.lastIncome += ticks * seconds
-		end
+function BagRules.accrue(session, clock, seconds, amount)
+	for _, monster in ipairs(session.monsters) do
+		local ticks = math.floor(math.max(0, clock - monster.lastIncome) / seconds)
+		session.pending += ticks * amount
+		monster.lastIncome += ticks * seconds
 	end
 end
 
-function ZooRules.collect(session, index)
-	local slot = session.slots[index]
-	if not slot then return 0 end
-	local amount = slot.pending
-	slot.pending = 0
+-- Prepared for direct collection; the UI/action remains to be confirmed.
+function BagRules.collect(session)
+	local amount = session.pending
+	session.pending = 0
 	session.balance += amount
 	return amount
 end
 
-return ZooRules
+return BagRules
 </ProtectedString>
         </Properties>
       </Item>
@@ -5849,12 +5832,15 @@ local RunService = game:GetService("RunService")
 local package = ReplicatedStorage:WaitForChild("RodeoFantasy")
 local Config = require(package:WaitForChild("Config"))
 local Rules = require(package:WaitForChild("CaptureRules"))
+local BagRules = require(package:WaitForChild("BagRules"))
 local remote = package:WaitForChild("CaptureRemote")
 local tuning = Config.Prototype
 local world = workspace:WaitForChild("RodeoPrototype")
 local monsters = world:WaitForChild("Monsters")
 local template = game:GetService("ServerStorage"):WaitForChild("RodeoMonsterTemplate")
 local states, owners, inventories, rateLimits, chunks = {}, {}, {}, {}, {}
+local bags = {}
+local nextBagUpdate = 0
 local initialPosition = Vector3.new(0, 2, -8)
 local jumpRange = Config.Capture.JumpMeters / tuning.MetersPerStud
 local preview = world:FindFirstChild("PreviewMonster")
@@ -5894,6 +5880,13 @@ end
 
 local function notify(player, message)
 	remote:FireClient(player, "Notice", { message = message })
+end
+
+local function sendBag(player)
+	local bag = bags[player]
+	if not bag then return end
+	BagRules.accrue(bag, now(), Config.BagIncome.IncomeSeconds, Config.BagIncome.IncomeAmount)
+	remote:FireClient(player, "BagState", { count = #bag.monsters, pending = bag.pending, balance = bag.balance })
 end
 
 local function sendState(player, state, message)
@@ -5947,6 +5940,8 @@ local function capture(player)
 	local monster = state.monster
 	local position = monster:GetPivot().Position
 	inventories[player] = (inventories[player] or 0) + 1
+	BagRules.grant(bags[player], Config.Monster.Id, now())
+	sendBag(player)
 	player:SetAttribute("EmberratCount", inventories[player])
 	release(player, "포획 성공! 앰버랫이 추가됐어요.")
 	monster:Destroy()
@@ -6015,6 +6010,7 @@ remote.OnServerEvent:Connect(function(player, action, payload)
 	limits[action] = clock
 	if action == "Sync" then
 		sendState(player, states[player])
+		sendBag(player)
 	elseif action == "Mount" then
 		mount(player, payload)
 	elseif action == "Steer" then
@@ -6049,6 +6045,10 @@ end)
 
 RunService.Heartbeat:Connect(function(deltaTime)
 	local clock = now()
+	if clock &gt;= nextBagUpdate then
+		nextBagUpdate = clock + 0.5
+		for player in pairs(bags) do sendBag(player) end
+	end
 	for player, state in pairs(states) do
 		if not state.root.Parent or not state.humanoid.Parent or state.humanoid.Health &lt;= 0
 			or not state.monster.Parent or player.Character ~= state.root.Parent then
@@ -6088,6 +6088,7 @@ end)
 
 local function playerAdded(player)
 	inventories[player] = 0
+	bags[player] = BagRules.new()
 	player:SetAttribute("EmberratCount", 0)
 	player.CharacterRemoving:Connect(function() release(player) end)
 end
@@ -6096,6 +6097,7 @@ Players.PlayerAdded:Connect(playerAdded)
 Players.PlayerRemoving:Connect(function(player)
 	release(player)
 	inventories[player], rateLimits[player] = nil, nil
+	bags[player] = nil
 end)
 for _, player in ipairs(Players:GetPlayers()) do playerAdded(player) end
 groundAt(0)
@@ -6166,7 +6168,8 @@ local yellow = make("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fr
 local orange = make("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(255, 116, 30) }, bar)
 local marker = make("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0, 0.5), Size = UDim2.new(0, 3, 1, 12), BackgroundColor3 = Color3.fromRGB(34, 31, 29), BorderSizePixel = 0, ZIndex = 3 }, bar)
 local collection = label(panel, "이번 접속 앰버랫 포획: 0마리", UDim2.fromOffset(12, 156), UDim2.new(1, -24, 0, 24), 14, Color3.fromRGB(230, 190, 126))
-label(gui, "앰버랫 B · 기본형 모델\n포획 기록은 이번 접속에서만 유지됩니다", UDim2.fromOffset(16, 12), UDim2.fromOffset(400, 54), 14)
+label(gui, "앰버랫 B · 포획과 가방 수익 테스트\n가방과 수익은 이번 접속에서만 유지됩니다", UDim2.fromOffset(16, 12), UDim2.fromOffset(400, 54), 14)
+local bagIncome = label(gui, "가방: 0마리 · 모인 돈: 0원", UDim2.fromOffset(16, 70), UDim2.fromOffset(400, 34), 16, Color3.fromRGB(255, 222, 138))
 local highlight = make("Highlight", { Enabled = false, FillTransparency = 0.85, OutlineTransparency = 0, DepthMode = Enum.HighlightDepthMode.Occluded }, gui)
 
 local function targetMonster()
@@ -6239,7 +6242,9 @@ UserInputService.TextBoxFocused:Connect(function()
 end)
 
 remote.OnClientEvent:Connect(function(kind, data)
-	if kind == "Notice" then
+	if kind == "BagState" then
+		bagIncome.Text = string.format("가방: %d마리 · 모인 돈: %d원", data.count, data.pending)
+	elseif kind == "Notice" then
 		status.Text, noticeUntil = data.message, os.clock() + 3
 	elseif kind == "Judged" then
 		marker.Position = UDim2.fromScale(data.position, 0.5)

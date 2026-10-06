@@ -14,8 +14,7 @@ Config.Growth = {
 	EvolutionStars = { 3, 6, 9 },
 }
 
-Config.Zoo = {
-	Slots = 4,
+Config.BagIncome = {
 	IncomeSeconds = 2,
 	IncomeAmount = 1,
 }

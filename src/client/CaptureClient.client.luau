@@ -46,7 +46,8 @@ local yellow = make("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fr
 local orange = make("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(255, 116, 30) }, bar)
 local marker = make("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0, 0.5), Size = UDim2.new(0, 3, 1, 12), BackgroundColor3 = Color3.fromRGB(34, 31, 29), BorderSizePixel = 0, ZIndex = 3 }, bar)
 local collection = label(panel, "이번 접속 앰버랫 포획: 0마리", UDim2.fromOffset(12, 156), UDim2.new(1, -24, 0, 24), 14, Color3.fromRGB(230, 190, 126))
-label(gui, "앰버랫 B · 기본형 모델\n포획 기록은 이번 접속에서만 유지됩니다", UDim2.fromOffset(16, 12), UDim2.fromOffset(400, 54), 14)
+label(gui, "앰버랫 B · 포획과 가방 수익 테스트\n가방과 수익은 이번 접속에서만 유지됩니다", UDim2.fromOffset(16, 12), UDim2.fromOffset(400, 54), 14)
+local bagIncome = label(gui, "가방: 0마리 · 모인 돈: 0원", UDim2.fromOffset(16, 70), UDim2.fromOffset(400, 34), 16, Color3.fromRGB(255, 222, 138))
 local highlight = make("Highlight", { Enabled = false, FillTransparency = 0.85, OutlineTransparency = 0, DepthMode = Enum.HighlightDepthMode.Occluded }, gui)
 
 local function targetMonster()
@@ -119,7 +120,9 @@ UserInputService.TextBoxFocused:Connect(function()
 end)
 
 remote.OnClientEvent:Connect(function(kind, data)
-	if kind == "Notice" then
+	if kind == "BagState" then
+		bagIncome.Text = string.format("가방: %d마리 · 모인 돈: %d원", data.count, data.pending)
+	elseif kind == "Notice" then
 		status.Text, noticeUntil = data.message, os.clock() + 3
 	elseif kind == "Judged" then
 		marker.Position = UDim2.fromScale(data.position, 0.5)

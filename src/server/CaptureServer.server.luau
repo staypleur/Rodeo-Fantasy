@@ -5,12 +5,15 @@ local RunService = game:GetService("RunService")
 local package = ReplicatedStorage:WaitForChild("RodeoFantasy")
 local Config = require(package:WaitForChild("Config"))
 local Rules = require(package:WaitForChild("CaptureRules"))
+local BagRules = require(package:WaitForChild("BagRules"))
 local remote = package:WaitForChild("CaptureRemote")
 local tuning = Config.Prototype
 local world = workspace:WaitForChild("RodeoPrototype")
 local monsters = world:WaitForChild("Monsters")
 local template = game:GetService("ServerStorage"):WaitForChild("RodeoMonsterTemplate")
 local states, owners, inventories, rateLimits, chunks = {}, {}, {}, {}, {}
+local bags = {}
+local nextBagUpdate = 0
 local initialPosition = Vector3.new(0, 2, -8)
 local jumpRange = Config.Capture.JumpMeters / tuning.MetersPerStud
 local preview = world:FindFirstChild("PreviewMonster")
@@ -50,6 +53,13 @@ end
 
 local function notify(player, message)
 	remote:FireClient(player, "Notice", { message = message })
+end
+
+local function sendBag(player)
+	local bag = bags[player]
+	if not bag then return end
+	BagRules.accrue(bag, now(), Config.BagIncome.IncomeSeconds, Config.BagIncome.IncomeAmount)
+	remote:FireClient(player, "BagState", { count = #bag.monsters, pending = bag.pending, balance = bag.balance })
 end
 
 local function sendState(player, state, message)
@@ -103,6 +113,8 @@ local function capture(player)
 	local monster = state.monster
 	local position = monster:GetPivot().Position
 	inventories[player] = (inventories[player] or 0) + 1
+	BagRules.grant(bags[player], Config.Monster.Id, now())
+	sendBag(player)
 	player:SetAttribute("EmberratCount", inventories[player])
 	release(player, "포획 성공! 앰버랫이 추가됐어요.")
 	monster:Destroy()
@@ -171,6 +183,7 @@ remote.OnServerEvent:Connect(function(player, action, payload)
 	limits[action] = clock
 	if action == "Sync" then
 		sendState(player, states[player])
+		sendBag(player)
 	elseif action == "Mount" then
 		mount(player, payload)
 	elseif action == "Steer" then
@@ -205,6 +218,10 @@ end)
 
 RunService.Heartbeat:Connect(function(deltaTime)
 	local clock = now()
+	if clock >= nextBagUpdate then
+		nextBagUpdate = clock + 0.5
+		for player in pairs(bags) do sendBag(player) end
+	end
 	for player, state in pairs(states) do
 		if not state.root.Parent or not state.humanoid.Parent or state.humanoid.Health <= 0
 			or not state.monster.Parent or player.Character ~= state.root.Parent then
@@ -244,6 +261,7 @@ end)
 
 local function playerAdded(player)
 	inventories[player] = 0
+	bags[player] = BagRules.new()
 	player:SetAttribute("EmberratCount", 0)
 	player.CharacterRemoving:Connect(function() release(player) end)
 end
@@ -252,6 +270,7 @@ Players.PlayerAdded:Connect(playerAdded)
 Players.PlayerRemoving:Connect(function(player)
 	release(player)
 	inventories[player], rateLimits[player] = nil, nil
+	bags[player] = nil
 end)
 for _, player in ipairs(Players:GetPlayers()) do playerAdded(player) end
 groundAt(0)

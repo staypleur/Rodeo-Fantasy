@@ -16,7 +16,7 @@ scripts = {
 expected = {
     "Config": "src/shared/Config.luau",
     "CaptureRules": "src/shared/CaptureRules.luau",
-    "ZooRules": "src/shared/ZooRules.luau",
+    "BagRules": "src/shared/BagRules.luau",
     "CaptureServer": "src/server/CaptureServer.server.luau",
     "CaptureClient": "src/client/CaptureClient.client.luau",
 }
