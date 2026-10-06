@@ -3,7 +3,7 @@ local package = game:GetService("ReplicatedStorage"):FindFirstChild("RodeoFantas
 assert(package, "RodeoFantasy package missing")
 local config = require(package.Config)
 local rules = require(package.CaptureRules)
-assert(config.Monster.MaxEnergy == 40)
+assert(config.Monster.Id == "Emberrat")
 assert(rules.zone(0.97, config.Capture.Repeat) == "Orange")
 assert(package.CaptureRemote:IsA("RemoteEvent"))
 assert(game:GetService("ServerScriptService").CaptureServer:IsA("Script"))

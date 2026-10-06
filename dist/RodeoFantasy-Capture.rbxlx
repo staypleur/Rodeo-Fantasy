@@ -147,7 +147,7 @@
                 </UDim2>
                 <float name="BackgroundTransparency">1</float>
                 <string name="Text">앰버랫
-불 · 포유류 / 외형 미정</string>
+외형 미정</string>
                 <float name="TextSize">18</float>
                 <Color3 name="TextColor3">
                   <R>1</R>
@@ -179,12 +179,14 @@ local Config = {}
 Config.Monster = {
 	Id = "Emberrat",
 	Name = "앰버랫",
-	AttackType = "Melee",
-	Synergies = { "Fire", "Mammal" },
-	SynergyNames = { "불", "포유류" },
-	MaxEnergy = 40,
-	EnergyPerAttack = 10,
-	Skill = { Name = "불꽃 이빨", Target = "OneEnemyInFront" },
+}
+
+-- Confirmed growth design; merging/evolution and zoo income are not implemented yet.
+-- Income amounts and payment rules must be confirmed before implementation.
+Config.Growth = {
+	MaxStars = 10,
+	CopiesPerUpgrade = 3,
+	EvolutionStars = { 3, 6, 9 },
 }
 
 Config.Capture = {
@@ -317,7 +319,7 @@ return Rules
               </UDim2>
               <float name="BackgroundTransparency">1</float>
               <string name="Text">앰버랫
-불 · 포유류 / 외형 미정</string>
+외형 미정</string>
               <float name="TextSize">18</float>
               <Color3 name="TextColor3">
                 <R>1</R>
@@ -661,7 +663,7 @@ local bar = make("Frame", { Name = "CaptureBar", Position = UDim2.new(0, 24, 0, 
 local yellow = make("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(250, 208, 65) }, bar)
 local orange = make("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(255, 116, 30) }, bar)
 local marker = make("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0, 0.5), Size = UDim2.new(0, 3, 1, 12), BackgroundColor3 = Color3.fromRGB(34, 31, 29), BorderSizePixel = 0, ZIndex = 3 }, bar)
-local collection = label(panel, "이번 접속 포획: 0마리 · 불 / 포유류 · 근접형", UDim2.fromOffset(12, 156), UDim2.new(1, -24, 0, 24), 14, Color3.fromRGB(230, 190, 126))
+local collection = label(panel, "이번 접속 앰버랫 포획: 0마리", UDim2.fromOffset(12, 156), UDim2.new(1, -24, 0, 24), 14, Color3.fromRGB(230, 190, 126))
 label(gui, "기능 테스트용 블록 · 앰버랫 외형은 추후 제작\n포획 기록은 이번 접속에서만 유지됩니다", UDim2.fromOffset(16, 12), UDim2.fromOffset(400, 54), 14)
 local highlight = make("Highlight", { Enabled = false, FillTransparency = 0.85, OutlineTransparency = 0, DepthMode = Enum.HighlightDepthMode.Occluded }, gui)
 
@@ -746,7 +748,7 @@ remote.OnClientEvent:Connect(function(kind, data)
 		bar.Visible = phase == "Minigame" or phase == "Holding"
 		yellow.Position, yellow.Size = UDim2.fromScale(widths.White, 0), UDim2.fromScale(widths.Yellow, 1)
 		orange.Position, orange.Size = UDim2.fromScale(1 - widths.Orange, 0), UDim2.fromScale(widths.Orange, 1)
-		collection.Text = string.format("이번 접속 포획: %d마리 · 불 / 포유류 · 근접형", data.count)
+		collection.Text = string.format("이번 접속 앰버랫 포획: %d마리", data.count)
 		noticeUntil = 0
 		if data.message then status.Text, noticeUntil = data.message, os.clock() + 3 end
 		toggleRide(phase ~= "Idle")
@@ -786,7 +788,7 @@ RunService.RenderStepped:Connect(function(dt)
 		end
 		if os.clock() &gt;= noticeUntil then status.Text = "3m 안의 앰버랫 블록을 클릭하세요" end
 	elseif phase == "Jumping" then
-		status.Text, detail.Text = "줄을 던져 탑승 중…", "앰버랫 · 불 / 포유류"
+		status.Text, detail.Text = "줄을 던져 탑승 중…", "앰버랫"
 	elseif phase == "Riding" then
 		status.Text = string.format("미니게임까지 %.1f초", math.max(0, Config.Capture.RideSeconds - elapsed))
 		detail.Text = "자동 전진 중 · A / D로 좌우 이동"

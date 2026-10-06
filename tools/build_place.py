@@ -65,7 +65,7 @@ def monster(parent, name, position):
     label, label_props = item(billboard, "TextLabel", "Label")
     prop(label_props, "UDim2", "Size", dict(XS=1, XO=0, YS=1, YO=0))
     prop(label_props, "float", "BackgroundTransparency", 1)
-    prop(label_props, "string", "Text", "앰버랫\n불 · 포유류 / 외형 미정")
+    prop(label_props, "string", "Text", "앰버랫\n외형 미정")
     prop(label_props, "float", "TextSize", 18)
     prop(label_props, "Color3", "TextColor3", dict(R=1, G=1, B=1))
     prop(label_props, "float", "TextStrokeTransparency", 0.3)

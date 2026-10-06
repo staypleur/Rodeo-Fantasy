@@ -4,12 +4,14 @@ local Config = {}
 Config.Monster = {
 	Id = "Emberrat",
 	Name = "앰버랫",
-	AttackType = "Melee",
-	Synergies = { "Fire", "Mammal" },
-	SynergyNames = { "불", "포유류" },
-	MaxEnergy = 40,
-	EnergyPerAttack = 10,
-	Skill = { Name = "불꽃 이빨", Target = "OneEnemyInFront" },
+}
+
+-- Confirmed growth design; merging/evolution and zoo income are not implemented yet.
+-- Income amounts and payment rules must be confirmed before implementation.
+Config.Growth = {
+	MaxStars = 10,
+	CopiesPerUpgrade = 3,
+	EvolutionStars = { 3, 6, 9 },
 }
 
 Config.Capture = {
