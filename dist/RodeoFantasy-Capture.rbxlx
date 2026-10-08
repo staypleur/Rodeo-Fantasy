@@ -1735,6 +1735,8 @@ Config.Prototype = {
 	JumpArcStuds = 10,
 	RoadHalfWidth = 35,
 	HerdStudsPerSecond = 44,
+	SwitchDashSeconds = 0.6,
+	SwitchDashMultiplier = 1.5,
 	HerdSpawnChance = 0.325,
 	RockSpawnChance = 0.825,
 	AirStudsPerSecond = 80,
@@ -1767,6 +1769,10 @@ return Config
           <string name="Name">HuntRules</string>
           <ProtectedString name="Source">-- Pure rules for continuous riding, airborne lassoing and swept collisions.
 local Rules = {}
+
+function Rules.rideSpeed(clock,dashUntil,base,multiplier)
+ return base*(dashUntil and clock&lt;dashUntil and multiplier or 1)
+end
 
 function Rules.jumpHeight(elapsed, duration, height)
 	return math.sin(math.clamp(elapsed / duration, 0, 1) * math.pi) * height
@@ -1852,9 +1858,18 @@ function Motion.step(state,x,z,dt,rocks,tuning,halfX,halfZ,rules)
  local wanted=math.clamp((target-x)*3,-14,14)
  state.vx+=math.clamp(wanted-state.vx,-45*dt,45*dt)
  local nextX,nextZ=math.clamp(x+state.vx*dt,-limit,limit),z-speed*dt
+ local overlapping=false
+ for _,rock in ipairs(rocks) do
+  if rules.sweptBox(x,0,z,x,0,z,rock.x,0,rock.z,rock.sx+halfX*2,2,rock.sz+halfZ*2,0.35) then overlapping=true break end
+ end
+ if overlapping then nextZ=z end
  local function blocked(nx,nz)
   for _,rock in ipairs(rocks) do
-   if rules.sweptBox(x,0,z,nx,0,nz,rock.x,0,rock.z,rock.sx+halfX*2,2,rock.sz+halfZ*2,0.35) then return true end
+   local inside=rules.sweptBox(x,0,z,x,0,z,rock.x,0,rock.z,rock.sx+halfX*2,2,rock.sz+halfZ*2,0.35)
+   -- A released animal or newly generated obstacle can already overlap. Allow
+   -- lateral escape toward the selected clear corridor instead of freezing forever.
+   local escaping=inside and nz==z and math.abs(target-nx)&lt;math.abs(target-x)
+   if not escaping and rules.sweptBox(x,0,z,nx,0,nz,rock.x,0,rock.z,rock.sx+halfX*2,2,rock.sz+halfZ*2,0.35) then return true end
   end
   return false
  end
@@ -5160,7 +5175,7 @@ local function send(player,message)
  local state,bag=states[player],bags[player]
  if not bag then return end
  BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
- remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,protectedUntil=state and state.protectedUntil or 0,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0})
+ remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,protectedUntil=state and state.protectedUntil or 0,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil})
 end
 local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
@@ -5180,6 +5195,7 @@ local function freeMount(state)
   state.monster:SetAttribute("Occupied",false)
   state.monster:SetAttribute("Steering",0)
   state.monster:SetAttribute("Angry",false)
+  state.monster:SetAttribute("DashUntil",nil)
   state.monster:SetAttribute("AngerWarning",false)
   state.monster:SetAttribute("AngerStarted",nil)
   local p=state.monster.PrimaryPart.Position
@@ -5225,6 +5241,7 @@ local function launch(player,state)
  freeMount(state)
  state.phase,state.started="Airborne",now()
  state.launchY=state.root.Position.Y
+ state.steer,state.dashUntil=0,nil
  state.tamed,state.angerAt=false,nil
  send(player)
 end
@@ -5240,6 +5257,7 @@ local function lasso(player,state)
  state.protectedUntil=now()+tuning.JumpSeconds+tuning.LandingGraceSeconds
  state.origin=state.root.CFrame
  state.landingSeconds=tuning.JumpSeconds
+ state.pendingDash=true
  attachRope(state)
  send(player)
 end
@@ -5256,7 +5274,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
  if action=="Start" then start(player) return end
  local state=states[player]
  if not state or state.phase=="GameOver" then return end
- if action=="Steer" and type(value)=="number" and value==value and value&gt;=-1 and value&lt;=1 then
+ if action=="Steer" and state.phase=="Riding" and type(value)=="number" and value==value and value&gt;=-1 and value&lt;=1 then
   state.steer,state.steerAt=value,now()
  elseif action=="Jump" and value==nil then
   if state.phase=="Riding" then launch(player,state)
@@ -5273,7 +5291,7 @@ RunService.Heartbeat:Connect(function(delta)
    continue
   end
   if not state.root.Parent or player.Character~=state.root.Parent or state.humanoid.Health&lt;=0 then finish(player,"사냥 종료") continue end
-  local steer=clock-state.steerAt&lt;0.5 and state.steer or 0
+  local steer=state.phase=="Riding" and clock-state.steerAt&lt;0.5 and state.steer or 0
   local buckHeight,buckDrift=0,0
   if state.phase=="Riding" and Config.Hunt.AngerEnabled and clock-state.started&gt;=Config.Hunt.AngerSeconds then
    state.angerAt=state.angerAt or clock
@@ -5283,8 +5301,8 @@ RunService.Heartbeat:Connect(function(delta)
     steer*=tuning.AngrySteerMultiplier
    end
   end
-  local old=state.root.Position
-  local speed=state.phase=="Airborne" and tuning.AirStudsPerSecond or tuning.ForwardStudsPerSecond
+  local old=state.phase=="Riding" and state.monster and state.monster.PrimaryPart.Position or state.root.Position
+  local speed=state.phase=="Airborne" and tuning.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,tuning.ForwardStudsPerSecond,tuning.SwitchDashMultiplier)
   local position=Vector3.new(math.clamp(old.X+(steer*tuning.SidewaysStudsPerSecond+buckDrift*tuning.BuckSidewaysStudsPerSecond)*dt,-tuning.RoadHalfWidth,tuning.RoadHalfWidth),old.Y,old.Z-speed*dt)
   state.distance+=speed*dt*tuning.MetersPerStud
   World.ensure(position.Z)
@@ -5306,6 +5324,9 @@ RunService.Heartbeat:Connect(function(delta)
    if clock-state.started&gt;=landingSeconds then
     clearRope(state)
     state.phase,state.started,state.tamed="Riding",clock,state.monster:GetAttribute("Tamed_"..player.UserId)==true
+    state.dashUntil=state.pendingDash and clock+tuning.SwitchDashSeconds or nil
+    state.pendingDash=nil
+    state.monster:SetAttribute("DashUntil",state.dashUntil)
     state.protectedUntil=clock+tuning.LandingGraceSeconds
     state.monster:SetAttribute("RunStarted",clock)
     state.monster:SetAttribute("Angry",false)
@@ -5379,6 +5400,27 @@ local function decoration(parent,name,position,size,color)
  return node
 end
 
+local function dressObstacle(rock,style)
+ rock.Transparency=1 rock:SetAttribute("Style",style)
+ local base=Vector3.new(rock.Position.X,0,rock.Position.Z)
+ if style=="FallenLog" then
+  local log=decoration(rock,"FallenTrunk",base+Vector3.new(0,1,0),Vector3.new(3.8,2,2),Color3.fromRGB(144,96,61))
+  log.Shape=Enum.PartType.Cylinder
+  for _,side in ipairs({-1,1}) do
+   local endGrain=decoration(rock,"TreeRings",base+Vector3.new(side*1.91,1,0),Vector3.new(0.05,1.6,1.6),Color3.fromRGB(224,182,122))
+   endGrain.Shape=Enum.PartType.Cylinder
+  end
+  decoration(rock,"BrokenBranch",base+Vector3.new(0.4,2.1,0),Vector3.new(0.55,1.7,0.55),Color3.fromRGB(127,83,54))
+  decoration(rock,"LogMoss",base+Vector3.new(-0.6,1.95,0.2),Vector3.new(1.5,0.2,1),Color3.fromRGB(119,159,82))
+ else
+  local stone=decoration(rock,"Boulder",base+Vector3.new(0,1.15,0),Vector3.new(3.8,2.3,3.8),Color3.fromRGB(177,157,123))
+  stone.CFrame*=CFrame.Angles(0,0,0.06)
+  decoration(rock,"StoneCap",base+Vector3.new(-0.3,2.5,0.15),Vector3.new(2.7,0.7,2.6),Color3.fromRGB(199,181,143))
+  decoration(rock,"Moss",base+Vector3.new(-0.6,2.91,0.1),Vector3.new(1.6,0.12,1.5),Color3.fromRGB(124,166,87))
+  decoration(rock,"StoneChip",base+Vector3.new(1.45,0.4,1.35),Vector3.new(0.9,0.8,0.9),Color3.fromRGB(163,146,113))
+ end
+end
+
 function World.init(world, modelTemplate, config, rules)
 	root, monsters, template, tuning, Rules = world, world.Monsters, modelTemplate, config.Prototype, rules
 	monsterId = config.Monster.Id
@@ -5449,6 +5491,7 @@ function World.ensure(z)
 					local rock = part(obstacles, "Rock", Vector3.new(random:NextInteger(-3,3)*8,1.5,rowZ-12), Vector3.new(4,3,4), Color3.fromRGB(167,130,99))
 					rock:SetAttribute("Chunk", index)
 					rock.CanCollide = false -- server swept collision is authoritative
+     dressObstacle(rock,(index+math.floor(offset/32))%3==0 and "FallenLog" or "MossyRock")
 				end
 			end
 		end
@@ -5603,6 +5646,7 @@ for i=1,32 do
 end
 local function active() return state.phase~="Idle" and state.phase~="GameOver" end
 local function steering()
+ if state.phase~="Riding" then return 0 end
  if right or left then return (right and 1 or 0)-(left and 1 or 0) end
  if held and pointerOrigin and pointerX then
   local dx=pointerX-pointerOrigin
@@ -5612,6 +5656,7 @@ local function steering()
 end
 local function keyAction(_,inputState,input)
  if UIS:GetFocusedTextBox() then return Enum.ContextActionResult.Pass end
+ if state.phase~="Riding" then left,right=false,false return Enum.ContextActionResult.Sink end
  local down=inputState==Enum.UserInputState.Begin
  if inputState==Enum.UserInputState.Cancel then left,right=false,false else
   if input.KeyCode==Enum.KeyCode.A then left=down end
@@ -5691,17 +5736,17 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
    visualFrame=state.origin:Lerp(mount*CFrame.new(0,t.RideHeightStuds,t.RideForwardStuds),p)*CFrame.new(0,math.sin(math.pi*p)*t.JumpArcStuds*0.5,0)
   elseif state.phase=="Airborne" and state.position and state.launchY then
    local elapsed=math.clamp(clock-(state.sampleTime or clock),0,0.3)
-   local pos=state.position+Vector3.new((state.steer or 0)*t.SidewaysStudsPerSecond,0,-t.AirStudsPerSecond)*elapsed
+   local pos=state.position+Vector3.new(0,0,-t.AirStudsPerSecond)*elapsed
    local target=CFrame.new(math.clamp(pos.X,-t.RoadHalfWidth,t.RoadHalfWidth),state.launchY+Rules.jumpHeight(clock-state.started,t.FlightSeconds,t.JumpArcStuds),pos.Z)
    flightFrame=(flightFrame or root.CFrame):Lerp(target,1-math.exp(-22*dt))
    visualFrame=flightFrame
   end
  end
- rider.update(player.Character,state.phase,visualFrame,dt,clock)
+ rider.update(player.Character,state.phase,visualFrame,dt,clock,state.dashUntil)
  crashEffect.update(player.Character,state.phase,clock)
  local displayDistance=state.distance or 0
  if active() then
-  local speed=state.phase=="Airborne" and t.AirStudsPerSecond or t.ForwardStudsPerSecond
+  local speed=state.phase=="Airborne" and t.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,t.ForwardStudsPerSecond,t.SwitchDashMultiplier)
   displayDistance+=math.clamp(clock-(state.sampleTime or clock),0,0.3)*speed*t.MetersPerStud
  end
  markers.update(active(),displayDistance,visualFrame,t.MetersPerStud)
@@ -5761,6 +5806,7 @@ local template = package:WaitForChild("VisualTemplate")
 local tuning = require(package:WaitForChild("Config")).Prototype
 local Rules = require(package:WaitForChild("HuntRules"))
 local restFrames = {}
+local dust={}
 local function clearHerdPath(from,to,root)
  local world=workspace:FindFirstChild("RodeoPrototype")
  local obstacles=world and world:FindFirstChild("Obstacles")
@@ -5797,6 +5843,11 @@ end
 
 function RideAnimator.update(monsters, clock, cameraPosition, dt)
  dt = dt or 1/60
+ for i=#dust,1,-1 do
+  local puff=dust[i] local age=clock-puff.started
+  if age&gt;=0.45 then puff.part:Destroy() table.remove(dust,i)
+  else puff.part.Transparency=0.55+age puff.part.Size=Vector3.one*(0.45+age*1.5) puff.part.Position+=Vector3.new(0,dt*0.7,0) end
+ end
  local displayed = {}
 	for model, pose in pairs(poses) do
 		if model.Parent ~= monsters then poses[model] = nil end
@@ -5824,7 +5875,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
    pose.sample, pose.received = root.CFrame, clock
   end
   local elapsed = math.clamp(clock-pose.received,0,0.08)
-  local speed = model:GetAttribute("Occupied") and tuning.ForwardStudsPerSecond or tuning.HerdStudsPerSecond
+  local speed = model:GetAttribute("Occupied") and Rules.rideSpeed(clock,model:GetAttribute("DashUntil"),tuning.ForwardStudsPerSecond,tuning.SwitchDashMultiplier) or tuning.HerdStudsPerSecond
   local steer = model:GetAttribute("Steering") or 0
   local velocity=Vector3.new(steer*tuning.SidewaysStudsPerSecond,0,-speed)
   if not model:GetAttribute("Occupied") then velocity=model:GetAttribute("HerdVelocity") or velocity end
@@ -5860,14 +5911,25 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
   end
 		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds)
 		local lean = running and (model:GetAttribute("Steering") or 0) * -0.18 or 0
-		local frame = pose.frame * CFrame.Angles(angry and pitch or 0, 0, lean)
+  local moving=running and velocity.Magnitude&gt;1
+  local bounce=moving and (1-math.cos(phase))*0.22 or 0
+  local gallopPitch=moving and math.sin(phase)*0.085 or 0
+		local frame = pose.frame * CFrame.new(0,bounce,0)*CFrame.Angles(angry and pitch or gallopPitch, 0, lean)
+  if moving and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)&gt;0.14 and #dust&lt;80 then
+   pose.lastDust=clock
+   local puff=Instance.new("Part") puff.Name="LocalHerdDust" puff.Anchored=true
+   puff.CanCollide,puff.CanTouch,puff.CanQuery=false,false,false
+   puff.Color=Color3.fromRGB(239,220,176) puff.Size=Vector3.one*0.45 puff.Transparency=0.55
+   puff.Position=Vector3.new(frame.X+math.sin(phase)*0.9,0.2,frame.Z+1.6)
+   puff.Parent=workspace table.insert(dust,{part=puff,started=clock})
+  end
   displayed[model] = frame
 		for _, entry in ipairs(pose) do
 			if not entry.part.Parent then continue end
 			local localFrame = entry.rest
-			if running and entry.side then
+			if moving and entry.side then
 				local opposite = (entry.side == "Left") ~= (entry.leg == "Front")
-				local swing = math.sin(phase + (opposite and math.pi or 0)) * 0.55
+				local swing = math.sin(phase + (opposite and math.pi or 0)) * 0.85
 				local joint = CFrame.new(entry.side == "Left" and -0.88 or 0.88, -0.87, entry.leg == "Front" and -0.91 or 1.17)
 				localFrame = CFrame.new(0,math.max(0,math.sin(phase + (opposite and math.pi or 0)))*0.22,0) * joint * CFrame.Angles(swing, 0, 0) * joint:Inverse() * entry.rest
 			end
@@ -5921,7 +5983,7 @@ local function restore()
  previousPhase=nil
  character,animate=nil,nil
 end
-function Presentation.update(model,phase,frame,dt,clock)
+function Presentation.update(model,phase,frame,dt,clock,dashUntil)
  local active=phase~="Idle" and phase~="GameOver"
  if character and (character~=model or not active) then restore() end
  local root=model and model:FindFirstChild("HumanoidRootPart")
@@ -6018,7 +6080,7 @@ function Presentation.update(model,phase,frame,dt,clock)
   elseif rope then rope:Destroy() rope=nil end
   shadow.CFrame=CFrame.new(frame.X,0.055,frame.Z)*CFrame.Angles(0,0,math.pi/2)
   shadow.Transparency=airborne and 0.5 or 0.75
-  trail.Enabled=airborne
+  trail.Enabled=airborne or (phase=="Riding" and dashUntil~=nil and clock&lt;dashUntil)
   if phase=="Riding" and previousPhase and previousPhase~="Riding" then
    for i=1,8 do
     local puff=Instance.new("Part") puff.Name="LocalLandingDust"

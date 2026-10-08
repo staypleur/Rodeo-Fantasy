@@ -17,6 +17,7 @@ local animator=require(game:GetService("StarterPlayer").StarterPlayerScripts.Rid
 local low,high={},{}
 for _,a in ipairs(animals) do low[a],high[a]=a.PrimaryPart.Position.X,a.PrimaryPart.Position.X end
 local checks=0
+local bounceLow,bounceHigh=math.huge,-math.huge
 for i=1,200 do
  local before={}
  for _,a in ipairs(animals) do before[a]=a.PrimaryPart.Position end
@@ -24,6 +25,8 @@ for i=1,200 do
  local displayed=animator.update(world.Monsters,1800000000+i*0.05,nil,0.05)
  for _,a in ipairs(animals) do
   local from,to=before[a],a.PrimaryPart.Position
+  local y=displayed[a].Y-a.PrimaryPart.Position.Y
+  bounceLow,bounceHigh=math.min(bounceLow,y),math.max(bounceHigh,y)
   assert(to.Z<=from.Z and math.abs(to.X)<33,"wild animal must move forward inside road")
   low[a],high[a]=math.min(low[a],to.X),math.max(high[a],to.X)
   for _,p in ipairs(rocks) do
@@ -42,3 +45,10 @@ for _,a in ipairs(animals) do
 end
 assert(config.Prototype.HerdSpawnChance==0.325 and config.Prototype.RockSpawnChance==0.825,"confirmed density tuning")
 print("HERD_STUDIO_PASS: "..checks.." native authoritative and displayed obstacle checks, lateral motion and mounted ownership")
+
+assert(bounceHigh-bounceLow>.3,"running body must rise and fall with stride")
+assert(workspace:FindFirstChild("LocalHerdDust"),"unmounted herd must emit visible dust")
+local trapped=engine.spawn(Vector3.new(0,2,0))
+for _=1,200 do engine.step(0.05) end
+assert(trapped.PrimaryPart.Position.Z<-100,"native animal initially inside rock must escape and continue")
+print("HERD_RECOVERY_AND_GALLOP_PASS")

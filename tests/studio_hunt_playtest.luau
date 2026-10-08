@@ -128,6 +128,8 @@ local success,problem=pcall(function()
  waitFor(function() return state.phase=="Airborne" end,"release must jump")
  waitFor(function() return not workspace:FindFirstChild("LocalCowboyLasso") end,"spinning rope must hide on jump")
  check(not workspace:FindFirstChild("LocalCowboyLasso"),"spinning rope must hide during airborne lasso aiming")
+ local airX=character.HumanoidRootPart.Position.X
+ remote:FireServer("Steer",1)
  local flightSeen=false
  local runService=game:GetService("RunService")
  runService:BindToRenderStep("CheckFlightPose",Enum.RenderPriority.Last.Value,function()
@@ -136,6 +138,7 @@ local success,problem=pcall(function()
  task.wait(0.08)
  runService:UnbindFromRenderStep("CheckFlightPose")
  check(flightSeen,"airborne character must lean forward when rendered")
+ check(math.abs(character.HumanoidRootPart.Position.X-airX)<0.05,"airborne steering must stay locked on client and server")
  check(character.HumanoidRootPart:FindFirstChild("FlightTrailAnchor")~=nil,"flight trail must exist")
  local oldCount=state.count
  local target=driver:InvokeServer("Target")
@@ -146,12 +149,15 @@ local success,problem=pcall(function()
  waitFor(function() return state.phase=="Riding" and state.monster==target end,"landing failed")
  check(state.count==oldCount,"old incomplete ride must not grant")
  check(target:GetAttribute("Occupied"),"target must be occupied")
+ check(state.dashUntil and state.dashUntil>workspace:GetServerTimeNow(),"switch must start short dash")
+ waitFor(function() local a=character.HumanoidRootPart:FindFirstChild("FlightTrailAnchor") return a and a:FindFirstChildOfClass("Trail") and a:FindFirstChildOfClass("Trail").Enabled end,"switch dash must display brief speed trail")
+ check(character.HumanoidRootPart.FlightTrailAnchor:FindFirstChildOfClass("Trail").Enabled,"dash trail must appear")
  check(state.protectedUntil>workspace:GetServerTimeNow(),"landing protection missing")
  local worstOffset=0
  local samples=0
  runService:BindToRenderStep("CheckMountAlignment",Enum.RenderPriority.Last.Value,function()
   if state.phase=="Riding" and target:FindFirstChild("Body") then
-   local expected=Vector3.new(0,-config.Prototype.RideHeightStuds-0.05,0.15-config.Prototype.RideForwardStuds)
+   local expected=character.HumanoidRootPart.CFrame:VectorToWorldSpace(Vector3.new(0,-config.Prototype.RideHeightStuds-0.05,0.15-config.Prototype.RideForwardStuds))
    local offset=target.Body.Position-character.HumanoidRootPart.Position
    worstOffset=math.max(worstOffset,(offset-expected).Magnitude)
    samples+=1

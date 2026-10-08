@@ -54,6 +54,7 @@ for i=1,32 do
 end
 local function active() return state.phase~="Idle" and state.phase~="GameOver" end
 local function steering()
+ if state.phase~="Riding" then return 0 end
  if right or left then return (right and 1 or 0)-(left and 1 or 0) end
  if held and pointerOrigin and pointerX then
   local dx=pointerX-pointerOrigin
@@ -63,6 +64,7 @@ local function steering()
 end
 local function keyAction(_,inputState,input)
  if UIS:GetFocusedTextBox() then return Enum.ContextActionResult.Pass end
+ if state.phase~="Riding" then left,right=false,false return Enum.ContextActionResult.Sink end
  local down=inputState==Enum.UserInputState.Begin
  if inputState==Enum.UserInputState.Cancel then left,right=false,false else
   if input.KeyCode==Enum.KeyCode.A then left=down end
@@ -142,17 +144,17 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
    visualFrame=state.origin:Lerp(mount*CFrame.new(0,t.RideHeightStuds,t.RideForwardStuds),p)*CFrame.new(0,math.sin(math.pi*p)*t.JumpArcStuds*0.5,0)
   elseif state.phase=="Airborne" and state.position and state.launchY then
    local elapsed=math.clamp(clock-(state.sampleTime or clock),0,0.3)
-   local pos=state.position+Vector3.new((state.steer or 0)*t.SidewaysStudsPerSecond,0,-t.AirStudsPerSecond)*elapsed
+   local pos=state.position+Vector3.new(0,0,-t.AirStudsPerSecond)*elapsed
    local target=CFrame.new(math.clamp(pos.X,-t.RoadHalfWidth,t.RoadHalfWidth),state.launchY+Rules.jumpHeight(clock-state.started,t.FlightSeconds,t.JumpArcStuds),pos.Z)
    flightFrame=(flightFrame or root.CFrame):Lerp(target,1-math.exp(-22*dt))
    visualFrame=flightFrame
   end
  end
- rider.update(player.Character,state.phase,visualFrame,dt,clock)
+ rider.update(player.Character,state.phase,visualFrame,dt,clock,state.dashUntil)
  crashEffect.update(player.Character,state.phase,clock)
  local displayDistance=state.distance or 0
  if active() then
-  local speed=state.phase=="Airborne" and t.AirStudsPerSecond or t.ForwardStudsPerSecond
+  local speed=state.phase=="Airborne" and t.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,t.ForwardStudsPerSecond,t.SwitchDashMultiplier)
   displayDistance+=math.clamp(clock-(state.sampleTime or clock),0,0.3)*speed*t.MetersPerStud
  end
  markers.update(active(),displayDistance,visualFrame,t.MetersPerStud)

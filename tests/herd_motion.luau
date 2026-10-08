@@ -36,4 +36,11 @@ local a,b=Motion.new(0,1),Motion.new(0,2)
 local ax=Motion.step(a,0,0,0.1,{},tuning,1.25,2.3,Rules)
 local bx=Motion.step(b,0,0,0.1,{},tuning,1.25,2.3,Rules)
 check(ax~=bx,"individuals must not share the same sway rhythm")
+for _,cluster in ipairs({{{x=0,z=0,sx=4,sz=4}},{{x=-2,z=0,sx=4,sz=4},{x=2,z=0,sx=4,sz=4}}}) do
+ for seed=1,12 do
+  local trapped=Motion.new(0,seed) local x,z=0,0
+  for _=1,200 do x,z=Motion.step(trapped,x,z,0.05,cluster,tuning,1.25,2.3,Rules) end
+  check(z<-100,"initial overlap must escape laterally and resume forward running")
+ end
+end
 print("PASS: "..checks.." herd motion checks")

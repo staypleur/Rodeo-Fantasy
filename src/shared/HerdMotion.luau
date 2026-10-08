@@ -38,9 +38,18 @@ function Motion.step(state,x,z,dt,rocks,tuning,halfX,halfZ,rules)
  local wanted=math.clamp((target-x)*3,-14,14)
  state.vx+=math.clamp(wanted-state.vx,-45*dt,45*dt)
  local nextX,nextZ=math.clamp(x+state.vx*dt,-limit,limit),z-speed*dt
+ local overlapping=false
+ for _,rock in ipairs(rocks) do
+  if rules.sweptBox(x,0,z,x,0,z,rock.x,0,rock.z,rock.sx+halfX*2,2,rock.sz+halfZ*2,0.35) then overlapping=true break end
+ end
+ if overlapping then nextZ=z end
  local function blocked(nx,nz)
   for _,rock in ipairs(rocks) do
-   if rules.sweptBox(x,0,z,nx,0,nz,rock.x,0,rock.z,rock.sx+halfX*2,2,rock.sz+halfZ*2,0.35) then return true end
+   local inside=rules.sweptBox(x,0,z,x,0,z,rock.x,0,rock.z,rock.sx+halfX*2,2,rock.sz+halfZ*2,0.35)
+   -- A released animal or newly generated obstacle can already overlap. Allow
+   -- lateral escape toward the selected clear corridor instead of freezing forever.
+   local escaping=inside and nz==z and math.abs(target-nx)<math.abs(target-x)
+   if not escaping and rules.sweptBox(x,0,z,nx,0,nz,rock.x,0,rock.z,rock.sx+halfX*2,2,rock.sz+halfZ*2,0.35) then return true end
   end
   return false
  end

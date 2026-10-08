@@ -1,6 +1,10 @@
 -- Pure rules for continuous riding, airborne lassoing and swept collisions.
 local Rules = {}
 
+function Rules.rideSpeed(clock,dashUntil,base,multiplier)
+ return base*(dashUntil and clock<dashUntil and multiplier or 1)
+end
+
 function Rules.jumpHeight(elapsed, duration, height)
 	return math.sin(math.clamp(elapsed / duration, 0, 1) * math.pi) * height
 end

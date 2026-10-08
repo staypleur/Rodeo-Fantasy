@@ -23,6 +23,27 @@ local function decoration(parent,name,position,size,color)
  return node
 end
 
+local function dressObstacle(rock,style)
+ rock.Transparency=1 rock:SetAttribute("Style",style)
+ local base=Vector3.new(rock.Position.X,0,rock.Position.Z)
+ if style=="FallenLog" then
+  local log=decoration(rock,"FallenTrunk",base+Vector3.new(0,1,0),Vector3.new(3.8,2,2),Color3.fromRGB(144,96,61))
+  log.Shape=Enum.PartType.Cylinder
+  for _,side in ipairs({-1,1}) do
+   local endGrain=decoration(rock,"TreeRings",base+Vector3.new(side*1.91,1,0),Vector3.new(0.05,1.6,1.6),Color3.fromRGB(224,182,122))
+   endGrain.Shape=Enum.PartType.Cylinder
+  end
+  decoration(rock,"BrokenBranch",base+Vector3.new(0.4,2.1,0),Vector3.new(0.55,1.7,0.55),Color3.fromRGB(127,83,54))
+  decoration(rock,"LogMoss",base+Vector3.new(-0.6,1.95,0.2),Vector3.new(1.5,0.2,1),Color3.fromRGB(119,159,82))
+ else
+  local stone=decoration(rock,"Boulder",base+Vector3.new(0,1.15,0),Vector3.new(3.8,2.3,3.8),Color3.fromRGB(177,157,123))
+  stone.CFrame*=CFrame.Angles(0,0,0.06)
+  decoration(rock,"StoneCap",base+Vector3.new(-0.3,2.5,0.15),Vector3.new(2.7,0.7,2.6),Color3.fromRGB(199,181,143))
+  decoration(rock,"Moss",base+Vector3.new(-0.6,2.91,0.1),Vector3.new(1.6,0.12,1.5),Color3.fromRGB(124,166,87))
+  decoration(rock,"StoneChip",base+Vector3.new(1.45,0.4,1.35),Vector3.new(0.9,0.8,0.9),Color3.fromRGB(163,146,113))
+ end
+end
+
 function World.init(world, modelTemplate, config, rules)
 	root, monsters, template, tuning, Rules = world, world.Monsters, modelTemplate, config.Prototype, rules
 	monsterId = config.Monster.Id
@@ -93,6 +114,7 @@ function World.ensure(z)
 					local rock = part(obstacles, "Rock", Vector3.new(random:NextInteger(-3,3)*8,1.5,rowZ-12), Vector3.new(4,3,4), Color3.fromRGB(167,130,99))
 					rock:SetAttribute("Chunk", index)
 					rock.CanCollide = false -- server swept collision is authoritative
+     dressObstacle(rock,(index+math.floor(offset/32))%3==0 and "FallenLog" or "MossyRock")
 				end
 			end
 		end

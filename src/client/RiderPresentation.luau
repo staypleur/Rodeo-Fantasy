@@ -26,7 +26,7 @@ local function restore()
  previousPhase=nil
  character,animate=nil,nil
 end
-function Presentation.update(model,phase,frame,dt,clock)
+function Presentation.update(model,phase,frame,dt,clock,dashUntil)
  local active=phase~="Idle" and phase~="GameOver"
  if character and (character~=model or not active) then restore() end
  local root=model and model:FindFirstChild("HumanoidRootPart")
@@ -123,7 +123,7 @@ function Presentation.update(model,phase,frame,dt,clock)
   elseif rope then rope:Destroy() rope=nil end
   shadow.CFrame=CFrame.new(frame.X,0.055,frame.Z)*CFrame.Angles(0,0,math.pi/2)
   shadow.Transparency=airborne and 0.5 or 0.75
-  trail.Enabled=airborne
+  trail.Enabled=airborne or (phase=="Riding" and dashUntil~=nil and clock<dashUntil)
   if phase=="Riding" and previousPhase and previousPhase~="Riding" then
    for i=1,8 do
     local puff=Instance.new("Part") puff.Name="LocalLandingDust"

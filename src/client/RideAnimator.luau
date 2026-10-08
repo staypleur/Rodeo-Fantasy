@@ -7,6 +7,7 @@ local template = package:WaitForChild("VisualTemplate")
 local tuning = require(package:WaitForChild("Config")).Prototype
 local Rules = require(package:WaitForChild("HuntRules"))
 local restFrames = {}
+local dust={}
 local function clearHerdPath(from,to,root)
  local world=workspace:FindFirstChild("RodeoPrototype")
  local obstacles=world and world:FindFirstChild("Obstacles")
@@ -43,6 +44,11 @@ end
 
 function RideAnimator.update(monsters, clock, cameraPosition, dt)
  dt = dt or 1/60
+ for i=#dust,1,-1 do
+  local puff=dust[i] local age=clock-puff.started
+  if age>=0.45 then puff.part:Destroy() table.remove(dust,i)
+  else puff.part.Transparency=0.55+age puff.part.Size=Vector3.one*(0.45+age*1.5) puff.part.Position+=Vector3.new(0,dt*0.7,0) end
+ end
  local displayed = {}
 	for model, pose in pairs(poses) do
 		if model.Parent ~= monsters then poses[model] = nil end
@@ -70,7 +76,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
    pose.sample, pose.received = root.CFrame, clock
   end
   local elapsed = math.clamp(clock-pose.received,0,0.08)
-  local speed = model:GetAttribute("Occupied") and tuning.ForwardStudsPerSecond or tuning.HerdStudsPerSecond
+  local speed = model:GetAttribute("Occupied") and Rules.rideSpeed(clock,model:GetAttribute("DashUntil"),tuning.ForwardStudsPerSecond,tuning.SwitchDashMultiplier) or tuning.HerdStudsPerSecond
   local steer = model:GetAttribute("Steering") or 0
   local velocity=Vector3.new(steer*tuning.SidewaysStudsPerSecond,0,-speed)
   if not model:GetAttribute("Occupied") then velocity=model:GetAttribute("HerdVelocity") or velocity end
@@ -106,14 +112,25 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
   end
 		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds)
 		local lean = running and (model:GetAttribute("Steering") or 0) * -0.18 or 0
-		local frame = pose.frame * CFrame.Angles(angry and pitch or 0, 0, lean)
+  local moving=running and velocity.Magnitude>1
+  local bounce=moving and (1-math.cos(phase))*0.22 or 0
+  local gallopPitch=moving and math.sin(phase)*0.085 or 0
+		local frame = pose.frame * CFrame.new(0,bounce,0)*CFrame.Angles(angry and pitch or gallopPitch, 0, lean)
+  if moving and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)>0.14 and #dust<80 then
+   pose.lastDust=clock
+   local puff=Instance.new("Part") puff.Name="LocalHerdDust" puff.Anchored=true
+   puff.CanCollide,puff.CanTouch,puff.CanQuery=false,false,false
+   puff.Color=Color3.fromRGB(239,220,176) puff.Size=Vector3.one*0.45 puff.Transparency=0.55
+   puff.Position=Vector3.new(frame.X+math.sin(phase)*0.9,0.2,frame.Z+1.6)
+   puff.Parent=workspace table.insert(dust,{part=puff,started=clock})
+  end
   displayed[model] = frame
 		for _, entry in ipairs(pose) do
 			if not entry.part.Parent then continue end
 			local localFrame = entry.rest
-			if running and entry.side then
+			if moving and entry.side then
 				local opposite = (entry.side == "Left") ~= (entry.leg == "Front")
-				local swing = math.sin(phase + (opposite and math.pi or 0)) * 0.55
+				local swing = math.sin(phase + (opposite and math.pi or 0)) * 0.85
 				local joint = CFrame.new(entry.side == "Left" and -0.88 or 0.88, -0.87, entry.leg == "Front" and -0.91 or 1.17)
 				localFrame = CFrame.new(0,math.max(0,math.sin(phase + (opposite and math.pi or 0)))*0.22,0) * joint * CFrame.Angles(swing, 0, 0) * joint:Inverse() * entry.rest
 			end

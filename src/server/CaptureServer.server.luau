@@ -17,7 +17,7 @@ local function send(player,message)
  local state,bag=states[player],bags[player]
  if not bag then return end
  BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
- remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,protectedUntil=state and state.protectedUntil or 0,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0})
+ remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,protectedUntil=state and state.protectedUntil or 0,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil})
 end
 local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
@@ -37,6 +37,7 @@ local function freeMount(state)
   state.monster:SetAttribute("Occupied",false)
   state.monster:SetAttribute("Steering",0)
   state.monster:SetAttribute("Angry",false)
+  state.monster:SetAttribute("DashUntil",nil)
   state.monster:SetAttribute("AngerWarning",false)
   state.monster:SetAttribute("AngerStarted",nil)
   local p=state.monster.PrimaryPart.Position
@@ -82,6 +83,7 @@ local function launch(player,state)
  freeMount(state)
  state.phase,state.started="Airborne",now()
  state.launchY=state.root.Position.Y
+ state.steer,state.dashUntil=0,nil
  state.tamed,state.angerAt=false,nil
  send(player)
 end
@@ -97,6 +99,7 @@ local function lasso(player,state)
  state.protectedUntil=now()+tuning.JumpSeconds+tuning.LandingGraceSeconds
  state.origin=state.root.CFrame
  state.landingSeconds=tuning.JumpSeconds
+ state.pendingDash=true
  attachRope(state)
  send(player)
 end
@@ -113,7 +116,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
  if action=="Start" then start(player) return end
  local state=states[player]
  if not state or state.phase=="GameOver" then return end
- if action=="Steer" and type(value)=="number" and value==value and value>=-1 and value<=1 then
+ if action=="Steer" and state.phase=="Riding" and type(value)=="number" and value==value and value>=-1 and value<=1 then
   state.steer,state.steerAt=value,now()
  elseif action=="Jump" and value==nil then
   if state.phase=="Riding" then launch(player,state)
@@ -130,7 +133,7 @@ RunService.Heartbeat:Connect(function(delta)
    continue
   end
   if not state.root.Parent or player.Character~=state.root.Parent or state.humanoid.Health<=0 then finish(player,"사냥 종료") continue end
-  local steer=clock-state.steerAt<0.5 and state.steer or 0
+  local steer=state.phase=="Riding" and clock-state.steerAt<0.5 and state.steer or 0
   local buckHeight,buckDrift=0,0
   if state.phase=="Riding" and Config.Hunt.AngerEnabled and clock-state.started>=Config.Hunt.AngerSeconds then
    state.angerAt=state.angerAt or clock
@@ -140,8 +143,8 @@ RunService.Heartbeat:Connect(function(delta)
     steer*=tuning.AngrySteerMultiplier
    end
   end
-  local old=state.root.Position
-  local speed=state.phase=="Airborne" and tuning.AirStudsPerSecond or tuning.ForwardStudsPerSecond
+  local old=state.phase=="Riding" and state.monster and state.monster.PrimaryPart.Position or state.root.Position
+  local speed=state.phase=="Airborne" and tuning.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,tuning.ForwardStudsPerSecond,tuning.SwitchDashMultiplier)
   local position=Vector3.new(math.clamp(old.X+(steer*tuning.SidewaysStudsPerSecond+buckDrift*tuning.BuckSidewaysStudsPerSecond)*dt,-tuning.RoadHalfWidth,tuning.RoadHalfWidth),old.Y,old.Z-speed*dt)
   state.distance+=speed*dt*tuning.MetersPerStud
   World.ensure(position.Z)
@@ -163,6 +166,9 @@ RunService.Heartbeat:Connect(function(delta)
    if clock-state.started>=landingSeconds then
     clearRope(state)
     state.phase,state.started,state.tamed="Riding",clock,state.monster:GetAttribute("Tamed_"..player.UserId)==true
+    state.dashUntil=state.pendingDash and clock+tuning.SwitchDashSeconds or nil
+    state.pendingDash=nil
+    state.monster:SetAttribute("DashUntil",state.dashUntil)
     state.protectedUntil=clock+tuning.LandingGraceSeconds
     state.monster:SetAttribute("RunStarted",clock)
     state.monster:SetAttribute("Angry",false)

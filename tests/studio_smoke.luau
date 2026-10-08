@@ -106,9 +106,10 @@ local a0=Instance.new("Attachment") a0.Parent=avatarRoot
 local a1=Instance.new("Attachment") a1.Parent=torso
 local upgraded=Instance.new("AnimationConstraint") upgraded.Name="RightHip"
 upgraded.Attachment0,upgraded.Attachment1=a0,a1 upgraded.Parent=avatarRoot
-presentation.update(rig,"Riding",CFrame.new(0,4,0),1,1800000000.2)
+presentation.update(rig,"Riding",CFrame.new(0,4,0),1,1800000000.2,1800000000.8)
 assert((-hip.C0.UpVector).Z<-.8,"classic thigh pose must point forward")
 assert((-upgraded.Transform.UpVector).Z<-.8,"upgraded thigh pose must point forward")
+assert(avatarRoot.FlightTrailAnchor:FindFirstChildOfClass("Trail").Enabled,"dash trail must appear while riding")
 local rope=workspace:FindFirstChild("LocalCowboyLasso")
 assert(rope and #rope:GetChildren()==50,"cowboy loop must have connected rope segments")
 local first=rope:FindFirstChildOfClass("Attachment") local before=first.Position
@@ -143,3 +144,11 @@ assert(nextFound,"next 1000m milestone must be generated")
 markers.update(false,0,nil,0.625)
 assert(not workspace:FindFirstChild("LocalDistanceMarker"),"milestones must clean up on run end")
 print("RODEO_MILESTONES_PASS")
+
+local hasLog,hasRock=false,false
+for _,obstacle in ipairs(world.Obstacles:GetChildren()) do
+ if obstacle:GetAttribute("Style")=="FallenLog" then hasLog=true assert(obstacle:FindFirstChild("FallenTrunk") and obstacle:FindFirstChild("TreeRings")) end
+ if obstacle:GetAttribute("Style")=="MossyRock" then hasRock=true assert(obstacle:FindFirstChild("Moss")) end
+end
+assert(hasLog and hasRock,"course must include both dressed obstacle styles")
+print("OBSTACLE_ART_PASS")
