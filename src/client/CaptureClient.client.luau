@@ -1,199 +1,151 @@
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-local UserInputService = game:GetService("UserInputService")
-local ContextActionService = game:GetService("ContextActionService")
-
-local player = Players.LocalPlayer
-local package = ReplicatedStorage:WaitForChild("RodeoFantasy")
-local Config = require(package:WaitForChild("Config"))
-local Rules = require(package:WaitForChild("CaptureRules"))
-local remote = package:WaitForChild("CaptureRemote")
-local RideAnimator = require(script.Parent:WaitForChild("RideAnimator"))
-local monsters = workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
-local mouse = player:GetMouse()
-local phase, started, widths = "Idle", 0, Config.Capture.First
-local captureAt, lastPress = nil, -math.huge
-local left, right, pressed, lastSteer = false, false, false, 0
-local noticeUntil, savedCameraType, savedCameraSubject = 0, nil, nil
-
-local function make(className, properties, parent)
-	local item = Instance.new(className)
-	for key, value in pairs(properties) do item[key] = value end
-	item.Parent = parent
-	return item
+local Players=game:GetService("Players")
+local RS=game:GetService("ReplicatedStorage")
+local RunService=game:GetService("RunService")
+local UIS=game:GetService("UserInputService")
+local CAS=game:GetService("ContextActionService")
+local player=Players.LocalPlayer
+local package=RS:WaitForChild("RodeoFantasy")
+local Config=require(package.Config)
+local Rules=require(package.HuntRules)
+local remote=package.CaptureRemote
+local animator=require(script.Parent.RideAnimator)
+local monsters=workspace.RodeoPrototype.Monsters
+local state={phase="Idle",started=0,count=0,pending=0,distance=0}
+local held,left,right=false,false,false
+local pointerOrigin,pointerX,lastSteer=nil,nil,0
+local notice,noticeUntil="",0
+local savedType,savedSubject=nil,nil
+local function make(kind,props,parent)
+ local node=Instance.new(kind)
+ for k,v in pairs(props) do node[k]=v end
+ node.Parent=parent
+ return node
 end
-
-local gui = make("ScreenGui", { Name = "RodeoCaptureUI", ResetOnSpawn = false, DisplayOrder = 10 }, player:WaitForChild("PlayerGui"))
-local panel = make("Frame", {
-	AnchorPoint = Vector2.new(0.5, 1), Position = UDim2.new(0.5, 0, 1, -24),
-	Size = UDim2.new(0.9, 0, 0, 192), BackgroundColor3 = Color3.fromRGB(27, 24, 23),
-	BackgroundTransparency = 0.08, BorderSizePixel = 0,
-}, gui)
-make("UISizeConstraint", { MaxSize = Vector2.new(720, 192) }, panel)
-make("UICorner", { CornerRadius = UDim.new(0, 14) }, panel)
-local function label(parent, text, position, size, fontSize, color)
-	return make("TextLabel", {
-		Text = text, Position = position, Size = size, TextSize = fontSize,
-		Font = Enum.Font.GothamMedium, TextColor3 = color or Color3.fromRGB(249, 242, 225),
-		BackgroundTransparency = 1, TextWrapped = true,
-	}, parent)
+local gui=make("ScreenGui",{Name="RodeoCaptureUI",ResetOnSpawn=false,DisplayOrder=10},player:WaitForChild("PlayerGui"))
+local function text(parent,value,pos,size,font)
+ return make("TextLabel",{Text=value,Position=pos,Size=size,TextSize=font or 18,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(255,245,219),BackgroundTransparency=1,TextWrapped=true},parent)
 end
-label(panel, "RODEO FANTASY · 앰버랫 포획 테스트", UDim2.fromOffset(12, 8), UDim2.new(1, -24, 0, 26), 18)
-local status = label(panel, "3m 안의 앰버랫을 클릭하세요", UDim2.fromOffset(12, 40), UDim2.new(1, -24, 0, 34), 19)
-local detail = label(panel, "WASD 이동 · 마우스 클릭으로 줄 던지기", UDim2.fromOffset(12, 78), UDim2.new(1, -24, 0, 24), 14)
-local bar = make("Frame", { Name = "CaptureBar", Position = UDim2.new(0, 24, 0, 115), Size = UDim2.new(1, -48, 0, 26), BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(241, 238, 228), Visible = false }, panel)
-local yellow = make("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(250, 208, 65) }, bar)
-local orange = make("Frame", { BorderSizePixel = 0, BackgroundColor3 = Color3.fromRGB(255, 116, 30) }, bar)
-local marker = make("Frame", { AnchorPoint = Vector2.new(0.5, 0.5), Position = UDim2.fromScale(0, 0.5), Size = UDim2.new(0, 3, 1, 12), BackgroundColor3 = Color3.fromRGB(34, 31, 29), BorderSizePixel = 0, ZIndex = 3 }, bar)
-local collection = label(panel, "이번 접속 앰버랫 포획: 0마리", UDim2.fromOffset(12, 156), UDim2.new(1, -24, 0, 24), 14, Color3.fromRGB(230, 190, 126))
-label(gui, "앰버랫 B · 포획과 가방 수익 테스트\n가방과 수익은 이번 접속에서만 유지됩니다", UDim2.fromOffset(16, 12), UDim2.fromOffset(400, 54), 14)
-local bagIncome = label(gui, "가방: 0마리 · 모인 돈: 0원", UDim2.fromOffset(16, 70), UDim2.fromOffset(400, 34), 16, Color3.fromRGB(255, 222, 138))
-local highlight = make("Highlight", { Enabled = false, FillTransparency = 0.85, OutlineTransparency = 0, DepthMode = Enum.HighlightDepthMode.Occluded }, gui)
-
-local function targetMonster()
-	local target = mouse.Target
-	if not target then return nil end
-	local model = target:FindFirstAncestorOfClass("Model")
-	if model and model.Parent == monsters then return model end
-	return nil
+local distance=text(gui,"0m",UDim2.fromOffset(16,16),UDim2.fromOffset(160,48),32)
+local bag=text(gui,"가방: 0마리 · 모인 돈: 0원",UDim2.fromOffset(16,64),UDim2.fromOffset(360,32),16)
+local panel=make("Frame",{AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,128),BackgroundColor3=Color3.fromRGB(36,29,25),BackgroundTransparency=0.15,BorderSizePixel=0},gui)
+make("UISizeConstraint",{MaxSize=Vector2.new(650,128)},panel)
+make("UICorner",{CornerRadius=UDim.new(0,14)},panel)
+local status=text(panel,"로데오 스트릿 · 파이리 사냥",UDim2.fromOffset(12,6),UDim2.new(1,-24,0,32),20)
+local instruction=text(panel,"누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기",UDim2.fromOffset(12,42),UDim2.new(1,-24,0,32),15)
+local progress=make("Frame",{Name="TamingProgress",Position=UDim2.new(0,16,0,90),Size=UDim2.new(1,-32,0,14),BackgroundColor3=Color3.fromRGB(94,70,50),BorderSizePixel=0,Visible=false},panel)
+local fill=make("Frame",{Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(244,127,115),BorderSizePixel=0},progress)
+local startButton=make("TextButton",{Name="StartHunt",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.52),Size=UDim2.fromOffset(230,64),Text="사냥 시작",TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(219,103,41)},gui)
+make("UICorner",{CornerRadius=UDim.new(0,16)},startButton)
+local highlight=make("Highlight",{Enabled=false,FillTransparency=0.82,OutlineColor=Color3.fromRGB(255,222,91)},gui)
+local ring=make("Part",{Name="LocalLassoRange",Anchored=true,CanCollide=false,CanTouch=false,CanQuery=false,Transparency=1,Size=Vector3.new(1,1,1)},workspace)
+local ringPoints={}
+for i=1,32 do
+ local a=make("Attachment",{},ring)
+ local angle=(i-1)/32*math.pi*2
+ a.Position=Vector3.new(math.cos(angle)*Config.Prototype.LassoRangeStuds,0,math.sin(angle)*Config.Prototype.LassoRangeStuds)
+ ringPoints[i]=a
 end
-
-local function sendSteer()
-	remote:FireServer("Steer", (right and 1 or 0) - (left and 1 or 0))
-	lastSteer = os.clock()
+local beams={}
+for i=1,32 do
+ beams[i]=make("Beam",{Attachment0=ringPoints[i],Attachment1=ringPoints[i%32+1],Width0=0.12,Width1=0.12,FaceCamera=true,Color=ColorSequence.new(Color3.fromRGB(255,224,83)),Enabled=false},ring)
 end
-
-local function inputAction(_, inputState, input)
-	if inputState == Enum.UserInputState.Cancel then
-		left, right = false, false
-		sendSteer()
-		return Enum.ContextActionResult.Sink
-	end
-	local down = inputState == Enum.UserInputState.Begin
-	if inputState ~= Enum.UserInputState.Begin and inputState ~= Enum.UserInputState.End then
-		return Enum.ContextActionResult.Sink
-	end
-	if UserInputService:GetFocusedTextBox() and down then return Enum.ContextActionResult.Pass end
-	if input.KeyCode == Enum.KeyCode.A then left = down sendSteer() end
-	if input.KeyCode == Enum.KeyCode.D then right = down sendSteer() end
-	if input.KeyCode == Enum.KeyCode.Space and down and (phase == "Minigame" or phase == "Holding")
-		and not pressed and os.clock() - lastPress >= 0.12 then
-		pressed = true
-		lastPress = os.clock()
-		remote:FireServer("Press")
-	end
-	return Enum.ContextActionResult.Sink
+local function active() return state.phase~="Idle" and state.phase~="GameOver" end
+local function steering()
+ if right or left then return (right and 1 or 0)-(left and 1 or 0) end
+ if held and pointerOrigin and pointerX then
+  local dx=pointerX-pointerOrigin
+  return math.abs(dx)<14 and 0 or math.clamp(dx/120,-1,1)
+ end
+ return 0
 end
-
-local function toggleRide(active)
-	local camera = workspace.CurrentCamera
-	if active then
-		if savedCameraType == nil then
-			savedCameraType, savedCameraSubject = camera.CameraType, camera.CameraSubject
-			ContextActionService:BindActionAtPriority("RodeoRide", inputAction, false, Enum.ContextActionPriority.High.Value + 1,
-				Enum.KeyCode.A, Enum.KeyCode.D, Enum.KeyCode.W, Enum.KeyCode.S, Enum.KeyCode.Space)
-		end
-		camera.CameraType = Enum.CameraType.Scriptable
-	else
-		ContextActionService:UnbindAction("RodeoRide")
-		if savedCameraType then
-			camera.CameraType = savedCameraType
-			if savedCameraSubject and savedCameraSubject.Parent then camera.CameraSubject = savedCameraSubject end
-		end
-		savedCameraType, savedCameraSubject = nil, nil
-		left, right = false, false
-	end
+local function keyAction(_,inputState,input)
+ local down=inputState==Enum.UserInputState.Begin
+ if inputState==Enum.UserInputState.Cancel then left,right=false,false else
+  if input.KeyCode==Enum.KeyCode.A then left=down end
+  if input.KeyCode==Enum.KeyCode.D then right=down end
+ end
+ return Enum.ContextActionResult.Sink
 end
-
-UserInputService.InputBegan:Connect(function(input, processed)
-	if processed or (phase ~= "Idle" and phase ~= "Riding") or input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
-	local target = targetMonster()
-	if target then remote:FireServer("Mount", target) end
+local function cameraMode(enabled)
+ local camera=workspace.CurrentCamera
+ if enabled and savedType==nil then
+  savedType,savedSubject=camera.CameraType,camera.CameraSubject
+  CAS:BindActionAtPriority("RodeoSteer",keyAction,false,Enum.ContextActionPriority.High.Value+1,Enum.KeyCode.A,Enum.KeyCode.D,Enum.KeyCode.W,Enum.KeyCode.S,Enum.KeyCode.Space)
+  camera.CameraType=Enum.CameraType.Scriptable
+ elseif not enabled and savedType~=nil then
+  CAS:UnbindAction("RodeoSteer")
+  camera.CameraType=savedType
+  if savedSubject and savedSubject.Parent then camera.CameraSubject=savedSubject end
+  savedType,savedSubject=nil,nil
+  held,left,right=false,false,false
+ end
+end
+startButton.Activated:Connect(function() remote:FireServer("Start") end)
+UIS.InputBegan:Connect(function(input,processed)
+ if processed or not active() then return end
+ if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
+  held=true pointerOrigin,pointerX=input.Position.X,input.Position.X
+  remote:FireServer("Hold",true)
+ end
 end)
-UserInputService.WindowFocusReleased:Connect(function()
-	left, right = false, false
-	if phase ~= "Idle" then sendSteer() end
+UIS.InputChanged:Connect(function(input)
+ if input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch then pointerX=input.Position.X end
 end)
-UserInputService.TextBoxFocused:Connect(function()
-	left, right = false, false
-	if phase ~= "Idle" then sendSteer() end
+UIS.InputEnded:Connect(function(input)
+ if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
+  if held then held=false remote:FireServer("Hold",false) end
+  pointerOrigin,pointerX=nil,nil
+ end
 end)
-
-remote.OnClientEvent:Connect(function(kind, data)
-	if kind == "BagState" then
-		bagIncome.Text = string.format("가방: %d마리 · 모인 돈: %d원", data.count, data.pending)
-	elseif kind == "Notice" then
-		status.Text, noticeUntil = data.message, os.clock() + 3
-	elseif kind == "Judged" then
-		marker.Position = UDim2.fromScale(data.position, 0.5)
-	elseif kind == "State" then
-		phase, started, pressed = data.phase, data.started, false
-		captureAt = data.captureAt
-		widths = data.widths or Config.Capture.First
-		bar.Visible = phase == "Minigame" or phase == "Holding"
-		yellow.Position, yellow.Size = UDim2.fromScale(widths.White, 0), UDim2.fromScale(widths.Yellow, 1)
-		orange.Position, orange.Size = UDim2.fromScale(1 - widths.Orange, 0), UDim2.fromScale(widths.Orange, 1)
-		collection.Text = string.format("이번 접속 앰버랫 포획: %d마리", data.count)
-		noticeUntil = 0
-		if data.message then status.Text, noticeUntil = data.message, os.clock() + 3 end
-		toggleRide(phase ~= "Idle")
-	end
+UIS.WindowFocusReleased:Connect(function()
+ if held then remote:FireServer("Hold",false) end
+ held,left,right=false,false,false
 end)
-
-player.CharacterAdded:Connect(function()
-	phase = "Idle"
-	toggleRide(false)
-	remote:FireServer("Sync")
+remote.OnClientEvent:Connect(function(kind,data)
+ if kind~="State" then return end
+ state=data
+ if data.message then notice,noticeUntil=data.message,os.clock()+3 end
+ startButton.Visible=not active()
+ startButton.Text=state.phase=="GameOver" and "다시 사냥하기" or "사냥 시작"
+ cameraMode(active())
+ bag.Text=string.format("가방: %d마리 · 모인 돈: %d원",state.count,state.pending)
 end)
-
+player.CharacterAdded:Connect(function() state.phase="Idle" cameraMode(false) remote:FireServer("Sync") end)
 RunService.RenderStepped:Connect(function(dt)
-	RideAnimator.update(monsters, workspace:GetServerTimeNow())
-	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
-	local elapsed = workspace:GetServerTimeNow() - started
-	if pressed and os.clock() - lastPress > 0.75 then pressed = false end
-	if phase == "Minigame" or phase == "Holding" then
-		marker.Position = UDim2.fromScale(Rules.position(elapsed, Config.Prototype.BarRoundTripSeconds), 0.5)
-	end
-	if phase ~= "Idle" and root then
-		local camera = workspace.CurrentCamera
-		local view = Config.Prototype
-		local goal = CFrame.lookAt(root.Position + Vector3.new(0, view.CameraHeightStuds, view.CameraBehindStuds), root.Position + Vector3.new(0, 0, -view.CameraLookAheadStuds))
-		camera.CFrame = camera.CFrame:Lerp(goal, 1 - math.exp(-10 * dt))
-		if os.clock() - lastSteer >= 0.15 then sendSteer() end
-	end
-	highlight.Enabled = false
-	if phase == "Idle" then
-		local target = targetMonster()
-		if target and target.PrimaryPart and root then
-			local distance = (target.PrimaryPart.Position - root.Position).Magnitude * Config.Prototype.MetersPerStud
-			highlight.Adornee, highlight.Enabled = target, true
-			local available = distance <= Config.Capture.JumpMeters and not target:GetAttribute("Occupied")
-			highlight.OutlineColor = available and Color3.fromRGB(136, 229, 165) or Color3.fromRGB(245, 105, 89)
-			detail.Text = string.format("앰버랫까지 %.1fm / 점프 범위 3m · 클릭하여 탑승", distance)
-		else
-			detail.Text = "WASD 이동 · 마우스 클릭으로 줄 던지기"
-		end
-		if os.clock() >= noticeUntil then status.Text = "3m 안의 앰버랫을 클릭하세요" end
-	elseif phase == "Jumping" then
-		status.Text, detail.Text = "줄을 던져 탑승 중…", "앰버랫"
-	elseif phase == "Riding" then
-		status.Text = string.format("미니게임까지 %.1f초", math.max(0, Config.Capture.RideSeconds - elapsed))
-		detail.Text = "A / D로 좌우 이동 · 3m 안의 다른 앰버랫 클릭으로 갈아타기"
-		local target = targetMonster()
-		if target and target.PrimaryPart and root and not target:GetAttribute("Occupied") then
-			local distance = (target.PrimaryPart.Position - root.Position).Magnitude * Config.Prototype.MetersPerStud
-			highlight.Adornee, highlight.Enabled = target, true
-			highlight.OutlineColor = distance <= Config.Capture.JumpMeters and Color3.fromRGB(136, 229, 165) or Color3.fromRGB(245, 105, 89)
-			detail.Text = string.format("갈아탈 앰버랫까지 %.1fm / 범위 3m · 클릭", distance)
-		end
-	elseif phase == "Minigame" then
-		status.Text = pressed and "판정 중…" or "노란색이나 주황색에서 스페이스바!"
-		detail.Text = string.format("흰색 %d%% 실패 · 노란색 %d%% 5초 버티기 · 주황색 %d%% 즉시 포획", math.floor(widths.White * 100 + 0.5), math.floor(widths.Yellow * 100 + 0.5), math.floor(widths.Orange * 100 + 0.5))
-	elseif phase == "Holding" then
-		status.Text = string.format("계속 버티세요! 포획까지 %.1f초", math.max(0, (captureAt or 0) - workspace:GetServerTimeNow()))
-		detail.Text = "스페이스바 계속 판정 · 노란색: 유지 / 흰색: 낙하 / 주황색: 즉시 포획"
-	end
+ local clock=workspace:GetServerTimeNow()
+ local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+ animator.update(monsters,clock,root and root.Position)
+ distance.Text=string.format("%dm",math.floor(state.distance or 0))
+ highlight.Enabled=false
+ progress.Visible=state.phase=="Riding"
+ for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
+ if active() and root then
+  local t=Config.Prototype
+  local target=CFrame.lookAt(root.Position+Vector3.new(0,t.CameraHeightStuds,t.CameraBehindStuds),root.Position+Vector3.new(0,0,-t.CameraLookAheadStuds))
+  workspace.CurrentCamera.CFrame=workspace.CurrentCamera.CFrame:Lerp(target,1-math.exp(-10*dt))
+  if os.clock()-lastSteer>=0.1 then remote:FireServer("Steer",steering()) lastSteer=os.clock() end
+ end
+ if state.phase=="Airborne" and root then
+  ring.Position=Vector3.new(root.Position.X,0.15,root.Position.Z)
+  local nearest,best=nil,Config.Prototype.LassoRangeStuds^2
+  for _,model in ipairs(monsters:GetChildren()) do
+   if model.PrimaryPart and not model:GetAttribute("Occupied") then
+    local d=model.PrimaryPart.Position-root.Position
+    if d.X*d.X+d.Z*d.Z<best then nearest,best=model,d.X*d.X+d.Z*d.Z end
+   end
+  end
+  if nearest then highlight.Adornee,highlight.Enabled=nearest,true end
+ end
+ if state.phase=="Riding" then
+  fill.Size=UDim2.fromScale(state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),1)
+  status.Text=state.angerAt and "화났어요! 손을 떼고 점프하세요!" or state.tamed and "길들이기 성공 · 다음 포켓몬으로!" or "파이리 길들이는 중 ♥"
+  instruction.Text="누른 채 좌우로 움직이기 / A·D · 손을 떼면 점프"
+ elseif state.phase=="Airborne" then
+  status.Text="다시 눌러 다음 포켓몬을 잡으세요!"
+  instruction.Text="노란 원 안에 포켓몬이 들어오면 줄이 연결됩니다"
+ elseif state.phase=="Lassoing" then status.Text="줄로 연결해 탑승 중…" instruction.Text="계속 누르고 계세요"
+ elseif state.phase=="GameOver" then status.Text="사냥 종료" instruction.Text="다시 사냥하기로 재도전 · 가방 수익은 유지"
+ else status.Text="로데오 스트릿 · 파이리 사냥" instruction.Text="사냥 시작 → 누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기" end
+ if os.clock()<noticeUntil then status.Text=notice end
 end)
-
 remote:FireServer("Sync")

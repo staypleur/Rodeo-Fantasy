@@ -1,329 +1,175 @@
-local Players = game:GetService("Players")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-
-local package = ReplicatedStorage:WaitForChild("RodeoFantasy")
-local Config = require(package:WaitForChild("Config"))
-local Rules = require(package:WaitForChild("CaptureRules"))
-local BagRules = require(package:WaitForChild("BagRules"))
-local remote = package:WaitForChild("CaptureRemote")
-local tuning = Config.Prototype
-local world = workspace:WaitForChild("RodeoPrototype")
-local monsters = world:WaitForChild("Monsters")
-local template = game:GetService("ServerStorage"):WaitForChild("RodeoMonsterTemplate")
-local states, owners, inventories, rateLimits, chunks = {}, {}, {}, {}, {}
-local bags = {}
-local nextBagUpdate = 0
-local decoratedChunks = {}
-local frontierZ = -8
-local initialPosition = Vector3.new(0, 2, -8)
-local jumpRange = Config.Capture.JumpMeters / tuning.MetersPerStud
-local preview = world:FindFirstChild("PreviewMonster")
-if preview then preview:Destroy() end
-chunks[0] = world:FindFirstChild("PreviewGround")
-
-local function now()
-	return workspace:GetServerTimeNow()
+local Players=game:GetService("Players")
+local RS=game:GetService("ReplicatedStorage")
+local RunService=game:GetService("RunService")
+local package=RS:WaitForChild("RodeoFantasy")
+local Config=require(package.Config)
+local Rules=require(package.HuntRules)
+local BagRules=require(package.BagRules)
+local World=require(script.Parent.HuntWorld)
+local remote=package.CaptureRemote
+local tuning=Config.Prototype
+local states,bags,limits={},{},{}
+local lastSync,lastCleanup=0,0
+World.init(workspace.RodeoPrototype,game:GetService("ServerStorage").RodeoMonsterTemplate,Config,Rules)
+World.ensure(0)
+local function now() return workspace:GetServerTimeNow() end
+local function send(player,message)
+ local state,bag=states[player],bags[player]
+ if not bag then return end
+ BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
+ remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message})
 end
-
-local function groundAt(z)
-	local center = math.floor(z / tuning.GroundChunkStuds + 0.5)
-	for index = center - 1, center + 1 do
-		if not chunks[index] then
-			local floor = Instance.new("Part")
-			floor.Name = "TestGround_" .. index
-			floor.Anchored = true
-			floor.Size = Vector3.new(100, 2, tuning.GroundChunkStuds)
-			floor.Position = Vector3.new(0, -1, index * tuning.GroundChunkStuds)
-			floor.Material = Enum.Material.Sand
-			floor.Color = Color3.fromRGB(195, 166, 119)
-			floor.Parent = world
-			chunks[index] = floor
-		end
-		if not decoratedChunks[index] then
-			decoratedChunks[index] = true
-			-- Temporary non-colliding visual markers make forward travel visible on the test floor.
-			for offset = -112, 112, 16 do
-				for _, side in ipairs({ -1, 1 }) do
-					local marker = Instance.new("Part")
-					marker.Name = "TestRoadMarker"
-					marker.Anchored, marker.CanCollide, marker.CanTouch, marker.CanQuery = true, false, false, false
-					marker.Size = Vector3.new(1.5, 0.1, 3)
-					marker.Position = Vector3.new(side * 43, 0.06, index * tuning.GroundChunkStuds + offset)
-					marker.Color = Color3.fromRGB(139, 105, 65)
-					marker.Material = Enum.Material.Sand
-					marker.Parent = world
-				end
-			end
-		end
-	end
-end
-
-local function spawnMonster(position)
-	local monster = template:Clone()
-	monster.Name = Config.Monster.Id
-	monster:SetAttribute("MonsterId", Config.Monster.Id)
-	monster:SetAttribute("Occupied", false)
-	monster:SetAttribute("Running", false)
-	monster:SetAttribute("Steering", 0)
-	monster:PivotTo(CFrame.new(position))
-	monster.Parent = monsters
-	return monster
-end
-
-local function spawnAhead(z)
-	-- Repeatable riding-switch fixture, not a final region spawn rule.
-	while frontierZ > z - 96 do
-		frontierZ -= 24
-		spawnMonster(Vector3.new((math.floor(-frontierZ / 24) % 2 == 0) and -4 or 4, 2, frontierZ))
-	end
-end
-
-local function notify(player, message)
-	remote:FireClient(player, "Notice", { message = message })
-end
-
-local function sendBag(player)
-	local bag = bags[player]
-	if not bag then return end
-	BagRules.accrue(bag, now(), Config.BagIncome.IncomeSeconds, Config.BagIncome.IncomeAmount)
-	remote:FireClient(player, "BagState", { count = #bag.monsters, pending = bag.pending, balance = bag.balance })
-end
-
-local function sendState(player, state, message)
-	remote:FireClient(player, "State", {
-		phase = state and state.phase or "Idle",
-		started = state and state.started or now(),
-		captureAt = state and state.captureAt,
-		widths = state and state.widths,
-		message = message,
-		count = inventories[player] or 0,
-	})
-end
-
 local function clearRope(state)
-	for _, item in ipairs(state.rope or {}) do
-		item:Destroy()
-	end
-	state.rope = nil
+ for _,item in ipairs(state.rope or {}) do item:Destroy() end
+ state.rope=nil
 end
-
-local function release(player, message)
-	local state = states[player]
-	if not state then return end
-	states[player] = nil
-	clearRope(state)
-	owners[state.monster] = nil
-	if state.monster.Parent then
-		state.monster:SetAttribute("Occupied", false)
-		state.monster:SetAttribute("Running", false)
-		state.monster:SetAttribute("Steering", 0)
-	end
-	local root, humanoid = state.root, state.humanoid
-	if root.Parent and humanoid.Parent then
-		local p = root.Position
-		if state.monster.Parent then p = state.monster:GetPivot().Position end
-		groundAt(p.Z)
-		root.CFrame = CFrame.new(math.clamp(p.X + 5, -44, 44), 5, p.Z)
-		root.AssemblyLinearVelocity = Vector3.zero
-		root.AssemblyAngularVelocity = Vector3.zero
-		root.Anchored = state.wasAnchored
-		humanoid.AutoRotate = state.autoRotate
-		humanoid.PlatformStand = state.platformStand
-		if humanoid.Health > 0 then
-			humanoid:ChangeState(Enum.HumanoidStateType.GettingUp)
-		end
-	end
-	if player.Parent then sendState(player, nil, message) end
+local function freeMount(state)
+ if state.monster and state.monster.Parent then
+  state.monster:SetAttribute("Occupied",false)
+  state.monster:SetAttribute("Steering",0)
+  state.monster:SetAttribute("Angry",false)
+ end
+ state.previousMonster,state.monster=state.monster,nil
+ clearRope(state)
 end
-
-local function capture(player)
-	local state = states[player]
-	if not state or state.phase ~= "Holding" and state.phase ~= "Minigame" then return end
-	local monster = state.monster
-	local position = monster:GetPivot().Position
-	inventories[player] = (inventories[player] or 0) + 1
-	BagRules.grant(bags[player], Config.Monster.Id, now())
-	sendBag(player)
-	player:SetAttribute("EmberratCount", inventories[player])
-	release(player, "포획 성공! 앰버랫이 추가됐어요.")
-	monster:Destroy()
-	-- Repeatable test fixture; this is not the final wild-monster spawn system.
-	task.delay(tuning.RespawnSeconds, function() spawnMonster(position) end)
+local function finish(player,reason)
+ local state=states[player]
+ if not state or state.phase=="GameOver" then return end
+ freeMount(state)
+ state.phase="GameOver"
+ if state.root.Parent then
+  state.root.Anchored=state.wasAnchored
+  state.root.AssemblyLinearVelocity=Vector3.zero
+  state.humanoid.AutoRotate,state.humanoid.PlatformStand=state.autoRotate,state.platformStand
+ end
+ send(player,reason)
 end
-
-local function mount(player, monster)
-	local previous = states[player]
-	if previous and (previous.phase ~= "Riding" or now() - previous.started >= Config.Capture.RideSeconds) then
-		notify(player, "갈아타기는 미니게임 시작 전 3초 동안만 가능해요.")
-		return
-	end
-	if typeof(monster) ~= "Instance" or not monster:IsA("Model") then return end
-	if monster.Parent ~= monsters or monster:GetAttribute("MonsterId") ~= Config.Monster.Id then return end
-	if owners[monster] then notify(player, "다른 플레이어가 타고 있어요.") return end
-	local character = player.Character
-	local root = character and character:FindFirstChild("HumanoidRootPart")
-	local humanoid = character and character:FindFirstChildOfClass("Humanoid")
-	if not root or not humanoid or humanoid.Health <= 0 then return end
-	local target = monster.PrimaryPart
-	if not target then return end
-	local difference = target.Position - root.Position
-	if not Rules.inRange(difference.X, difference.Y, difference.Z, jumpRange) then
-		notify(player, "앰버랫에게 더 가까이 가세요. 점프 범위는 3m예요.")
-		return
-	end
-	local rayParams = RaycastParams.new()
-	rayParams.FilterType = Enum.RaycastFilterType.Exclude
-	rayParams.FilterDescendantsInstances = previous and { character, monster, previous.monster } or { character, monster }
-	if workspace:Raycast(root.Position, difference, rayParams) then
-		notify(player, "사이에 장애물이 있어 줄을 던질 수 없어요.")
-		return
-	end
-	-- Validate the destination before cancelling the previous ride. Invalid clicks keep it intact.
-	if previous then
-		clearRope(previous)
-		owners[previous.monster] = nil
-		if previous.monster.Parent then
-			previous.monster:SetAttribute("Occupied", false)
-			previous.monster:SetAttribute("Running", false)
-			previous.monster:SetAttribute("Steering", 0)
-		end
-	end
-	local originalMovement = previous or {
-		wasAnchored = root.Anchored, autoRotate = humanoid.AutoRotate, platformStand = humanoid.PlatformStand,
-	}
-	local state = {
-		phase = "Jumping", started = now(), monster = monster,
-		root = root, humanoid = humanoid, steer = 0, steerAt = now(),
-		origin = root.CFrame, wasAnchored = originalMovement.wasAnchored,
-		autoRotate = originalMovement.autoRotate, platformStand = originalMovement.platformStand,
-		widths = (inventories[player] or 0) > 0 and Config.Capture.Repeat or Config.Capture.First,
-	}
-	states[player], owners[monster] = state, player
-	monster:SetAttribute("Occupied", true)
-	root.Anchored = true
-	humanoid.AutoRotate = false
-	humanoid.PlatformStand = true
-	local start = Instance.new("Attachment")
-	start.Position = Vector3.new(1, 0, 0)
-	start.Parent = root
-	local finish = Instance.new("Attachment")
-	finish.Parent = target
-	local rope = Instance.new("Beam")
-	rope.Attachment0, rope.Attachment1 = start, finish
-	rope.Width0, rope.Width1 = 0.1, 0.1
-	rope.FaceCamera = true
-	rope.Color = ColorSequence.new(Color3.fromRGB(166, 119, 65))
-	rope.Parent = root
-	state.rope = { rope, start, finish }
-	sendState(player, state)
+local function start(player)
+ local previous=states[player]
+ if previous and previous.phase~="GameOver" then return end
+ local character=player.Character
+ local root=character and character:FindFirstChild("HumanoidRootPart")
+ local humanoid=character and character:FindFirstChildOfClass("Humanoid")
+ if not root or not humanoid or humanoid.Health<=0 then return end
+ World.ensure(0)
+ local model=World.spawn(Vector3.new(0,2,-8))
+ model:SetAttribute("Occupied",true)
+ model:SetAttribute("Angry",false)
+ states[player]={phase="Riding",started=now(),monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),held=false,distance=0,tamed=false}
+ root.Anchored,humanoid.AutoRotate,humanoid.PlatformStand=true,false,true
+ root.CFrame=model:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
+ send(player)
 end
-
-remote.OnServerEvent:Connect(function(player, action, payload)
-	if type(action) ~= "string" then return end
-	if action ~= "Sync" and action ~= "Mount" and action ~= "Steer" and action ~= "Press" then return end
-	local clock = now()
-	local limits = rateLimits[player]
-	if not limits then limits = {} rateLimits[player] = limits end
-	local interval = action == "Steer" and 0.04 or action == "Press" and 0.1 or 0.25
-	if clock - (limits[action] or -math.huge) < interval then return end
-	limits[action] = clock
-	if action == "Sync" then
-		sendState(player, states[player])
-		sendBag(player)
-	elseif action == "Mount" then
-		mount(player, payload)
-	elseif action == "Steer" then
-		local state = states[player]
-		if state and (payload == -1 or payload == 0 or payload == 1) then
-			state.steer, state.steerAt = payload, clock
-		end
-	elseif action == "Press" then
-		local state = states[player]
-		if not state or (state.phase ~= "Minigame" and state.phase ~= "Holding") then return end
-		if not state.humanoid.Parent or state.humanoid.Health <= 0 or not state.monster.Parent then return end
-		if state.captureAt and clock >= state.captureAt then
-			capture(player)
-			return
-		end
-		-- The client never supplies a success/colour/count. Server receipt time is authoritative.
-		local position = Rules.position(clock - state.started, tuning.BarRoundTripSeconds)
-		local zone = Rules.zone(position, state.widths)
-		remote:FireClient(player, "Judged", { zone = zone, position = position })
-		if zone == "Orange" then
-			capture(player)
-		elseif zone == "Yellow" then
-			-- Keep the bar's original clock and the first yellow's deadline.
-			state.phase = "Holding"
-			state.captureAt = state.captureAt or (clock + Config.Capture.HoldSeconds)
-			sendState(player, state)
-		else
-			release(player, "흰색 판정! 떨어졌어요. 다시 클릭해 도전하세요.")
-		end
-	end
+local function launch(player,state)
+ freeMount(state)
+ state.phase,state.started="Airborne",now()
+ state.launchY=state.root.Position.Y
+ state.tamed,state.angerAt=false,nil
+ send(player)
+end
+local function lasso(player,state)
+ local model=World.nearest(state.root.Position,state.previousMonster)
+ if not model then return end
+ local params=RaycastParams.new()
+ params.FilterType=Enum.RaycastFilterType.Exclude
+ params.FilterDescendantsInstances={state.root.Parent,workspace.RodeoPrototype.Monsters}
+ if workspace:Raycast(state.root.Position,model.PrimaryPart.Position-state.root.Position,params) then return end
+ model:SetAttribute("Occupied",true)
+ state.monster,state.phase,state.started=model,"Lassoing",now()
+ state.origin=state.root.CFrame
+ local from,to=Instance.new("Attachment"),Instance.new("Attachment")
+ from.Parent,to.Parent=state.root,model.PrimaryPart
+ local rope=Instance.new("Beam")
+ rope.Attachment0,rope.Attachment1=from,to
+ rope.Width0,rope.Width1,rope.FaceCamera=0.1,0.1,true
+ rope.Color,rope.Parent=ColorSequence.new(Color3.fromRGB(230,181,72)),state.root
+ state.rope={from,to,rope}
+ send(player)
+end
+remote.OnServerEvent:Connect(function(player,action,value)
+ if type(action)~="string" or not bags[player] then return end
+ if action~="Sync" and action~="Start" and action~="Hold" and action~="Steer" then return end
+ local stamps=limits[player]
+ if not stamps then stamps={} limits[player]=stamps end
+ local interval=action=="Steer" and 0.04 or action=="Hold" and 0.04 or 0.25
+ if now()-(stamps[action] or -math.huge)<interval then return end
+ stamps[action]=now()
+ if action=="Sync" then send(player) return end
+ if action=="Start" then start(player) return end
+ local state=states[player]
+ if not state or state.phase=="GameOver" then return end
+ if action=="Steer" and type(value)=="number" and value==value and value>=-1 and value<=1 then
+  state.steer,state.steerAt=value,now()
+ elseif action=="Hold" and type(value)=="boolean" then
+  local released=state.held and not value
+  state.held=value
+  if released and state.phase=="Riding" then launch(player,state) end
+ end
 end)
-
-RunService.Heartbeat:Connect(function(deltaTime)
-	local clock = now()
-	if clock >= nextBagUpdate then
-		nextBagUpdate = clock + 0.5
-		for player in pairs(bags) do sendBag(player) end
-	end
-	for player, state in pairs(states) do
-		if not state.root.Parent or not state.humanoid.Parent or state.humanoid.Health <= 0
-			or not state.monster.Parent or player.Character ~= state.root.Parent then
-			release(player, "다시 탑승할 수 있어요.")
-			continue
-		end
-		local monsterFrame = state.monster:GetPivot()
-		local saddle = monsterFrame * CFrame.new(0, tuning.RideHeightStuds, 0)
-		if state.phase == "Jumping" then
-			local alpha = math.clamp((clock - state.started) / tuning.JumpSeconds, 0, 1)
-			state.root.CFrame = state.origin:Lerp(saddle, alpha) + Vector3.new(0, math.sin(alpha * math.pi) * tuning.JumpArcStuds, 0)
-			if alpha >= 1 then
-				clearRope(state)
-				state.phase, state.started = "Riding", clock
-				state.monster:SetAttribute("Running", true)
-				state.monster:SetAttribute("RunStarted", clock)
-				sendState(player, state)
-			end
-		else
-			local p = monsterFrame.Position
-			local steering = clock - state.steerAt < 0.5 and state.steer or 0
-			if state.monster:GetAttribute("Steering") ~= steering then state.monster:SetAttribute("Steering", steering) end
-			local dt = math.min(deltaTime, 0.1)
-			local x = math.clamp(p.X + steering * tuning.SidewaysStudsPerSecond * dt, -tuning.RoadHalfWidth, tuning.RoadHalfWidth)
-			local z = p.Z - tuning.ForwardStudsPerSecond * dt
-			groundAt(z)
-			spawnAhead(z)
-			local newFrame = CFrame.new(x, p.Y, z)
-			state.monster:PivotTo(newFrame)
-			state.root.CFrame = newFrame * CFrame.new(0, tuning.RideHeightStuds, 0)
-			state.root.AssemblyLinearVelocity = Vector3.zero
-			if state.phase == "Riding" and clock - state.started >= Config.Capture.RideSeconds then
-				state.phase, state.started = "Minigame", clock
-				sendState(player, state)
-			elseif state.phase == "Holding" and clock >= state.captureAt then
-				capture(player)
-			end
-		end
-	end
+RunService.Heartbeat:Connect(function(delta)
+ local clock,dt=now(),math.min(delta,0.1)
+ World.step(dt)
+ local nearZ={0}
+ for player,state in pairs(states) do
+  if state.phase=="GameOver" then
+   if state.root.Parent then table.insert(nearZ,state.root.Position.Z) end
+   continue
+  end
+  if not state.root.Parent or player.Character~=state.root.Parent or state.humanoid.Health<=0 then finish(player,"사냥 종료") continue end
+  local steer=clock-state.steerAt<0.5 and state.steer or 0
+  local old=state.root.Position
+  local speed=state.phase=="Airborne" and tuning.AirStudsPerSecond or tuning.ForwardStudsPerSecond
+  local position=Vector3.new(math.clamp(old.X+steer*tuning.SidewaysStudsPerSecond*dt,-tuning.RoadHalfWidth,tuning.RoadHalfWidth),old.Y,old.Z-speed*dt)
+  state.distance+=speed*dt*tuning.MetersPerStud
+  World.ensure(position.Z)
+  table.insert(nearZ,position.Z)
+  if state.phase=="Airborne" then
+   position=Vector3.new(position.X,state.launchY+Rules.jumpHeight(clock-state.started,tuning.FlightSeconds,tuning.JumpArcStuds),position.Z)
+   state.root.CFrame=CFrame.new(position)
+   if World.hit(old,position) then finish(player,"장애물에 부딪혔어요.") continue end
+   if state.held then lasso(player,state) end
+   if state.phase=="Airborne" and clock-state.started>=tuning.FlightSeconds then finish(player,"다음 포켓몬을 잡지 못했어요.") end
+  elseif state.phase=="Lassoing" then
+   if not state.monster or not state.monster.Parent then finish(player,"포켓몬을 놓쳤어요.") continue end
+   local p=state.monster.PrimaryPart.Position
+   state.monster:PivotTo(CFrame.new(p.X,2,p.Z-tuning.ForwardStudsPerSecond*dt))
+   local saddle=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
+   state.root.CFrame=state.origin:Lerp(saddle,math.clamp((clock-state.started)/tuning.JumpSeconds,0,1))
+   if World.hit(p,state.monster.PrimaryPart.Position) then finish(player,"장애물에 부딪혔어요.") continue end
+   if clock-state.started>=tuning.JumpSeconds then
+    clearRope(state)
+    state.phase,state.started,state.tamed="Riding",clock,state.monster:GetAttribute("Tamed_"..player.UserId)==true
+    state.monster:SetAttribute("RunStarted",clock)
+    state.monster:SetAttribute("Angry",false)
+    send(player)
+    if not state.held then launch(player,state) end
+   end
+  elseif state.phase=="Riding" then
+   if not state.monster or not state.monster.Parent then finish(player,"포켓몬을 놓쳤어요.") continue end
+   position=Vector3.new(position.X,2,position.Z)
+   local before=state.monster.PrimaryPart.Position
+   state.monster:PivotTo(CFrame.new(position))
+   state.monster:SetAttribute("Steering",steer)
+   state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
+   if World.hit(before,position) then finish(player,"장애물에 부딪혔어요.") continue end
+   if not state.tamed and clock-state.started>=Config.Hunt.TameSeconds then
+    state.tamed=true BagRules.grant(bags[player],Config.Monster.Id,clock) send(player,"파이리 길들이기 성공! 가방에 추가됐어요.")
+    state.monster:SetAttribute("Tamed_"..player.UserId,true)
+   end
+   if Config.Hunt.BucksOff and clock-state.started>=Config.Hunt.AngerSeconds then
+    state.angerAt=state.angerAt or clock
+    state.monster:SetAttribute("Angry",true)
+    if clock-state.angerAt>=tuning.BuckWarningSeconds then finish(player,"파이리가 화가 나서 떨어뜨렸어요.") end
+   end
+  end
+ end
+ if clock-lastSync>=0.25 then lastSync=clock for _,player in ipairs(Players:GetPlayers()) do send(player) end end
+ if clock-lastCleanup>=3 then lastCleanup=clock World.cleanup(nearZ) end
 end)
-
-local function playerAdded(player)
-	inventories[player] = 0
-	bags[player] = BagRules.new()
-	player:SetAttribute("EmberratCount", 0)
-	player.CharacterRemoving:Connect(function() release(player) end)
+local function added(player)
+ bags[player]=BagRules.new()
+ player.CharacterRemoving:Connect(function() finish(player,"사냥 종료") states[player]=nil end)
 end
-
-Players.PlayerAdded:Connect(playerAdded)
-Players.PlayerRemoving:Connect(function(player)
-	release(player)
-	inventories[player], rateLimits[player] = nil, nil
-	bags[player] = nil
-end)
-for _, player in ipairs(Players:GetPlayers()) do playerAdded(player) end
-groundAt(0)
-spawnMonster(initialPosition)
-spawnAhead(initialPosition.Z)
+Players.PlayerAdded:Connect(added)
+Players.PlayerRemoving:Connect(function(player) finish(player,"사냥 종료") states[player],bags[player],limits[player]=nil,nil,nil end)
+for _,player in ipairs(Players:GetPlayers()) do added(player) end

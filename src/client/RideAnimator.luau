@@ -8,13 +8,9 @@ local function remember(model)
 	local pose = {}
 	for _, part in ipairs(model:GetDescendants()) do
 		if part:IsA("BasePart") and part ~= root then
-			local side, leg = string.match(part.Name, "^(%a+)Front")
-			if side ~= "Left" and side ~= "Right" then side = nil end
-			if side then leg = "Front" else
-				side = string.match(part.Name, "^(%a+)Back")
-				if side ~= "Left" and side ~= "Right" then side = nil end
-				if side then leg = "Back" end
-			end
+			local side = string.sub(part.Name,1,4)=="Left" and "Left" or string.sub(part.Name,1,5)=="Right" and "Right" or nil
+			local leg = side and (string.find(part.Name,"Leg",1,true) or string.find(part.Name,"Paw",1,true) or string.find(part.Name,"Claw",1,true)) and "Back" or nil
+			if not leg then side=nil end
 			table.insert(pose, { part = part, rest = root.CFrame:ToObjectSpace(part.CFrame), side = side, leg = leg })
 		end
 	end
@@ -22,28 +18,30 @@ local function remember(model)
 	return pose
 end
 
-function RideAnimator.update(monsters, clock)
+function RideAnimator.update(monsters, clock, cameraPosition)
 	for model, pose in pairs(poses) do
 		if model.Parent ~= monsters then poses[model] = nil end
 	end
 	for _, model in ipairs(monsters:GetChildren()) do
 		local root = model.PrimaryPart
 		if not root then continue end
+		if cameraPosition and (root.Position-cameraPosition).Magnitude>220 then continue end
 		local running = model:GetAttribute("Running") == true
 		local pose = poses[model]
 		if not pose and not running then continue end
 		pose = pose or remember(model)
 		local phase = (clock - (model:GetAttribute("RunStarted") or clock)) * math.pi * 7
-		local bob = running and (0.07 * math.sin(phase * 2)) or 0
+		local angry = model:GetAttribute("Angry") == true
+		local bob = running and ((angry and 0.32 or 0.07) * math.sin(phase * 2)) or 0
 		local lean = running and (model:GetAttribute("Steering") or 0) * -0.09 or 0
 		local frame = root.CFrame * CFrame.new(0, bob, 0) * CFrame.Angles(0, 0, lean)
 		for _, entry in ipairs(pose) do
 			if not entry.part.Parent then continue end
 			local localFrame = entry.rest
 			if running and entry.side then
-				local opposite = (entry.side == "Left") ~= (entry.leg == "Front")
+				local opposite = entry.side == "Left"
 				local swing = math.sin(phase + (opposite and math.pi or 0)) * 0.3
-				local joint = CFrame.new(entry.side == "Left" and -0.87 or 0.87, -0.45, entry.leg == "Front" and -1.25 or 1.45)
+				local joint = CFrame.new(entry.side == "Left" and -0.84 or 0.84, -0.65, 0.03)
 				localFrame = joint * CFrame.Angles(swing, 0, 0) * joint:Inverse() * entry.rest
 			end
 			entry.part.CFrame = frame * localFrame

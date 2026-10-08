@@ -2,9 +2,8 @@
 local Config = {}
 
 Config.Monster = {
-	Id = "Emberrat",
-	Name = "앰버랫",
-	Design = "B",
+	Id = "Charmander",
+	Name = "파이리",
 }
 
 -- Merging/evolution remain pending.
@@ -19,12 +18,12 @@ Config.BagIncome = {
 	IncomeAmount = 1,
 }
 
-Config.Capture = {
-	JumpMeters = 3,
-	RideSeconds = 3,
-	HoldSeconds = 5,
-	First = { White = 0.85, Yellow = 0.14, Orange = 0.01 },
-	Repeat = { White = 0.80, Yellow = 0.17, Orange = 0.03 },
+-- Original-style behaviours; exact source-game numbers are not verified.
+-- Timing below is explicit prototype tuning, not a claim of identical balance.
+Config.Hunt = {
+	TameSeconds = 5,
+	AngerSeconds = 8,
+	BucksOff = true,
 }
 
 -- These are tuning values for testing, not finalized game balance/art.
@@ -33,9 +32,13 @@ Config.Prototype = {
 	ForwardStudsPerSecond = 40,
 	SidewaysStudsPerSecond = 22,
 	JumpSeconds = 0.45,
-	JumpArcStuds = 3,
-	BarRoundTripSeconds = 2.4,
-	RoadHalfWidth = 40,
+	JumpArcStuds = 10,
+	RoadHalfWidth = 35,
+	HerdStudsPerSecond = 24,
+	AirStudsPerSecond = 60,
+	LassoRangeStuds = 12,
+	FlightSeconds = 1.2,
+	BuckWarningSeconds = 2,
 	GroundChunkStuds = 256,
 	RideHeightStuds = 4,
 	RespawnSeconds = 1,

@@ -15,9 +15,10 @@ scripts = {
 }
 expected = {
     "Config": "src/shared/Config.luau",
-    "CaptureRules": "src/shared/CaptureRules.luau",
+    "HuntRules": "src/shared/HuntRules.luau",
     "BagRules": "src/shared/BagRules.luau",
     "CaptureServer": "src/server/CaptureServer.server.luau",
+    "HuntWorld": "src/server/HuntWorld.luau",
     "CaptureClient": "src/client/CaptureClient.client.luau",
     "RideAnimator": "src/client/RideAnimator.luau",
 }
@@ -28,12 +29,12 @@ assert place.find("Item[@class='ServerScriptService']/Item[@class='Script']") is
 assert place.find("Item[@class='StarterPlayer']/Item[@class='StarterPlayerScripts']/Item[@class='LocalScript']") is not None
 print(f"PASS: XML structure, unique references, script placement and all {len(expected)} embedded sources")
 
-standalone = ET.parse(root / "dist/Emberrat-B.rbxmx").getroot()
+standalone = ET.parse(root / "dist/Charmander.rbxmx").getroot()
 model = standalone.find("Item[@class='Model']")
-assert model is not None and model.find("Properties/string[@name='Name']").text == "Emberrat_B"
+assert model is not None and model.find("Properties/string[@name='Name']").text == "Charmander"
 model_refs = {node.attrib["referent"] for node in model.iter("Item")}
 for ref in model.iter("Ref"):
     assert ref.text in model_refs, "standalone model must not depend on the place"
 assert not any(node.attrib["class"] in ("Script", "LocalScript", "ModuleScript", "MeshPart") for node in model.iter("Item"))
-assert len(list(model.iter("Item"))) > 60
+assert len(list(model.iter("Item"))) > 30
 print("PASS: standalone model has complete local references and no scripts or uploaded meshes")

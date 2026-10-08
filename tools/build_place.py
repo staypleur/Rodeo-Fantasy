@@ -3,7 +3,7 @@ from pathlib import Path
 import copy
 import math
 import xml.etree.ElementTree as ET
-from emberrat_model import components
+from charmander_model import components
 
 ROOT = Path(__file__).resolve().parents[1]
 document = ET.Element("roblox", version="4")
@@ -99,7 +99,7 @@ def monster(parent, name, position):
     label, label_props = item(billboard, "TextLabel", "Label")
     prop(label_props, "UDim2", "Size", dict(XS=1, XO=0, YS=1, YO=0))
     prop(label_props, "float", "BackgroundTransparency", 1)
-    prop(label_props, "string", "Text", "앰버랫")
+    prop(label_props, "string", "Text", "파이리")
     prop(label_props, "float", "TextSize", 18)
     prop(label_props, "Color3", "TextColor3", dict(R=1, G=1, B=1))
     prop(label_props, "float", "TextStrokeTransparency", 0.3)
@@ -122,13 +122,14 @@ monster(world, "PreviewMonster", (0, 2, -8))
 replicated, _ = item(document, "ReplicatedStorage", "ReplicatedStorage")
 package, _ = item(replicated, "Folder", "RodeoFantasy")
 script(package, "ModuleScript", "Config", "src/shared/Config.luau")
-script(package, "ModuleScript", "CaptureRules", "src/shared/CaptureRules.luau")
+script(package, "ModuleScript", "HuntRules", "src/shared/HuntRules.luau")
 script(package, "ModuleScript", "BagRules", "src/shared/BagRules.luau")
 item(package, "RemoteEvent", "CaptureRemote")
 server_storage, _ = item(document, "ServerStorage", "ServerStorage")
 model_template = monster(server_storage, "RodeoMonsterTemplate", (0, 0, 0))
 server_scripts, _ = item(document, "ServerScriptService", "ServerScriptService")
 script(server_scripts, "Script", "CaptureServer", "src/server/CaptureServer.server.luau")
+script(server_scripts, "ModuleScript", "HuntWorld", "src/server/HuntWorld.luau")
 starter, starter_props = item(document, "StarterPlayer", "StarterPlayer")
 prop(starter_props, "float", "CameraMaxZoomDistance", 40)
 prop(starter_props, "float", "CameraMinZoomDistance", 8)
@@ -146,12 +147,12 @@ output.parent.mkdir(exist_ok=True)
 ET.ElementTree(document).write(output, encoding="utf-8", xml_declaration=True)
 print(f"Built {output.name} ({output.stat().st_size:,} bytes)")
 
-# A standalone, editable model is included for reuse in the future zoo scene.
+# A standalone, editable model is included for reuse.
 model_document = ET.Element("roblox", version="4")
 model_copy = copy.deepcopy(model_template)
-model_copy.find("Properties/string[@name='Name']").text = "Emberrat_B"
+model_copy.find("Properties/string[@name='Name']").text = "Charmander"
 model_document.append(model_copy)
 ET.indent(model_document, space="  ")
-model_output = output.parent / "Emberrat-B.rbxmx"
+model_output = output.parent / "Charmander.rbxmx"
 ET.ElementTree(model_document).write(model_output, encoding="utf-8", xml_declaration=True)
 print(f"Built {model_output.name} ({len(components())} visual parts)")
