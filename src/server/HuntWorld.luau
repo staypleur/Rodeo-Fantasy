@@ -3,6 +3,8 @@ local chunks, animals, previousPositions = {}, {}, {}
 local root, monsters, obstacles, template, tuning
 local Rules
 local monsterId
+local Motion=require(game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy"):WaitForChild("HerdMotion"))
+local spawnSerial=0
 
 local function part(parent, name, position, size, color)
 	local item = Instance.new("Part")
@@ -42,7 +44,8 @@ function World.spawn(position)
 	model:SetAttribute("Steering", 0)
 	model:PivotTo(CFrame.new(position))
 	model.Parent = monsters
-	animals[model] = true
+	spawnSerial+=1
+	animals[model] = Motion.new(position.X,spawnSerial)
 	return model
 end
 
@@ -84,9 +87,9 @@ function World.ensure(z)
 			-- Leave the run launch area clear; all other rows contain moving herds.
 			if rowZ < -20 or rowZ > 30 then
 				for _, x in ipairs({-18,-6,6,18}) do
-					if random:NextNumber() < 0.65 then World.spawn(Vector3.new(x,2,rowZ)) end
+					if random:NextNumber() < tuning.HerdSpawnChance then World.spawn(Vector3.new(x,2,rowZ)) end
 				end
-				if random:NextNumber() < 0.55 then
+				if random:NextNumber() < tuning.RockSpawnChance then
 					local rock = part(obstacles, "Rock", Vector3.new(random:NextInteger(-3,3)*8,1.5,rowZ-12), Vector3.new(4,3,4), Color3.fromRGB(167,130,99))
 					rock:SetAttribute("Chunk", index)
 					rock.CanCollide = false -- server swept collision is authoritative
@@ -97,12 +100,22 @@ function World.ensure(z)
 end
 
 function World.step(dt)
-	for model in pairs(animals) do
+ local rocks={}
+ for _,rock in ipairs(obstacles:GetChildren()) do
+  if rock:IsA("BasePart") then table.insert(rocks,{x=rock.Position.X,z=rock.Position.Z,sx=rock.Size.X,sz=rock.Size.Z}) end
+ end
+	for model,motion in pairs(animals) do
 		if not model.Parent then animals[model] = nil previousPositions[model]=nil continue end
 		previousPositions[model] = model.PrimaryPart.Position
 		if not model:GetAttribute("Occupied") then
 			-- Only the authoritative root moves. Clients own all visual body poses.
-			model.PrimaryPart.CFrame += Vector3.new(0,0,-tuning.HerdStudsPerSecond*dt)
+   local p,half=model.PrimaryPart.Position,model.PrimaryPart.Size/2
+   if motion.wasOccupied then motion.home,motion.vx,motion.wasOccupied=p.X,0,false end
+   local x,z,vx=Motion.step(motion,p.X,p.Z,dt,rocks,tuning,half.X,half.Z,Rules)
+   model.PrimaryPart.CFrame=CFrame.new(x,p.Y,z)*CFrame.Angles(0,-math.atan2(vx,tuning.HerdStudsPerSecond),0)
+   model:SetAttribute("Steering",vx/tuning.SidewaysStudsPerSecond)
+		 model:SetAttribute("HerdVelocity",Vector3.new(vx,0,(z-p.Z)/math.max(dt,0.000001)))
+		else motion.wasOccupied=true
 		end
 	end
 end

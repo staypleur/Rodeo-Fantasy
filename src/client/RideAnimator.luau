@@ -7,6 +7,17 @@ local template = package:WaitForChild("VisualTemplate")
 local tuning = require(package:WaitForChild("Config")).Prototype
 local Rules = require(package:WaitForChild("HuntRules"))
 local restFrames = {}
+local function clearHerdPath(from,to,root)
+ local world=workspace:FindFirstChild("RodeoPrototype")
+ local obstacles=world and world:FindFirstChild("Obstacles")
+ if not obstacles then return true end
+ for _,rock in ipairs(obstacles:GetChildren()) do
+  if not rock:IsA("BasePart") then continue end
+  local p,s=rock.Position,rock.Size+root.Size
+  if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,0.2) then return false end
+ end
+ return true
+end
 for _, part in ipairs(template:GetDescendants()) do
  if part:IsA("BasePart") and part ~= template.PrimaryPart then
   restFrames[part.Name] = template.PrimaryPart.CFrame:ToObjectSpace(part.CFrame)
@@ -61,11 +72,16 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
   local elapsed = math.clamp(clock-pose.received,0,0.08)
   local speed = model:GetAttribute("Occupied") and tuning.ForwardStudsPerSecond or tuning.HerdStudsPerSecond
   local steer = model:GetAttribute("Steering") or 0
-  local target = pose.sample + Vector3.new(steer*tuning.SidewaysStudsPerSecond,0,-speed)*(running and elapsed or 0)
+  local velocity=Vector3.new(steer*tuning.SidewaysStudsPerSecond,0,-speed)
+  if not model:GetAttribute("Occupied") then velocity=model:GetAttribute("HerdVelocity") or velocity end
+  local target = pose.sample + velocity*(running and elapsed or 0)
+  if not model:GetAttribute("Occupied") and not clearHerdPath(pose.sample.Position,target.Position,root) then target=pose.sample end
   if (target.Position-pose.frame.Position).Magnitude>30 or not running then
    pose.frame = target
   else
-   pose.frame = pose.frame:Lerp(target,1-math.exp(-22*dt))
+   local blended=pose.frame:Lerp(target,1-math.exp(-22*dt))
+   if not model:GetAttribute("Occupied") and not clearHerdPath(pose.frame.Position,blended.Position,root) then blended=pose.sample end
+   pose.frame = blended
   end
 
 		local phase = (clock - (model:GetAttribute("RunStarted") or clock)) * math.pi * 7

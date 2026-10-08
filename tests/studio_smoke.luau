@@ -44,8 +44,8 @@ engine.step(0.1)
 assert(animal.PrimaryPart.Position.Z<before.Z,"wild herd must run")
 assert(animal.Body.CFrame==bodyBefore,"server must not overwrite client body animation")
 -- First render after the root has moved must use immutable template offsets.
-animator.update(world.Monsters,1,nil,1/60)
-local expected=animal.PrimaryPart.CFrame*package.VisualTemplate.Body.CFrame
+local displayed=animator.update(world.Monsters,1,nil,1/60)
+local expected=displayed[animal]*package.VisualTemplate.Body.CFrame
 assert((animal.Body.Position-expected.Position).Magnitude<0.001,"late render must not capture displaced rest pose")
 local previous=animal.Body.Position
 animal.PrimaryPart.CFrame+=Vector3.new(0,0,-4)

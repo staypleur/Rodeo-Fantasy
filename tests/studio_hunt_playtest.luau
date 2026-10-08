@@ -11,13 +11,25 @@ local driver=RS:WaitForChild("HuntTestDriver")
 local world=require(script.Parent.HuntWorld)
 game:GetService("RunService").Heartbeat:Connect(function()
  local obstacles=workspace.RodeoPrototype:FindFirstChild("Obstacles")
- if obstacles then obstacles:ClearAllChildren() end
+ if obstacles then for _,obstacle in ipairs(obstacles:GetChildren()) do if not obstacle:GetAttribute("TestKeep") then obstacle:Destroy() end end end
  for _,animal in ipairs(workspace.RodeoPrototype.Monsters:GetChildren()) do
   if not animal:GetAttribute("Occupied") and not animal:GetAttribute("TestKeep") then animal:Destroy() end
  end
 end)
 driver.OnServerInvoke=function(player,action,value)
- if action=="Target" then
+ if action=="HerdFixture" then
+  local z=player.Character.HumanoidRootPart.Position.Z
+  local rock=Instance.new("Part") rock.Name="TestRock" rock.Anchored=true rock.CanCollide=false
+  rock.Size=Vector3.new(4,3,4) rock.Position=Vector3.new(0,1.5,z-40)
+  rock:SetAttribute("TestKeep",true) rock.Parent=workspace.RodeoPrototype.Obstacles
+  local animal=world.spawn(Vector3.new(0,2,z+25)) animal:SetAttribute("TestKeep",true)
+  return {animal=animal,rock=rock}
+ elseif action=="ClearHerdFixture" then
+  for _,folder in ipairs({workspace.RodeoPrototype.Monsters,workspace.RodeoPrototype.Obstacles}) do
+   for _,node in ipairs(folder:GetChildren()) do if node:GetAttribute("TestKeep") then node:Destroy() end end
+  end
+  return true
+ elseif action=="Target" then
   local root=player.Character.HumanoidRootPart
   local target=world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-3))
   target:SetAttribute("TestKeep",true)
@@ -57,6 +69,28 @@ local success,problem=pcall(function()
  local character=player.Character or player.CharacterAdded:Wait()
  character:WaitForChild("HumanoidRootPart")
  check(player.PlayerGui:WaitForChild("RodeoCaptureUI",15)~=nil,"UI missing")
+ local fixture=driver:InvokeServer("HerdFixture")
+ local animal,rock=fixture.animal,fixture.rock
+ animal:WaitForChild("Body")
+ local bad,renderSamples,low,high=0,0,0,0
+ local run=game:GetService("RunService")
+ local rules=require(RS.RodeoFantasy.HuntRules)
+ local rest=RS.RodeoFantasy.VisualTemplate.Body.CFrame
+ run:BindToRenderStep("CheckLiveHerd",Enum.RenderPriority.Last.Value,function()
+  if not animal.Parent or not rock.Parent then return end
+  local root=animal.PrimaryPart
+  if not root then return end
+  local frame=animal.Body.CFrame*rest:Inverse()
+  local size=rock.Size+root.Size local p=rock.Position
+  if rules.sweptBox(frame.X,frame.Y,frame.Z,frame.X,frame.Y,frame.Z,p.X,p.Y,p.Z,size.X,size.Y,size.Z,0) then bad+=1 end
+  low,high=math.min(low,root.Position.X),math.max(high,root.Position.X)
+  renderSamples+=1
+ end)
+ waitFor(function() return animal.PrimaryPart and animal.PrimaryPart.Position.Z<rock.Position.Z-15 end,"live herd must go around its rock")
+ run:UnbindFromRenderStep("CheckLiveHerd")
+ check(renderSamples>0 and bad==0,"networked displayed animal must not pass through its rock")
+ check(high-low>3,"networked wild animal must visibly steer around rock")
+ driver:InvokeServer("ClearHerdFixture")
  local originalFov=workspace.CurrentCamera.FieldOfView
  remote:FireServer("Start")
  waitFor(function() return state.phase=="Lassoing" end,"opening flight missing")

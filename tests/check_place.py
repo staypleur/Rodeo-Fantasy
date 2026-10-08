@@ -16,6 +16,7 @@ scripts = {
 expected = {
     "Config": "src/shared/Config.luau",
     "HuntRules": "src/shared/HuntRules.luau",
+    "HerdMotion": "src/shared/HerdMotion.luau",
     "BagRules": "src/shared/BagRules.luau",
     "CaptureServer": "src/server/CaptureServer.server.luau",
     "HuntWorld": "src/server/HuntWorld.luau",
