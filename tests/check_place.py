@@ -18,9 +18,11 @@ expected = {
     "HuntRules": "src/shared/HuntRules.luau",
     "HerdMotion": "src/shared/HerdMotion.luau",
     "CourseGeometry": "src/shared/CourseGeometry.luau",
+    "HerdVisibility": "src/shared/HerdVisibility.luau",
     "BagRules": "src/shared/BagRules.luau",
     "CaptureServer": "src/server/CaptureServer.server.luau",
     "HuntWorld": "src/server/HuntWorld.luau",
+    "LobbyWorld": "src/server/LobbyWorld.luau",
     "CaptureClient": "src/client/CaptureClient.client.luau",
     "RideAnimator": "src/client/RideAnimator.luau",
     "RiderPresentation": "src/client/RiderPresentation.luau",
@@ -51,3 +53,11 @@ print("PASS: standalone model has complete local references and no scripts or up
 assert place.find("Item[@class='StarterPlayer']/Properties/bool[@name='LoadCharacterAppearance']").text == "true"
 assert not any(node.find("Properties/string[@name='Name']").text == "StarterCharacter" for node in place.iter("Item"))
 print("PASS: player appearance enabled with no replacement StarterCharacter")
+
+lobby=next(n for n in place.iter("Item") if n.find("Properties/string[@name='Name']").text=="RodeoLobby")
+plots=next(n for n in lobby if n.tag=="Item" and n.find("Properties/string[@name='Name']").text=="Plots")
+assert len(plots.findall("Item"))==8
+for plot in plots.findall("Item"):
+    pens=next(n for n in plot.findall("Item") if n.find("Properties/string[@name='Name']").text=="Pens")
+    assert len(pens.findall("Item"))==8
+print("PASS: lobby contains eight private plots and 64 editable native pens")

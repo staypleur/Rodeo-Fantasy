@@ -5,6 +5,7 @@ local Rules
 local monsterId,rideSpeed
 local Motion=require(game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy"):WaitForChild("HerdMotion"))
 local Course=require(game:GetService("ReplicatedStorage").RodeoFantasy.CourseGeometry)
+local Visibility=require(game.ReplicatedStorage.RodeoFantasy.HerdVisibility)
 local spawnSerial=0
 local crateRows={}
 
@@ -212,24 +213,28 @@ function World.nearest(position, excluded)
 	return best
 end
 
--- Generated ground persists while its herd runs away. Refill a depleted launch
--- window rather than regenerating chunks or multiplying an existing herd.
-function World.replenish(z)
+-- Maintain a camera-sized moving window, not the whole generated road.
+function World.replenish(z,aspect)
+ aspect=aspect or 1
  local count=0
  for model in pairs(animals) do
   if model.Parent and not model:GetAttribute("Occupied") then
    local p=model.PrimaryPart.Position
-   if p.Z<z-24 and p.Z>z-280 then count+=1 end
+   if Visibility.visible(p.X,p.Y,p.Z-z,aspect,tuning) then count+=1 end
   end
  end
+ -- Two extra animals buffer movement between server refreshes.
  if count>=6 then return end
- for offset=48,272,32 do
+ for offset=20,100,16 do
   local targetZ=z-offset
-  local ranges=Course.ranges(targetZ,4)
-  for _,range in ipairs(ranges) do
-   for i=1,4/#ranges do
-    local x=range[1]+(range[2]-range[1])*i/(4/#ranges+1)
-    local safe=true
+  -- Keep the last running screen populated; the run still stops at 1,000m.
+  if targetZ < -Course.LengthStuds-100 then continue end
+  local ranges=Course.ranges(targetZ,3)
+  local rowCount=0
+  for _,i in ipairs({3,4,2,5,1,6}) do
+   for _,range in ipairs(ranges) do
+    local x=range[1]+(range[2]-range[1])*i/7
+    local safe=Visibility.visible(x,2,targetZ-z,aspect,tuning)
     for _,rock in ipairs(obstacles:GetChildren()) do
      if not rock:GetAttribute("Broken") and math.abs(rock.Position.X-x)<rock.Size.X/2+2 and math.abs(rock.Position.Z-targetZ)<rock.Size.Z/2+4 then safe=false break end
     end
@@ -238,9 +243,11 @@ function World.replenish(z)
       if other.Parent and math.abs(other.PrimaryPart.Position.X-x)<5 and math.abs(other.PrimaryPart.Position.Z-targetZ)<10 then safe=false break end
      end
     end
-    if safe then World.spawn(Vector3.new(x,2,targetZ)) count+=1 end
+    if safe then World.spawn(Vector3.new(x,2,targetZ)) count+=1 rowCount+=1 end
     if count>=6 then return end
+    if rowCount>=2 then break end
    end
+   if rowCount>=2 then break end
   end
  end
 end

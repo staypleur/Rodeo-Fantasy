@@ -14,7 +14,7 @@ root.Name="HumanoidRootPart"
 root.Parent=character
 local humanoid=Instance.new("Humanoid")
 humanoid.Parent=character
-local player={Character=character,UserId=991001,CharacterRemoving=signal(function() end)}
+local player={SetAttribute=function() end,DisplayName="NativeTest",Character=character,UserId=991001,CharacterRemoving=signal(function() end)}
 local players={PlayerAdded=signal(function() end),PlayerRemoving=signal(function() end),GetPlayers=function() return {player} end}
 local remote={OnServerEvent=signal(function(fn) event=fn end),FireClient=function(_,_,kind,data) if kind=="State" then latest=data end end}
 local package={Config=RS.RodeoFantasy.Config,HuntRules=RS.RodeoFantasy.HuntRules,BagRules=RS.RodeoFantasy.BagRules,CourseGeometry=RS.RodeoFantasy.CourseGeometry,CaptureRemote=remote}
@@ -47,6 +47,7 @@ local function advance(seconds,keepObstacles,keepMonsters)
   heartbeat(0.1)
 	end
 end
+root.CFrame=game.ServerScriptService.LobbyWorld and workspace.RodeoLobby.Airport.Departure.CFrame+Vector3.new(0,0,4) or root.CFrame
 event(player,"Start")
 check(latest.phase=="Lassoing" and root.Anchored,"start must fly toward first mount")
 check(latest.count==0,"bag must start empty")
@@ -101,6 +102,7 @@ advance(0.3,true)
 check(latest.phase=="GameOver" and not root.Anchored,"obstacle collision immediately after landing must end run")
 check(latest.monsterCrashFrame~=nil and target.Parent==nil,"obstacle crash must remove mount and provide breakup frame")
 protectedRock:Destroy()
+root.CFrame=game.ServerScriptService.LobbyWorld and workspace.RodeoLobby.Airport.Departure.CFrame+Vector3.new(0,0,4) or root.CFrame
 event(player,"Start")
 advance(config.Prototype.IntroSeconds+0.2)
 check(latest.protectedUntil==nil,"landing must not expose protection timer")
@@ -112,6 +114,7 @@ check(latest.count==1,"same individual must not grant twice")
 event(player,"Jump")
 advance(config.Prototype.FlightSeconds+0.5)
 check(latest.phase=="GameOver" and not root.Anchored,"missed airborne catch must end and restore")
+root.CFrame=game.ServerScriptService.LobbyWorld and workspace.RodeoLobby.Airport.Departure.CFrame+Vector3.new(0,0,4) or root.CFrame
 event(player,"Start")
 check(latest.phase=="Lassoing" and latest.count==1,"restart flight must retain bag")
 advance(config.Prototype.IntroSeconds+config.Hunt.AngerSeconds+0.4)
@@ -136,6 +139,7 @@ check(latest.phase=="Airborne","space must launch during sustained anger")
 check(not angryMount:GetAttribute("Angry") and angryMount.PrimaryPart.Position.Y==2,"released bucking monster must return to ground")
 advance(config.Prototype.FlightSeconds+0.5)
 check(latest.phase=="GameOver" and not root.Anchored,"miss after anger jump must restore")
+root.CFrame=game.ServerScriptService.LobbyWorld and workspace.RodeoLobby.Airport.Departure.CFrame+Vector3.new(0,0,4) or root.CFrame
 event(player,"Start")
 advance(config.Prototype.IntroSeconds+0.3)
 local rock=Instance.new("Part")
@@ -148,12 +152,14 @@ advance(0.2,true)
 check(latest.phase=="GameOver" and not root.Anchored,"swept collision must end and restore")
 check(humanoid.AutoRotate and not humanoid.PlatformStand,"normal character flags must be restored")
 -- Every contact type is immediate, including initial landings.
+root.CFrame=game.ServerScriptService.LobbyWorld and workspace.RodeoLobby.Airport.Departure.CFrame+Vector3.new(0,0,4) or root.CFrame
 event(player,"Start")
 advance(config.Prototype.IntroSeconds+0.2)
 local blocker=world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-4))
 advance(0.1,false,true)
 check(latest.phase=="GameOver" and latest.endReason=="Monster" and latest.crash,"mounted monster contact must crash")
 check(blocker.Parent~=nil,"collision must not break the monster")
+root.CFrame=game.ServerScriptService.LobbyWorld and workspace.RodeoLobby.Airport.Departure.CFrame+Vector3.new(0,0,4) or root.CFrame
 event(player,"Start")
 advance(config.Prototype.IntroSeconds+0.2)
 for _=1,35 do

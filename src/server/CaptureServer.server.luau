@@ -6,10 +6,11 @@ local Config=require(package.Config)
 local Rules=require(package.HuntRules)
 local BagRules=require(package.BagRules)
 local World=require(script.Parent.HuntWorld)
+local Lobby=require(script.Parent.LobbyWorld)
 local Course=require(package.CourseGeometry)
 local remote=package.CaptureRemote
 local tuning=Config.Prototype
-local states,bags,limits={},{},{}
+local states,bags,limits,views={},{},{},{}
 local lastSync,lastCleanup=0,0
 World.init(workspace.RodeoPrototype,game:GetService("ServerStorage").RodeoMonsterTemplate,Config,Rules)
 World.ensure(0)
@@ -21,7 +22,7 @@ local function send(player,message)
  local state,bag=states[player],bags[player]
  if not bag then return end
  BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
- remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
+ remote:FireClient(player,"State",{phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
 end
 local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
@@ -76,6 +77,7 @@ local function start(player)
  local root=character and character:FindFirstChild("HumanoidRootPart")
  local humanoid=character and character:FindFirstChildOfClass("Humanoid")
  if not root or not humanoid or humanoid.Health<=0 then return end
+ if not previous and not Lobby.canDepart(player) then send(player,"비행장에서 사냥터로 출발하세요.") return end
  if previous then
   freeMount(previous)
   if previous.phase=="CourseEnd" and previous.root==root then
@@ -84,7 +86,7 @@ local function start(player)
   end
  end
  World.ensure(0)
- World.replenish(0)
+ World.replenish(0,views[player] or 1)
  local model=World.spawn(Vector3.new(0,2,-8))
  model:SetAttribute("Occupied",true)
  model:SetAttribute("Angry",false)
@@ -118,17 +120,31 @@ local function lasso(player,state)
  attachRope(state)
  send(player)
 end
+Lobby.connect(start)
 remote.OnServerEvent:Connect(function(player,action,value)
  if type(action)~="string" or not bags[player] then return end
- if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" then return end
+ if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
  local interval=action=="Jump" and 0.08 or action=="Steer" and 0.04 or 0.25
  if now()-(stamps[action] or -math.huge)<interval then return end
  stamps[action]=now()
+ if action=="View" then
+  if type(value)=="number" and value==value and value>=0.4 and value<=4 then views[player]=value end
+  return
+ end
  if action=="Sync" then send(player) return end
  if action=="Start" then start(player) return end
+ if action=="ReturnLobby" then
+  local state=states[player]
+  if state and (state.phase=="GameOver" or state.phase=="CourseEnd") then
+   finish(player,"로비로 돌아왔어요.")
+   state.root.CFrame=Lobby.Spawn
+   states[player]=nil send(player)
+  end
+  return
+ end
  local state=states[player]
  if not state or state.phase=="GameOver" then return end
  if action=="Steer" and state.phase=="Riding" and type(value)=="number" and value==value and value>=-1 and value<=1 then
@@ -227,16 +243,21 @@ RunService.Heartbeat:Connect(function(delta)
     -- Anger persists until the rider chooses to jump or a real collision ends the run.
    end
   end
+  if clock-(state.lastHerdRefresh or -math.huge)>=0.25 then
+   state.lastHerdRefresh=clock
+   World.replenish(state.root.Position.Z,views[player] or 1)
+  end
  end
  if clock-lastSync>=0.25 then lastSync=clock for _,player in ipairs(Players:GetPlayers()) do send(player) end end
  if clock-lastCleanup>=3 then lastCleanup=clock World.cleanup(nearZ) end
 end)
 local function added(player)
+ if not Lobby.assign(player) then player:Kick("이 서버는 8명까지 입장할 수 있어요.") return end
  player.CanLoadCharacterAppearance=true
  if player.UserId>0 then player.CharacterAppearanceId=player.UserId end
  bags[player]=BagRules.new()
  player.CharacterRemoving:Connect(function() finish(player,"사냥 종료") states[player]=nil end)
 end
 Players.PlayerAdded:Connect(added)
-Players.PlayerRemoving:Connect(function(player) finish(player,"사냥 종료") states[player],bags[player],limits[player]=nil,nil,nil end)
+Players.PlayerRemoving:Connect(function(player) Lobby.release(player) finish(player,"사냥 종료") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil end)
 for _,player in ipairs(Players:GetPlayers()) do added(player) end

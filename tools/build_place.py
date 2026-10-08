@@ -4,6 +4,7 @@ import copy
 import math
 import xml.etree.ElementTree as ET
 from lumidon_model import components
+from lobby_map import build_lobby
 
 ROOT = Path(__file__).resolve().parents[1]
 document = ET.Element("roblox", version="4")
@@ -114,7 +115,8 @@ world, _ = item(workspace, "Folder", "RodeoPrototype")
 item(world, "Folder", "Monsters")
 floor, floor_props = part(world, "PreviewGround", (0, -1, 0), (100, 2, 256), (178, 211, 117))
 prop(floor_props, "token", "Material", 272)  # SmoothPlastic
-spawn, spawn_props = part(world, "Spawn", (0, 0.1, 0), (5, 0.2, 5), (178, 211, 117), "SpawnLocation")
+lobby = build_lobby(workspace, item, part, prop)
+spawn, spawn_props = part(lobby, "LobbySpawn", (6000, 0.1, 25), (5, 0.2, 5), (178, 211, 117), "SpawnLocation")
 prop(spawn_props, "bool", "Neutral", True)
 prop(spawn_props, "bool", "CanCollide", False)
 prop(spawn_props, "float", "Transparency", 1)
@@ -127,6 +129,7 @@ script(package, "ModuleScript", "Config", "src/shared/Config.luau")
 script(package, "ModuleScript", "HuntRules", "src/shared/HuntRules.luau")
 script(package, "ModuleScript", "HerdMotion", "src/shared/HerdMotion.luau")
 script(package, "ModuleScript", "CourseGeometry", "src/shared/CourseGeometry.luau")
+script(package, "ModuleScript", "HerdVisibility", "src/shared/HerdVisibility.luau")
 script(package, "ModuleScript", "BagRules", "src/shared/BagRules.luau")
 item(package, "RemoteEvent", "CaptureRemote")
 monster(package, "VisualTemplate", (0, 0, 0))
@@ -135,6 +138,7 @@ model_template = monster(server_storage, "RodeoMonsterTemplate", (0, 0, 0))
 server_scripts, _ = item(document, "ServerScriptService", "ServerScriptService")
 script(server_scripts, "Script", "CaptureServer", "src/server/CaptureServer.server.luau")
 script(server_scripts, "ModuleScript", "HuntWorld", "src/server/HuntWorld.luau")
+script(server_scripts, "ModuleScript", "LobbyWorld", "src/server/LobbyWorld.luau")
 starter, starter_props = item(document, "StarterPlayer", "StarterPlayer")
 prop(starter_props, "bool", "LoadCharacterAppearance", True)
 prop(starter_props, "float", "CameraMaxZoomDistance", 40)

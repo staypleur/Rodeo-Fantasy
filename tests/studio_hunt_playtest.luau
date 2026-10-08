@@ -17,7 +17,11 @@ game:GetService("RunService").Heartbeat:Connect(function()
  end
 end)
 driver.OnServerInvoke=function(player,action,value)
- if action=="HerdFixture" then
+ if action=="Airport" then
+  player.Character.HumanoidRootPart.CFrame=workspace.RodeoLobby.Airport.Departure.CFrame+Vector3.new(0,0,4)
+  return true
+ elseif action=="HerdFixture" then
+  player.Character.HumanoidRootPart.CFrame=CFrame.new(0,4,0)
   local z=player.Character.HumanoidRootPart.Position.Z
   local rock=Instance.new("Part") rock.Name="TestRock" rock.Anchored=true rock.CanCollide=false
   rock.Size=Vector3.new(4,3,4) rock.Position=Vector3.new(0,1.5,z-40)
@@ -103,6 +107,8 @@ local success,problem=pcall(function()
  check(high-low>3,"networked wild animal must visibly steer around rock")
  driver:InvokeServer("ClearHerdFixture")
  local originalFov=workspace.CurrentCamera.FieldOfView
+ check(player:GetAttribute("LobbySlot")~=nil,"lobby must assign a personal plot")
+ driver:InvokeServer("Airport")
  remote:FireServer("Start")
  waitFor(function() return state.phase=="Lassoing" end,"opening flight missing")
  waitFor(function() return state.phase=="Riding" end,"opening landing failed")
@@ -126,6 +132,7 @@ local success,problem=pcall(function()
  for _,key in ipairs(bound.inputTypes or {}) do if key==Enum.KeyCode.Space then spaceBound=true end end
  check(spaceBound,"space key must bind jump/lasso action")
  check(not player.PlayerGui.RodeoCaptureUI.HuntHelp.Visible,"riding must hide bottom explanations")
+ check(player.PlayerGui.RodeoCaptureUI.DistanceCounter.Visible and not player.PlayerGui.RodeoCaptureUI.LobbyStats.Visible,"hunt must show meters and hide bag/money")
  waitFor(function() return workspace:FindFirstChild("LocalTamingGaugeAnchor")~=nil end,"mounted gauge missing")
  local mountedGauge=workspace.LocalTamingGaugeAnchor.MountedTamingGauge
  check(mountedGauge.Enabled and mountedGauge.Frame.Heart.Text=="♥","mounted heart gauge must be visible")
@@ -248,6 +255,10 @@ local success,problem=pcall(function()
  remote:FireServer("Jump")
  waitFor(function() return state.phase=="GameOver" end,"run after course end must end normally")
  check(not character.HumanoidRootPart.Anchored,"restart after course end must preserve original character restoration")
+ remote:FireServer("ReturnLobby")
+ waitFor(function() return state.area=="Lobby" and state.phase=="Idle" end,"return to lobby must restore lobby state")
+ check(state.count>0,"lobby return must retain bag")
+ waitFor(function() return player.PlayerGui.RodeoCaptureUI.LobbyStats.Visible and not player.PlayerGui.RodeoCaptureUI.DistanceCounter.Visible end,"lobby must show bag and hide meters")
 end)
 driver:InvokeServer("Finish",success and ("PASS: "..checks.." hunting Play checks") or ("FAIL: "..tostring(problem)))
 ]==]

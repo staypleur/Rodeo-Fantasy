@@ -201,6 +201,6 @@ assert(#world.Monsters:GetChildren()==6,"depleted existing road must regain near
 engine.replenish(0)
 assert(#world.Monsters:GetChildren()==6,"repeated restart must not multiply herd")
 for _,npc in ipairs(world.Monsters:GetChildren()) do
- assert(npc.PrimaryPart.Position.Z < -24 and npc.PrimaryPart.Position.Z > -280,"refill must stay in front of launch")
+ assert(require(package.HerdVisibility).visible(npc.PrimaryPart.Position.X,npc.PrimaryPart.Position.Y,npc.PrimaryPart.Position.Z,1,config.Prototype),"refill must stay in front of launch")
 end
 print("RESTART_HERD_REFILL_PASS")

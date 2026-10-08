@@ -34,7 +34,16 @@ local function text(parent,value,pos,size,font)
  return make("TextLabel",{Text=value,Position=pos,Size=size,TextSize=font or 18,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(255,245,219),BackgroundTransparency=1,TextWrapped=true},parent)
 end
 local distance=text(gui,"0m",UDim2.new(0.5,-80,0,12),UDim2.fromOffset(160,48),32)
-local bag=text(gui,"가방: 0마리 · 모인 돈: 0원",UDim2.fromOffset(16,64),UDim2.fromOffset(320,32),14)
+distance.Name="DistanceCounter"
+distance.TextColor3=Color3.fromRGB(255,232,151)
+distance.TextStrokeColor3=Color3.fromRGB(26,46,35) distance.TextStrokeTransparency=0
+distance.BackgroundColor3=Color3.fromRGB(31,55,42) distance.BackgroundTransparency=0.12
+make("UICorner",{CornerRadius=UDim.new(0,14)},distance)
+make("UIStroke",{Color=Color3.fromRGB(113,148,95),Thickness=2},distance)
+local lastAspect=nil
+local bag=text(gui,"가방: 0마리 · 모인 돈: 0원",UDim2.fromOffset(16,16),UDim2.fromOffset(320,42),16)
+bag.Name="LobbyStats" bag.BackgroundColor3=Color3.fromRGB(40,65,56) bag.BackgroundTransparency=0.1
+make("UICorner",{CornerRadius=UDim.new(0,12)},bag)
 local panel=make("Frame",{Name="HuntHelp",AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,94),BackgroundColor3=Color3.fromRGB(43,67,49),BackgroundTransparency=0.22,BorderSizePixel=0},gui)
 make("UISizeConstraint",{MaxSize=Vector2.new(510,94)},panel)
 make("UICorner",{CornerRadius=UDim.new(0,14)},panel)
@@ -42,6 +51,9 @@ local status=text(panel,"로데오 스트릿 · 루미돈 사냥",UDim2.fromOffs
 local instruction=text(panel,"A·D 좌우 이동 → 스페이스바 점프 → 다시 눌러 줄",UDim2.fromOffset(12,34),UDim2.new(1,-24,0,28),13)
 local startButton=make("TextButton",{Name="StartHunt",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.52),Size=UDim2.fromOffset(230,64),Text="사냥 시작",TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(219,103,41)},gui)
 make("UICorner",{CornerRadius=UDim.new(0,16)},startButton)
+local returnButton=make("TextButton",{Name="ReturnLobby",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.64),Size=UDim2.fromOffset(230,48),Text="로비로 돌아가기",TextSize=18,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(78,132,114),Visible=false},gui)
+make("UICorner",{CornerRadius=UDim.new(0,14)},returnButton)
+returnButton.Activated:Connect(function() remote:FireServer("ReturnLobby") end)
 local highlight=make("Highlight",{Enabled=false,FillTransparency=0.82,OutlineColor=Color3.fromRGB(255,222,91)},gui)
 local ring=make("Part",{Name="LocalLassoRange",Anchored=true,CanCollide=false,CanTouch=false,CanQuery=false,Transparency=1,Size=Vector3.new(1,1,1)},workspace)
 local ringPoints={}
@@ -127,7 +139,8 @@ remote.OnClientEvent:Connect(function(kind,data)
  if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
  if data.message then notice,noticeUntil=data.message,os.clock()+3 end
- startButton.Visible=not active()
+ startButton.Visible=state.phase~="Idle" and not active()
+ returnButton.Visible=state.phase=="GameOver" or state.phase=="CourseEnd"
  startButton.Text=state.phase=="GameOver" and "다시 사냥하기" or "사냥 시작"
  cameraMode(active() or state.phase=="CourseEnd")
  bag.Text=string.format("가방: %d마리 · 모인 돈: %d원",state.count,state.pending)
@@ -135,6 +148,9 @@ end)
 player.CharacterAdded:Connect(function() state.phase="Idle" cameraMode(false) remote:FireServer("Sync") end)
 RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Camera.Value+1, function(dt)
  local clock=workspace:GetServerTimeNow()
+ local size=workspace.CurrentCamera.ViewportSize
+ local aspect=size.Y>0 and math.clamp(size.X/size.Y,0.4,4) or 1
+ if not lastAspect or math.abs(aspect-lastAspect)>0.05 then remote:FireServer("View",aspect) lastAspect=aspect end
  local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
  local frames=animator.update(monsters,clock,root and root.Position,dt)
  local t=Config.Prototype
@@ -168,6 +184,8 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  end
  markers.update(active() or state.phase=="CourseEnd",displayDistance,visualFrame,t.MetersPerStud)
  displayDistance=math.min(displayDistance,1000)
+ distance.Visible=state.area=="Hunt"
+ bag.Visible=state.area=="Lobby" or state.phase=="Idle"
  distance.Text=string.format("%dm",math.floor(displayDistance))
  highlight.Enabled=false
  panel.Visible=not active()
@@ -204,7 +222,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  elseif state.phase=="Lassoing" then status.Text="날아가서 탑승하는 중…" instruction.Text="탑승 후 계속 타고 달릴 수 있어요"
  elseif state.phase=="CourseEnd" then status.Text="1,000m · 다음 지역 준비 중" instruction.Text="초원 시험 구간이 끝났어요 · 사냥 시작으로 다시 달릴 수 있어요"
  elseif state.phase=="GameOver" then status.Text="사냥 종료" instruction.Text="다시 사냥하기로 재도전 · 가방 수익은 유지"
- else status.Text="로데오 스트릿 · 루미돈 사냥" instruction.Text="사냥 시작 → A·D 좌우 이동 → 스페이스바 점프 → 다시 눌러 줄" end
+ else status.Text="로데오 판타지 · 파스텔 로비" instruction.Text="비행장으로 걸어가 E를 누르면 사냥터로 출발해요" end
  if os.clock()<noticeUntil and not state.angerAt then status.Text=notice end
 end)
 remote:FireServer("Sync")
