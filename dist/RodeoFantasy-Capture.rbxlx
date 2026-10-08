@@ -2933,6 +2933,9 @@ Config.Prototype = {
 	GroundChunkStuds = 256,
 	RideHeightStuds = 4,
 	RespawnSeconds = 1,
+	CameraHeightStuds = 28,
+	CameraBehindStuds = 27,
+	CameraLookAheadStuds = 18,
 }
 
 return Config
@@ -5841,6 +5844,7 @@ local template = game:GetService("ServerStorage"):WaitForChild("RodeoMonsterTemp
 local states, owners, inventories, rateLimits, chunks = {}, {}, {}, {}, {}
 local bags = {}
 local nextBagUpdate = 0
+local decoratedChunks = {}
 local initialPosition = Vector3.new(0, 2, -8)
 local jumpRange = Config.Capture.JumpMeters / tuning.MetersPerStud
 local preview = world:FindFirstChild("PreviewMonster")
@@ -5865,6 +5869,22 @@ local function groundAt(z)
 			floor.Parent = world
 			chunks[index] = floor
 		end
+		if not decoratedChunks[index] then
+			decoratedChunks[index] = true
+			-- Temporary non-colliding visual markers make forward travel visible on the test floor.
+			for offset = -112, 112, 16 do
+				for _, side in ipairs({ -1, 1 }) do
+					local marker = Instance.new("Part")
+					marker.Name = "TestRoadMarker"
+					marker.Anchored, marker.CanCollide, marker.CanTouch, marker.CanQuery = true, false, false, false
+					marker.Size = Vector3.new(1.5, 0.1, 3)
+					marker.Position = Vector3.new(side * 43, 0.06, index * tuning.GroundChunkStuds + offset)
+					marker.Color = Color3.fromRGB(139, 105, 65)
+					marker.Material = Enum.Material.Sand
+					marker.Parent = world
+				end
+			end
+		end
 	end
 end
 
@@ -5873,6 +5893,8 @@ local function spawnMonster(position)
 	monster.Name = Config.Monster.Id
 	monster:SetAttribute("MonsterId", Config.Monster.Id)
 	monster:SetAttribute("Occupied", false)
+	monster:SetAttribute("Running", false)
+	monster:SetAttribute("Steering", 0)
 	monster:PivotTo(CFrame.new(position))
 	monster.Parent = monsters
 	return monster
@@ -5915,6 +5937,8 @@ local function release(player, message)
 	owners[state.monster] = nil
 	if state.monster.Parent then
 		state.monster:SetAttribute("Occupied", false)
+		state.monster:SetAttribute("Running", false)
+		state.monster:SetAttribute("Steering", 0)
 	end
 	local root, humanoid = state.root, state.humanoid
 	if root.Parent and humanoid.Parent then
@@ -6063,11 +6087,14 @@ RunService.Heartbeat:Connect(function(deltaTime)
 			if alpha &gt;= 1 then
 				clearRope(state)
 				state.phase, state.started = "Riding", clock
+				state.monster:SetAttribute("Running", true)
+				state.monster:SetAttribute("RunStarted", clock)
 				sendState(player, state)
 			end
 		else
 			local p = monsterFrame.Position
 			local steering = clock - state.steerAt &lt; 0.5 and state.steer or 0
+			if state.monster:GetAttribute("Steering") ~= steering then state.monster:SetAttribute("Steering", steering) end
 			local dt = math.min(deltaTime, 0.1)
 			local x = math.clamp(p.X + steering * tuning.SidewaysStudsPerSecond * dt, -tuning.RoadHalfWidth, tuning.RoadHalfWidth)
 			local z = p.Z - tuning.ForwardStudsPerSecond * dt
@@ -6131,6 +6158,7 @@ local package = ReplicatedStorage:WaitForChild("RodeoFantasy")
 local Config = require(package:WaitForChild("Config"))
 local Rules = require(package:WaitForChild("CaptureRules"))
 local remote = package:WaitForChild("CaptureRemote")
+local RideAnimator = require(script.Parent:WaitForChild("RideAnimator"))
 local monsters = workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
 local mouse = player:GetMouse()
 local phase, started, widths = "Idle", 0, Config.Capture.First
@@ -6269,6 +6297,7 @@ player.CharacterAdded:Connect(function()
 end)
 
 RunService.RenderStepped:Connect(function(dt)
+	RideAnimator.update(monsters, workspace:GetServerTimeNow())
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	local elapsed = workspace:GetServerTimeNow() - started
 	if pressed and os.clock() - lastPress &gt; 0.75 then pressed = false end
@@ -6277,7 +6306,8 @@ RunService.RenderStepped:Connect(function(dt)
 	end
 	if phase ~= "Idle" and root then
 		local camera = workspace.CurrentCamera
-		local goal = CFrame.lookAt(root.Position + Vector3.new(0, 12, 20), root.Position + Vector3.new(0, 0, -10))
+		local view = Config.Prototype
+		local goal = CFrame.lookAt(root.Position + Vector3.new(0, view.CameraHeightStuds, view.CameraBehindStuds), root.Position + Vector3.new(0, 0, -view.CameraLookAheadStuds))
 		camera.CFrame = camera.CFrame:Lerp(goal, 1 - math.exp(-10 * dt))
 		if os.clock() - lastSteer &gt;= 0.15 then sendSteer() end
 	end
@@ -6313,9 +6343,70 @@ remote:FireServer("Sync")
           <bool name="Disabled">false</bool>
         </Properties>
       </Item>
+      <Item class="ModuleScript" referent="RBX276">
+        <Properties>
+          <string name="Name">RideAnimator</string>
+          <ProtectedString name="Source">-- Procedural visual motion for the native part model. Never changes its mount root.
+local RideAnimator = {}
+local poses = {}
+
+local function remember(model)
+	local root = model.PrimaryPart
+	if not root then return nil end
+	local pose = {}
+	for _, part in ipairs(model:GetDescendants()) do
+		if part:IsA("BasePart") and part ~= root then
+			local side, leg = string.match(part.Name, "^(%a+)Front")
+			if side ~= "Left" and side ~= "Right" then side = nil end
+			if side then leg = "Front" else
+				side = string.match(part.Name, "^(%a+)Back")
+				if side ~= "Left" and side ~= "Right" then side = nil end
+				if side then leg = "Back" end
+			end
+			table.insert(pose, { part = part, rest = root.CFrame:ToObjectSpace(part.CFrame), side = side, leg = leg })
+		end
+	end
+	poses[model] = pose
+	return pose
+end
+
+function RideAnimator.update(monsters, clock)
+	for model, pose in pairs(poses) do
+		if model.Parent ~= monsters then poses[model] = nil end
+	end
+	for _, model in ipairs(monsters:GetChildren()) do
+		local root = model.PrimaryPart
+		if not root then continue end
+		local running = model:GetAttribute("Running") == true
+		local pose = poses[model]
+		if not pose and not running then continue end
+		pose = pose or remember(model)
+		local phase = (clock - (model:GetAttribute("RunStarted") or clock)) * math.pi * 7
+		local bob = running and (0.07 * math.sin(phase * 2)) or 0
+		local lean = running and (model:GetAttribute("Steering") or 0) * -0.09 or 0
+		local frame = root.CFrame * CFrame.new(0, bob, 0) * CFrame.Angles(0, 0, lean)
+		for _, entry in ipairs(pose) do
+			if not entry.part.Parent then continue end
+			local localFrame = entry.rest
+			if running and entry.side then
+				local opposite = (entry.side == "Left") ~= (entry.leg == "Front")
+				local swing = math.sin(phase + (opposite and math.pi or 0)) * 0.3
+				local joint = CFrame.new(entry.side == "Left" and -0.87 or 0.87, -0.45, entry.leg == "Front" and -1.25 or 1.45)
+				localFrame = joint * CFrame.Angles(swing, 0, 0) * joint:Inverse() * entry.rest
+			end
+			entry.part.CFrame = frame * localFrame
+		end
+		if not running then poses[model] = nil end
+	end
+end
+
+return RideAnimator
+</ProtectedString>
+        </Properties>
+      </Item>
     </Item>
   </Item>
-  <Item class="Lighting" referent="RBX276">
+  <Item class="Lighting" referent="RBX277">
     <Properties>
       <string name="Name">Lighting</string>
       <float name="ClockTime">14</float>

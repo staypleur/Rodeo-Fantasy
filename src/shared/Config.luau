@@ -39,6 +39,9 @@ Config.Prototype = {
 	GroundChunkStuds = 256,
 	RideHeightStuds = 4,
 	RespawnSeconds = 1,
+	CameraHeightStuds = 28,
+	CameraBehindStuds = 27,
+	CameraLookAheadStuds = 18,
 }
 
 return Config

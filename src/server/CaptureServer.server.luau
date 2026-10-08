@@ -14,6 +14,7 @@ local template = game:GetService("ServerStorage"):WaitForChild("RodeoMonsterTemp
 local states, owners, inventories, rateLimits, chunks = {}, {}, {}, {}, {}
 local bags = {}
 local nextBagUpdate = 0
+local decoratedChunks = {}
 local initialPosition = Vector3.new(0, 2, -8)
 local jumpRange = Config.Capture.JumpMeters / tuning.MetersPerStud
 local preview = world:FindFirstChild("PreviewMonster")
@@ -38,6 +39,22 @@ local function groundAt(z)
 			floor.Parent = world
 			chunks[index] = floor
 		end
+		if not decoratedChunks[index] then
+			decoratedChunks[index] = true
+			-- Temporary non-colliding visual markers make forward travel visible on the test floor.
+			for offset = -112, 112, 16 do
+				for _, side in ipairs({ -1, 1 }) do
+					local marker = Instance.new("Part")
+					marker.Name = "TestRoadMarker"
+					marker.Anchored, marker.CanCollide, marker.CanTouch, marker.CanQuery = true, false, false, false
+					marker.Size = Vector3.new(1.5, 0.1, 3)
+					marker.Position = Vector3.new(side * 43, 0.06, index * tuning.GroundChunkStuds + offset)
+					marker.Color = Color3.fromRGB(139, 105, 65)
+					marker.Material = Enum.Material.Sand
+					marker.Parent = world
+				end
+			end
+		end
 	end
 end
 
@@ -46,6 +63,8 @@ local function spawnMonster(position)
 	monster.Name = Config.Monster.Id
 	monster:SetAttribute("MonsterId", Config.Monster.Id)
 	monster:SetAttribute("Occupied", false)
+	monster:SetAttribute("Running", false)
+	monster:SetAttribute("Steering", 0)
 	monster:PivotTo(CFrame.new(position))
 	monster.Parent = monsters
 	return monster
@@ -88,6 +107,8 @@ local function release(player, message)
 	owners[state.monster] = nil
 	if state.monster.Parent then
 		state.monster:SetAttribute("Occupied", false)
+		state.monster:SetAttribute("Running", false)
+		state.monster:SetAttribute("Steering", 0)
 	end
 	local root, humanoid = state.root, state.humanoid
 	if root.Parent and humanoid.Parent then
@@ -236,11 +257,14 @@ RunService.Heartbeat:Connect(function(deltaTime)
 			if alpha >= 1 then
 				clearRope(state)
 				state.phase, state.started = "Riding", clock
+				state.monster:SetAttribute("Running", true)
+				state.monster:SetAttribute("RunStarted", clock)
 				sendState(player, state)
 			end
 		else
 			local p = monsterFrame.Position
 			local steering = clock - state.steerAt < 0.5 and state.steer or 0
+			if state.monster:GetAttribute("Steering") ~= steering then state.monster:SetAttribute("Steering", steering) end
 			local dt = math.min(deltaTime, 0.1)
 			local x = math.clamp(p.X + steering * tuning.SidewaysStudsPerSecond * dt, -tuning.RoadHalfWidth, tuning.RoadHalfWidth)
 			local z = p.Z - tuning.ForwardStudsPerSecond * dt

@@ -19,6 +19,7 @@ expected = {
     "BagRules": "src/shared/BagRules.luau",
     "CaptureServer": "src/server/CaptureServer.server.luau",
     "CaptureClient": "src/client/CaptureClient.client.luau",
+    "RideAnimator": "src/client/RideAnimator.luau",
 }
 assert set(scripts) == set(expected)
 for name, source in expected.items():

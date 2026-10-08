@@ -36,5 +36,23 @@ for _, descendant in ipairs(clone:GetDescendants()) do
 		assert(descendant.Anchored and not descendant.CanCollide, "model must not block rider")
 	end
 end
+local animator = require(game:GetService("StarterPlayer").StarterPlayerScripts.RideAnimator)
+local testFolder = Instance.new("Folder")
+testFolder.Name = "TemporaryAnimationTest"
+testFolder.Parent = workspace
+clone.Parent = testFolder
+local rootBefore, legBefore = clone.PrimaryPart.CFrame, clone.LeftFrontLeg.CFrame
+clone:SetAttribute("Running", true)
+clone:SetAttribute("RunStarted", 0)
+clone:SetAttribute("Steering", 1)
+animator.update(testFolder, 0.1)
+assert(clone.PrimaryPart.CFrame == rootBefore, "animation must preserve mount root")
+assert((clone.LeftFrontLeg.Position - legBefore.Position).Magnitude > 0.01, "legs must animate")
+assert(clone.TailFlame.Parent == clone, "flame must remain attached")
+clone:SetAttribute("Running", false)
+animator.update(testFolder, 0.2)
+assert((clone.LeftFrontLeg.Position - legBefore.Position).Magnitude < 0.001, "idle must restore rest pose")
+assert(clone.PrimaryPart.CFrame == rootBefore, "idle must preserve mount root")
 clone:Destroy()
-print("RODEO_STUDIO_SMOKE_PASS: Emberrat B parts, flames, hierarchy and complete model pivot validated")
+testFolder:Destroy()
+print("RODEO_STUDIO_SMOKE_PASS: Emberrat B parts, flames, hierarchy, model pivot and ride animation validated")

@@ -9,6 +9,7 @@ local package = ReplicatedStorage:WaitForChild("RodeoFantasy")
 local Config = require(package:WaitForChild("Config"))
 local Rules = require(package:WaitForChild("CaptureRules"))
 local remote = package:WaitForChild("CaptureRemote")
+local RideAnimator = require(script.Parent:WaitForChild("RideAnimator"))
 local monsters = workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
 local mouse = player:GetMouse()
 local phase, started, widths = "Idle", 0, Config.Capture.First
@@ -147,6 +148,7 @@ player.CharacterAdded:Connect(function()
 end)
 
 RunService.RenderStepped:Connect(function(dt)
+	RideAnimator.update(monsters, workspace:GetServerTimeNow())
 	local root = player.Character and player.Character:FindFirstChild("HumanoidRootPart")
 	local elapsed = workspace:GetServerTimeNow() - started
 	if pressed and os.clock() - lastPress > 0.75 then pressed = false end
@@ -155,7 +157,8 @@ RunService.RenderStepped:Connect(function(dt)
 	end
 	if phase ~= "Idle" and root then
 		local camera = workspace.CurrentCamera
-		local goal = CFrame.lookAt(root.Position + Vector3.new(0, 12, 20), root.Position + Vector3.new(0, 0, -10))
+		local view = Config.Prototype
+		local goal = CFrame.lookAt(root.Position + Vector3.new(0, view.CameraHeightStuds, view.CameraBehindStuds), root.Position + Vector3.new(0, 0, -view.CameraLookAheadStuds))
 		camera.CFrame = camera.CFrame:Lerp(goal, 1 - math.exp(-10 * dt))
 		if os.clock() - lastSteer >= 0.15 then sendSteer() end
 	end
