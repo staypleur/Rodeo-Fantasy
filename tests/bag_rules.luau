@@ -60,3 +60,27 @@ for stars=1,10 do
  assert(Rules.income(sample)==3*2^(stars-1))
 end
 print("PASS: per-star doubling from one through ten stars")
+
+local evolve=Rules.new()
+Rules.grant(evolve,"MeadowMouse",0,3,1)
+Rules.grant(evolve,"MeadowMouse",0,3,1)
+Rules.grant(evolve,"MeadowMouse",0,3,1)
+Rules.grant(evolve,"GrassBoar",0,3,2)
+assert(Rules.place(evolve,1,2) and Rules.place(evolve,2,2))
+local upgraded,affected=Rules.evolve(evolve,{1,2,3},5)
+assert(upgraded and upgraded.monsterId=="MeadowMouse" and upgraded.stars==2 and upgraded.lastIncome==5)
+assert(upgraded.incomeAmount==1 and upgraded.incomeSeconds==3 and #evolve.monsters==2)
+assert(affected[2] and upgraded.assignedPen==nil,"evolution clears consumed ranch placements")
+Rules.accrue(evolve,8,3,1)
+assert(evolve.pending==2,"evolved monster earns double after the next full interval")
+local bad=Rules.new()
+Rules.grant(bad,"MeadowMouse",0) Rules.grant(bad,"MeadowMouse",0) Rules.grant(bad,"GrassBoar",0)
+assert(not Rules.evolve(bad,{1,2,3},1) and #bad.monsters==3,"mixed species must fail without consuming")
+Rules.grant(bad,"MeadowMouse",0)
+bad.monsters[4].stars=2
+assert(not Rules.evolve(bad,{1,2,4},1) and #bad.monsters==4,"mixed stars must fail without consuming")
+assert(not Rules.evolve(bad,{1,1,2},1) and #bad.monsters==4,"duplicate IDs must fail")
+assert(not Rules.evolve(bad,{1,2,999},1) and #bad.monsters==4,"missing item must fail")
+bad.monsters[1].stars=10 bad.monsters[2].stars=10 bad.monsters[4].stars=10
+assert(not Rules.evolve(bad,{1,2,4},1) and #bad.monsters==4,"10-star monsters cannot evolve")
+print("PASS: server evolution consumes three matching copies, doubles production and safely rejects invalid sets")

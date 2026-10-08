@@ -22,7 +22,7 @@ local function loadUI(name)
  return f()
 end
 local gui=Instance.new('ScreenGui') gui.Parent=game.StarterGui
-local remote={FireServer=function(_,action) table.insert(calls,action) end}
+local remote={FireServer=function(_,action,value) table.insert(calls,action) calls[#calls+1]=value end}
 local book=loadUI('JournalUI').new(gui,remote)
 local bag=loadUI('BagUI').new(gui,remote)
 book.onOpen=bag.close bag.onOpen=book.close
@@ -54,5 +54,22 @@ local FX=require(game.StarterPlayer.StarterPlayerScripts.IncomeEffects)
 local model=game.ServerStorage.RodeoMonsterTemplate:Clone() model.Parent=workspace
 local gain=FX.pet(model,3) assert(gain.GainAmount.Text=='+3' and gain.Adornee==model.PrimaryPart)
 FX.clear() assert(not gain.Parent)
+local evolutionItems={
+ {id=101,monsterId='MeadowMouse',stars=1,incomeSeconds=3,incomeAmount=1},
+ {id=102,monsterId='MeadowMouse',stars=1,incomeSeconds=3,incomeAmount=1},
+ {id=103,monsterId='MeadowMouse',stars=1,incomeSeconds=3,incomeAmount=1},
+ {id=104,monsterId='GrassBoar',stars=1,incomeSeconds=3,incomeAmount=2},
+}
+bag.snapshot(evolutionItems) bag.toggle()
+gui.BagWindow.EvolutionMode:Activate()
+assert(gui.BagWindow.EvolutionControls.Visible and bag.evolutionMode)
+for _,id in ipairs({101,102,103}) do bag.cards[id].SelectForEvolution:Activate() end
+assert(gui.BagWindow.EvolutionStatus.Text:find('3 / 3') and gui.BagWindow.ConfirmEvolution.Active)
+bag.cards[104].SelectForEvolution:Activate()
+assert(not bag.selected[104],"different species cannot be selected into the same evolution")
+gui.BagWindow.ConfirmEvolution:Activate()
+assert(calls[#calls-1]=='Evolve' and #calls[#calls]==3,"confirmation sends exactly three IDs to server")
+bag.evolutionResult({ok=true,monsterId='MeadowMouse',stars=2})
+assert(not bag.evolutionMode and not gui.BagWindow.EvolutionControls.Visible,"successful evolution exits selection mode")
 model:Destroy() character:Destroy() gui:Destroy()
 print('COLLECTION_UI_PASS: hold/release/lobby gating, eight journal portraits, black silhouettes, discovery names, capped pagination/localized filters and true coin effects')

@@ -84,6 +84,8 @@ function World.spawn(position,speciesId,stars)
  local id=speciesId or monsterId
  local source=game.ServerStorage[Catalog.template(id,stars)]
 	local model = source:Clone()
+ local stage=Catalog.stage(stars)
+ model:ScaleTo(Catalog.scale(stars)/Catalog.Scales[stage])
  -- Wild herds replicate only their authoritative root. Clients build the approved visual
  -- for displayed creatures, instead of replicating hundreds of hidden body parts per runner.
  for _,node in ipairs(model:GetChildren()) do if node~=model.PrimaryPart then node:Destroy() end end
@@ -92,14 +94,14 @@ function World.spawn(position,speciesId,stars)
  model.Name = id
 	model:SetAttribute("MonsterId", id)
  model:SetAttribute("Stars",stars)
- model:SetAttribute("SaddleHeight",species.SaddleHeight*Catalog.Scales[Catalog.stage(stars)])
+ model:SetAttribute("SaddleHeight",species.SaddleHeight*Catalog.scale(stars))
 	model:SetAttribute("Occupied", false)
 	model:SetAttribute("Running", true)
  model:SetAttribute("RideSpeed",species.RunSpeed)
  model:SetAttribute("HerdSpeed",species.HerdSpeed)
  model:SetAttribute("SizeClass",species.SizeClass)
  model:SetAttribute("Flying",species.Flying)
- local height=species.Flying and species.RootHeight or species.RootHeight*Catalog.Scales[Catalog.stage(stars)]
+ local height=species.RootHeight*Catalog.scale(stars)
  model:SetAttribute("RootHeight",height)
  position=Vector3.new(position.X,height,position.Z)
 	model:SetAttribute("RunStarted", workspace:GetServerTimeNow() - (math.abs(position.X*0.17+position.Z*0.023)%1))

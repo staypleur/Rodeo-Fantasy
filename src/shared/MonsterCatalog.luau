@@ -10,6 +10,14 @@ C.Order={"MeadowMouse","GrassBoar","TreeWolf","Weedcrow","RockElephant"}
 for _,id in ipairs(C.Order) do C[id].Region=C[id].Region or (C[id].Acquisition=="Breeding" and "Breeding" or "Meadow") C[id].Acquisition=C[id].Acquisition or "Hunt" end
 C.Scales={[1]=1,[3]=1.4,[6]=1.9,[9]=2.5}
 function C.stage(stars) return stars>=9 and 9 or stars>=6 and 6 or stars>=3 and 3 or 1 end
+function C.scale(stars)
+ stars=math.clamp(tonumber(stars) or 1,1,10)
+ local lower=C.stage(stars)
+ if lower==9 then return 2.5+(stars-9)*.2 end
+ local upper=lower==1 and 3 or lower+3
+ local alpha=(stars-lower)/(upper-lower)
+ return C.Scales[lower]+(C.Scales[upper]-C.Scales[lower])*alpha
+end
 function C.visual(id,stars) local stage=C.stage(stars or 1) return C[id].Visual..(stage==1 and "" or "_S"..stage) end
 function C.template(id,stars) local stage=C.stage(stars or 1) return C[id].Template..(stage==1 and "" or "_S"..stage) end
 function C.pick(meters,serial)

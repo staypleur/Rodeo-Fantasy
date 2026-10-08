@@ -4,7 +4,10 @@ local C=require(package.MonsterCatalog)
 local Mesh=require(script.Parent.CreatureMesh)
 function P.fill(viewport,id,stars,silhouette)
  local world=Instance.new("WorldModel") world.Parent=viewport
- local model=package[C.visual(id,stars)]:Clone() model.Parent=world model:PivotTo(CFrame.new())
+ local model=package[C.visual(id,stars)]:Clone()
+ local stage=C.stage(stars)
+ model:ScaleTo(C.scale(stars)/C.Scales[stage])
+ model.Parent=world model:PivotTo(CFrame.new())
  for _,node in ipairs(model:GetDescendants()) do
   if node:IsA("BillboardGui") or node:IsA("Light") then node:Destroy()
   elseif silhouette and node:IsA("BasePart") then node.Color=Color3.fromRGB(22,28,23) node.Material=Enum.Material.SmoothPlastic end

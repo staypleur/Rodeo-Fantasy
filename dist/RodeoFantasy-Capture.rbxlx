@@ -104975,6 +104975,14 @@ C.Order={"MeadowMouse","GrassBoar","TreeWolf","Weedcrow","RockElephant"}
 for _,id in ipairs(C.Order) do C[id].Region=C[id].Region or (C[id].Acquisition=="Breeding" and "Breeding" or "Meadow") C[id].Acquisition=C[id].Acquisition or "Hunt" end
 C.Scales={[1]=1,[3]=1.4,[6]=1.9,[9]=2.5}
 function C.stage(stars) return stars&gt;=9 and 9 or stars&gt;=6 and 6 or stars&gt;=3 and 3 or 1 end
+function C.scale(stars)
+ stars=math.clamp(tonumber(stars) or 1,1,10)
+ local lower=C.stage(stars)
+ if lower==9 then return 2.5+(stars-9)*.2 end
+ local upper=lower==1 and 3 or lower+3
+ local alpha=(stars-lower)/(upper-lower)
+ return C.Scales[lower]+(C.Scales[upper]-C.Scales[lower])*alpha
+end
 function C.visual(id,stars) local stage=C.stage(stars or 1) return C[id].Visual..(stage==1 and "" or "_S"..stage) end
 function C.template(id,stars) local stage=C.stage(stars or 1) return C[id].Template..(stage==1 and "" or "_S"..stage) end
 function C.pick(meters,serial)
@@ -105410,6 +105418,13 @@ L.entries={
  ["Hover an entry for field notes"]={ko="몬스터에 커서를 올리면 획득 방법을 볼 수 있어요",ja="モンスターにカーソルを合わせると入手方法を表示"},
  ["No entries here yet"]={ko="아직 등록된 몬스터가 없는 분류예요",ja="この分類にはまだ項目がありません"},
  ["Breeding details not announced yet"]={ko="배합 방법은 아직 공개되지 않았어요",ja="交配方法はまだ公開されていません"},
+ ["Evolve"]={ko="진화",ja="進化",en="Evolve"},
+ ["Cancel"]={ko="취소",ja="キャンセル",en="Cancel"},
+ ["Select"]={ko="선택",ja="選択",en="Select"},
+ ["Selected"]={ko="선택됨",ja="選択済み",en="Selected"},
+ ["Select three matching monsters"]={ko="같은 종류·같은 별 3마리를 선택하세요",ja="同種・同じ星の3匹を選んでください",en="Select three matching monsters"},
+ ["Evolution failed"]={ko="진화할 수 없어요. 가방을 새로 확인해 주세요.",ja="進化できません。バッグを確認してください。",en="Evolution failed. Refresh your bag and try again."},
+ ["Already at max stars"]={ko="10성이 된 몬스터는 더 진화할 수 없어요.",ja="10星のモンスターは進化できません。",en="A 10-star monster cannot evolve further."},
  ["Loading progress"]={ko="기록을 불러오는 중",ja="記録を読み込み中"},
  ["Progress saved"]={ko="기록 저장됨",ja="記録を保存済み"},
  ["Progress loaded"]={ko="기록 불러옴",ja="記録を読み込み済み"},
@@ -105444,7 +105459,7 @@ function L.huntHint(meters,seconds,locale)
 end
 function L.evolutionHint(stars,locale)
  local lang=string.sub(locale or "en",1,2)
- local pattern=lang=="ko" and "같은 종류·같은 별의 몬스터 3마리를 합쳐 %d성까지 성장시키세요. 합성 기능은 준비 중이에요." or lang=="ja" and "同種・同じ星の3匹を合成し%d星まで育てよう。合成機能は準備中。" or "Merge three of the same species and star until %d stars. Merging is coming soon."
+ local pattern=lang=="ko" and "가방에서 같은 종류·같은 별 3마리를 선택해 %d성으로 진화시키세요." or lang=="ja" and "バッグで同種・同じ星の3匹を選び、%d星に進化させよう。" or "Select three of the same species and star in your bag to evolve to %d stars."
  return string.format(pattern,stars)
 end
 return L
@@ -105526,6 +105541,37 @@ function BagRules.remove(session,id,pen)
  local item=BagRules.find(session,id)
  if not item or item.assignedPen~=pen then return false end
  item.assignedPen=nil return true
+end
+
+-- Consumes exactly three distinct copies of the same species and star tier.
+-- Returns the new monster and the affected ranches, or nil plus a reason.
+function BagRules.evolve(session,ids,clock)
+ if type(ids)~="table" or #ids~=3 then return nil,"NeedThree" end
+ local unique,selected={},{}
+ for _,id in ipairs(ids) do
+  if type(id)~="number" or id~=id or id%1~=0 or unique[id] then return nil,"InvalidSelection" end
+  unique[id]=true
+  local item=BagRules.find(session,id)
+  if not item then return nil,"MissingMonster" end
+  table.insert(selected,item)
+ end
+ local first=selected[1]
+ if math.floor(first.stars or 1)&gt;=10 then return nil,"MaxStars" end
+ for index=2,3 do
+  local item=selected[index]
+  if item.monsterId~=first.monsterId then return nil,"DifferentSpecies" end
+  if item.stars~=first.stars then return nil,"DifferentStars" end
+ end
+ local affected={}
+ for _,item in ipairs(selected) do if item.assignedPen then affected[item.assignedPen]=true end end
+ for index=#session.monsters,1,-1 do
+  if unique[session.monsters[index].id] then table.remove(session.monsters,index) end
+ end
+ session.serial=(session.serial or 0)+1
+ local evolved={id=session.serial,monsterId=first.monsterId,stars=first.stars+1,lastIncome=clock,
+  incomeSeconds=first.incomeSeconds,incomeAmount=first.incomeAmount}
+ table.insert(session.monsters,evolved)
+ return evolved,affected
 end
 
 -- Prepared for direct collection; the UI/action remains to be confirmed.
@@ -294786,7 +294832,7 @@ Lobby.connectPens(function(player)
 end)
 remote.OnServerEvent:Connect(function(player,action,value)
  if type(action)~="string" or not bags[player] then return end
- if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Journal" then return end
+ if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
@@ -294805,6 +294851,23 @@ remote.OnServerEvent:Connect(function(player,action,value)
   if states[player] or type(value)~="table" or not Lobby.canUsePen(player,value.pen) then return end
   local changed=action=="Place" and BagRules.place(bags[player],value.id,value.pen) or action=="Remove" and BagRules.remove(bags[player],value.id,value.pen)
   if changed then Lobby.display(player,value.pen,bags[player].monsters) sendBag(player) end
+  return
+ end
+ if action=="Evolve" then
+  if states[player] or type(value)~="table" then return end
+  -- Credit every completed income tick before consuming source monsters.
+  local gains=BagRules.accrue(bags[player],now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
+  local evolved,affected=BagRules.evolve(bags[player],value,now())
+  if not evolved then
+   remote:FireClient(player,"EvolutionResult",{ok=false,reason=affected})
+   sendBag(player)
+   return
+  end
+  for pen in pairs(affected) do Lobby.display(player,pen,bags[player].monsters) end
+  remote:FireClient(player,"EvolutionResult",{ok=true,monsterId=evolved.monsterId,stars=evolved.stars})
+  send(player)
+  if #gains&gt;0 then remote:FireClient(player,"BagIncome",gains) end
+  sendBag(player)
   return
  end
  if action=="Journal" then if not states[player] then remote:FireClient(player,"Journal",Progress.snapshot(player,true)) end return end
@@ -295038,6 +295101,8 @@ function World.spawn(position,speciesId,stars)
  local id=speciesId or monsterId
  local source=game.ServerStorage[Catalog.template(id,stars)]
 	local model = source:Clone()
+ local stage=Catalog.stage(stars)
+ model:ScaleTo(Catalog.scale(stars)/Catalog.Scales[stage])
  -- Wild herds replicate only their authoritative root. Clients build the approved visual
  -- for displayed creatures, instead of replicating hundreds of hidden body parts per runner.
  for _,node in ipairs(model:GetChildren()) do if node~=model.PrimaryPart then node:Destroy() end end
@@ -295046,14 +295111,14 @@ function World.spawn(position,speciesId,stars)
  model.Name = id
 	model:SetAttribute("MonsterId", id)
  model:SetAttribute("Stars",stars)
- model:SetAttribute("SaddleHeight",species.SaddleHeight*Catalog.Scales[Catalog.stage(stars)])
+ model:SetAttribute("SaddleHeight",species.SaddleHeight*Catalog.scale(stars))
 	model:SetAttribute("Occupied", false)
 	model:SetAttribute("Running", true)
  model:SetAttribute("RideSpeed",species.RunSpeed)
  model:SetAttribute("HerdSpeed",species.HerdSpeed)
  model:SetAttribute("SizeClass",species.SizeClass)
  model:SetAttribute("Flying",species.Flying)
- local height=species.Flying and species.RootHeight or species.RootHeight*Catalog.Scales[Catalog.stage(stars)]
+ local height=species.RootHeight*Catalog.scale(stars)
  model:SetAttribute("RootHeight",height)
  position=Vector3.new(position.X,height,position.Z)
 	model:SetAttribute("RunStarted", workspace:GetServerTimeNow() - (math.abs(position.X*0.17+position.Z*0.023)%1))
@@ -295427,7 +295492,10 @@ function Lobby.display(player,index,items)
    model:SetAttribute("MonsterId",item.monsterId) model:SetAttribute("Stars",item.stars) model:SetAttribute("Flying",species.Flying)
    model:SetAttribute("RunStarted",workspace:GetServerTimeNow())
    for _,node in ipairs(model:GetDescendants()) do if node:IsA("BillboardGui") then node:Destroy() end end
-   local scale=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog).Scales[require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog).stage(item.stars)]
+   local catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
+   local stage=catalog.stage(item.stars)
+   local scale=catalog.scale(item.stars)
+   model:ScaleTo(scale/catalog.Scales[stage])
    local height=species.Flying and 3*scale or species.RootHeight*scale
    local boxFrame,boxSize=model:GetBoundingBox()
    local offset=model.PrimaryPart.CFrame:ToObjectSpace(boxFrame).Position
@@ -295498,10 +295566,13 @@ local function node(kind,name,props,parent)
 end
 function P.update(gui,level,name)
  local theme,tier=Themes.forLevel(level)
+ gui.Size=UDim2.fromOffset(220,44)
  if gui:GetAttribute("ThemeTier")~=tier then
   gui:ClearAllChildren() gui:SetAttribute("ThemeTier",tier) gui:SetAttribute("Theme",theme.name)
+  local canvas=node("Frame","PlaqueCanvas",{BackgroundTransparency=1,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(300,58)},gui)
+  local scale=Instance.new("UIScale") scale.Name="CompactPlaqueScale" scale.Scale=.73 scale.Parent=canvas
   local function block(name,x,y,w,h,color,z)
-   return node("Frame",name,{BorderSizePixel=0,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundColor3=color,ZIndex=z or 1},gui)
+   return node("Frame",name,{BorderSizePixel=0,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundColor3=color,ZIndex=z or 1},canvas)
   end
   local edge,metal,paper=rgb(theme.edge),rgb(theme.metal),rgb(theme.paper)
   block("Shadow",18,21,264,32,Color3.fromRGB(32,30,40))
@@ -295535,17 +295606,18 @@ function P.update(gui,level,name)
   if tier==11 then
    local colors={Color3.fromRGB(247,110,115),Color3.fromRGB(255,188,93),Color3.fromRGB(255,230,127),Color3.fromRGB(112,216,173),Color3.fromRGB(111,191,245),Color3.fromRGB(163,137,248),Color3.fromRGB(231,157,226)}
    local seq={} for i,c in ipairs(colors) do seq[i]=ColorSequenceKeypoint.new((i-1)/6,c) end
-   node("UIGradient","Rainbow",{Color=ColorSequence.new(seq)},gui.Bevel)
+   node("UIGradient","Rainbow",{Color=ColorSequence.new(seq)},canvas.Bevel)
    for i,c in ipairs(colors) do block("RainbowGem",36+(i-1)*36,46,15,3,c,4) end
   end
   local props={BackgroundTransparency=1,Font=Enum.Font.GothamBold,TextColor3=rgb(theme.ink),ZIndex=5}
-  local number=node("TextLabel","Level",props,gui)
+  local number=node("TextLabel","Level",props,canvas)
   number.Position=UDim2.fromOffset(31,20) number.Size=UDim2.fromOffset(48,27) number.TextSize=21
-  local account=node("TextLabel","PlayerName",props,gui)
+  local account=node("TextLabel","PlayerName",props,canvas)
   account.Position=UDim2.fromOffset(82,21) account.Size=UDim2.fromOffset(188,25)
   account.TextSize=17 account.TextXAlignment=Enum.TextXAlignment.Left account.TextTruncate=Enum.TextTruncate.AtEnd
  end
- gui.Level.Text=tostring(level) gui.PlayerName.Text=name
+ local canvas=gui:FindFirstChild("PlaqueCanvas")
+ if canvas then canvas.Level.Text=tostring(level) canvas.PlayerName.Text=name end
 end
 return P
 </ProtectedString>
@@ -295573,7 +295645,7 @@ local function nameplate(player,level)
  local gui=head:FindFirstChild("ExplorerNameplate")
  if not gui then
   gui=Instance.new("BillboardGui") gui.Name="ExplorerNameplate" gui.Adornee=head
-  gui.Size=UDim2.fromOffset(300,58) gui.StudsOffset=Vector3.new(0,2.2,0)
+  gui.Size=UDim2.fromOffset(220,44) gui.StudsOffset=Vector3.new(0,2.2,0)
   gui.MaxDistance=120 gui.AlwaysOnTop=false gui.Parent=head
   local humanoid=character:FindFirstChildOfClass("Humanoid") if humanoid then humanoid.NameDisplayDistance=0 end
  end
@@ -296006,7 +296078,10 @@ local C=require(package.MonsterCatalog)
 local Mesh=require(script.Parent.CreatureMesh)
 function P.fill(viewport,id,stars,silhouette)
  local world=Instance.new("WorldModel") world.Parent=viewport
- local model=package[C.visual(id,stars)]:Clone() model.Parent=world model:PivotTo(CFrame.new())
+ local model=package[C.visual(id,stars)]:Clone()
+ local stage=C.stage(stars)
+ model:ScaleTo(C.scale(stars)/C.Scales[stage])
+ model.Parent=world model:PivotTo(CFrame.new())
  for _,node in ipairs(model:GetDescendants()) do
   if node:IsA("BillboardGui") or node:IsA("Light") then node:Destroy()
   elseif silhouette and node:IsA("BasePart") then node.Color=Color3.fromRGB(22,28,23) node.Material=Enum.Material.SmoothPlastic end
@@ -296223,7 +296298,7 @@ local function make(class,props,parent)
  node.Parent=parent return node
 end
 function UI.new(gui,remote)
- local self={area="Lobby",items={},count=-1,pen=nil,region="All",page=1,query=""}
+ local self={area="Lobby",items={},count=-1,pen=nil,region="All",page=1,query="",evolutionMode=false,selected={}}
  local button=make("TextButton",{Name="OpenBag",Text="Bag [R]",Size=UDim2.fromOffset(110,44),Position=UDim2.new(1,-125,1,-60),BackgroundColor3=Color3.fromRGB(147,104,72),TextColor3=Color3.new(1,1,1),TextSize=18},gui)
  make("UICorner",{CornerRadius=UDim.new(0,12)},button)
  local window=make("Frame",{Name="BagWindow",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.8,.75),BackgroundColor3=Color3.fromRGB(249,242,222),ZIndex=20},gui)
@@ -296231,7 +296306,17 @@ function UI.new(gui,remote)
  make("UICorner",{CornerRadius=UDim.new(0,18)},window)
  local title=make("TextLabel",{Text="Bag",BackgroundTransparency=1,Position=UDim2.fromOffset(20,10),Size=UDim2.new(1,-100,0,40),TextSize=26,TextColor3=Color3.fromRGB(43,74,55),ZIndex=21},window)
  local close=make("TextButton",{Name="CloseBag",Text="Close",Position=UDim2.new(1,-90,0,12),Size=UDim2.fromOffset(75,34),ZIndex=21},window)
- local money=make("TextLabel",{Name="BagMoney",BackgroundTransparency=1,Position=UDim2.fromOffset(20,55),Size=UDim2.new(1,-40,0,34),TextSize=20,TextColor3=Color3.fromRGB(43,74,55),ZIndex=21},window)
+ local money=make("TextLabel",{Name="BagMoney",BackgroundTransparency=1,Position=UDim2.fromOffset(20,55),Size=UDim2.new(.62,-20,0,34),TextSize=20,TextColor3=Color3.fromRGB(43,74,55),TextXAlignment=Enum.TextXAlignment.Left,ZIndex=21},window)
+ local evolveToggle=make("TextButton",{Name="EvolutionMode",Text=L.text("Evolve",player.LocaleId),Position=UDim2.new(1,-142,0,55),Size=UDim2.fromOffset(122,34),TextSize=16,BackgroundColor3=Color3.fromRGB(110,133,91),TextColor3=Color3.new(1,1,1),ZIndex=23},window)
+ make("UICorner",{CornerRadius=UDim.new(0,9)},evolveToggle)
+ local evolveControls=make("Frame",{Name="EvolutionControls",Visible=false,BackgroundColor3=Color3.fromRGB(235,222,194),Position=UDim2.fromOffset(16,174),Size=UDim2.new(1,-32,0,58),ZIndex=22},window)
+ make("UICorner",{CornerRadius=UDim.new(0,10)},evolveControls)
+ local evolveStatus=make("TextLabel",{Name="EvolutionStatus",Text=L.text("Select three matching monsters",player.LocaleId),BackgroundTransparency=1,Position=UDim2.fromOffset(10,0),Size=UDim2.new(1,-258,1,0),TextSize=14,TextColor3=Color3.fromRGB(70,58,40),TextXAlignment=Enum.TextXAlignment.Left,ZIndex=23},evolveControls)
+ local evolvePreview=make("ViewportFrame",{Name="EvolutionPreview",BackgroundColor3=Color3.fromRGB(249,242,222),BackgroundTransparency=.12,Position=UDim2.new(1,-248,0,5),Size=UDim2.fromOffset(48,48),ZIndex=23},evolveControls)
+ make("UICorner",{CornerRadius=UDim.new(0,8)},evolvePreview)
+ local evolveCancel=make("TextButton",{Name="CancelEvolution",Text=L.text("Cancel",player.LocaleId),Position=UDim2.new(1,-194,0,12),Size=UDim2.fromOffset(80,34),TextSize=13,BackgroundColor3=Color3.fromRGB(164,139,107),TextColor3=Color3.new(1,1,1),ZIndex=24},evolveControls)
+ local evolveConfirm=make("TextButton",{Name="ConfirmEvolution",Text=L.text("Evolve",player.LocaleId),Position=UDim2.new(1,-108,0,12),Size=UDim2.fromOffset(100,34),TextSize=13,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},evolveControls)
+ make("UICorner",{CornerRadius=UDim.new(0,8)},evolveCancel) make("UICorner",{CornerRadius=UDim.new(0,8)},evolveConfirm)
  local scroll=make("ScrollingFrame",{Name="BagCards",BackgroundTransparency=1,BorderSizePixel=0,Position=UDim2.fromOffset(16,175),Size=UDim2.new(1,-32,1,-230),CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y,ScrollBarThickness=6,ZIndex=21},window)
  make("UIGridLayout",{CellSize=UDim2.fromOffset(170,245),CellPadding=UDim2.fromOffset(12,12),SortOrder=Enum.SortOrder.LayoutOrder},scroll)
  local empty=make("TextLabel",{Name="EmptyBag",Text="No monsters caught yet",BackgroundTransparency=1,Position=UDim2.fromScale(.1,.45),Size=UDim2.fromScale(.8,.15),TextSize=20,TextWrapped=true,ZIndex=22},window)
@@ -296251,16 +296336,58 @@ function UI.new(gui,remote)
   make("UICorner",{CornerRadius=UDim.new(0,8)},tab)
   tab.Activated:Connect(function() self.filter(region,nil) end)
  end
+ local chooser
  local revision=0
+ local function selectedCount() local n=0 for _ in pairs(self.selected) do n+=1 end return n end
+ local function selectionAnchor()
+  for id in pairs(self.selected) do
+   for _,item in ipairs(self.items) do if item.id==id then return item end end
+  end
+ end
+ local function updateEvolutionControls()
+  local count=selectedCount()
+  local anchor=selectionAnchor()
+  if anchor then
+   evolveStatus.Text=L.text(anchor.monsterId,player.LocaleId).." · "..anchor.stars.."★  →  "..(anchor.stars+1).."★    "..count.." / 3"
+   for _,child in ipairs(evolvePreview:GetChildren()) do child:Destroy() end
+   if anchor.stars&lt;10 then Portrait.fill(evolvePreview,anchor.monsterId,anchor.stars+1,false) end
+  else
+   evolveStatus.Text=L.text("Select three matching monsters",player.LocaleId).."    "..count.." / 3"
+   for _,child in ipairs(evolvePreview:GetChildren()) do child:Destroy() end
+  end
+  evolveConfirm.Active=count==3 and anchor~=nil and anchor.stars&lt;10
+  evolveConfirm.AutoButtonColor=evolveConfirm.Active
+  evolveConfirm.BackgroundColor3=evolveConfirm.Active and Color3.fromRGB(80,134,104) or Color3.fromRGB(151,159,143)
+ end
+ function self.setEvolutionMode(enabled)
+  self.evolutionMode=enabled==true
+  if not self.evolutionMode then self.selected={} end
+  self.mode=nil self.pen=nil chooser.Visible=false scroll.Visible=true
+  evolveControls.Visible=self.evolutionMode
+  scroll.Position=UDim2.fromOffset(16,self.evolutionMode and 240 or 175)
+  scroll.Size=UDim2.new(1,-32,1,self.evolutionMode and -295 or -230)
+  evolveToggle.Text=self.evolutionMode and L.text("Cancel",player.LocaleId) or L.text("Evolve",player.LocaleId)
+  self.snapshot(self.items)
+ end
+ evolveToggle.Activated:Connect(function()
+  if self.area=="Lobby" and not self.pen then self.setEvolutionMode(not self.evolutionMode) end
+ end)
+ evolveCancel.Activated:Connect(function() self.setEvolutionMode(false) end)
+ evolveConfirm.Activated:Connect(function()
+  if not evolveConfirm.Active or self.area~="Lobby" then return end
+  local ids={} for id in pairs(self.selected) do table.insert(ids,id) end
+  table.sort(ids)
+  if #ids==3 then remote:FireServer("Evolve",ids) end
+ end)
  search:GetPropertyChangedSignal("Text"):Connect(function()
   revision+=1 local current=revision
   task.delay(.12,function() if revision==current then self.filter(nil,search.Text) end end)
  end)
  previous.Activated:Connect(function() self.page=math.max(1,self.page-1) self.snapshot(self.items) end)
  nextPage.Activated:Connect(function() self.page+=1 self.snapshot(self.items) end)
- function self.close() window.Visible=false self.pen=nil end
+ function self.close() window.Visible=false self.pen=nil self.setEvolutionMode(false) end
  function self.opened() if self.onOpen then self.onOpen() end end
- local chooser=make("Frame",{Name="RanchChooser",Visible=false,BackgroundTransparency=1,Position=UDim2.fromOffset(20,110),Size=UDim2.new(1,-40,1,-130),ZIndex=23},window)
+ chooser=make("Frame",{Name="RanchChooser",Visible=false,BackgroundTransparency=1,Position=UDim2.fromOffset(20,110),Size=UDim2.new(1,-40,1,-130),ZIndex=23},window)
  make("UIGridLayout",{CellSize=UDim2.new(.45,0,0,90),CellPadding=UDim2.fromOffset(18,18)},chooser)
  for index=1,4 do
   local choice=make("TextButton",{Name="RanchChoice"..index,Text=L.text("Ranch",player.LocaleId).." "..index,BackgroundColor3=Color3.fromRGB(147,182,154),TextColor3=Color3.fromRGB(37,61,46),TextSize=22,ZIndex=24},chooser)
@@ -296269,12 +296396,12 @@ function UI.new(gui,remote)
  end
  function self.openRanchMenu()
   if self.area~="Lobby" then return end
-  self.mode="RanchMenu" self.pen=nil self.snapshot(self.items) window.Visible=true self.opened() chooser.Visible=true scroll.Visible=false empty.Visible=false
+  self.setEvolutionMode(false) self.mode="RanchMenu" self.pen=nil self.snapshot(self.items) window.Visible=true self.opened() chooser.Visible=true scroll.Visible=false empty.Visible=false
   title.Text=L.text("Choose ranch",player.LocaleId)
  end
  function self.toggle()
   if self.area~="Lobby" then return end
-  self.mode=nil self.pen=nil chooser.Visible=false scroll.Visible=true
+  self.mode=nil self.pen=nil self.setEvolutionMode(false) chooser.Visible=false scroll.Visible=true
   self.snapshot(self.items)
   window.Visible=not window.Visible
   if window.Visible then self.opened() remote:FireServer("Bag") end
@@ -296287,18 +296414,20 @@ function UI.new(gui,remote)
  function self.state(state)
   self.area=state.area
   button.Visible=state.area=="Lobby"
-  if state.area~="Lobby" then window.Visible=false self.pen=nil end
+  if state.area~="Lobby" then window.Visible=false self.pen=nil self.setEvolutionMode(false) end
   money.Text=L.text("Uncollected coins",player.LocaleId)..": "..tostring(state.pending or 0)
   button.Text=L.text("Bag",player.LocaleId).." [R]"
   if state.area=="Lobby" and self.count~=state.count then self.count=state.count remote:FireServer("Bag") end
  end
  function self.openPen(index)
   if self.area~="Lobby" then return end
-  self.mode=nil chooser.Visible=false scroll.Visible=true
+  self.setEvolutionMode(false) self.mode=nil chooser.Visible=false scroll.Visible=true
   self.pen=index self.snapshot(self.items) window.Visible=true self.opened()
  end
  function self.snapshot(items)
   self.items=items self.cards={}
+  local present={} for _,item in ipairs(items) do present[item.id]=true end
+  for id in pairs(self.selected) do if not present[id] then self.selected[id]=nil end end
   local placed=0
   for _,item in ipairs(items) do if item.assignedPen==self.pen and self.pen then placed+=1 end end
   title.Text=L.text(self.mode=="RanchMenu" and "Choose ranch" or self.pen and "Ranch" or "Bag",player.LocaleId)..(self.pen and (" "..self.pen.." · "..placed.."/2") or "")
@@ -296308,6 +296437,13 @@ function UI.new(gui,remote)
   pageLabel.Text=self.page.." / "..pages
   local show=self.mode~="RanchMenu"
   search.Visible=show tabs.Visible=show previous.Visible=show nextPage.Visible=show pageLabel.Visible=show
+  evolveToggle.Visible=show and not self.pen
+  evolveControls.Visible=show and self.evolutionMode and not self.pen
+  if self.evolutionMode then
+   scroll.Position=UDim2.fromOffset(16,240) scroll.Size=UDim2.new(1,-32,1,-295)
+  else
+   scroll.Position=UDim2.fromOffset(16,175) scroll.Size=UDim2.new(1,-32,1,-230)
+  end
   empty.Visible=show and #filtered==0
   empty.Text=L.text(#items==0 and "No monsters caught yet" or "No matching monsters",player.LocaleId)
   for _,tab in ipairs(tabs:GetChildren()) do if tab:IsA("TextButton") then tab.BackgroundColor3=tab.Name=="Region_"..self.region and Color3.fromRGB(167,127,79) or Color3.fromRGB(213,193,159) end end
@@ -296330,10 +296466,33 @@ function UI.new(gui,remote)
     choose.Activated:Connect(function()
      if allowed and self.pen and self.area=="Lobby" then remote:FireServer(mine and "Remove" or "Place",{id=item.id,pen=self.pen}) end
     end)
+   elseif self.evolutionMode then
+    local anchor=selectionAnchor()
+    local compatible=not anchor or (anchor.monsterId==item.monsterId and anchor.stars==item.stars)
+    local selected=self.selected[item.id]==true
+    local choose=make("TextButton",{Name="SelectForEvolution",Text=selected and L.text("Selected",player.LocaleId) or L.text("Select",player.LocaleId),Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,29),TextSize=14,BackgroundColor3=selected and Color3.fromRGB(80,134,104) or compatible and Color3.fromRGB(147,182,154) or Color3.fromRGB(184,181,168),TextColor3=Color3.new(1,1,1),Active=compatible and (selected or selectedCount()&lt;3),ZIndex=24},card)
+    make("UICorner",{CornerRadius=UDim.new(0,8)},choose)
+    choose.Activated:Connect(function()
+     if self.selected[item.id] then self.selected[item.id]=nil
+     elseif compatible and selectedCount()&lt;3 and self.area=="Lobby" then self.selected[item.id]=true end
+     self.snapshot(self.items)
+    end)
    elseif item.assignedPen then
     make("TextLabel",{Text=L.text("Placed",player.LocaleId).." · "..item.assignedPen,BackgroundTransparency=1,Position=UDim2.fromOffset(4,208),Size=UDim2.new(1,-8,0,29),TextSize=14,ZIndex=23},card)
    end
 
+  end
+  updateEvolutionControls()
+ end
+ function self.evolutionResult(result)
+  if type(result)~="table" then return end
+  if result.ok then
+   self.selected={} self.evolutionMode=false evolveControls.Visible=false
+   scroll.Position=UDim2.fromOffset(16,175) scroll.Size=UDim2.new(1,-32,1,-230)
+   evolveToggle.Text=L.text("Evolve",player.LocaleId)
+  else
+   local key=result.reason=="MaxStars" and "Already at max stars" or "Evolution failed"
+   evolveStatus.Text=L.text(key,player.LocaleId)
   end
  end
  function self.income(gains)
@@ -296633,6 +296792,8 @@ remote.OnClientEvent:Connect(function(kind,data)
  if kind=="Pen" then bagUI.openPen(data) return end
  if kind=="Journal" then journalUI.snapshot(data) return end
  if kind=="Bag" then bagUI.snapshot(data) return end
+ if kind=="EvolutionResult" then bagUI.evolutionResult(data) return end
+ if kind=="BagIncome" then bagUI.income(data) return end
  if kind~="State" then return end
  if data.huntRoot and data.huntRoot:FindFirstChild("Monsters") and monsters~=data.huntRoot.Monsters then
   monsters=data.huntRoot.Monsters
@@ -296925,7 +297086,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
    pose.frame = blended
   end
 
-		local scale=Catalog.Scales[Catalog.stage(model:GetAttribute("Stars") or 1)]
+		local scale=Catalog.scale(model:GetAttribute("Stars") or 1)
 		local phase = (clock - (model:GetAttribute("RunStarted") or clock)) * math.pi * 7
 		local angry = model:GetAttribute("Angry") == true
 		local warningActive = model:GetAttribute("AngerWarning") == true or angry

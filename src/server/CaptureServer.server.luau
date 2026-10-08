@@ -191,7 +191,7 @@ Lobby.connectPens(function(player)
 end)
 remote.OnServerEvent:Connect(function(player,action,value)
  if type(action)~="string" or not bags[player] then return end
- if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Journal" then return end
+ if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
@@ -210,6 +210,23 @@ remote.OnServerEvent:Connect(function(player,action,value)
   if states[player] or type(value)~="table" or not Lobby.canUsePen(player,value.pen) then return end
   local changed=action=="Place" and BagRules.place(bags[player],value.id,value.pen) or action=="Remove" and BagRules.remove(bags[player],value.id,value.pen)
   if changed then Lobby.display(player,value.pen,bags[player].monsters) sendBag(player) end
+  return
+ end
+ if action=="Evolve" then
+  if states[player] or type(value)~="table" then return end
+  -- Credit every completed income tick before consuming source monsters.
+  local gains=BagRules.accrue(bags[player],now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
+  local evolved,affected=BagRules.evolve(bags[player],value,now())
+  if not evolved then
+   remote:FireClient(player,"EvolutionResult",{ok=false,reason=affected})
+   sendBag(player)
+   return
+  end
+  for pen in pairs(affected) do Lobby.display(player,pen,bags[player].monsters) end
+  remote:FireClient(player,"EvolutionResult",{ok=true,monsterId=evolved.monsterId,stars=evolved.stars})
+  send(player)
+  if #gains>0 then remote:FireClient(player,"BagIncome",gains) end
+  sendBag(player)
   return
  end
  if action=="Journal" then if not states[player] then remote:FireClient(player,"Journal",Progress.snapshot(player,true)) end return end

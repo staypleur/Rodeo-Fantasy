@@ -71,7 +71,10 @@ function Lobby.display(player,index,items)
    model:SetAttribute("MonsterId",item.monsterId) model:SetAttribute("Stars",item.stars) model:SetAttribute("Flying",species.Flying)
    model:SetAttribute("RunStarted",workspace:GetServerTimeNow())
    for _,node in ipairs(model:GetDescendants()) do if node:IsA("BillboardGui") then node:Destroy() end end
-   local scale=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog).Scales[require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog).stage(item.stars)]
+   local catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
+   local stage=catalog.stage(item.stars)
+   local scale=catalog.scale(item.stars)
+   model:ScaleTo(scale/catalog.Scales[stage])
    local height=species.Flying and 3*scale or species.RootHeight*scale
    local boxFrame,boxSize=model:GetBoundingBox()
    local offset=model.PrimaryPart.CFrame:ToObjectSpace(boxFrame).Position

@@ -212,6 +212,8 @@ remote.OnClientEvent:Connect(function(kind,data)
  if kind=="Pen" then bagUI.openPen(data) return end
  if kind=="Journal" then journalUI.snapshot(data) return end
  if kind=="Bag" then bagUI.snapshot(data) return end
+ if kind=="EvolutionResult" then bagUI.evolutionResult(data) return end
+ if kind=="BagIncome" then bagUI.income(data) return end
  if kind~="State" then return end
  if data.huntRoot and data.huntRoot:FindFirstChild("Monsters") and monsters~=data.huntRoot.Monsters then
   monsters=data.huntRoot.Monsters

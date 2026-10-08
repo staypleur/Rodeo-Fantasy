@@ -47,6 +47,37 @@ function BagRules.remove(session,id,pen)
  item.assignedPen=nil return true
 end
 
+-- Consumes exactly three distinct copies of the same species and star tier.
+-- Returns the new monster and the affected ranches, or nil plus a reason.
+function BagRules.evolve(session,ids,clock)
+ if type(ids)~="table" or #ids~=3 then return nil,"NeedThree" end
+ local unique,selected={},{}
+ for _,id in ipairs(ids) do
+  if type(id)~="number" or id~=id or id%1~=0 or unique[id] then return nil,"InvalidSelection" end
+  unique[id]=true
+  local item=BagRules.find(session,id)
+  if not item then return nil,"MissingMonster" end
+  table.insert(selected,item)
+ end
+ local first=selected[1]
+ if math.floor(first.stars or 1)>=10 then return nil,"MaxStars" end
+ for index=2,3 do
+  local item=selected[index]
+  if item.monsterId~=first.monsterId then return nil,"DifferentSpecies" end
+  if item.stars~=first.stars then return nil,"DifferentStars" end
+ end
+ local affected={}
+ for _,item in ipairs(selected) do if item.assignedPen then affected[item.assignedPen]=true end end
+ for index=#session.monsters,1,-1 do
+  if unique[session.monsters[index].id] then table.remove(session.monsters,index) end
+ end
+ session.serial=(session.serial or 0)+1
+ local evolved={id=session.serial,monsterId=first.monsterId,stars=first.stars+1,lastIncome=clock,
+  incomeSeconds=first.incomeSeconds,incomeAmount=first.incomeAmount}
+ table.insert(session.monsters,evolved)
+ return evolved,affected
+end
+
 -- Prepared for direct collection; the UI/action remains to be confirmed.
 function BagRules.collect(session)
 	local amount = session.pending

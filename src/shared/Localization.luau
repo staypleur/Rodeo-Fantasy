@@ -72,6 +72,13 @@ L.entries={
  ["Hover an entry for field notes"]={ko="몬스터에 커서를 올리면 획득 방법을 볼 수 있어요",ja="モンスターにカーソルを合わせると入手方法を表示"},
  ["No entries here yet"]={ko="아직 등록된 몬스터가 없는 분류예요",ja="この分類にはまだ項目がありません"},
  ["Breeding details not announced yet"]={ko="배합 방법은 아직 공개되지 않았어요",ja="交配方法はまだ公開されていません"},
+ ["Evolve"]={ko="진화",ja="進化",en="Evolve"},
+ ["Cancel"]={ko="취소",ja="キャンセル",en="Cancel"},
+ ["Select"]={ko="선택",ja="選択",en="Select"},
+ ["Selected"]={ko="선택됨",ja="選択済み",en="Selected"},
+ ["Select three matching monsters"]={ko="같은 종류·같은 별 3마리를 선택하세요",ja="同種・同じ星の3匹を選んでください",en="Select three matching monsters"},
+ ["Evolution failed"]={ko="진화할 수 없어요. 가방을 새로 확인해 주세요.",ja="進化できません。バッグを確認してください。",en="Evolution failed. Refresh your bag and try again."},
+ ["Already at max stars"]={ko="10성이 된 몬스터는 더 진화할 수 없어요.",ja="10星のモンスターは進化できません。",en="A 10-star monster cannot evolve further."},
  ["Loading progress"]={ko="기록을 불러오는 중",ja="記録を読み込み中"},
  ["Progress saved"]={ko="기록 저장됨",ja="記録を保存済み"},
  ["Progress loaded"]={ko="기록 불러옴",ja="記録を読み込み済み"},
@@ -106,7 +113,7 @@ function L.huntHint(meters,seconds,locale)
 end
 function L.evolutionHint(stars,locale)
  local lang=string.sub(locale or "en",1,2)
- local pattern=lang=="ko" and "같은 종류·같은 별의 몬스터 3마리를 합쳐 %d성까지 성장시키세요. 합성 기능은 준비 중이에요." or lang=="ja" and "同種・同じ星の3匹を合成し%d星まで育てよう。合成機能は準備中。" or "Merge three of the same species and star until %d stars. Merging is coming soon."
+ local pattern=lang=="ko" and "가방에서 같은 종류·같은 별 3마리를 선택해 %d성으로 진화시키세요." or lang=="ja" and "バッグで同種・同じ星の3匹を選び、%d星に進化させよう。" or "Select three of the same species and star in your bag to evolve to %d stars."
  return string.format(pattern,stars)
 end
 return L

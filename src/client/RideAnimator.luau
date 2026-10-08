@@ -159,7 +159,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
    pose.frame = blended
   end
 
-		local scale=Catalog.Scales[Catalog.stage(model:GetAttribute("Stars") or 1)]
+		local scale=Catalog.scale(model:GetAttribute("Stars") or 1)
 		local phase = (clock - (model:GetAttribute("RunStarted") or clock)) * math.pi * 7
 		local angry = model:GetAttribute("Angry") == true
 		local warningActive = model:GetAttribute("AngerWarning") == true or angry

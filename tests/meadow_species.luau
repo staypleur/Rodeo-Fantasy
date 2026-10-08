@@ -24,4 +24,11 @@ end
 assert(peaks==3,'wolf must hop three times in a burst')
 assert(R.buck(1.6,1,8,true)==0,'burst must have a landing pause')
 assert(C.visual('RockElephant',10)=='RockElephantVisualTemplate_S9')
+local previous=C.scale(1)
+for stars=2,10 do
+ local current=C.scale(stars)
+ assert(current>previous,"every star tier must grow the creature")
+ previous=current
+end
+assert(C.scale(1)==1 and C.scale(3)==1.4 and C.scale(6)==1.9 and C.scale(9)==2.5 and C.scale(10)>C.scale(9))
 print('PASS: five species stats, unlock gates, 18 size/dash contacts and three-hop burst')

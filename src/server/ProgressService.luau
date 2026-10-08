@@ -17,7 +17,7 @@ local function nameplate(player,level)
  local gui=head:FindFirstChild("ExplorerNameplate")
  if not gui then
   gui=Instance.new("BillboardGui") gui.Name="ExplorerNameplate" gui.Adornee=head
-  gui.Size=UDim2.fromOffset(300,58) gui.StudsOffset=Vector3.new(0,2.2,0)
+  gui.Size=UDim2.fromOffset(220,44) gui.StudsOffset=Vector3.new(0,2.2,0)
   gui.MaxDistance=120 gui.AlwaysOnTop=false gui.Parent=head
   local humanoid=character:FindFirstChildOfClass("Humanoid") if humanoid then humanoid.NameDisplayDistance=0 end
  end

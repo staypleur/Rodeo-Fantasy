@@ -7,10 +7,13 @@ local function node(kind,name,props,parent)
 end
 function P.update(gui,level,name)
  local theme,tier=Themes.forLevel(level)
+ gui.Size=UDim2.fromOffset(220,44)
  if gui:GetAttribute("ThemeTier")~=tier then
   gui:ClearAllChildren() gui:SetAttribute("ThemeTier",tier) gui:SetAttribute("Theme",theme.name)
+  local canvas=node("Frame","PlaqueCanvas",{BackgroundTransparency=1,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(300,58)},gui)
+  local scale=Instance.new("UIScale") scale.Name="CompactPlaqueScale" scale.Scale=.73 scale.Parent=canvas
   local function block(name,x,y,w,h,color,z)
-   return node("Frame",name,{BorderSizePixel=0,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundColor3=color,ZIndex=z or 1},gui)
+   return node("Frame",name,{BorderSizePixel=0,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundColor3=color,ZIndex=z or 1},canvas)
   end
   local edge,metal,paper=rgb(theme.edge),rgb(theme.metal),rgb(theme.paper)
   block("Shadow",18,21,264,32,Color3.fromRGB(32,30,40))
@@ -44,16 +47,17 @@ function P.update(gui,level,name)
   if tier==11 then
    local colors={Color3.fromRGB(247,110,115),Color3.fromRGB(255,188,93),Color3.fromRGB(255,230,127),Color3.fromRGB(112,216,173),Color3.fromRGB(111,191,245),Color3.fromRGB(163,137,248),Color3.fromRGB(231,157,226)}
    local seq={} for i,c in ipairs(colors) do seq[i]=ColorSequenceKeypoint.new((i-1)/6,c) end
-   node("UIGradient","Rainbow",{Color=ColorSequence.new(seq)},gui.Bevel)
+   node("UIGradient","Rainbow",{Color=ColorSequence.new(seq)},canvas.Bevel)
    for i,c in ipairs(colors) do block("RainbowGem",36+(i-1)*36,46,15,3,c,4) end
   end
   local props={BackgroundTransparency=1,Font=Enum.Font.GothamBold,TextColor3=rgb(theme.ink),ZIndex=5}
-  local number=node("TextLabel","Level",props,gui)
+  local number=node("TextLabel","Level",props,canvas)
   number.Position=UDim2.fromOffset(31,20) number.Size=UDim2.fromOffset(48,27) number.TextSize=21
-  local account=node("TextLabel","PlayerName",props,gui)
+  local account=node("TextLabel","PlayerName",props,canvas)
   account.Position=UDim2.fromOffset(82,21) account.Size=UDim2.fromOffset(188,25)
   account.TextSize=17 account.TextXAlignment=Enum.TextXAlignment.Left account.TextTruncate=Enum.TextTruncate.AtEnd
  end
- gui.Level.Text=tostring(level) gui.PlayerName.Text=name
+ local canvas=gui:FindFirstChild("PlaqueCanvas")
+ if canvas then canvas.Level.Text=tostring(level) canvas.PlayerName.Text=name end
 end
 return P
