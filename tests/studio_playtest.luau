@@ -18,8 +18,18 @@ driver.OnServerInvoke = function(player, action, value)
 		root.CFrame = CFrame.new(monster.PrimaryPart.Position + Vector3.new(value and 5 or 30, 3, 0))
 		root.AssemblyLinearVelocity = Vector3.zero
 		return monster
+	elseif action == "SwitchTarget" then
+		local monster = game:GetService("ServerStorage").RodeoMonsterTemplate:Clone()
+		monster.Name = "SwitchTestTarget"
+		monster:SetAttribute("MonsterId", "Emberrat")
+		monster:SetAttribute("Occupied", false)
+		local root = player.Character.HumanoidRootPart
+		monster:PivotTo(CFrame.new(root.Position.X + (value and 30 or 3), 2, root.Position.Z - 3))
+		monster.Parent = workspace.RodeoPrototype.Monsters
+		return monster
 	elseif action == "Finish" then
 		finished = true
+		print("RODEO_TEST_SERVER_RESULT: " .. value)
 		task.defer(function() testService:EndTest(value) end)
 		return true
 	end
@@ -89,6 +99,20 @@ local success, problem = pcall(function()
 	task.wait(0.3)
 	monster = mount()
 	check(monster:GetAttribute("Occupied"), "monster must be occupied")
+	local firstRideStarted = state.started
+	local farTarget = driver:InvokeServer("SwitchTarget", true)
+	remote:FireServer("Mount", farTarget)
+	task.wait(0.3)
+	check(state.phase == "Riding" and monster:GetAttribute("Occupied"), "invalid switch must preserve old ride")
+	check(state.started == firstRideStarted, "invalid switch must preserve ride clock")
+	local switchTarget = driver:InvokeServer("SwitchTarget", false)
+	remote:FireServer("Mount", switchTarget)
+	untilTrue(function() return state.phase == "Jumping" end, "switch must jump")
+	check(not monster:GetAttribute("Occupied"), "switch must free previous monster")
+	untilTrue(function() return state.phase == "Riding" end, "switch must finish mounting")
+	check(switchTarget:GetAttribute("Occupied") and state.started > firstRideStarted, "switch must restart three seconds")
+	check(state.count == 0, "switch must not capture previous monster")
+	monster = switchTarget
 	local old = monster.PrimaryPart.Position
 	for _ = 1, 4 do remote:FireServer("Steer", 1) task.wait(0.15) end
 	remote:FireServer("Steer", 0)
@@ -103,6 +127,10 @@ local success, problem = pcall(function()
 	untilTrue(function() return state.phase == "Holding" end, "yellow did not enter hold")
 	check(lastZone == "Yellow" and state.count == 0, "yellow must wait before capture")
 	local firstDeadline, barStarted = state.captureAt, state.started
+	local rejectedTarget = driver:InvokeServer("SwitchTarget", false)
+	remote:FireServer("Mount", rejectedTarget)
+	task.wait(0.3)
+	check(state.phase == "Holding" and state.captureAt == firstDeadline, "holding must reject switch without resetting deadline")
 	local captureBar = player.PlayerGui.RodeoCaptureUI:FindFirstChild("CaptureBar", true)
 	check(captureBar and captureBar.Visible, "bar must stay visible while holding")
 	pressAt(0.9)

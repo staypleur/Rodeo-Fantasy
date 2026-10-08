@@ -107,7 +107,7 @@ local function toggleRide(active)
 end
 
 UserInputService.InputBegan:Connect(function(input, processed)
-	if processed or phase ~= "Idle" or input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
+	if processed or (phase ~= "Idle" and phase ~= "Riding") or input.UserInputType ~= Enum.UserInputType.MouseButton1 then return end
 	local target = targetMonster()
 	if target then remote:FireServer("Mount", target) end
 end)
@@ -179,7 +179,14 @@ RunService.RenderStepped:Connect(function(dt)
 		status.Text, detail.Text = "줄을 던져 탑승 중…", "앰버랫"
 	elseif phase == "Riding" then
 		status.Text = string.format("미니게임까지 %.1f초", math.max(0, Config.Capture.RideSeconds - elapsed))
-		detail.Text = "자동 전진 중 · A / D로 좌우 이동"
+		detail.Text = "A / D로 좌우 이동 · 3m 안의 다른 앰버랫 클릭으로 갈아타기"
+		local target = targetMonster()
+		if target and target.PrimaryPart and root and not target:GetAttribute("Occupied") then
+			local distance = (target.PrimaryPart.Position - root.Position).Magnitude * Config.Prototype.MetersPerStud
+			highlight.Adornee, highlight.Enabled = target, true
+			highlight.OutlineColor = distance <= Config.Capture.JumpMeters and Color3.fromRGB(136, 229, 165) or Color3.fromRGB(245, 105, 89)
+			detail.Text = string.format("갈아탈 앰버랫까지 %.1fm / 범위 3m · 클릭", distance)
+		end
 	elseif phase == "Minigame" then
 		status.Text = pressed and "판정 중…" or "노란색이나 주황색에서 스페이스바!"
 		detail.Text = string.format("흰색 %d%% 실패 · 노란색 %d%% 5초 버티기 · 주황색 %d%% 즉시 포획", math.floor(widths.White * 100 + 0.5), math.floor(widths.Yellow * 100 + 0.5), math.floor(widths.Orange * 100 + 0.5))

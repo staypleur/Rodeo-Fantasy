@@ -15,6 +15,7 @@ local states, owners, inventories, rateLimits, chunks = {}, {}, {}, {}, {}
 local bags = {}
 local nextBagUpdate = 0
 local decoratedChunks = {}
+local frontierZ = -8
 local initialPosition = Vector3.new(0, 2, -8)
 local jumpRange = Config.Capture.JumpMeters / tuning.MetersPerStud
 local preview = world:FindFirstChild("PreviewMonster")
@@ -68,6 +69,14 @@ local function spawnMonster(position)
 	monster:PivotTo(CFrame.new(position))
 	monster.Parent = monsters
 	return monster
+end
+
+local function spawnAhead(z)
+	-- Repeatable riding-switch fixture, not a final region spawn rule.
+	while frontierZ > z - 96 do
+		frontierZ -= 24
+		spawnMonster(Vector3.new((math.floor(-frontierZ / 24) % 2 == 0) and -4 or 4, 2, frontierZ))
+	end
 end
 
 local function notify(player, message)
@@ -144,7 +153,11 @@ local function capture(player)
 end
 
 local function mount(player, monster)
-	if states[player] then return end
+	local previous = states[player]
+	if previous and (previous.phase ~= "Riding" or now() - previous.started >= Config.Capture.RideSeconds) then
+		notify(player, "갈아타기는 미니게임 시작 전 3초 동안만 가능해요.")
+		return
+	end
 	if typeof(monster) ~= "Instance" or not monster:IsA("Model") then return end
 	if monster.Parent ~= monsters or monster:GetAttribute("MonsterId") ~= Config.Monster.Id then return end
 	if owners[monster] then notify(player, "다른 플레이어가 타고 있어요.") return end
@@ -161,16 +174,29 @@ local function mount(player, monster)
 	end
 	local rayParams = RaycastParams.new()
 	rayParams.FilterType = Enum.RaycastFilterType.Exclude
-	rayParams.FilterDescendantsInstances = { character, monster }
+	rayParams.FilterDescendantsInstances = previous and { character, monster, previous.monster } or { character, monster }
 	if workspace:Raycast(root.Position, difference, rayParams) then
 		notify(player, "사이에 장애물이 있어 줄을 던질 수 없어요.")
 		return
 	end
+	-- Validate the destination before cancelling the previous ride. Invalid clicks keep it intact.
+	if previous then
+		clearRope(previous)
+		owners[previous.monster] = nil
+		if previous.monster.Parent then
+			previous.monster:SetAttribute("Occupied", false)
+			previous.monster:SetAttribute("Running", false)
+			previous.monster:SetAttribute("Steering", 0)
+		end
+	end
+	local originalMovement = previous or {
+		wasAnchored = root.Anchored, autoRotate = humanoid.AutoRotate, platformStand = humanoid.PlatformStand,
+	}
 	local state = {
 		phase = "Jumping", started = now(), monster = monster,
 		root = root, humanoid = humanoid, steer = 0, steerAt = now(),
-		origin = root.CFrame, wasAnchored = root.Anchored,
-		autoRotate = humanoid.AutoRotate, platformStand = humanoid.PlatformStand,
+		origin = root.CFrame, wasAnchored = originalMovement.wasAnchored,
+		autoRotate = originalMovement.autoRotate, platformStand = originalMovement.platformStand,
 		widths = (inventories[player] or 0) > 0 and Config.Capture.Repeat or Config.Capture.First,
 	}
 	states[player], owners[monster] = state, player
@@ -269,6 +295,7 @@ RunService.Heartbeat:Connect(function(deltaTime)
 			local x = math.clamp(p.X + steering * tuning.SidewaysStudsPerSecond * dt, -tuning.RoadHalfWidth, tuning.RoadHalfWidth)
 			local z = p.Z - tuning.ForwardStudsPerSecond * dt
 			groundAt(z)
+			spawnAhead(z)
 			local newFrame = CFrame.new(x, p.Y, z)
 			state.monster:PivotTo(newFrame)
 			state.root.CFrame = newFrame * CFrame.new(0, tuning.RideHeightStuds, 0)
@@ -299,3 +326,4 @@ end)
 for _, player in ipairs(Players:GetPlayers()) do playerAdded(player) end
 groundAt(0)
 spawnMonster(initialPosition)
+spawnAhead(initialPosition.Z)
