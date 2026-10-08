@@ -1,6 +1,6 @@
 # Roblox Studio 적용과 확인
 
-현재 파일에는 새 초원5종 1성의 주행과 A안 성장 모델20개가 들어 있습니다. 합성 기능은 미정이므로 사냥 중 자동 진화하지 않습니다.
+현재 파일에는 새 초원5종 1성의 주행과 A안 단계별 부품 근사 모델이 들어 있습니다. GLB MeshPart 설치가 끝나기 전에는 승인 그림에 가까운 완성 3D 모델이 표시되지 않습니다. 합성 기능은 미정이므로 사냥 중 자동 진화하지 않습니다.
 
 ## 새 파일 실행
 
@@ -8,7 +8,7 @@
 2. **File → Open from File** 또는 **Ctrl+O**를 누릅니다.
 3. 프로젝트 폴더의 **dist → RodeoFantasy-Capture.rbxlx**를 선택합니다. 이전 열린 파일을 그대로 시험하면 변경이 보이지 않습니다.
 4. **File → Save to File As**로 새 이름에 저장하면 자동 복구 파일 잠금 충돌을 피할 수 있습니다.
-5. **F5**로 실행합니다. 중앙 평지에 나타나는지 확인하세요.
+5. **F5**로 실행합니다. 중앙 평지에 나타나는지 확인하세요. A 디자인 MeshPart를 넣으려면 [20개 모델을 가져와 설치하는 절차](ROBLOX_MODEL_IMPORT.md)를 완료해야 합니다. 그냥 F5만 누르면 기존 부품 근사 모델이 보입니다.
 
 ## 로비
 
@@ -67,14 +67,10 @@
 
 도감/경험치 영구 저장은 게시된 경험의 API 사용 설정과 실제 재접속 시험이 필요합니다. 미게시 파일은 세션 기록이며 가방/잔액은 아직 영구 저장하지 않습니다. 실제8클라이언트/모바일 성능은 이번 편집 모드 검사의 범위 밖입니다.
 
-## 3D 메시·실제 블록 로비·낙하 재검사
+## A 모델 가져오기와 게시
 
-1. 기존 시험을 Shift+F5로 멈추고 Ctrl+O로 dist/RodeoFantasy-Capture.rbxlx를 다시 엽니다. F5를 누릅니다. 실행 중 몬스터가 실제 MeshPart 몸체/입체 잎으로 표시됩니다. 편집 모드의 기본 부품은 실행 시 메시로 바뀌는 참조 모델입니다.
-2. 로비 중앙의 낮은 블록 타일과 실제 돌출 스터드, 목장·길·나무·진열대의 스터드를 확인합니다. 기존 파일을 이미 열어 둔 상태에서는 디스크 파일 변경이 자동으로 적용되지 않으므로 다시 여는 과정이 필요합니다.
-3. E1초로 사냥을 시작해 첫1.6초 탑승 연출 후 무리가 동굴/높은 둥지에서 도로로 합류하는지 확인합니다. 초원 종료선 직전에도 야생4~6마리가 표시되어야 합니다.
-4. Space로 점프하고 줄을 던지지 않습니다. 떨어지면 몸이 파편으로 흩어지고 이름/레벨도 숨겨져야 합니다. Space 재도전이나 로비 복귀 버튼을 누르면 몸과 이름표가 복원되어야 합니다.
-5. R 가방/T 도감/목장 배치에서도 같은3D A모델인지 확인합니다. 실제 합성 UI는 아직 없으며 생산량 계산은1~10성 모든 별의2배 규칙을 준비했습니다.
+최신 장소 파일에는 청록 지붕·석조 정원 A안 로비가 들어 있습니다. 다만 GLB는 자동 삽입되지 않으며 기존 부품 근사 모델이 보입니다. 승인된 20개 3D 모델을 가져와 연결하고 사냥·목장·가방·도감에서 확인하려면 [Studio 모델 가져오기 절차](ROBLOX_MODEL_IMPORT.md)를 완료하세요. Roblox에서 다른 플레이어에게 로비 변경을 보여주려면 마지막에 **File → Publish to Roblox**가 필요합니다. Git 커밋/푸시는 Roblox 게시가 아닙니다.
 
-공개 게임에서 메시를 쓰려면 Creator Dashboard의 해당 경험에서 **Enable Mesh / Image APIs**를 켜야 합니다. Roblox는 이 설정에 계정 연령/ID 인증 요건을 둡니다. [공식 EditableMesh 안내](https://create.roblox.com/docs/reference/engine/classes/EditableMesh). 설정이 꺼져 있거나 메시 생성이 실패하면 기본 A부품 모델을 유지하고 Studio **View → Output**에 `Creature mesh unavailable` 원인을 남깁니다. 이번 검사는 Studio 편집 모드의 실제 MeshPart 생성/애니메이션이며 공개 클라이언트 검증을 뜻하지 않습니다.
+현재 저장소에는 승인된 A 디자인을 바탕으로 만든 20개 로우폴리 3D GLB가 `dist/CreatureModels`에 있습니다. 기존 장소 파일에는 로비 A 건축이 들어 있지만 GLB는 장소에 자동 삽입되지 않습니다. 게임 템플릿에 실제 메시를 넣는 데 필요한 Studio 가져오기와 연결 스크립트는 [ROBLOX_MODEL_IMPORT.md](ROBLOX_MODEL_IMPORT.md)를 따르세요.
 
-원본3D파일은 assets/meshes/meadow의 OBJ와 같은 이름의 MTL을 함께 보관합니다. Blender에서 File → Import → Wavefront (.obj)로 열 수 있으며 모델 색/종별 부품 그룹을 유지합니다. 당장 시험하기 위해 별도 수동3D Import를 할 필요는 없습니다.
+가져온 정적 `MeshPart`는 런타임 EditableMesh 권한에 의존하지 않습니다. 반대로 아직 수동 가져오기를 하지 않은 템플릿은 기본 부품 모델을 사용하고, 런타임 변형 메시가 실패하면 Studio **View → Output**에 `Creature mesh unavailable` 원인을 남깁니다. EditableMesh 공개 권한은 [Roblox 공식 안내](https://create.roblox.com/docs/reference/engine/classes/EditableMesh)를 확인하세요.

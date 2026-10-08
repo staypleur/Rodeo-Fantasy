@@ -22,4 +22,4 @@
 
 실제 부품 설계의 오프라인 미리보기: [A계열20모델](../assets/previews/meadow-approved-a-models.png). 이 렌더는 Studio 스크린샷이 아니며 기본 부품을 근사 투영한 것이다. B/C는 실제 모델로 제작하지 않고 후보 그림/프롬프트로 보관한다.
 
-2026-10-08 추가: A계열20개 실제3D OBJ/MTL을 assets/meshes/meadow에 저장했다. 게임 실행 시 CreatureMesh가 직접 만든 몸체/잎 메시를 적용한다. 오프라인 미리보기도 같은 메시 정점/면을 사용하며 실제 Studio 캡처는 아니다.
+2026-10-09 추가: A계열20개 OBJ/MTL을 `assets/meshes/meadow`에, Roblox Studio Importer용 다중 메시 GLB를 `dist/CreatureModels`에 저장했다. 각 GLB는 28–40개의 이름 있는 MeshPart 원본으로 구성된다. 아직 새 Studio 장소로 가져와 연결해야 게임의 현재 부품 근사 모델이 실제 수입 메시로 바뀐다. 설치는 [ROBLOX_MODEL_IMPORT.md](ROBLOX_MODEL_IMPORT.md)를 따른다. 오프라인 미리보기는 Studio 캡처가 아니다.
