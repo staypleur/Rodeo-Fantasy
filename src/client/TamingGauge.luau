@@ -26,16 +26,19 @@ local function create()
  heart.BackgroundTransparency=1 heart.Text="♥" heart.Font=Enum.Font.GothamBlack
  heart.TextSize=44 heart.TextColor3=Color3.fromRGB(255,139,209) heart.Parent=disk
 end
-function Gauge.update(frame,progress,tamed,angry)
- if not frame then if billboard then billboard.Enabled=false end return end
+function Gauge.update(frame,progress,tamed,camera)
+ if not frame or tamed then if billboard then billboard.Enabled=false end return end
  if not anchor then create() end
- billboard.Enabled=true anchor.CFrame=frame*CFrame.new(3.5,5,0)
+ billboard.Enabled=true
+ -- Screen-relative lower-left of the mount, without covering its body or the rider.
+ local right=camera and camera.CFrame.RightVector or Vector3.xAxis
+ local up=camera and camera.CFrame.UpVector or Vector3.yAxis
+ anchor.CFrame=CFrame.new(frame.Position-right*4.5-up*2.5)
  local completed=math.floor(math.clamp(progress,0,1)*64+0.0001)
  for i,segment in ipairs(segments) do
   segment.BackgroundColor3=i<=completed and Color3.fromRGB(255,137,207) or Color3.fromRGB(106,99,78)
  end
- heart.Text=angry and "!" or "♥"
- heart.TextColor3=angry and Color3.fromRGB(255,167,96) or Color3.fromRGB(255,139,209)
- heart.TextTransparency=tamed and 0 or 0.1
+ heart.Text="♥"
+ heart.TextTransparency=0.1
 end
 return Gauge

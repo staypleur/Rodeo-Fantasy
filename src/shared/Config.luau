@@ -23,7 +23,7 @@ Config.BagIncome = {
 Config.Hunt = {
 	TameSeconds = 5,
 	AngerSeconds = 8,
-	BucksOff = true,
+	AngerEnabled = true,
 }
 
 -- These are tuning values for testing, not finalized game balance/art.
@@ -39,7 +39,7 @@ Config.Prototype = {
 	AirStudsPerSecond = 80,
 	LassoRangeStuds = 12,
 	FlightSeconds = 1.2,
-	BuckWarningSeconds = 2,
+	AngerWarningSeconds = 2,
 	BuckCycleSeconds = 0.55,
 	BuckHeightStuds = 2.4,
 	AngrySteerMultiplier = 0.35,

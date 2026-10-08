@@ -37,7 +37,10 @@ local function freeMount(state)
   state.monster:SetAttribute("Occupied",false)
   state.monster:SetAttribute("Steering",0)
   state.monster:SetAttribute("Angry",false)
+  state.monster:SetAttribute("AngerWarning",false)
   state.monster:SetAttribute("AngerStarted",nil)
+  local p=state.monster.PrimaryPart.Position
+  state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z)
  end
  state.previousMonster,state.monster=state.monster,nil
  clearRope(state)
@@ -129,10 +132,13 @@ RunService.Heartbeat:Connect(function(delta)
   if not state.root.Parent or player.Character~=state.root.Parent or state.humanoid.Health<=0 then finish(player,"사냥 종료") continue end
   local steer=clock-state.steerAt<0.5 and state.steer or 0
   local buckHeight,buckDrift=0,0
-  if state.phase=="Riding" and Config.Hunt.BucksOff and clock-state.started>=Config.Hunt.AngerSeconds then
+  if state.phase=="Riding" and Config.Hunt.AngerEnabled and clock-state.started>=Config.Hunt.AngerSeconds then
    state.angerAt=state.angerAt or clock
-   buckHeight,buckDrift=Rules.buck(clock-state.angerAt,tuning.BuckCycleSeconds,tuning.BuckHeightStuds)
-   steer*=tuning.AngrySteerMultiplier
+   local elapsed=clock-state.angerAt-tuning.AngerWarningSeconds
+   if elapsed>=0 then
+    buckHeight,buckDrift=Rules.buck(elapsed,tuning.BuckCycleSeconds,tuning.BuckHeightStuds)
+    steer*=tuning.AngrySteerMultiplier
+   end
   end
   local old=state.root.Position
   local speed=state.phase=="Airborne" and tuning.AirStudsPerSecond or tuning.ForwardStudsPerSecond
@@ -160,6 +166,7 @@ RunService.Heartbeat:Connect(function(delta)
     state.protectedUntil=clock+tuning.LandingGraceSeconds
     state.monster:SetAttribute("RunStarted",clock)
     state.monster:SetAttribute("Angry",false)
+    state.monster:SetAttribute("AngerWarning",false)
     state.monster:SetAttribute("AngerStarted",nil)
     send(player)
     -- Space presses during landing are not queued as a new jump.
@@ -178,11 +185,12 @@ RunService.Heartbeat:Connect(function(delta)
     state.tamed=true BagRules.grant(bags[player],Config.Monster.Id,clock) send(player,Config.Monster.Name.." 길들이기 성공! 가방에 추가됐어요.")
     state.monster:SetAttribute("Tamed_"..player.UserId,true)
    end
-   if Config.Hunt.BucksOff and clock-state.started>=Config.Hunt.AngerSeconds then
+   if Config.Hunt.AngerEnabled and clock-state.started>=Config.Hunt.AngerSeconds then
     state.angerAt=state.angerAt or clock
-    state.monster:SetAttribute("AngerStarted",state.angerAt)
-    state.monster:SetAttribute("Angry",true)
-    if clock-state.angerAt>=tuning.BuckWarningSeconds then finish(player,Config.Monster.Name.."이 화가 나서 떨어뜨렸어요.") end
+    state.monster:SetAttribute("AngerWarning",true)
+    state.monster:SetAttribute("AngerStarted",state.angerAt+tuning.AngerWarningSeconds)
+    state.monster:SetAttribute("Angry",clock-state.angerAt>=tuning.AngerWarningSeconds)
+    -- Anger persists until the rider chooses to jump or a real collision ends the run.
    end
   end
  end

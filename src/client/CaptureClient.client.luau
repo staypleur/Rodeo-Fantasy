@@ -152,7 +152,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  distance.Text=string.format("%dm",math.floor(state.distance or 0))
  highlight.Enabled=false
  panel.Visible=not active()
- gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),state.tamed,state.angerAt~=nil)
+ gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),state.tamed,workspace.CurrentCamera)
  for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
  if active() and root then
   -- Follow horizontal movement; jumping should not lift the whole view.

@@ -70,8 +70,9 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
 
 		local phase = (clock - (model:GetAttribute("RunStarted") or clock)) * math.pi * 7
 		local angry = model:GetAttribute("Angry") == true
+		local warningActive = model:GetAttribute("AngerWarning") == true or angry
 		local warning = warnings[model]
-		if angry and not warning then
+		if warningActive and not warning then
 			warning = Instance.new("BillboardGui")
 			warning.Name, warning.Size, warning.StudsOffset = "AngerWarning", UDim2.fromOffset(60, 70), Vector3.new(0, 4.5, 0)
 			warning.AlwaysOnTop, warning.Adornee, warning.Parent = true, root, root
@@ -82,7 +83,11 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
 			label.Parent = warning
 			warnings[model] = warning
 		end
-		if warning then warning.Enabled = angry end
+		if warning then
+   warning.Enabled = warningActive
+   local label=warning:FindFirstChildWhichIsA("TextLabel")
+   if label then label.TextTransparency=0.15+math.max(0,math.sin(clock*12))*0.45 end
+  end
 		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds)
 		local lean = running and (model:GetAttribute("Steering") or 0) * -0.09 or 0
 		local frame = pose.frame * CFrame.Angles(angry and pitch or 0, 0, lean)
