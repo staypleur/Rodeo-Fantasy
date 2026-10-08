@@ -8,7 +8,7 @@ local function clear()
  shards,hidden={},{}
  character,started=nil,nil
 end
-function Effect.start(model,clock)
+function Effect.start(model,clock,monsterFrame)
  clear()
  if not model then return end
  character,started=model,clock
@@ -35,6 +35,21 @@ function Effect.start(model,clock)
   if radial.Magnitude<0.1 then radial=Vector3.new(math.cos(index*2.4),0,math.sin(index*2.4)) end
   local velocity=radial.Unit*12+Vector3.new(0,12+index%4,10)
   table.insert(shards,{part=shard,origin=shard.CFrame,velocity=velocity,alpha=original.Transparency,spin=Vector3.new(index%3+1,1,index%2+1)})
+ end
+ if monsterFrame then
+  local template=game.ReplicatedStorage.RodeoFantasy.VisualTemplate
+  for _,original in ipairs(template:GetChildren()) do
+   if not original:IsA("BasePart") or original==template.PrimaryPart or original.Transparency>=1 then continue end
+   index+=1
+   local shard=original:Clone()
+   for _,item in ipairs(shard:GetDescendants()) do if not item:IsA("SpecialMesh") and not item:IsA("Decal") then item:Destroy() end end
+   shard.Name="LocalMonsterCrashShard" shard.Anchored=true
+   shard.CanCollide,shard.CanTouch,shard.CanQuery=false,false,false
+   shard.CFrame=monsterFrame*template.PrimaryPart.CFrame:ToObjectSpace(original.CFrame)
+   shard.Parent=workspace
+   local angle=index*2.4
+   table.insert(shards,{part=shard,origin=shard.CFrame,velocity=Vector3.new(math.cos(angle)*14,9+index%5,math.sin(angle)*14+10),alpha=original.Transparency,spin=Vector3.new(1,index%3+1,1)})
+  end
  end
 end
 function Effect.update(model,phase,clock)

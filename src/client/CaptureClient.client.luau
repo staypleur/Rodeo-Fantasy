@@ -13,6 +13,7 @@ local rider=require(script.Parent:WaitForChild("RiderPresentation"))
 local gauge=require(script.Parent:WaitForChild("TamingGauge"))
 local crashEffect=require(script.Parent:WaitForChild("CrashEffect"))
 local audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local catch=require(script.Parent:WaitForChild("CatchPresentation"))
 local dash=require(script.Parent:WaitForChild("DashPresentation"))
 local markers=require(script.Parent:WaitForChild("DistanceMarkers"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
@@ -57,7 +58,9 @@ end
 local function active() return state.phase~="Idle" and state.phase~="GameOver" and state.phase~="CourseEnd" end
 local function steering()
  if state.phase~="Riding" then return 0 end
- if right or left then return (right and 1 or 0)-(left and 1 or 0) end
+ local keyLeft=not UIS:GetFocusedTextBox() and UIS:IsKeyDown(Enum.KeyCode.A)
+ local keyRight=not UIS:GetFocusedTextBox() and UIS:IsKeyDown(Enum.KeyCode.D)
+ if keyRight or keyLeft then return (keyRight and 1 or 0)-(keyLeft and 1 or 0) end
  if held and pointerOrigin and pointerX then
   local dx=pointerX-pointerOrigin
   return math.abs(dx)<14 and 0 or math.clamp(dx/120,-1,1)
@@ -120,7 +123,7 @@ UIS.WindowFocusReleased:Connect(function()
 end)
 remote.OnClientEvent:Connect(function(kind,data)
  if kind~="State" then return end
- if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow()) end
+ if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow(),data.monsterCrashFrame) end
  if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
  if data.message then notice,noticeUntil=data.message,os.clock()+3 end
@@ -152,13 +155,15 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
    visualFrame=flightFrame
   end
  end
+ local catchFov=catch.update(state,player.Character,visualFrame,clock)
  rider.update(player.Character,state.phase,visualFrame,dt,clock,state.dashUntil)
  dash.update(state.phase,visualFrame,clock,state.dashUntil,t.SwitchDashSeconds)
  crashEffect.update(player.Character,state.phase,clock)
+ catch.crates(workspace.RodeoPrototype:FindFirstChild("Obstacles"),root and root.Position,clock,dt)
  audio.update(state,monsters,root and root.Position,clock)
  local displayDistance=state.distance or 0
  if active() then
-  local speed=state.phase=="Airborne" and t.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,t.ForwardStudsPerSecond,t.SwitchDashMultiplier)
+  local speed=state.phase=="Airborne" and t.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,(state.baseSpeed or t.ForwardStudsPerSecond),t.SwitchDashMultiplier)
   displayDistance+=math.clamp(clock-(state.sampleTime or clock),0,0.3)*speed*t.MetersPerStud
  end
  markers.update(active() or state.phase=="CourseEnd",displayDistance,visualFrame,t.MetersPerStud)
@@ -173,6 +178,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   local groundFocus=Vector3.new(0,t.CameraGroundFocusStuds,visualFrame.Position.Z)
   local target=CFrame.lookAt(groundFocus+Vector3.new(t.CameraSideStuds,t.CameraHeightStuds,t.CameraBehindStuds),groundFocus+Vector3.new(0,0,-t.CameraLookAheadStuds))
   -- The followed visual position is already smoothed; a second camera lag hides jumps.
+  workspace.CurrentCamera.FieldOfView=t.CameraFieldOfView+catchFov
   workspace.CurrentCamera.CFrame=target
   workspace.CurrentCamera.Focus=CFrame.new(groundFocus)
   if os.clock()-lastSteer>=0.1 then remote:FireServer("Steer",steering()) lastSteer=os.clock() end
@@ -191,9 +197,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  if state.phase=="Riding" then
   status.Text=state.angerAt and "화났어요! 스페이스바로 점프하세요!" or state.tamed and "길들이기 성공 · 계속 타고 달리세요" or "루미돈 길들이는 중 ♥"
   instruction.Text="A·D로 좌우 이동 · 스페이스바로 점프 / 공중에서 다시 누르면 줄"
-  if clock<(state.protectedUntil or 0) then
-   instruction.Text=string.format("착지 보호 %.1f초 · A·D 좌우 이동 / 스페이스바 점프",state.protectedUntil-clock)
-  end
+
  elseif state.phase=="Airborne" then
   status.Text="스페이스바로 다음 몬스터를 잡으세요!"
   instruction.Text="노란 원 안에 몬스터가 들어오면 줄이 연결됩니다"

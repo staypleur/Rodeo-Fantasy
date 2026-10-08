@@ -163,3 +163,44 @@ assert(wind.Position.Z==-10,"wind must follow moving rider")
 dash.update("Riding",CFrame.identity,4.61,4.6,0.6)
 assert(not workspace:FindFirstChild("LocalDashWind"),"dash effect must clean up when boost expires")
 print("DASH_WIND_PASS")
+
+local catch=require(game.StarterPlayer.StarterPlayerScripts.CatchPresentation)
+local catchRig=Instance.new("Model") catchRig.Parent=workspace
+local catchRoot=Instance.new("Part") catchRoot.Name="HumanoidRootPart" catchRoot.Parent=catchRig
+local hand=Instance.new("Part") hand.Name="RightHand" hand.Parent=catchRig
+local catchState={phase="Lassoing",monster=animal,started=10,landingSeconds=0.28}
+catch.update(catchState,catchRig,CFrame.new(0,5,0),10.05)
+assert(workspace:FindFirstChild("LocalThrownLasso") and workspace:FindFirstChild("LocalCatchGlow"),"throw loop and brief glow required")
+catchState.phase="Riding"
+catch.update(catchState,catchRig,CFrame.new(0,4,-10),10.28)
+assert(workspace:FindFirstChild("LocalLandingRing") and not workspace:FindFirstChild("LocalThrownLasso"),"landing must expand a ground ring and remove throw")
+catch.update(catchState,catchRig,CFrame.new(0,4,-20),10.9)
+assert(not workspace:FindFirstChild("LocalLandingRing") and not workspace:FindFirstChild("LocalCatchGlow"),"catch impulse must expire")
+local crate=Instance.new("Part") crate.Position=Vector3.new(100,2,100) crate.Size=Vector3.new(4,4,4) crate.Parent=world.Obstacles
+crate:SetAttribute("BreakableCrate",true)
+local from,to=Vector3.new(100,2,110),Vector3.new(100,2,90)
+assert(engine.crateHit(from,to,animal,"Small") and not crate:GetAttribute("Broken"),"small monster cannot smash crate")
+assert(not engine.crateHit(from,to,animal,"Medium") and crate:GetAttribute("Broken"),"medium monster breaks crate without ending run")
+assert(not engine.hit(from,to),"broken crate cannot collide again")
+assert(not crate.CanQuery and not crate.CanTouch,"broken crate must not block lasso raycasts or touch")
+catch.crates(world.Obstacles,crate.Position,workspace:GetServerTimeNow(),0.01)
+assert(workspace:FindFirstChild("LocalCrateShard"),"broken crate must scatter wood")
+catch.crates(nil,nil,workspace:GetServerTimeNow()+1,1)
+assert(not workspace:FindFirstChild("LocalCrateShard"),"crate shards must clean up")
+crate:Destroy()
+effect.start(catchRig,12,CFrame.new(100,2,100))
+assert(workspace:FindFirstChild("LocalMonsterCrashShard"),"obstacle crash must also scatter monster pieces")
+effect.update(catchRig,"GameOver",13.2)
+assert(not workspace:FindFirstChild("LocalMonsterCrashShard"),"monster shards must clean up")
+effect.clear() catchRig:Destroy()
+print("CATCH_CRATE_MONSTER_BREAKUP_PASS")
+
+for _,npc in ipairs(world.Monsters:GetChildren()) do npc:Destroy() end
+engine.replenish(0)
+assert(#world.Monsters:GetChildren()==6,"depleted existing road must regain nearby herd")
+engine.replenish(0)
+assert(#world.Monsters:GetChildren()==6,"repeated restart must not multiply herd")
+for _,npc in ipairs(world.Monsters:GetChildren()) do
+ assert(npc.PrimaryPart.Position.Z < -24 and npc.PrimaryPart.Position.Z > -280,"refill must stay in front of launch")
+end
+print("RESTART_HERD_REFILL_PASS")

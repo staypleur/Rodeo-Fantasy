@@ -1715,6 +1715,8 @@ Config.Audio = {
 Config.Monster = {
 	Id = "Lumidon",
 	Name = "루미돈",
+ RunSpeed = 64, -- species-specific riding speed
+ SizeClass = "Medium", -- temporary crate-breaking test classification
 }
 
 -- Merging/evolution remain pending.
@@ -1739,7 +1741,7 @@ Config.Hunt = {
 
 -- These are tuning values for testing, not finalized game balance/art.
 Config.Prototype = {
-	MetersPerStud = 0.625,
+	MetersPerStud = 0.625 / 3,
 	ForwardStudsPerSecond = 64,
 	SidewaysStudsPerSecond = 32,
 	JumpSeconds = 0.28,
@@ -1751,6 +1753,7 @@ Config.Prototype = {
 	SwitchDashMultiplier = 1.5,
 	HerdSpawnChance = 0.325,
 	RockSpawnChance = 0.825,
+ CrateSpawnChance = 0.07, -- rare placement trial, not final density
 	AirStudsPerSecond = 80,
 	LassoRangeStuds = 12,
 	FlightSeconds = 1.2,
@@ -1759,7 +1762,6 @@ Config.Prototype = {
 	BuckHeightStuds = 2.4,
 	AngrySteerMultiplier = 0.35,
 	BuckSidewaysStudsPerSecond = 12,
-	LandingGraceSeconds = 2,
 	GroundChunkStuds = 256,
 	RideHeightStuds = 2,
 	RideForwardStuds = -0.4,
@@ -1915,14 +1917,14 @@ return Motion
         <Properties>
           <string name="Name">CourseGeometry</string>
           <ProtectedString name="Source">-- First meadow only. Distances below are layout trial values in studs.
-local Course={LengthStuds=1600,LengthMeters=1000}
+local Course={LengthStuds=4800,LayoutScale=3,LengthMeters=1000}
 local function ramp(d,a,b) return math.clamp((d-a)/(b-a),0,1) end
 function Course.width(z)
- local d=math.max(0,-z)
+ local d=math.max(0,-z/3)
  return 35-11*ramp(d,256,400)+11*ramp(d,600,800)
 end
 function Course.median(z)
- local d=math.max(0,-z)
+ local d=math.max(0,-z/3)
  return 9*ramp(d,800,950)*(1-ramp(d,1200,1400))
 end
 function Course.ranges(z,padding)
@@ -5234,11 +5236,14 @@ local lastSync,lastCleanup=0,0
 World.init(workspace.RodeoPrototype,game:GetService("ServerStorage").RodeoMonsterTemplate,Config,Rules)
 World.ensure(0)
 local function now() return workspace:GetServerTimeNow() end
+local function baseSpeed(state)
+ return state and state.monster and state.monster:GetAttribute("RideSpeed") or tuning.ForwardStudsPerSecond
+end
 local function send(player,message)
  local state,bag=states[player],bags[player]
  if not bag then return end
  BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
- remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,protectedUntil=state and state.protectedUntil or 0,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil})
+ remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
 end
 local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
@@ -5248,6 +5253,7 @@ local function attachRope(state)
  local from,to=Instance.new("Attachment"),Instance.new("Attachment")
  from.Parent,to.Parent=state.root,state.monster.PrimaryPart
  local rope=Instance.new("Beam")
+ rope.Name="CaptureRope"
  rope.Attachment0,rope.Attachment1=from,to
  rope.Width0,rope.Width1,rope.FaceCamera=0.1,0.1,true
  rope.Color,rope.Parent=ColorSequence.new(Color3.fromRGB(230,181,72)),state.root
@@ -5273,7 +5279,10 @@ local function finish(player,reason,crashKind)
  if not state or state.phase=="GameOver" then return end
  state.crash=crashKind~=nil
  state.endReason=crashKind
+ local brokenMount=(crashKind=="Wall" or crashKind=="Obstacle") and state.monster
+ if brokenMount and brokenMount.Parent then state.monsterCrashFrame=brokenMount.PrimaryPart.CFrame end
  freeMount(state)
+ if brokenMount and brokenMount.Parent then brokenMount:Destroy() end
  state.phase="GameOver"
  if state.root.Parent then
   state.root.Anchored=state.wasAnchored
@@ -5297,6 +5306,7 @@ local function start(player)
   end
  end
  World.ensure(0)
+ World.replenish(0)
  local model=World.spawn(Vector3.new(0,2,-8))
  model:SetAttribute("Occupied",true)
  model:SetAttribute("Angry",false)
@@ -5304,7 +5314,6 @@ local function start(player)
  root.Anchored,humanoid.AutoRotate,humanoid.PlatformStand=true,false,true
  root.CFrame=CFrame.new(0,2+tuning.RideHeightStuds,18)
  states[player].origin=root.CFrame
- states[player].protectedUntil=now()+tuning.IntroSeconds+tuning.LandingGraceSeconds
  attachRope(states[player])
  send(player)
 end
@@ -5325,7 +5334,6 @@ local function lasso(player,state)
  if workspace:Raycast(state.root.Position,model.PrimaryPart.Position-state.root.Position,params) then return end
  model:SetAttribute("Occupied",true)
  state.monster,state.phase,state.started=model,"Lassoing",now()
- state.protectedUntil=now()+tuning.JumpSeconds+tuning.LandingGraceSeconds
  state.origin=state.root.CFrame
  state.landingSeconds=tuning.JumpSeconds
  state.pendingDash=true
@@ -5373,7 +5381,7 @@ RunService.Heartbeat:Connect(function(delta)
    end
   end
   local old=state.phase=="Riding" and state.monster and state.monster.PrimaryPart.Position or state.root.Position
-  local speed=state.phase=="Airborne" and tuning.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,tuning.ForwardStudsPerSecond,tuning.SwitchDashMultiplier)
+  local speed=state.phase=="Airborne" and tuning.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,baseSpeed(state),tuning.SwitchDashMultiplier)
   local position=Vector3.new(math.clamp(old.X+(steer*tuning.SidewaysStudsPerSecond+buckDrift*tuning.BuckSidewaysStudsPerSecond)*dt,-tuning.RoadHalfWidth,tuning.RoadHalfWidth),old.Y,old.Z-speed*dt)
   if state.distance+speed*dt*tuning.MetersPerStud&gt;=Course.LengthMeters then
    state.distance=Course.LengthMeters
@@ -5394,24 +5402,23 @@ RunService.Heartbeat:Connect(function(delta)
   if state.phase=="Airborne" then
    position=Vector3.new(position.X,state.launchY+Rules.jumpHeight(clock-state.started,tuning.FlightSeconds,tuning.JumpArcStuds),position.Z)
    state.root.CFrame=CFrame.new(position)
-   if clock&gt;=(state.protectedUntil or 0) and World.hit(old,position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
+   if World.hit(old,position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
    if state.phase=="Airborne" and clock-state.started&gt;=tuning.FlightSeconds then finish(player,"다음 몬스터를 잡지 못했어요.") end
   elseif state.phase=="Lassoing" then
    if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end
    local p=state.monster.PrimaryPart.Position
-   state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z-tuning.ForwardStudsPerSecond*dt)
+   state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z-baseSpeed(state)*dt)
    local saddle=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
    local landingSeconds=state.landingSeconds or tuning.JumpSeconds
    local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
    state.root.CFrame=state.origin:Lerp(saddle,landingProgress)*CFrame.new(0,math.sin(math.pi*landingProgress)*tuning.JumpArcStuds*0.5,0)
-   if clock&gt;=(state.protectedUntil or 0) and World.hit(p,state.monster.PrimaryPart.Position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
+   if World.hit(p,state.monster.PrimaryPart.Position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
    if clock-state.started&gt;=landingSeconds then
     clearRope(state)
     state.phase,state.started,state.tamed="Riding",clock,state.monster:GetAttribute("Tamed_"..player.UserId)==true
     state.dashUntil=state.pendingDash and clock+tuning.SwitchDashSeconds or nil
     state.pendingDash=nil
     state.monster:SetAttribute("DashUntil",state.dashUntil)
-    state.protectedUntil=clock+tuning.LandingGraceSeconds
     state.monster:SetAttribute("RunStarted",clock)
     state.monster:SetAttribute("Angry",false)
     state.monster:SetAttribute("AngerWarning",false)
@@ -5426,9 +5433,10 @@ RunService.Heartbeat:Connect(function(delta)
    state.monster.PrimaryPart.CFrame=CFrame.new(position)
    state.monster:SetAttribute("Steering",steer)
    state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
+   if World.crateHit(before,position,state.monster,Config.Monster.SizeClass) then finish(player,"상자를 부술 수 없는 몬스터예요.","Obstacle") continue end
    local contact=World.mountedHit(before,position,state.monster)
    if contact then finish(player,contact=="Wall" and "벽에 부딪혔어요." or "다른 몬스터에 부딪혔어요.",contact) continue end
-   if clock&gt;=(state.protectedUntil or 0) and World.hit(before,position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
+   if World.hit(before,position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
    if not state.tamed and clock-state.started&gt;=Config.Hunt.TameSeconds then
     state.tamed=true BagRules.grant(bags[player],Config.Monster.Id,clock) send(player,Config.Monster.Name.." 길들이기 성공! 가방에 추가됐어요.")
     state.monster:SetAttribute("Tamed_"..player.UserId,true)
@@ -5446,6 +5454,8 @@ RunService.Heartbeat:Connect(function(delta)
  if clock-lastCleanup&gt;=3 then lastCleanup=clock World.cleanup(nearZ) end
 end)
 local function added(player)
+ player.CanLoadCharacterAppearance=true
+ if player.UserId&gt;0 then player.CharacterAppearanceId=player.UserId end
  bags[player]=BagRules.new()
  player.CharacterRemoving:Connect(function() finish(player,"사냥 종료") states[player]=nil end)
 end
@@ -5463,10 +5473,11 @@ for _,player in ipairs(Players:GetPlayers()) do added(player) end
 local chunks, animals, previousPositions = {}, {}, {}
 local root, monsters, obstacles, template, tuning
 local Rules
-local monsterId
+local monsterId,rideSpeed
 local Motion=require(game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy"):WaitForChild("HerdMotion"))
 local Course=require(game:GetService("ReplicatedStorage").RodeoFantasy.CourseGeometry)
 local spawnSerial=0
+local crateRows={}
 
 local function part(parent, name, position, size, color)
 	local item = Instance.new("Part")
@@ -5483,6 +5494,23 @@ local function decoration(parent,name,position,size,color)
  node.CanCollide,node.CanTouch,node.CanQuery=false,false,false
  node.TopSurface,node.BottomSurface=Enum.SurfaceType.Smooth,Enum.SurfaceType.Smooth
  return node
+end
+
+local function createCrate(x,z,index)
+ local box=part(obstacles,"BreakableCrate",Vector3.new(x,2,z),Vector3.new(4,4,4),Color3.fromRGB(133,88,54))
+ box.Transparency=1 box.CanCollide=false box:SetAttribute("Chunk",index) box:SetAttribute("BreakableCrate",true)
+ decoration(box,"WoodCore",box.Position,Vector3.new(3.6,3.6,3.6),Color3.fromRGB(143,97,59))
+ for _,side in ipairs({-1,1}) do
+  for _,height in ipairs({0.25,3.75}) do
+   decoration(box,"Frame",Vector3.new(x,height,z+side*1.94),Vector3.new(4,0.5,0.25),Color3.fromRGB(218,163,94))
+  end
+  for _,edge in ipairs({-1,1}) do
+   decoration(box,"Corner",Vector3.new(x+edge*1.75,2,z+side*1.94),Vector3.new(0.5,4,0.25),Color3.fromRGB(218,163,94))
+  end
+  local brace=decoration(box,"DiagonalBrace",Vector3.new(x,2,z+side*2),Vector3.new(4.4,0.45,0.2),Color3.fromRGB(195,137,77))
+  brace.CFrame*=CFrame.Angles(0,0,math.pi/4)
+ end
+ return box
 end
 
 local function dressObstacle(rock,style,scale)
@@ -5509,6 +5537,7 @@ end
 function World.init(world, modelTemplate, config, rules)
 	root, monsters, template, tuning, Rules = world, world.Monsters, modelTemplate, config.Prototype, rules
 	monsterId = config.Monster.Id
+ rideSpeed = config.Monster.RunSpeed or tuning.ForwardStudsPerSecond
 	obstacles = Instance.new("Folder")
 	obstacles.Name, obstacles.Parent = "Obstacles", root
 	local preview = root:FindFirstChild("PreviewMonster")
@@ -5523,6 +5552,7 @@ function World.spawn(position)
 	model:SetAttribute("MonsterId", monsterId)
 	model:SetAttribute("Occupied", false)
 	model:SetAttribute("Running", true)
+ model:SetAttribute("RideSpeed",rideSpeed)
 	model:SetAttribute("RunStarted", workspace:GetServerTimeNow() - (math.abs(position.X*0.17+position.Z*0.023)%1))
 	model:SetAttribute("Steering", 0)
 	model:PivotTo(CFrame.new(position))
@@ -5597,6 +5627,25 @@ function World.ensure(z)
      rock.CanCollide=false -- server swept collision is authoritative
      dressObstacle(rock,style,scale)
 				end
+
+    -- Independent seeded rolls keep existing herd/rock density unchanged.
+    if rowZ &lt; -96 then
+     local crateRandom=Random.new(33017+math.abs(math.floor(rowZ))*31)
+     if crateRandom:NextNumber()&lt;tuning.CrateSpawnChance then
+      local clear=true
+      for existing in pairs(crateRows) do if math.abs(existing-rowZ)&lt;192 then clear=false break end end
+      if clear then
+       local ranges=Course.ranges(rowZ,5)
+       local range=ranges[crateRandom:NextInteger(1,#ranges)]
+       local x=crateRandom:NextNumber(range[1],range[2])
+       -- Crates need their own clear footprint beside trees/rocks.
+       for _,other in ipairs(obstacles:GetChildren()) do
+        if math.abs(other.Position.Z-rowZ)&lt;other.Size.Z/2+4 and math.abs(other.Position.X-x)&lt;other.Size.X/2+4 then clear=false break end
+       end
+       if clear then createCrate(x,rowZ,index) crateRows[rowZ]=index end
+      end
+     end
+    end
 			end
 		end
 	end
@@ -5605,7 +5654,7 @@ end
 function World.step(dt)
  local rocks={}
  for _,rock in ipairs(obstacles:GetChildren()) do
-  if rock:IsA("BasePart") then table.insert(rocks,{x=rock.Position.X,z=rock.Position.Z,sx=rock.Size.X,sz=rock.Size.Z}) end
+  if rock:IsA("BasePart") and not rock:GetAttribute("Broken") then table.insert(rocks,{x=rock.Position.X,z=rock.Position.Z,sx=rock.Size.X,sz=rock.Size.Z}) end
  end
 	for model,motion in pairs(animals) do
 		if not model.Parent then animals[model] = nil previousPositions[model]=nil continue end
@@ -5634,6 +5683,39 @@ function World.nearest(position, excluded)
 	return best
 end
 
+-- Generated ground persists while its herd runs away. Refill a depleted launch
+-- window rather than regenerating chunks or multiplying an existing herd.
+function World.replenish(z)
+ local count=0
+ for model in pairs(animals) do
+  if model.Parent and not model:GetAttribute("Occupied") then
+   local p=model.PrimaryPart.Position
+   if p.Z&lt;z-24 and p.Z&gt;z-280 then count+=1 end
+  end
+ end
+ if count&gt;=6 then return end
+ for offset=48,272,32 do
+  local targetZ=z-offset
+  local ranges=Course.ranges(targetZ,4)
+  for _,range in ipairs(ranges) do
+   for i=1,4/#ranges do
+    local x=range[1]+(range[2]-range[1])*i/(4/#ranges+1)
+    local safe=true
+    for _,rock in ipairs(obstacles:GetChildren()) do
+     if not rock:GetAttribute("Broken") and math.abs(rock.Position.X-x)&lt;rock.Size.X/2+2 and math.abs(rock.Position.Z-targetZ)&lt;rock.Size.Z/2+4 then safe=false break end
+    end
+    if safe then
+     for other in pairs(animals) do
+      if other.Parent and math.abs(other.PrimaryPart.Position.X-x)&lt;5 and math.abs(other.PrimaryPart.Position.Z-targetZ)&lt;10 then safe=false break end
+     end
+    end
+    if safe then World.spawn(Vector3.new(x,2,targetZ)) count+=1 end
+    if count&gt;=6 then return end
+   end
+  end
+ end
+end
+
 -- Contact while riding: include moving herds and the visible inner canyon face.
 function World.mountedHit(from,to,mount)
  local half=mount.PrimaryPart.Size/2
@@ -5654,10 +5736,26 @@ end
 
 function World.hit(from, to)
 	for _, rock in ipairs(obstacles:GetChildren()) do
+		if rock:GetAttribute("Broken") then continue end
 		local p,s = rock.Position,rock.Size
 		if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,1) then return true end
 	end
 	return false
+end
+
+function World.crateHit(from,to,mount,sizeClass)
+ for _,box in ipairs(obstacles:GetChildren()) do
+  if not box:GetAttribute("BreakableCrate") or box:GetAttribute("Broken") then continue end
+  local p,s=box.Position,box.Size+mount.PrimaryPart.Size
+  if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,0) then
+   if sizeClass~="Medium" and sizeClass~="Large" then return true end
+   box.CanQuery=false box.CanTouch=false
+   box:SetAttribute("Broken",true) box:SetAttribute("BrokenAt",workspace:GetServerTimeNow())
+   for _,piece in ipairs(box:GetDescendants()) do if piece:IsA("BasePart") then piece.Transparency=1 piece.CanQuery=false end end
+   -- Loot is deliberately pending the user's item design.
+  end
+ end
+ return false
 end
 
 -- Preserve each active runner's vicinity, and avoid unlimited course/animal growth.
@@ -5669,6 +5767,7 @@ function World.cleanup(nearZ)
 			chunk:Destroy()
 			chunks[index] = nil
 			for _, rock in ipairs(obstacles:GetChildren()) do if rock:GetAttribute("Chunk") == index then rock:Destroy() end end
+			for z,owner in pairs(crateRows) do if owner==index then crateRows[z]=nil end end
 		end
 	end
 	for model in pairs(animals) do
@@ -5687,6 +5786,7 @@ return World
   <Item class="StarterPlayer" referent="RBX171">
     <Properties>
       <string name="Name">StarterPlayer</string>
+      <bool name="LoadCharacterAppearance">true</bool>
       <float name="CameraMaxZoomDistance">40</float>
       <float name="CameraMinZoomDistance">8</float>
     </Properties>
@@ -5712,6 +5812,7 @@ local rider=require(script.Parent:WaitForChild("RiderPresentation"))
 local gauge=require(script.Parent:WaitForChild("TamingGauge"))
 local crashEffect=require(script.Parent:WaitForChild("CrashEffect"))
 local audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local catch=require(script.Parent:WaitForChild("CatchPresentation"))
 local dash=require(script.Parent:WaitForChild("DashPresentation"))
 local markers=require(script.Parent:WaitForChild("DistanceMarkers"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
@@ -5756,7 +5857,9 @@ end
 local function active() return state.phase~="Idle" and state.phase~="GameOver" and state.phase~="CourseEnd" end
 local function steering()
  if state.phase~="Riding" then return 0 end
- if right or left then return (right and 1 or 0)-(left and 1 or 0) end
+ local keyLeft=not UIS:GetFocusedTextBox() and UIS:IsKeyDown(Enum.KeyCode.A)
+ local keyRight=not UIS:GetFocusedTextBox() and UIS:IsKeyDown(Enum.KeyCode.D)
+ if keyRight or keyLeft then return (keyRight and 1 or 0)-(keyLeft and 1 or 0) end
  if held and pointerOrigin and pointerX then
   local dx=pointerX-pointerOrigin
   return math.abs(dx)&lt;14 and 0 or math.clamp(dx/120,-1,1)
@@ -5819,7 +5922,7 @@ UIS.WindowFocusReleased:Connect(function()
 end)
 remote.OnClientEvent:Connect(function(kind,data)
  if kind~="State" then return end
- if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow()) end
+ if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow(),data.monsterCrashFrame) end
  if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
  if data.message then notice,noticeUntil=data.message,os.clock()+3 end
@@ -5851,13 +5954,15 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
    visualFrame=flightFrame
   end
  end
+ local catchFov=catch.update(state,player.Character,visualFrame,clock)
  rider.update(player.Character,state.phase,visualFrame,dt,clock,state.dashUntil)
  dash.update(state.phase,visualFrame,clock,state.dashUntil,t.SwitchDashSeconds)
  crashEffect.update(player.Character,state.phase,clock)
+ catch.crates(workspace.RodeoPrototype:FindFirstChild("Obstacles"),root and root.Position,clock,dt)
  audio.update(state,monsters,root and root.Position,clock)
  local displayDistance=state.distance or 0
  if active() then
-  local speed=state.phase=="Airborne" and t.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,t.ForwardStudsPerSecond,t.SwitchDashMultiplier)
+  local speed=state.phase=="Airborne" and t.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,(state.baseSpeed or t.ForwardStudsPerSecond),t.SwitchDashMultiplier)
   displayDistance+=math.clamp(clock-(state.sampleTime or clock),0,0.3)*speed*t.MetersPerStud
  end
  markers.update(active() or state.phase=="CourseEnd",displayDistance,visualFrame,t.MetersPerStud)
@@ -5872,6 +5977,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   local groundFocus=Vector3.new(0,t.CameraGroundFocusStuds,visualFrame.Position.Z)
   local target=CFrame.lookAt(groundFocus+Vector3.new(t.CameraSideStuds,t.CameraHeightStuds,t.CameraBehindStuds),groundFocus+Vector3.new(0,0,-t.CameraLookAheadStuds))
   -- The followed visual position is already smoothed; a second camera lag hides jumps.
+  workspace.CurrentCamera.FieldOfView=t.CameraFieldOfView+catchFov
   workspace.CurrentCamera.CFrame=target
   workspace.CurrentCamera.Focus=CFrame.new(groundFocus)
   if os.clock()-lastSteer&gt;=0.1 then remote:FireServer("Steer",steering()) lastSteer=os.clock() end
@@ -5890,9 +5996,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  if state.phase=="Riding" then
   status.Text=state.angerAt and "화났어요! 스페이스바로 점프하세요!" or state.tamed and "길들이기 성공 · 계속 타고 달리세요" or "루미돈 길들이는 중 ♥"
   instruction.Text="A·D로 좌우 이동 · 스페이스바로 점프 / 공중에서 다시 누르면 줄"
-  if clock&lt;(state.protectedUntil or 0) then
-   instruction.Text=string.format("착지 보호 %.1f초 · A·D 좌우 이동 / 스페이스바 점프",state.protectedUntil-clock)
-  end
+
  elseif state.phase=="Airborne" then
   status.Text="스페이스바로 다음 몬스터를 잡으세요!"
   instruction.Text="노란 원 안에 몬스터가 들어오면 줄이 연결됩니다"
@@ -5925,7 +6029,7 @@ local function clearHerdPath(from,to,root)
  local obstacles=world and world:FindFirstChild("Obstacles")
  if not obstacles then return true end
  for _,rock in ipairs(obstacles:GetChildren()) do
-  if not rock:IsA("BasePart") then continue end
+  if not rock:IsA("BasePart") or rock:GetAttribute("Broken") then continue end
   local p,s=rock.Position,rock.Size+root.Size
   if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,0.2) then return false end
  end
@@ -5958,8 +6062,8 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
  dt = dt or 1/60
  for i=#dust,1,-1 do
   local puff=dust[i] local age=clock-puff.started
-  if age&gt;=0.45 then puff.part:Destroy() table.remove(dust,i)
-  else puff.part.Transparency=0.55+age puff.part.Size=Vector3.one*(0.45+age*1.5) puff.part.Position+=Vector3.new(0,dt*0.7,0) end
+  if age&gt;=0.6 then puff.part:Destroy() table.remove(dust,i)
+  else puff.part.Transparency=0.45+age/0.6*0.55 puff.part.Size=Vector3.one*(0.75+age*1.5) puff.part.Position+=Vector3.new(0,dt*0.7,0) end
  end
  local displayed = {}
 	for model, pose in pairs(poses) do
@@ -5988,7 +6092,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
    pose.sample, pose.received = root.CFrame, clock
   end
   local elapsed = math.clamp(clock-pose.received,0,0.08)
-  local speed = model:GetAttribute("Occupied") and Rules.rideSpeed(clock,model:GetAttribute("DashUntil"),tuning.ForwardStudsPerSecond,tuning.SwitchDashMultiplier) or tuning.HerdStudsPerSecond
+  local speed = model:GetAttribute("Occupied") and Rules.rideSpeed(clock,model:GetAttribute("DashUntil"),(model:GetAttribute("RideSpeed") or tuning.ForwardStudsPerSecond),tuning.SwitchDashMultiplier) or tuning.HerdStudsPerSecond
   local steer = model:GetAttribute("Steering") or 0
   local velocity=Vector3.new(steer*tuning.SidewaysStudsPerSecond,0,-speed)
   if not model:GetAttribute("Occupied") then velocity=model:GetAttribute("HerdVelocity") or velocity end
@@ -6028,11 +6132,11 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
   local bounce=moving and (1-math.cos(phase))*0.22 or 0
   local gallopPitch=moving and math.sin(phase)*0.085 or 0
 		local frame = pose.frame * CFrame.new(0,bounce,0)*CFrame.Angles(angry and pitch or gallopPitch, 0, lean)
-  if moving and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)&gt;0.14 and #dust&lt;80 then
+  if moving and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)&gt;0.18 and #dust&lt;80 then
    pose.lastDust=clock
    local puff=Instance.new("Part") puff.Name="LocalHerdDust" puff.Anchored=true
    puff.CanCollide,puff.CanTouch,puff.CanQuery=false,false,false
-   puff.Color=Color3.fromRGB(239,220,176) puff.Size=Vector3.one*0.45 puff.Transparency=0.55
+   puff.Color=Color3.fromRGB(239,220,176) puff.Size=Vector3.one*0.75 puff.Transparency=0.45
    puff.Position=Vector3.new(frame.X+math.sin(phase)*0.9,0.2,frame.Z+1.6)
    puff.Parent=workspace table.insert(dust,{part=puff,started=clock})
   end
@@ -6140,13 +6244,13 @@ function Presentation.update(model,phase,frame,dt,clock,dashUntil)
    end
   end
   local airborne=phase=="Airborne" or phase=="Lassoing"
-  root.CFrame=frame * CFrame.Angles(airborne and -0.5 or 0,0,0)
+  root.CFrame=frame * CFrame.Angles(phase=="Lassoing" and -0.28 or airborne and -0.5 or 0,0,0)
   local function poseOffset(name)
    name=name:gsub(" ","")
    local offset=CFrame.identity
    if name:find("Shoulder") then
     local side=name:find("Left") and -1 or 1
-    offset=airborne and CFrame.Angles(0,0,side*math.pi/2) or (side==1 and CFrame.Angles(0.12*math.sin(clock*15),0,2.65) or CFrame.Angles(0.65,0,-0.15))
+    offset=phase=="Lassoing" and (side==1 and CFrame.Angles(1.8,0,0.35) or CFrame.Angles(0.2,0,-1.0)) or airborne and CFrame.Angles(0,0,side*math.pi/2) or (side==1 and CFrame.Angles(0.12*math.sin(clock*15),0,2.65) or CFrame.Angles(0.65,0,-0.15))
    elseif name:find("Hip") then
     local side=name:find("Left") and -1 or 1
     offset=CFrame.Angles(airborne and 0 or 1.2,0,side*(airborne and 0.65 or 0.3))
@@ -6195,26 +6299,26 @@ function Presentation.update(model,phase,frame,dt,clock,dashUntil)
   shadow.Transparency=airborne and 0.5 or 0.75
   trail.Enabled=airborne or (phase=="Riding" and dashUntil~=nil and clock&lt;dashUntil)
   if phase=="Riding" and previousPhase and previousPhase~="Riding" then
-   for i=1,8 do
+   for i=1,22 do
     local puff=Instance.new("Part") puff.Name="LocalLandingDust"
     puff.Anchored,puff.CanCollide,puff.CanTouch,puff.CanQuery=true,false,false,false
-    puff.Color=Color3.fromRGB(239,220,176) puff.Size=Vector3.one*0.7 puff.Transparency=0.45
-    local angle=i/8*math.pi*2
-    puff.Position=Vector3.new(frame.X+math.cos(angle)*2,0.3,frame.Z+math.sin(angle)*2)
-    puff.Parent=workspace table.insert(dust,{part=puff,started=clock})
+    puff.Color=Color3.fromRGB(239,220,176) puff.Size=Vector3.one*(1.2+i%3*0.35) puff.Transparency=0.45
+    local angle=i/22*math.pi*2
+    puff.Position=Vector3.new(frame.X+math.cos(angle)*4,0.5,frame.Z+math.sin(angle)*4)
+    puff.Parent=workspace table.insert(dust,{part=puff,started=clock,velocity=Vector3.new(math.cos(angle)*12,1.2,math.sin(angle)*12),baseSize=puff.Size.X})
    end
   end
   previousPhase=phase
-  if phase=="Riding" and clock-lastDust&gt;0.08 then
+  if phase=="Riding" and clock-lastDust&gt;0.04 then
    lastDust=clock
    local puff=Instance.new("Part")
    puff.Name="LocalHoofDust" puff.Anchored=true
    puff.CanCollide,puff.CanTouch,puff.CanQuery=false,false,false
    puff.Color=Color3.fromRGB(239,220,176) puff.Material=Enum.Material.SmoothPlastic
-   puff.Size=Vector3.new(0.5,0.5,0.5) puff.Transparency=0.45
-   puff.Position=Vector3.new(frame.X+math.sin(clock*31),0.3,frame.Z+2)
+   puff.Size=Vector3.one*(0.9+math.sin(clock*19)*0.15) puff.Transparency=0.4
+   puff.Position=Vector3.new(frame.X+math.sin(clock*31)*1.5,0.35,frame.Z+2.5)
    puff.Parent=workspace
-   table.insert(dust,{part=puff,started=clock})
+   table.insert(dust,{part=puff,started=clock,baseSize=puff.Size.X,velocity=Vector3.new(math.sin(clock*11)*0.5,0.7,2)})
    local streak=puff:Clone() streak.Name="LocalSpeedStreak"
    streak.Size=Vector3.new(0.08,0.04,3.5) streak.Transparency=0.65
    streak.Position=Vector3.new(frame.X+math.sin(clock*17)*8,0.08,frame.Z-9)
@@ -6222,12 +6326,12 @@ function Presentation.update(model,phase,frame,dt,clock,dashUntil)
   end
  end
  for i=#dust,1,-1 do
-  local entry=dust[i] local p=(clock-entry.started)/0.45
+  local entry=dust[i] local p=(clock-entry.started)/0.65
   if p&gt;=1 then entry.part:Destroy() table.remove(dust,i)
   else
    entry.part.Transparency=0.45+p*0.55
-   if not entry.streak then entry.part.Size=Vector3.one*(0.5+p*0.65) end
-   entry.part.Position+=Vector3.new(0,entry.streak and 0 or dt*0.6,0)
+   if not entry.streak then entry.part.Size=Vector3.one*((entry.baseSize or 0.5)+p*0.8) end
+   entry.part.Position+=(entry.velocity or Vector3.new(0,entry.streak and 0 or 0.6,0))*dt
   end
  end
 end
@@ -6299,7 +6403,7 @@ local function clear()
  shards,hidden={},{}
  character,started=nil,nil
 end
-function Effect.start(model,clock)
+function Effect.start(model,clock,monsterFrame)
  clear()
  if not model then return end
  character,started=model,clock
@@ -6326,6 +6430,21 @@ function Effect.start(model,clock)
   if radial.Magnitude&lt;0.1 then radial=Vector3.new(math.cos(index*2.4),0,math.sin(index*2.4)) end
   local velocity=radial.Unit*12+Vector3.new(0,12+index%4,10)
   table.insert(shards,{part=shard,origin=shard.CFrame,velocity=velocity,alpha=original.Transparency,spin=Vector3.new(index%3+1,1,index%2+1)})
+ end
+ if monsterFrame then
+  local template=game.ReplicatedStorage.RodeoFantasy.VisualTemplate
+  for _,original in ipairs(template:GetChildren()) do
+   if not original:IsA("BasePart") or original==template.PrimaryPart or original.Transparency&gt;=1 then continue end
+   index+=1
+   local shard=original:Clone()
+   for _,item in ipairs(shard:GetDescendants()) do if not item:IsA("SpecialMesh") and not item:IsA("Decal") then item:Destroy() end end
+   shard.Name="LocalMonsterCrashShard" shard.Anchored=true
+   shard.CanCollide,shard.CanTouch,shard.CanQuery=false,false,false
+   shard.CFrame=monsterFrame*template.PrimaryPart.CFrame:ToObjectSpace(original.CFrame)
+   shard.Parent=workspace
+   local angle=index*2.4
+   table.insert(shards,{part=shard,origin=shard.CFrame,velocity=Vector3.new(math.cos(angle)*14,9+index%5,math.sin(angle)*14+10),alpha=original.Transparency,spin=Vector3.new(1,index%3+1,1)})
+  end
  end
 end
 function Effect.update(model,phase,clock)
@@ -6507,9 +6626,112 @@ return Dash
 </ProtectedString>
         </Properties>
       </Item>
+      <Item class="ModuleScript" referent="RBX181">
+        <Properties>
+          <string name="Name">CatchPresentation</string>
+          <ProtectedString name="Source">-- Cosmetic throw and landing impulse; capture still belongs to the server.
+local Effects={}
+local phase,throw,ring,burst,highlight
+local debris={}
+local broken=setmetatable({},{__mode="k"})
+local function anchor(name)
+ local p=Instance.new("Part") p.Name=name p.Anchored=true p.Transparency=1
+ p.CanCollide,p.CanTouch,p.CanQuery=false,false,false p.Size=Vector3.one p.Parent=workspace
+ return p
+end
+local function circle(parent,count,color,width)
+ local points={}
+ for i=1,count do local a=Instance.new("Attachment") a.Parent=parent points[i]=a end
+ for i=1,count do
+  local beam=Instance.new("Beam") beam.Attachment0=points[i] beam.Attachment1=points[i%count+1]
+  beam.Width0,beam.Width1,beam.FaceCamera=width,width,true beam.Color=ColorSequence.new(color) beam.Parent=parent
+ end
+ return points
+end
+local function clear()
+ for _,value in ipairs({throw or false,ring or false,highlight or false}) do if value then value:Destroy() end end
+ if burst then burst.part:Destroy() end
+ throw,ring,burst,highlight=nil,nil,nil,nil
+end
+function Effects.update(state,character,frame,clock)
+ if state.phase=="Idle" or state.phase=="GameOver" or state.phase=="CourseEnd" then clear() phase=state.phase return 0 end
+ if state.phase=="Lassoing" and state.monster and state.monster.PrimaryPart and frame then
+  if not throw then
+   throw=anchor("LocalThrownLasso") circle(throw,24,Color3.fromRGB(255,222,100),0.12)
+   local a,b=Instance.new("Attachment"),Instance.new("Attachment") a.Name="Hand" b.Name="Loop" a.Parent=throw b.Parent=throw
+   local line=Instance.new("Beam") line.CurveSize0=2 line.CurveSize1=-1 line.Attachment0,line.Attachment1=a,b line.Width0,line.Width1,line.FaceCamera=0.1,0.1,true
+   line.Color=ColorSequence.new(Color3.fromRGB(255,222,100)) line.Parent=throw
+  end
+  local root=character and character:FindFirstChild("HumanoidRootPart")
+  local serverRope=root and root:FindFirstChild("CaptureRope")
+  if serverRope then serverRope.Enabled=false end
+  local hand=character and (character:FindFirstChild("RightHand") or character:FindFirstChild("Right Arm"))
+  local origin=hand and hand.Position or frame.Position+Vector3.new(1,1,0)
+  local target=state.monster.PrimaryPart.Position+Vector3.new(0,1,0)
+  local p=math.clamp((clock-state.started)/(state.landingSeconds or 0.28),0,1)
+  local center=origin:Lerp(target,math.min(1,p*1.8))+Vector3.new(0,math.sin(math.pi*p)*2,0)
+  throw.CFrame=CFrame.new(center)
+  local index=0
+  for _,a in ipairs(throw:GetChildren()) do
+   if a:IsA("Attachment") and a.Name~="Hand" and a.Name~="Loop" then
+    local angle=index/24*math.pi*2 index+=1
+    a.Position=Vector3.new(math.cos(angle)*(1.3+p*0.8),math.sin(angle)*0.35,math.sin(angle)*(1+p*0.6))
+   end
+  end
+  throw.Hand.Position=throw.CFrame:PointToObjectSpace(origin) throw.Loop.Position=Vector3.zero
+  if not highlight then highlight=Instance.new("Highlight") highlight.Name="LocalCatchGlow" highlight.Parent=workspace end
+  highlight.Adornee=state.monster highlight.FillColor=Color3.fromRGB(255,229,113) highlight.OutlineColor=Color3.fromRGB(255,248,213)
+  highlight.FillTransparency=0.35+p*0.5 highlight.OutlineTransparency=0.15+p*0.7
+ elseif throw then throw:Destroy() throw=nil end
+ if state.phase=="Riding" and phase=="Lassoing" and frame then
+  if burst then burst.part:Destroy() end
+  if ring then ring:Destroy() end
+  ring=anchor("LocalLandingRing") ring.Position=Vector3.new(frame.X,0.15,frame.Z)
+  burst={part=ring,started=clock,points=circle(ring,40,Color3.fromRGB(247,229,181),0.6)}
+ end
+ if burst then
+  local age=(clock-burst.started)/0.55
+  if age&gt;=1 then burst.part:Destroy() burst=nil ring=nil if highlight then highlight:Destroy() highlight=nil end
+  else
+   local radius=2+age*11
+   for i,a in ipairs(burst.points) do local angle=(i-1)/40*math.pi*2 a.Position=Vector3.new(math.cos(angle)*radius,0,math.sin(angle)*radius) end
+   for _,beam in ipairs(burst.part:GetChildren()) do if beam:IsA("Beam") then beam.Transparency=NumberSequence.new(0.25+age*0.75) beam.Width0=0.8*(1-age)+0.1 beam.Width1=beam.Width0 end end
+   if highlight then highlight.FillTransparency=0.85+age*0.15 highlight.OutlineTransparency=0.85+age*0.15 end
+  end
+ end
+ phase=state.phase
+ return state.phase=="Lassoing" and math.sin(math.pi*math.clamp((clock-state.started)/(state.landingSeconds or 0.28),0,1))*2.5 or 0
+end
+function Effects.crates(obstacles,position,clock,dt)
+ if obstacles and position then
+  for _,box in ipairs(obstacles:GetChildren()) do
+   if box:GetAttribute("Broken") and not broken[box] then
+    broken[box]=true
+    if clock-(box:GetAttribute("BrokenAt") or 0)&lt;0.8 and (box.Position-position).Magnitude&lt;160 then
+     for i=1,12 do
+      local shard=anchor("LocalCrateShard") shard.Transparency=0 shard.Material=Enum.Material.Wood
+      shard.Color=Color3.fromRGB(203,148,87) shard.Size=Vector3.new(1.8,0.35,0.55)
+      local angle=i/12*math.pi*2
+      shard.CFrame=CFrame.new(box.Position+Vector3.new(math.cos(angle),i%3-1,math.sin(angle)))
+      table.insert(debris,{part=shard,origin=shard.CFrame,started=clock,velocity=Vector3.new(math.cos(angle)*12,6+i%4,math.sin(angle)*12)})
+     end
+    end
+   end
+  end
+ end
+ for i=#debris,1,-1 do
+  local entry=debris[i] local age=clock-entry.started
+  if age&gt;=0.8 then entry.part:Destroy() table.remove(debris,i)
+  else entry.part.CFrame=CFrame.new(entry.origin.Position+entry.velocity*age+Vector3.new(0,-16*age*age,0))*CFrame.Angles(age*5,age*3,0) entry.part.Transparency=math.clamp((age-0.5)/0.3,0,1) end
+ end
+end
+return Effects
+</ProtectedString>
+        </Properties>
+      </Item>
     </Item>
   </Item>
-  <Item class="Lighting" referent="RBX181">
+  <Item class="Lighting" referent="RBX182">
     <Properties>
       <string name="Name">Lighting</string>
       <float name="ClockTime">13</float>

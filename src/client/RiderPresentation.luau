@@ -70,13 +70,13 @@ function Presentation.update(model,phase,frame,dt,clock,dashUntil)
    end
   end
   local airborne=phase=="Airborne" or phase=="Lassoing"
-  root.CFrame=frame * CFrame.Angles(airborne and -0.5 or 0,0,0)
+  root.CFrame=frame * CFrame.Angles(phase=="Lassoing" and -0.28 or airborne and -0.5 or 0,0,0)
   local function poseOffset(name)
    name=name:gsub(" ","")
    local offset=CFrame.identity
    if name:find("Shoulder") then
     local side=name:find("Left") and -1 or 1
-    offset=airborne and CFrame.Angles(0,0,side*math.pi/2) or (side==1 and CFrame.Angles(0.12*math.sin(clock*15),0,2.65) or CFrame.Angles(0.65,0,-0.15))
+    offset=phase=="Lassoing" and (side==1 and CFrame.Angles(1.8,0,0.35) or CFrame.Angles(0.2,0,-1.0)) or airborne and CFrame.Angles(0,0,side*math.pi/2) or (side==1 and CFrame.Angles(0.12*math.sin(clock*15),0,2.65) or CFrame.Angles(0.65,0,-0.15))
    elseif name:find("Hip") then
     local side=name:find("Left") and -1 or 1
     offset=CFrame.Angles(airborne and 0 or 1.2,0,side*(airborne and 0.65 or 0.3))
@@ -125,26 +125,26 @@ function Presentation.update(model,phase,frame,dt,clock,dashUntil)
   shadow.Transparency=airborne and 0.5 or 0.75
   trail.Enabled=airborne or (phase=="Riding" and dashUntil~=nil and clock<dashUntil)
   if phase=="Riding" and previousPhase and previousPhase~="Riding" then
-   for i=1,8 do
+   for i=1,22 do
     local puff=Instance.new("Part") puff.Name="LocalLandingDust"
     puff.Anchored,puff.CanCollide,puff.CanTouch,puff.CanQuery=true,false,false,false
-    puff.Color=Color3.fromRGB(239,220,176) puff.Size=Vector3.one*0.7 puff.Transparency=0.45
-    local angle=i/8*math.pi*2
-    puff.Position=Vector3.new(frame.X+math.cos(angle)*2,0.3,frame.Z+math.sin(angle)*2)
-    puff.Parent=workspace table.insert(dust,{part=puff,started=clock})
+    puff.Color=Color3.fromRGB(239,220,176) puff.Size=Vector3.one*(1.2+i%3*0.35) puff.Transparency=0.45
+    local angle=i/22*math.pi*2
+    puff.Position=Vector3.new(frame.X+math.cos(angle)*4,0.5,frame.Z+math.sin(angle)*4)
+    puff.Parent=workspace table.insert(dust,{part=puff,started=clock,velocity=Vector3.new(math.cos(angle)*12,1.2,math.sin(angle)*12),baseSize=puff.Size.X})
    end
   end
   previousPhase=phase
-  if phase=="Riding" and clock-lastDust>0.08 then
+  if phase=="Riding" and clock-lastDust>0.04 then
    lastDust=clock
    local puff=Instance.new("Part")
    puff.Name="LocalHoofDust" puff.Anchored=true
    puff.CanCollide,puff.CanTouch,puff.CanQuery=false,false,false
    puff.Color=Color3.fromRGB(239,220,176) puff.Material=Enum.Material.SmoothPlastic
-   puff.Size=Vector3.new(0.5,0.5,0.5) puff.Transparency=0.45
-   puff.Position=Vector3.new(frame.X+math.sin(clock*31),0.3,frame.Z+2)
+   puff.Size=Vector3.one*(0.9+math.sin(clock*19)*0.15) puff.Transparency=0.4
+   puff.Position=Vector3.new(frame.X+math.sin(clock*31)*1.5,0.35,frame.Z+2.5)
    puff.Parent=workspace
-   table.insert(dust,{part=puff,started=clock})
+   table.insert(dust,{part=puff,started=clock,baseSize=puff.Size.X,velocity=Vector3.new(math.sin(clock*11)*0.5,0.7,2)})
    local streak=puff:Clone() streak.Name="LocalSpeedStreak"
    streak.Size=Vector3.new(0.08,0.04,3.5) streak.Transparency=0.65
    streak.Position=Vector3.new(frame.X+math.sin(clock*17)*8,0.08,frame.Z-9)
@@ -152,12 +152,12 @@ function Presentation.update(model,phase,frame,dt,clock,dashUntil)
   end
  end
  for i=#dust,1,-1 do
-  local entry=dust[i] local p=(clock-entry.started)/0.45
+  local entry=dust[i] local p=(clock-entry.started)/0.65
   if p>=1 then entry.part:Destroy() table.remove(dust,i)
   else
    entry.part.Transparency=0.45+p*0.55
-   if not entry.streak then entry.part.Size=Vector3.one*(0.5+p*0.65) end
-   entry.part.Position+=Vector3.new(0,entry.streak and 0 or dt*0.6,0)
+   if not entry.streak then entry.part.Size=Vector3.one*((entry.baseSize or 0.5)+p*0.8) end
+   entry.part.Position+=(entry.velocity or Vector3.new(0,entry.streak and 0 or 0.6,0))*dt
   end
  end
 end

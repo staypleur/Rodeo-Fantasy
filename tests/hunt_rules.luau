@@ -34,3 +34,11 @@ check(Rules.rideSpeed(10,10.6,64,1.5)==96)
 check(Rules.rideSpeed(10.6,10.6,64,1.5)==64)
 check(Rules.rideSpeed(11,10.6,64,1.5)==64)
 print("PASS: "..checks.." continuous hunting checks")
+
+local config=require("../src/shared/Config")
+local meters=config.Prototype.MetersPerStud
+local normal=Rules.rideSpeed(1,nil,64,1.5)*meters
+local boost=Rules.rideSpeed(1,1.6,64,1.5)*meters
+local fast=Rules.rideSpeed(1,nil,96,1.5)*meters
+assert(math.abs(boost/normal-1.5)<0.00001 and math.abs(fast/normal-1.5)<0.00001,"dash and species speed must scale meter accrual")
+print("PASS: dash and faster species increase meters in proportion to actual speed")

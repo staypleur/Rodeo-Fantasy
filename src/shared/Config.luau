@@ -16,6 +16,8 @@ Config.Audio = {
 Config.Monster = {
 	Id = "Lumidon",
 	Name = "루미돈",
+ RunSpeed = 64, -- species-specific riding speed
+ SizeClass = "Medium", -- temporary crate-breaking test classification
 }
 
 -- Merging/evolution remain pending.
@@ -40,7 +42,7 @@ Config.Hunt = {
 
 -- These are tuning values for testing, not finalized game balance/art.
 Config.Prototype = {
-	MetersPerStud = 0.625,
+	MetersPerStud = 0.625 / 3,
 	ForwardStudsPerSecond = 64,
 	SidewaysStudsPerSecond = 32,
 	JumpSeconds = 0.28,
@@ -52,6 +54,7 @@ Config.Prototype = {
 	SwitchDashMultiplier = 1.5,
 	HerdSpawnChance = 0.325,
 	RockSpawnChance = 0.825,
+ CrateSpawnChance = 0.07, -- rare placement trial, not final density
 	AirStudsPerSecond = 80,
 	LassoRangeStuds = 12,
 	FlightSeconds = 1.2,
@@ -60,7 +63,6 @@ Config.Prototype = {
 	BuckHeightStuds = 2.4,
 	AngrySteerMultiplier = 0.35,
 	BuckSidewaysStudsPerSecond = 12,
-	LandingGraceSeconds = 2,
 	GroundChunkStuds = 256,
 	RideHeightStuds = 2,
 	RideForwardStuds = -0.4,

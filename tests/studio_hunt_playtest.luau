@@ -48,7 +48,7 @@ driver.OnServerInvoke=function(player,action,value)
   require(RS.RodeoFantasy.Config).Prototype.MetersPerStud=1000
   return true
  elseif action=="ResetCourse" then
-  require(RS.RodeoFantasy.Config).Prototype.MetersPerStud=0.625
+  require(RS.RodeoFantasy.Config).Prototype.MetersPerStud=0.625/3
   return true
  elseif action=="Finish" then
   print("HUNT_TEST_SERVER_RESULT: "..value)
@@ -107,7 +107,8 @@ local success,problem=pcall(function()
  waitFor(function() return state.phase=="Lassoing" end,"opening flight missing")
  waitFor(function() return state.phase=="Riding" end,"opening landing failed")
  waitFor(function() return workspace.CurrentCamera.CameraType==Enum.CameraType.Scriptable and workspace.CurrentCamera.CFrame.LookVector.Y < -0.7 end,"angled camera did not activate")
- check(workspace.CurrentCamera.FieldOfView==config.Prototype.CameraFieldOfView,"hunt field of view must apply")
+ waitFor(function() return math.abs(workspace.CurrentCamera.FieldOfView-config.Prototype.CameraFieldOfView)<0.01 end,"catch field of view must settle after landing")
+ check(math.abs(workspace.CurrentCamera.FieldOfView-config.Prototype.CameraFieldOfView)<0.01,"hunt field of view must apply")
  local camera=workspace.CurrentCamera
  check(math.abs(camera.CFrame.Position.X-config.Prototype.CameraSideStuds)<0.5,"diagonal camera must follow road center")
  if camera.ViewportSize.Y>0 then
@@ -168,8 +169,9 @@ local success,problem=pcall(function()
  check(state.dashUntil and state.dashUntil>workspace:GetServerTimeNow(),"switch must start short dash")
  waitFor(function() local a=character.HumanoidRootPart:FindFirstChild("FlightTrailAnchor") return a and a:FindFirstChildOfClass("Trail") and a:FindFirstChildOfClass("Trail").Enabled end,"switch dash must display brief speed trail")
  check(character.HumanoidRootPart.FlightTrailAnchor:FindFirstChildOfClass("Trail").Enabled,"dash trail must appear")
+ waitFor(function() return workspace:FindFirstChild("LocalDashWind")~=nil end,"switch dash wind must render")
  check(workspace:FindFirstChild("LocalDashWind")~=nil,"switch dash must surround rider with wind")
- check(state.protectedUntil>workspace:GetServerTimeNow(),"landing protection missing")
+ check(state.protectedUntil==nil,"landing protection must be removed")
  local worstOffset=0
  local samples=0
  runService:BindToRenderStep("CheckMountAlignment",Enum.RenderPriority.Last.Value,function()
@@ -242,7 +244,7 @@ local success,problem=pcall(function()
  driver:InvokeServer("ResetCourse")
  remote:FireServer("Start")
  waitFor(function() return state.phase=="Riding" and state.monster~=finalMount end,"course end must allow restart")
- check(not finalMount:GetAttribute("Occupied"),"restart must release paused mount")
+ check(finalMount.Parent==nil or not finalMount:GetAttribute("Occupied"),"restart must release or remove paused mount")
  remote:FireServer("Jump")
  waitFor(function() return state.phase=="GameOver" end,"run after course end must end normally")
  check(not character.HumanoidRootPart.Anchored,"restart after course end must preserve original character restoration")

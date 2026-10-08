@@ -28,6 +28,7 @@ expected = {
     "DistanceMarkers": "src/client/DistanceMarkers.luau",
     "AudioPresentation": "src/client/AudioPresentation.luau",
     "DashPresentation": "src/client/DashPresentation.luau",
+    "CatchPresentation": "src/client/CatchPresentation.luau",
     "CrashEffect": "src/client/CrashEffect.luau",
 }
 assert set(scripts) == set(expected)
@@ -46,3 +47,7 @@ for ref in model.iter("Ref"):
 assert not any(node.attrib["class"] in ("Script", "LocalScript", "ModuleScript", "MeshPart") for node in model.iter("Item"))
 assert len(list(model.iter("Item"))) > 30
 print("PASS: standalone model has complete local references and no scripts or uploaded meshes")
+
+assert place.find("Item[@class='StarterPlayer']/Properties/bool[@name='LoadCharacterAppearance']").text == "true"
+assert not any(node.find("Properties/string[@name='Name']").text == "StarterCharacter" for node in place.iter("Item"))
+print("PASS: player appearance enabled with no replacement StarterCharacter")

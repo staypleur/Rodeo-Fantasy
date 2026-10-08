@@ -2,10 +2,11 @@ local World = {}
 local chunks, animals, previousPositions = {}, {}, {}
 local root, monsters, obstacles, template, tuning
 local Rules
-local monsterId
+local monsterId,rideSpeed
 local Motion=require(game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy"):WaitForChild("HerdMotion"))
 local Course=require(game:GetService("ReplicatedStorage").RodeoFantasy.CourseGeometry)
 local spawnSerial=0
+local crateRows={}
 
 local function part(parent, name, position, size, color)
 	local item = Instance.new("Part")
@@ -22,6 +23,23 @@ local function decoration(parent,name,position,size,color)
  node.CanCollide,node.CanTouch,node.CanQuery=false,false,false
  node.TopSurface,node.BottomSurface=Enum.SurfaceType.Smooth,Enum.SurfaceType.Smooth
  return node
+end
+
+local function createCrate(x,z,index)
+ local box=part(obstacles,"BreakableCrate",Vector3.new(x,2,z),Vector3.new(4,4,4),Color3.fromRGB(133,88,54))
+ box.Transparency=1 box.CanCollide=false box:SetAttribute("Chunk",index) box:SetAttribute("BreakableCrate",true)
+ decoration(box,"WoodCore",box.Position,Vector3.new(3.6,3.6,3.6),Color3.fromRGB(143,97,59))
+ for _,side in ipairs({-1,1}) do
+  for _,height in ipairs({0.25,3.75}) do
+   decoration(box,"Frame",Vector3.new(x,height,z+side*1.94),Vector3.new(4,0.5,0.25),Color3.fromRGB(218,163,94))
+  end
+  for _,edge in ipairs({-1,1}) do
+   decoration(box,"Corner",Vector3.new(x+edge*1.75,2,z+side*1.94),Vector3.new(0.5,4,0.25),Color3.fromRGB(218,163,94))
+  end
+  local brace=decoration(box,"DiagonalBrace",Vector3.new(x,2,z+side*2),Vector3.new(4.4,0.45,0.2),Color3.fromRGB(195,137,77))
+  brace.CFrame*=CFrame.Angles(0,0,math.pi/4)
+ end
+ return box
 end
 
 local function dressObstacle(rock,style,scale)
@@ -48,6 +66,7 @@ end
 function World.init(world, modelTemplate, config, rules)
 	root, monsters, template, tuning, Rules = world, world.Monsters, modelTemplate, config.Prototype, rules
 	monsterId = config.Monster.Id
+ rideSpeed = config.Monster.RunSpeed or tuning.ForwardStudsPerSecond
 	obstacles = Instance.new("Folder")
 	obstacles.Name, obstacles.Parent = "Obstacles", root
 	local preview = root:FindFirstChild("PreviewMonster")
@@ -62,6 +81,7 @@ function World.spawn(position)
 	model:SetAttribute("MonsterId", monsterId)
 	model:SetAttribute("Occupied", false)
 	model:SetAttribute("Running", true)
+ model:SetAttribute("RideSpeed",rideSpeed)
 	model:SetAttribute("RunStarted", workspace:GetServerTimeNow() - (math.abs(position.X*0.17+position.Z*0.023)%1))
 	model:SetAttribute("Steering", 0)
 	model:PivotTo(CFrame.new(position))
@@ -136,6 +156,25 @@ function World.ensure(z)
      rock.CanCollide=false -- server swept collision is authoritative
      dressObstacle(rock,style,scale)
 				end
+
+    -- Independent seeded rolls keep existing herd/rock density unchanged.
+    if rowZ < -96 then
+     local crateRandom=Random.new(33017+math.abs(math.floor(rowZ))*31)
+     if crateRandom:NextNumber()<tuning.CrateSpawnChance then
+      local clear=true
+      for existing in pairs(crateRows) do if math.abs(existing-rowZ)<192 then clear=false break end end
+      if clear then
+       local ranges=Course.ranges(rowZ,5)
+       local range=ranges[crateRandom:NextInteger(1,#ranges)]
+       local x=crateRandom:NextNumber(range[1],range[2])
+       -- Crates need their own clear footprint beside trees/rocks.
+       for _,other in ipairs(obstacles:GetChildren()) do
+        if math.abs(other.Position.Z-rowZ)<other.Size.Z/2+4 and math.abs(other.Position.X-x)<other.Size.X/2+4 then clear=false break end
+       end
+       if clear then createCrate(x,rowZ,index) crateRows[rowZ]=index end
+      end
+     end
+    end
 			end
 		end
 	end
@@ -144,7 +183,7 @@ end
 function World.step(dt)
  local rocks={}
  for _,rock in ipairs(obstacles:GetChildren()) do
-  if rock:IsA("BasePart") then table.insert(rocks,{x=rock.Position.X,z=rock.Position.Z,sx=rock.Size.X,sz=rock.Size.Z}) end
+  if rock:IsA("BasePart") and not rock:GetAttribute("Broken") then table.insert(rocks,{x=rock.Position.X,z=rock.Position.Z,sx=rock.Size.X,sz=rock.Size.Z}) end
  end
 	for model,motion in pairs(animals) do
 		if not model.Parent then animals[model] = nil previousPositions[model]=nil continue end
@@ -173,6 +212,39 @@ function World.nearest(position, excluded)
 	return best
 end
 
+-- Generated ground persists while its herd runs away. Refill a depleted launch
+-- window rather than regenerating chunks or multiplying an existing herd.
+function World.replenish(z)
+ local count=0
+ for model in pairs(animals) do
+  if model.Parent and not model:GetAttribute("Occupied") then
+   local p=model.PrimaryPart.Position
+   if p.Z<z-24 and p.Z>z-280 then count+=1 end
+  end
+ end
+ if count>=6 then return end
+ for offset=48,272,32 do
+  local targetZ=z-offset
+  local ranges=Course.ranges(targetZ,4)
+  for _,range in ipairs(ranges) do
+   for i=1,4/#ranges do
+    local x=range[1]+(range[2]-range[1])*i/(4/#ranges+1)
+    local safe=true
+    for _,rock in ipairs(obstacles:GetChildren()) do
+     if not rock:GetAttribute("Broken") and math.abs(rock.Position.X-x)<rock.Size.X/2+2 and math.abs(rock.Position.Z-targetZ)<rock.Size.Z/2+4 then safe=false break end
+    end
+    if safe then
+     for other in pairs(animals) do
+      if other.Parent and math.abs(other.PrimaryPart.Position.X-x)<5 and math.abs(other.PrimaryPart.Position.Z-targetZ)<10 then safe=false break end
+     end
+    end
+    if safe then World.spawn(Vector3.new(x,2,targetZ)) count+=1 end
+    if count>=6 then return end
+   end
+  end
+ end
+end
+
 -- Contact while riding: include moving herds and the visible inner canyon face.
 function World.mountedHit(from,to,mount)
  local half=mount.PrimaryPart.Size/2
@@ -193,10 +265,26 @@ end
 
 function World.hit(from, to)
 	for _, rock in ipairs(obstacles:GetChildren()) do
+		if rock:GetAttribute("Broken") then continue end
 		local p,s = rock.Position,rock.Size
 		if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,1) then return true end
 	end
 	return false
+end
+
+function World.crateHit(from,to,mount,sizeClass)
+ for _,box in ipairs(obstacles:GetChildren()) do
+  if not box:GetAttribute("BreakableCrate") or box:GetAttribute("Broken") then continue end
+  local p,s=box.Position,box.Size+mount.PrimaryPart.Size
+  if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,0) then
+   if sizeClass~="Medium" and sizeClass~="Large" then return true end
+   box.CanQuery=false box.CanTouch=false
+   box:SetAttribute("Broken",true) box:SetAttribute("BrokenAt",workspace:GetServerTimeNow())
+   for _,piece in ipairs(box:GetDescendants()) do if piece:IsA("BasePart") then piece.Transparency=1 piece.CanQuery=false end end
+   -- Loot is deliberately pending the user's item design.
+  end
+ end
+ return false
 end
 
 -- Preserve each active runner's vicinity, and avoid unlimited course/animal growth.
@@ -208,6 +296,7 @@ function World.cleanup(nearZ)
 			chunk:Destroy()
 			chunks[index] = nil
 			for _, rock in ipairs(obstacles:GetChildren()) do if rock:GetAttribute("Chunk") == index then rock:Destroy() end end
+			for z,owner in pairs(crateRows) do if owner==index then crateRows[z]=nil end end
 		end
 	end
 	for model in pairs(animals) do

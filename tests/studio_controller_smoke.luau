@@ -17,7 +17,7 @@ humanoid.Parent=character
 local player={Character=character,UserId=991001,CharacterRemoving=signal(function() end)}
 local players={PlayerAdded=signal(function() end),PlayerRemoving=signal(function() end),GetPlayers=function() return {player} end}
 local remote={OnServerEvent=signal(function(fn) event=fn end),FireClient=function(_,_,kind,data) if kind=="State" then latest=data end end}
-local package={Config=RS.RodeoFantasy.Config,HuntRules=RS.RodeoFantasy.HuntRules,BagRules=RS.RodeoFantasy.BagRules,CaptureRemote=remote}
+local package={Config=RS.RodeoFantasy.Config,HuntRules=RS.RodeoFantasy.HuntRules,BagRules=RS.RodeoFantasy.BagRules,CourseGeometry=RS.RodeoFantasy.CourseGeometry,CaptureRemote=remote}
 local fakeRS={WaitForChild=function() return package end}
 local fakeRun={Heartbeat=signal(function(fn) heartbeat=fn end)}
 local fakeGame={GetService=function(_,name)
@@ -81,9 +81,13 @@ advance(0.6)
 check(latest.phase=="Riding" and latest.monster==target,"rope must finish landing")
 check(latest.phase~="Airborne","space during landing must not queue another jump")
 check(latest.dashUntil and latest.dashUntil>clock,"switch landing must begin short dash")
+event(player,"Steer",0.5)
+local dashX=target.PrimaryPart.Position.X
 local dashZ=target.PrimaryPart.Position.Z
 advance(0.1)
 check(math.abs(dashZ-target.PrimaryPart.Position.Z-9.6)<0.01,"dash must move 1.5 times normal speed without saddle offset drift")
+check(target.PrimaryPart.Position.X>dashX,"dash must allow lateral steering")
+event(player,"Steer",0)
 advance(0.4)
 local normalZ=target.PrimaryPart.Position.Z
 advance(0.1)
@@ -94,10 +98,12 @@ protectedRock.Size=Vector3.new(4,3,4)
 protectedRock.Position=Vector3.new(root.Position.X,1.5,root.Position.Z-6)
 protectedRock.Parent=workspace.RodeoPrototype.Obstacles
 advance(0.3,true)
-check(latest.phase=="Riding" and latest.protectedUntil>clock,"landing grace must protect against obstacle")
+check(latest.phase=="GameOver" and not root.Anchored,"obstacle collision immediately after landing must end run")
+check(latest.monsterCrashFrame~=nil and target.Parent==nil,"obstacle crash must remove mount and provide breakup frame")
 protectedRock:Destroy()
-advance(2.1)
-check(latest.protectedUntil<clock,"landing grace must expire")
+event(player,"Start")
+advance(config.Prototype.IntroSeconds+0.2)
+check(latest.protectedUntil==nil,"landing must not expose protection timer")
 advance(config.Hunt.TameSeconds+0.3)
 check(latest.count==1 and latest.tamed,"sustained ride must tame")
 check(latest.phase=="Riding","taming must keep running")
@@ -131,7 +137,7 @@ check(not angryMount:GetAttribute("Angry") and angryMount.PrimaryPart.Position.Y
 advance(config.Prototype.FlightSeconds+0.5)
 check(latest.phase=="GameOver" and not root.Anchored,"miss after anger jump must restore")
 event(player,"Start")
-advance(config.Prototype.IntroSeconds+config.Prototype.LandingGraceSeconds+0.3)
+advance(config.Prototype.IntroSeconds+0.3)
 local rock=Instance.new("Part")
 rock.Name="ControllerTestRock"
 rock.Anchored=true
@@ -141,7 +147,7 @@ rock.Parent=workspace.RodeoPrototype.Obstacles
 advance(0.2,true)
 check(latest.phase=="GameOver" and not root.Anchored,"swept collision must end and restore")
 check(humanoid.AutoRotate and not humanoid.PlatformStand,"normal character flags must be restored")
--- New contact types ignore rock-only landing protection.
+-- Every contact type is immediate, including initial landings.
 event(player,"Start")
 advance(config.Prototype.IntroSeconds+0.2)
 local blocker=world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-4))

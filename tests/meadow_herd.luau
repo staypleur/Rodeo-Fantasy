@@ -5,7 +5,7 @@ local tuning=require("../src/shared/Config").Prototype
 local checks=0
 for layout=1,12 do
  local rocks={}
- for d=80,1580,32 do
+ for d=80,4780,32 do
   local scale=(d+layout)%3==0 and 2 or 1
   local ranges=Course.ranges(-d,scale*2+3)
   local range=ranges[(math.floor(d/32)+layout)%#ranges+1]
@@ -16,7 +16,7 @@ for layout=1,12 do
   local x,z=initialX,0
   local motion=Motion.new(x,layout*7+initialX)
   local still=0
-  for tick=1,500 do
+  for tick=1,1250 do
    local nx,nz=Motion.step(motion,x,z,0.1,rocks,tuning,1.25,2.3,Rules,Course)
    assert(Course.contains(nx,nz,1.25),"herd must stay in meadow branches")
    still=math.abs(nz-z)<0.001 and still+0.1 or 0
@@ -27,7 +27,7 @@ for layout=1,12 do
    end
    x,z=nx,nz
   end
-  assert(z<-1600,"herd must traverse entire meadow")
+  assert(z<-4800,"herd must traverse entire meadow")
  end
 end
 print("PASS: "..checks.." meadow footprint checks across 12 varied layouts, forks and obstacle sizes")

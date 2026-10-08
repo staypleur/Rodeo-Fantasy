@@ -13,7 +13,7 @@ local function clearHerdPath(from,to,root)
  local obstacles=world and world:FindFirstChild("Obstacles")
  if not obstacles then return true end
  for _,rock in ipairs(obstacles:GetChildren()) do
-  if not rock:IsA("BasePart") then continue end
+  if not rock:IsA("BasePart") or rock:GetAttribute("Broken") then continue end
   local p,s=rock.Position,rock.Size+root.Size
   if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,0.2) then return false end
  end
@@ -46,8 +46,8 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
  dt = dt or 1/60
  for i=#dust,1,-1 do
   local puff=dust[i] local age=clock-puff.started
-  if age>=0.45 then puff.part:Destroy() table.remove(dust,i)
-  else puff.part.Transparency=0.55+age puff.part.Size=Vector3.one*(0.45+age*1.5) puff.part.Position+=Vector3.new(0,dt*0.7,0) end
+  if age>=0.6 then puff.part:Destroy() table.remove(dust,i)
+  else puff.part.Transparency=0.45+age/0.6*0.55 puff.part.Size=Vector3.one*(0.75+age*1.5) puff.part.Position+=Vector3.new(0,dt*0.7,0) end
  end
  local displayed = {}
 	for model, pose in pairs(poses) do
@@ -76,7 +76,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
    pose.sample, pose.received = root.CFrame, clock
   end
   local elapsed = math.clamp(clock-pose.received,0,0.08)
-  local speed = model:GetAttribute("Occupied") and Rules.rideSpeed(clock,model:GetAttribute("DashUntil"),tuning.ForwardStudsPerSecond,tuning.SwitchDashMultiplier) or tuning.HerdStudsPerSecond
+  local speed = model:GetAttribute("Occupied") and Rules.rideSpeed(clock,model:GetAttribute("DashUntil"),(model:GetAttribute("RideSpeed") or tuning.ForwardStudsPerSecond),tuning.SwitchDashMultiplier) or tuning.HerdStudsPerSecond
   local steer = model:GetAttribute("Steering") or 0
   local velocity=Vector3.new(steer*tuning.SidewaysStudsPerSecond,0,-speed)
   if not model:GetAttribute("Occupied") then velocity=model:GetAttribute("HerdVelocity") or velocity end
@@ -116,11 +116,11 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
   local bounce=moving and (1-math.cos(phase))*0.22 or 0
   local gallopPitch=moving and math.sin(phase)*0.085 or 0
 		local frame = pose.frame * CFrame.new(0,bounce,0)*CFrame.Angles(angry and pitch or gallopPitch, 0, lean)
-  if moving and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)>0.14 and #dust<80 then
+  if moving and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)>0.18 and #dust<80 then
    pose.lastDust=clock
    local puff=Instance.new("Part") puff.Name="LocalHerdDust" puff.Anchored=true
    puff.CanCollide,puff.CanTouch,puff.CanQuery=false,false,false
-   puff.Color=Color3.fromRGB(239,220,176) puff.Size=Vector3.one*0.45 puff.Transparency=0.55
+   puff.Color=Color3.fromRGB(239,220,176) puff.Size=Vector3.one*0.75 puff.Transparency=0.45
    puff.Position=Vector3.new(frame.X+math.sin(phase)*0.9,0.2,frame.Z+1.6)
    puff.Parent=workspace table.insert(dust,{part=puff,started=clock})
   end
