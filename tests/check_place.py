@@ -17,6 +17,7 @@ expected = {
     "Config": "src/shared/Config.luau",
     "HuntRules": "src/shared/HuntRules.luau",
     "HerdMotion": "src/shared/HerdMotion.luau",
+    "CourseGeometry": "src/shared/CourseGeometry.luau",
     "BagRules": "src/shared/BagRules.luau",
     "CaptureServer": "src/server/CaptureServer.server.luau",
     "HuntWorld": "src/server/HuntWorld.luau",
@@ -25,6 +26,8 @@ expected = {
     "RiderPresentation": "src/client/RiderPresentation.luau",
     "TamingGauge": "src/client/TamingGauge.luau",
     "DistanceMarkers": "src/client/DistanceMarkers.luau",
+    "AudioPresentation": "src/client/AudioPresentation.luau",
+    "DashPresentation": "src/client/DashPresentation.luau",
     "CrashEffect": "src/client/CrashEffect.luau",
 }
 assert set(scripts) == set(expected)

@@ -5,13 +5,22 @@ function Motion.new(x,seed)
  return {home=x,elapsed=0,phase=seed*2.399963,amplitude=2.5+seed%3*0.6,vx=0}
 end
 
-function Motion.step(state,x,z,dt,rocks,tuning,halfX,halfZ,rules)
+function Motion.step(state,x,z,dt,rocks,tuning,halfX,halfZ,rules,course)
  dt=math.max(0,math.min(dt,0.1))
  state.elapsed+=dt
- local limit=tuning.RoadHalfWidth-halfX-1
+ local limit=(course and course.width(z) or tuning.RoadHalfWidth)-halfX-1
  local speed=tuning.HerdStudsPerSecond
  local horizon=speed*1.5+halfZ
- local intervals={{-limit,limit}}
+ local intervals
+ for attempt=1,4 do
+ intervals=course and course.planningRanges(z,horizon,halfX+1) or {{-limit,limit}}
+ if course and course.median(z)>0 then
+  local reachable={}
+  for _,range in ipairs(intervals) do
+   if (x<0 and range[1]<0) or (x>=0 and range[2]>0) then table.insert(reachable,range) end
+  end
+  intervals=reachable
+ end
  -- Select a corridor that stays clear for the animal's full footprint.
  for _,rock in ipairs(rocks) do
   local depth=rock.sz/2+halfZ+0.9
@@ -27,6 +36,9 @@ function Motion.step(state,x,z,dt,rocks,tuning,halfX,halfZ,rules)
    end
    intervals=remaining
   end
+ end
+ if #intervals>0 then break end
+ horizon*=0.5
  end
  local preferred=math.clamp(state.home+math.sin(state.elapsed*0.72+state.phase)*state.amplitude+math.sin(state.elapsed*1.13+state.phase*0.7)*0.65,-limit,limit)
  local target,best=x,math.huge
@@ -44,6 +56,7 @@ function Motion.step(state,x,z,dt,rocks,tuning,halfX,halfZ,rules)
  end
  if overlapping then nextZ=z end
  local function blocked(nx,nz)
+  if course and not course.contains(nx,nz,halfX+0.35) and course.contains(x,z,halfX+0.35) then return true end
   for _,rock in ipairs(rocks) do
    local inside=rules.sweptBox(x,0,z,x,0,z,rock.x,0,rock.z,rock.sx+halfX*2,2,rock.sz+halfZ*2,0.35)
    -- A released animal or newly generated obstacle can already overlap. Allow
@@ -56,6 +69,7 @@ function Motion.step(state,x,z,dt,rocks,tuning,halfX,halfZ,rules)
  -- A close or newly spawned rock must never be tunneled through between ticks.
  if blocked(nextX,nextZ) then
   if not blocked(nextX,z) then nextZ=z
+  elseif not blocked(x,nextZ) then nextX=x state.vx=0
   else nextX,nextZ=x,z state.vx=0 end
  end
  return nextX,nextZ,(nextX-x)/math.max(dt,0.000001)

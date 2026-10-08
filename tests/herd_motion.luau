@@ -29,6 +29,15 @@ local _,endZ=run(0,20,5,rocks,150,0.1)
 check(endZ<-200,"staggered rocks must not trap the herd")
 local _,edgeZ=run(29,20,7,{{x=29,z=-40,sx=4,sz=4}},100,0.1)
 check(edgeZ<-100,"edge rock must be bypassed within road bounds")
+-- Reproduced in a generated Studio course: the desired lateral route crosses
+-- the adjacent rock while the straight-forward path is still clear.
+for seed=1,12 do
+ local _,endZ=run(11.680899620056153,-282.7998962402344,seed,{
+  {x=16,z=-348,sx=4,sz=4},{x=8,z=-284,sx=4,sz=4},
+  {x=8,z=-252,sx=4,sz=4},{x=-8,z=-220,sx=4,sz=4},
+ },100,0.1)
+ check(endZ<-500,"rock-edge detour must keep moving through its clear forward lane")
+end
 local state=Motion.new(0,1)
 local nx,nz=Motion.step(state,0,0,0.1,{{x=0,z=-6,sx=4,sz=4}},tuning,1.25,2.3,Rules)
 check(nz==0 and nx~=0,"sudden close rock must brake forward motion while steering clear")

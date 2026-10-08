@@ -1,6 +1,18 @@
 -- Confirmed rules and adjustable prototype presentation values are kept separate.
 local Config = {}
 
+-- Creator Store music/hoof recording plus Roblox bundled action sounds.
+Config.Audio = {
+ BGM="rbxassetid://1839048285",
+ Hooves="rbxassetid://118636555040923",
+ Jump="rbxasset://sounds/action_jump.mp3",
+ Rope="rbxassetid://9120718279",
+ Land="rbxasset://sounds/action_jump_land.mp3",
+ Success="rbxasset://sounds/volume_slider.ogg",
+ MusicVolume=0.16,
+ EffectsVolume=0.35,
+}
+
 Config.Monster = {
 	Id = "Lumidon",
 	Name = "루미돈",

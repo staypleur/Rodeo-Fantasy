@@ -6,6 +6,7 @@ local Config=require(package.Config)
 local Rules=require(package.HuntRules)
 local BagRules=require(package.BagRules)
 local World=require(script.Parent.HuntWorld)
+local Course=require(package.CourseGeometry)
 local remote=package.CaptureRemote
 local tuning=Config.Prototype
 local states,bags,limits={},{},{}
@@ -35,6 +36,7 @@ end
 local function freeMount(state)
  if state.monster and state.monster.Parent then
   state.monster:SetAttribute("Occupied",false)
+  state.monster:SetAttribute("Running",true)
   state.monster:SetAttribute("Steering",0)
   state.monster:SetAttribute("Angry",false)
   state.monster:SetAttribute("DashUntil",nil)
@@ -62,11 +64,18 @@ local function finish(player,reason,crashKind)
 end
 local function start(player)
  local previous=states[player]
- if previous and previous.phase~="GameOver" then return end
+ if previous and previous.phase~="GameOver" and previous.phase~="CourseEnd" then return end
  local character=player.Character
  local root=character and character:FindFirstChild("HumanoidRootPart")
  local humanoid=character and character:FindFirstChildOfClass("Humanoid")
  if not root or not humanoid or humanoid.Health<=0 then return end
+ if previous then
+  freeMount(previous)
+  if previous.phase=="CourseEnd" and previous.root==root then
+   root.Anchored=previous.wasAnchored
+   humanoid.AutoRotate,humanoid.PlatformStand=previous.autoRotate,previous.platformStand
+  end
+ end
  World.ensure(0)
  local model=World.spawn(Vector3.new(0,2,-8))
  model:SetAttribute("Occupied",true)
@@ -128,7 +137,7 @@ RunService.Heartbeat:Connect(function(delta)
  World.step(dt)
  local nearZ={0}
  for player,state in pairs(states) do
-  if state.phase=="GameOver" then
+  if (state.phase=="GameOver" or state.phase=="CourseEnd") then
    if state.root.Parent then table.insert(nearZ,state.root.Position.Z) end
    continue
   end
@@ -146,6 +155,19 @@ RunService.Heartbeat:Connect(function(delta)
   local old=state.phase=="Riding" and state.monster and state.monster.PrimaryPart.Position or state.root.Position
   local speed=state.phase=="Airborne" and tuning.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,tuning.ForwardStudsPerSecond,tuning.SwitchDashMultiplier)
   local position=Vector3.new(math.clamp(old.X+(steer*tuning.SidewaysStudsPerSecond+buckDrift*tuning.BuckSidewaysStudsPerSecond)*dt,-tuning.RoadHalfWidth,tuning.RoadHalfWidth),old.Y,old.Z-speed*dt)
+  if state.distance+speed*dt*tuning.MetersPerStud>=Course.LengthMeters then
+   state.distance=Course.LengthMeters
+   state.phase="CourseEnd" state.dashUntil=nil
+   if state.monster then state.monster:SetAttribute("Running",false) state.monster:SetAttribute("DashUntil",nil) state.monster:SetAttribute("Angry",false) state.monster:SetAttribute("AngerWarning",false) end
+   if state.monster then
+    local p=state.monster.PrimaryPart.Position
+    state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z)
+    state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
+   end
+   clearRope(state)
+   send(player,"다음 지역 준비 중")
+   continue
+  end
   state.distance+=speed*dt*tuning.MetersPerStud
   World.ensure(position.Z)
   table.insert(nearZ,position.Z)

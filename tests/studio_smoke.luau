@@ -139,16 +139,27 @@ assert(gate and gate:GetAttribute("Meters")==1000,"first map milestone must show
 assert(math.abs(gate:GetPivot().Z-(-408))<0.01,"milestone must align with remaining server distance")
 markers.update(true,1001,CFrame.new(0,4,-410),0.625)
 local nextFound=false
-for _,m in ipairs(workspace:GetChildren()) do if m.Name=="LocalDistanceMarker" and m:GetAttribute("Meters")==2000 then nextFound=true end end
-assert(nextFound,"next 1000m milestone must be generated")
+for _,m in ipairs(workspace:GetChildren()) do if m.Name=="LocalDistanceMarker" and m:GetAttribute("Meters")==1000 then nextFound=true end end
+assert(nextFound,"unfinished second theme must not get a 2000m marker")
 markers.update(false,0,nil,0.625)
 assert(not workspace:FindFirstChild("LocalDistanceMarker"),"milestones must clean up on run end")
 print("RODEO_MILESTONES_PASS")
 
 local hasLog,hasRock=false,false
 for _,obstacle in ipairs(world.Obstacles:GetChildren()) do
- if obstacle:GetAttribute("Style")=="FallenLog" then hasLog=true assert(obstacle:FindFirstChild("FallenTrunk") and obstacle:FindFirstChild("TreeRings")) end
+ if obstacle:GetAttribute("Style")=="Tree" then hasLog=true assert(obstacle:FindFirstChild("TreeTrunk") and obstacle:FindFirstChild("LeafCrown")) end
  if obstacle:GetAttribute("Style")=="MossyRock" then hasRock=true assert(obstacle:FindFirstChild("Moss")) end
 end
 assert(hasLog and hasRock,"course must include both dressed obstacle styles")
 print("OBSTACLE_ART_PASS")
+
+local dash=require(game.StarterPlayer.StarterPlayerScripts.DashPresentation)
+dash.update("Riding",CFrame.new(0,4,0),4,4.6,0.6)
+local wind=workspace:FindFirstChild("LocalDashWind")
+assert(wind and #wind:GetChildren()==152,"dash requires wind rings and trailing streaks")
+assert(not wind.CanCollide and not wind.CanQuery,"wind must be cosmetic")
+dash.update("Riding",CFrame.new(0,4,-10),4.3,4.6,0.6)
+assert(wind.Position.Z==-10,"wind must follow moving rider")
+dash.update("Riding",CFrame.identity,4.61,4.6,0.6)
+assert(not workspace:FindFirstChild("LocalDashWind"),"dash effect must clean up when boost expires")
+print("DASH_WIND_PASS")

@@ -1700,6 +1700,18 @@
           <ProtectedString name="Source">-- Confirmed rules and adjustable prototype presentation values are kept separate.
 local Config = {}
 
+-- Creator Store music/hoof recording plus Roblox bundled action sounds.
+Config.Audio = {
+ BGM="rbxassetid://1839048285",
+ Hooves="rbxassetid://118636555040923",
+ Jump="rbxasset://sounds/action_jump.mp3",
+ Rope="rbxassetid://9120718279",
+ Land="rbxasset://sounds/action_jump_land.mp3",
+ Success="rbxasset://sounds/volume_slider.ogg",
+ MusicVolume=0.16,
+ EffectsVolume=0.35,
+}
+
 Config.Monster = {
 	Id = "Lumidon",
 	Name = "루미돈",
@@ -1825,13 +1837,22 @@ function Motion.new(x,seed)
  return {home=x,elapsed=0,phase=seed*2.399963,amplitude=2.5+seed%3*0.6,vx=0}
 end
 
-function Motion.step(state,x,z,dt,rocks,tuning,halfX,halfZ,rules)
+function Motion.step(state,x,z,dt,rocks,tuning,halfX,halfZ,rules,course)
  dt=math.max(0,math.min(dt,0.1))
  state.elapsed+=dt
- local limit=tuning.RoadHalfWidth-halfX-1
+ local limit=(course and course.width(z) or tuning.RoadHalfWidth)-halfX-1
  local speed=tuning.HerdStudsPerSecond
  local horizon=speed*1.5+halfZ
- local intervals={{-limit,limit}}
+ local intervals
+ for attempt=1,4 do
+ intervals=course and course.planningRanges(z,horizon,halfX+1) or {{-limit,limit}}
+ if course and course.median(z)&gt;0 then
+  local reachable={}
+  for _,range in ipairs(intervals) do
+   if (x&lt;0 and range[1]&lt;0) or (x&gt;=0 and range[2]&gt;0) then table.insert(reachable,range) end
+  end
+  intervals=reachable
+ end
  -- Select a corridor that stays clear for the animal's full footprint.
  for _,rock in ipairs(rocks) do
   local depth=rock.sz/2+halfZ+0.9
@@ -1847,6 +1868,9 @@ function Motion.step(state,x,z,dt,rocks,tuning,halfX,halfZ,rules)
    end
    intervals=remaining
   end
+ end
+ if #intervals&gt;0 then break end
+ horizon*=0.5
  end
  local preferred=math.clamp(state.home+math.sin(state.elapsed*0.72+state.phase)*state.amplitude+math.sin(state.elapsed*1.13+state.phase*0.7)*0.65,-limit,limit)
  local target,best=x,math.huge
@@ -1864,6 +1888,7 @@ function Motion.step(state,x,z,dt,rocks,tuning,halfX,halfZ,rules)
  end
  if overlapping then nextZ=z end
  local function blocked(nx,nz)
+  if course and not course.contains(nx,nz,halfX+0.35) and course.contains(x,z,halfX+0.35) then return true end
   for _,rock in ipairs(rocks) do
    local inside=rules.sweptBox(x,0,z,x,0,z,rock.x,0,rock.z,rock.sx+halfX*2,2,rock.sz+halfZ*2,0.35)
    -- A released animal or newly generated obstacle can already overlap. Allow
@@ -1876,6 +1901,7 @@ function Motion.step(state,x,z,dt,rocks,tuning,halfX,halfZ,rules)
  -- A close or newly spawned rock must never be tunneled through between ticks.
  if blocked(nextX,nextZ) then
   if not blocked(nextX,z) then nextZ=z
+  elseif not blocked(x,nextZ) then nextX=x state.vx=0
   else nextX,nextZ=x,z state.vx=0 end
  end
  return nextX,nextZ,(nextX-x)/math.max(dt,0.000001)
@@ -1886,6 +1912,42 @@ return Motion
         </Properties>
       </Item>
       <Item class="ModuleScript" referent="RBX62">
+        <Properties>
+          <string name="Name">CourseGeometry</string>
+          <ProtectedString name="Source">-- First meadow only. Distances below are layout trial values in studs.
+local Course={LengthStuds=1600,LengthMeters=1000}
+local function ramp(d,a,b) return math.clamp((d-a)/(b-a),0,1) end
+function Course.width(z)
+ local d=math.max(0,-z)
+ return 35-11*ramp(d,256,400)+11*ramp(d,600,800)
+end
+function Course.median(z)
+ local d=math.max(0,-z)
+ return 9*ramp(d,800,950)*(1-ramp(d,1200,1400))
+end
+function Course.ranges(z,padding)
+ local edge=Course.width(z)-padding
+ local middle=Course.median(z)
+ if middle&gt;0 then return {{-edge,-middle-padding},{middle+padding,edge}} end
+ return {{-edge,edge}}
+end
+function Course.planningRanges(z,horizon,padding)
+ local edge=math.min(Course.width(z),Course.width(z-horizon),Course.width(z-horizon/2))-padding
+ local middle=math.max(Course.median(z),Course.median(z-horizon),Course.median(z-horizon/2))
+ if middle&gt;0 then return {{-edge,-middle-padding},{middle+padding,edge}} end
+ return {{-edge,edge}}
+end
+function Course.contains(x,z,padding)
+ for _,range in ipairs(Course.ranges(z,padding)) do
+  if x&gt;range[1] and x&lt;range[2] then return true end
+ end
+ return false
+end
+return Course
+</ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX63">
         <Properties>
           <string name="Name">BagRules</string>
           <ProtectedString name="Source">-- Session-only bag income. Summoning/display never affects income.
@@ -1919,17 +1981,17 @@ return BagRules
 </ProtectedString>
         </Properties>
       </Item>
-      <Item class="RemoteEvent" referent="RBX63">
+      <Item class="RemoteEvent" referent="RBX64">
         <Properties>
           <string name="Name">CaptureRemote</string>
         </Properties>
       </Item>
-      <Item class="Model" referent="RBX64">
+      <Item class="Model" referent="RBX65">
         <Properties>
           <string name="Name">VisualTemplate</string>
-          <Ref name="PrimaryPart">RBX65</Ref>
+          <Ref name="PrimaryPart">RBX66</Ref>
         </Properties>
-        <Item class="Part" referent="RBX65">
+        <Item class="Part" referent="RBX66">
           <Properties>
             <string name="Name">MountRoot</string>
             <bool name="Anchored">true</bool>
@@ -1960,7 +2022,7 @@ return BagRules
             <bool name="CanQuery">false</bool>
             <bool name="CanTouch">false</bool>
           </Properties>
-          <Item class="BillboardGui" referent="RBX113">
+          <Item class="BillboardGui" referent="RBX114">
             <Properties>
               <string name="Name">Nameplate</string>
               <UDim2 name="Size">
@@ -1976,7 +2038,7 @@ return BagRules
               </Vector3>
               <bool name="AlwaysOnTop">true</bool>
             </Properties>
-            <Item class="TextLabel" referent="RBX114">
+            <Item class="TextLabel" referent="RBX115">
               <Properties>
                 <string name="Name">Label</string>
                 <UDim2 name="Size">
@@ -1998,7 +2060,7 @@ return BagRules
             </Item>
           </Item>
         </Item>
-        <Item class="Part" referent="RBX66">
+        <Item class="Part" referent="RBX67">
           <Properties>
             <string name="Name">Body</string>
             <bool name="Anchored">true</bool>
@@ -2033,7 +2095,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX67">
+        <Item class="Part" referent="RBX68">
           <Properties>
             <string name="Name">Back</string>
             <bool name="Anchored">true</bool>
@@ -2068,7 +2130,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX68">
+        <Item class="Part" referent="RBX69">
           <Properties>
             <string name="Name">Belly</string>
             <bool name="Anchored">true</bool>
@@ -2103,7 +2165,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX69">
+        <Item class="Part" referent="RBX70">
           <Properties>
             <string name="Name">Head</string>
             <bool name="Anchored">true</bool>
@@ -2138,7 +2200,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX70">
+        <Item class="Part" referent="RBX71">
           <Properties>
             <string name="Name">HeadCrown</string>
             <bool name="Anchored">true</bool>
@@ -2173,7 +2235,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX71">
+        <Item class="Part" referent="RBX72">
           <Properties>
             <string name="Name">Snout</string>
             <bool name="Anchored">true</bool>
@@ -2208,7 +2270,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX72">
+        <Item class="Part" referent="RBX73">
           <Properties>
             <string name="Name">NoseTop</string>
             <bool name="Anchored">true</bool>
@@ -2243,7 +2305,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX73">
+        <Item class="Part" referent="RBX74">
           <Properties>
             <string name="Name">Smile</string>
             <bool name="Anchored">true</bool>
@@ -2274,7 +2336,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX74">
+        <Item class="Part" referent="RBX75">
           <Properties>
             <string name="Name">LeftEar</string>
             <bool name="Anchored">true</bool>
@@ -2309,7 +2371,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX75">
+        <Item class="Part" referent="RBX76">
           <Properties>
             <string name="Name">LeftEarInner</string>
             <bool name="Anchored">true</bool>
@@ -2340,7 +2402,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX76">
+        <Item class="Part" referent="RBX77">
           <Properties>
             <string name="Name">LeftEyeWhite</string>
             <bool name="Anchored">true</bool>
@@ -2371,7 +2433,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX77">
+        <Item class="Part" referent="RBX78">
           <Properties>
             <string name="Name">LeftPupil</string>
             <bool name="Anchored">true</bool>
@@ -2402,7 +2464,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX78">
+        <Item class="Part" referent="RBX79">
           <Properties>
             <string name="Name">LeftShine</string>
             <bool name="Anchored">true</bool>
@@ -2433,7 +2495,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX79">
+        <Item class="Part" referent="RBX80">
           <Properties>
             <string name="Name">LeftNostril</string>
             <bool name="Anchored">true</bool>
@@ -2464,7 +2526,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX80">
+        <Item class="Part" referent="RBX81">
           <Properties>
             <string name="Name">LeftCheek</string>
             <bool name="Anchored">true</bool>
@@ -2495,7 +2557,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX81">
+        <Item class="Part" referent="RBX82">
           <Properties>
             <string name="Name">LeftFrontLeg</string>
             <bool name="Anchored">true</bool>
@@ -2530,7 +2592,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX82">
+        <Item class="Part" referent="RBX83">
           <Properties>
             <string name="Name">LeftFrontPaw</string>
             <bool name="Anchored">true</bool>
@@ -2565,7 +2627,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX83">
+        <Item class="Part" referent="RBX84">
           <Properties>
             <string name="Name">LeftFrontHoofLine</string>
             <bool name="Anchored">true</bool>
@@ -2596,7 +2658,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX84">
+        <Item class="Part" referent="RBX85">
           <Properties>
             <string name="Name">LeftBackLeg</string>
             <bool name="Anchored">true</bool>
@@ -2631,7 +2693,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX85">
+        <Item class="Part" referent="RBX86">
           <Properties>
             <string name="Name">LeftBackPaw</string>
             <bool name="Anchored">true</bool>
@@ -2666,7 +2728,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX86">
+        <Item class="Part" referent="RBX87">
           <Properties>
             <string name="Name">LeftBackHoofLine</string>
             <bool name="Anchored">true</bool>
@@ -2697,7 +2759,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX87">
+        <Item class="Part" referent="RBX88">
           <Properties>
             <string name="Name">RightEar</string>
             <bool name="Anchored">true</bool>
@@ -2732,7 +2794,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX88">
+        <Item class="Part" referent="RBX89">
           <Properties>
             <string name="Name">RightEarInner</string>
             <bool name="Anchored">true</bool>
@@ -2763,7 +2825,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX89">
+        <Item class="Part" referent="RBX90">
           <Properties>
             <string name="Name">RightEyeWhite</string>
             <bool name="Anchored">true</bool>
@@ -2794,7 +2856,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX90">
+        <Item class="Part" referent="RBX91">
           <Properties>
             <string name="Name">RightPupil</string>
             <bool name="Anchored">true</bool>
@@ -2825,7 +2887,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX91">
+        <Item class="Part" referent="RBX92">
           <Properties>
             <string name="Name">RightShine</string>
             <bool name="Anchored">true</bool>
@@ -2856,7 +2918,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX92">
+        <Item class="Part" referent="RBX93">
           <Properties>
             <string name="Name">RightNostril</string>
             <bool name="Anchored">true</bool>
@@ -2887,7 +2949,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX93">
+        <Item class="Part" referent="RBX94">
           <Properties>
             <string name="Name">RightCheek</string>
             <bool name="Anchored">true</bool>
@@ -2918,7 +2980,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX94">
+        <Item class="Part" referent="RBX95">
           <Properties>
             <string name="Name">RightFrontLeg</string>
             <bool name="Anchored">true</bool>
@@ -2953,7 +3015,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX95">
+        <Item class="Part" referent="RBX96">
           <Properties>
             <string name="Name">RightFrontPaw</string>
             <bool name="Anchored">true</bool>
@@ -2988,7 +3050,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX96">
+        <Item class="Part" referent="RBX97">
           <Properties>
             <string name="Name">RightFrontHoofLine</string>
             <bool name="Anchored">true</bool>
@@ -3019,7 +3081,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX97">
+        <Item class="Part" referent="RBX98">
           <Properties>
             <string name="Name">RightBackLeg</string>
             <bool name="Anchored">true</bool>
@@ -3054,7 +3116,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX98">
+        <Item class="Part" referent="RBX99">
           <Properties>
             <string name="Name">RightBackPaw</string>
             <bool name="Anchored">true</bool>
@@ -3089,7 +3151,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX99">
+        <Item class="Part" referent="RBX100">
           <Properties>
             <string name="Name">RightBackHoofLine</string>
             <bool name="Anchored">true</bool>
@@ -3120,7 +3182,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX100">
+        <Item class="Part" referent="RBX101">
           <Properties>
             <string name="Name">TailBase</string>
             <bool name="Anchored">true</bool>
@@ -3155,7 +3217,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX101">
+        <Item class="Part" referent="RBX102">
           <Properties>
             <string name="Name">TailCurl</string>
             <bool name="Anchored">true</bool>
@@ -3190,7 +3252,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX102">
+        <Item class="Part" referent="RBX103">
           <Properties>
             <string name="Name">TailTip</string>
             <bool name="Anchored">true</bool>
@@ -3225,7 +3287,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX103">
+        <Item class="Part" referent="RBX104">
           <Properties>
             <string name="Name">LanternSaddle</string>
             <bool name="Anchored">true</bool>
@@ -3260,7 +3322,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX104">
+        <Item class="Part" referent="RBX105">
           <Properties>
             <string name="Name">LanternBase</string>
             <bool name="Anchored">true</bool>
@@ -3295,7 +3357,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX105">
+        <Item class="Part" referent="RBX106">
           <Properties>
             <string name="Name">LanternGlow</string>
             <bool name="Anchored">true</bool>
@@ -3325,7 +3387,7 @@ return BagRules
             <bool name="CanTouch">false</bool>
             <token name="Material">288</token>
           </Properties>
-          <Item class="PointLight" referent="RBX106">
+          <Item class="PointLight" referent="RBX107">
             <Properties>
               <string name="Name">LanternLight</string>
               <Color3 name="Color">
@@ -3338,7 +3400,7 @@ return BagRules
             </Properties>
           </Item>
         </Item>
-        <Item class="Part" referent="RBX107">
+        <Item class="Part" referent="RBX108">
           <Properties>
             <string name="Name">LanternPost-0.360.38</string>
             <bool name="Anchored">true</bool>
@@ -3369,7 +3431,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX108">
+        <Item class="Part" referent="RBX109">
           <Properties>
             <string name="Name">LanternPost-0.361.1</string>
             <bool name="Anchored">true</bool>
@@ -3400,7 +3462,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX109">
+        <Item class="Part" referent="RBX110">
           <Properties>
             <string name="Name">LanternPost0.360.38</string>
             <bool name="Anchored">true</bool>
@@ -3431,7 +3493,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX110">
+        <Item class="Part" referent="RBX111">
           <Properties>
             <string name="Name">LanternPost0.361.1</string>
             <bool name="Anchored">true</bool>
@@ -3462,7 +3524,7 @@ return BagRules
             <token name="Material">272</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX111">
+        <Item class="Part" referent="RBX112">
           <Properties>
             <string name="Name">LanternRoof</string>
             <bool name="Anchored">true</bool>
@@ -3497,7 +3559,7 @@ return BagRules
             <token name="RightSurface">3</token>
           </Properties>
         </Item>
-        <Item class="Part" referent="RBX112">
+        <Item class="Part" referent="RBX113">
           <Properties>
             <string name="Name">LanternCap</string>
             <bool name="Anchored">true</bool>
@@ -3535,16 +3597,16 @@ return BagRules
       </Item>
     </Item>
   </Item>
-  <Item class="ServerStorage" referent="RBX115">
+  <Item class="ServerStorage" referent="RBX116">
     <Properties>
       <string name="Name">ServerStorage</string>
     </Properties>
-    <Item class="Model" referent="RBX116">
+    <Item class="Model" referent="RBX117">
       <Properties>
         <string name="Name">RodeoMonsterTemplate</string>
-        <Ref name="PrimaryPart">RBX117</Ref>
+        <Ref name="PrimaryPart">RBX118</Ref>
       </Properties>
-      <Item class="Part" referent="RBX117">
+      <Item class="Part" referent="RBX118">
         <Properties>
           <string name="Name">MountRoot</string>
           <bool name="Anchored">true</bool>
@@ -3575,7 +3637,7 @@ return BagRules
           <bool name="CanQuery">false</bool>
           <bool name="CanTouch">false</bool>
         </Properties>
-        <Item class="BillboardGui" referent="RBX165">
+        <Item class="BillboardGui" referent="RBX166">
           <Properties>
             <string name="Name">Nameplate</string>
             <UDim2 name="Size">
@@ -3591,7 +3653,7 @@ return BagRules
             </Vector3>
             <bool name="AlwaysOnTop">true</bool>
           </Properties>
-          <Item class="TextLabel" referent="RBX166">
+          <Item class="TextLabel" referent="RBX167">
             <Properties>
               <string name="Name">Label</string>
               <UDim2 name="Size">
@@ -3613,7 +3675,7 @@ return BagRules
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="RBX118">
+      <Item class="Part" referent="RBX119">
         <Properties>
           <string name="Name">Body</string>
           <bool name="Anchored">true</bool>
@@ -3648,7 +3710,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX119">
+      <Item class="Part" referent="RBX120">
         <Properties>
           <string name="Name">Back</string>
           <bool name="Anchored">true</bool>
@@ -3683,7 +3745,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX120">
+      <Item class="Part" referent="RBX121">
         <Properties>
           <string name="Name">Belly</string>
           <bool name="Anchored">true</bool>
@@ -3718,7 +3780,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX121">
+      <Item class="Part" referent="RBX122">
         <Properties>
           <string name="Name">Head</string>
           <bool name="Anchored">true</bool>
@@ -3753,7 +3815,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX122">
+      <Item class="Part" referent="RBX123">
         <Properties>
           <string name="Name">HeadCrown</string>
           <bool name="Anchored">true</bool>
@@ -3788,7 +3850,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX123">
+      <Item class="Part" referent="RBX124">
         <Properties>
           <string name="Name">Snout</string>
           <bool name="Anchored">true</bool>
@@ -3823,7 +3885,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX124">
+      <Item class="Part" referent="RBX125">
         <Properties>
           <string name="Name">NoseTop</string>
           <bool name="Anchored">true</bool>
@@ -3858,7 +3920,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX125">
+      <Item class="Part" referent="RBX126">
         <Properties>
           <string name="Name">Smile</string>
           <bool name="Anchored">true</bool>
@@ -3889,7 +3951,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX126">
+      <Item class="Part" referent="RBX127">
         <Properties>
           <string name="Name">LeftEar</string>
           <bool name="Anchored">true</bool>
@@ -3924,7 +3986,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX127">
+      <Item class="Part" referent="RBX128">
         <Properties>
           <string name="Name">LeftEarInner</string>
           <bool name="Anchored">true</bool>
@@ -3955,7 +4017,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX128">
+      <Item class="Part" referent="RBX129">
         <Properties>
           <string name="Name">LeftEyeWhite</string>
           <bool name="Anchored">true</bool>
@@ -3986,7 +4048,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX129">
+      <Item class="Part" referent="RBX130">
         <Properties>
           <string name="Name">LeftPupil</string>
           <bool name="Anchored">true</bool>
@@ -4017,7 +4079,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX130">
+      <Item class="Part" referent="RBX131">
         <Properties>
           <string name="Name">LeftShine</string>
           <bool name="Anchored">true</bool>
@@ -4048,7 +4110,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX131">
+      <Item class="Part" referent="RBX132">
         <Properties>
           <string name="Name">LeftNostril</string>
           <bool name="Anchored">true</bool>
@@ -4079,7 +4141,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX132">
+      <Item class="Part" referent="RBX133">
         <Properties>
           <string name="Name">LeftCheek</string>
           <bool name="Anchored">true</bool>
@@ -4110,7 +4172,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX133">
+      <Item class="Part" referent="RBX134">
         <Properties>
           <string name="Name">LeftFrontLeg</string>
           <bool name="Anchored">true</bool>
@@ -4145,7 +4207,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX134">
+      <Item class="Part" referent="RBX135">
         <Properties>
           <string name="Name">LeftFrontPaw</string>
           <bool name="Anchored">true</bool>
@@ -4180,7 +4242,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX135">
+      <Item class="Part" referent="RBX136">
         <Properties>
           <string name="Name">LeftFrontHoofLine</string>
           <bool name="Anchored">true</bool>
@@ -4211,7 +4273,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX136">
+      <Item class="Part" referent="RBX137">
         <Properties>
           <string name="Name">LeftBackLeg</string>
           <bool name="Anchored">true</bool>
@@ -4246,7 +4308,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX137">
+      <Item class="Part" referent="RBX138">
         <Properties>
           <string name="Name">LeftBackPaw</string>
           <bool name="Anchored">true</bool>
@@ -4281,7 +4343,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX138">
+      <Item class="Part" referent="RBX139">
         <Properties>
           <string name="Name">LeftBackHoofLine</string>
           <bool name="Anchored">true</bool>
@@ -4312,7 +4374,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX139">
+      <Item class="Part" referent="RBX140">
         <Properties>
           <string name="Name">RightEar</string>
           <bool name="Anchored">true</bool>
@@ -4347,7 +4409,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX140">
+      <Item class="Part" referent="RBX141">
         <Properties>
           <string name="Name">RightEarInner</string>
           <bool name="Anchored">true</bool>
@@ -4378,7 +4440,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX141">
+      <Item class="Part" referent="RBX142">
         <Properties>
           <string name="Name">RightEyeWhite</string>
           <bool name="Anchored">true</bool>
@@ -4409,7 +4471,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX142">
+      <Item class="Part" referent="RBX143">
         <Properties>
           <string name="Name">RightPupil</string>
           <bool name="Anchored">true</bool>
@@ -4440,7 +4502,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX143">
+      <Item class="Part" referent="RBX144">
         <Properties>
           <string name="Name">RightShine</string>
           <bool name="Anchored">true</bool>
@@ -4471,7 +4533,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX144">
+      <Item class="Part" referent="RBX145">
         <Properties>
           <string name="Name">RightNostril</string>
           <bool name="Anchored">true</bool>
@@ -4502,7 +4564,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX145">
+      <Item class="Part" referent="RBX146">
         <Properties>
           <string name="Name">RightCheek</string>
           <bool name="Anchored">true</bool>
@@ -4533,7 +4595,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX146">
+      <Item class="Part" referent="RBX147">
         <Properties>
           <string name="Name">RightFrontLeg</string>
           <bool name="Anchored">true</bool>
@@ -4568,7 +4630,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX147">
+      <Item class="Part" referent="RBX148">
         <Properties>
           <string name="Name">RightFrontPaw</string>
           <bool name="Anchored">true</bool>
@@ -4603,7 +4665,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX148">
+      <Item class="Part" referent="RBX149">
         <Properties>
           <string name="Name">RightFrontHoofLine</string>
           <bool name="Anchored">true</bool>
@@ -4634,7 +4696,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX149">
+      <Item class="Part" referent="RBX150">
         <Properties>
           <string name="Name">RightBackLeg</string>
           <bool name="Anchored">true</bool>
@@ -4669,7 +4731,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX150">
+      <Item class="Part" referent="RBX151">
         <Properties>
           <string name="Name">RightBackPaw</string>
           <bool name="Anchored">true</bool>
@@ -4704,7 +4766,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX151">
+      <Item class="Part" referent="RBX152">
         <Properties>
           <string name="Name">RightBackHoofLine</string>
           <bool name="Anchored">true</bool>
@@ -4735,7 +4797,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX152">
+      <Item class="Part" referent="RBX153">
         <Properties>
           <string name="Name">TailBase</string>
           <bool name="Anchored">true</bool>
@@ -4770,7 +4832,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX153">
+      <Item class="Part" referent="RBX154">
         <Properties>
           <string name="Name">TailCurl</string>
           <bool name="Anchored">true</bool>
@@ -4805,7 +4867,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX154">
+      <Item class="Part" referent="RBX155">
         <Properties>
           <string name="Name">TailTip</string>
           <bool name="Anchored">true</bool>
@@ -4840,7 +4902,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX155">
+      <Item class="Part" referent="RBX156">
         <Properties>
           <string name="Name">LanternSaddle</string>
           <bool name="Anchored">true</bool>
@@ -4875,7 +4937,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX156">
+      <Item class="Part" referent="RBX157">
         <Properties>
           <string name="Name">LanternBase</string>
           <bool name="Anchored">true</bool>
@@ -4910,7 +4972,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX157">
+      <Item class="Part" referent="RBX158">
         <Properties>
           <string name="Name">LanternGlow</string>
           <bool name="Anchored">true</bool>
@@ -4940,7 +5002,7 @@ return BagRules
           <bool name="CanTouch">false</bool>
           <token name="Material">288</token>
         </Properties>
-        <Item class="PointLight" referent="RBX158">
+        <Item class="PointLight" referent="RBX159">
           <Properties>
             <string name="Name">LanternLight</string>
             <Color3 name="Color">
@@ -4953,7 +5015,7 @@ return BagRules
           </Properties>
         </Item>
       </Item>
-      <Item class="Part" referent="RBX159">
+      <Item class="Part" referent="RBX160">
         <Properties>
           <string name="Name">LanternPost-0.360.38</string>
           <bool name="Anchored">true</bool>
@@ -4984,7 +5046,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX160">
+      <Item class="Part" referent="RBX161">
         <Properties>
           <string name="Name">LanternPost-0.361.1</string>
           <bool name="Anchored">true</bool>
@@ -5015,7 +5077,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX161">
+      <Item class="Part" referent="RBX162">
         <Properties>
           <string name="Name">LanternPost0.360.38</string>
           <bool name="Anchored">true</bool>
@@ -5046,7 +5108,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX162">
+      <Item class="Part" referent="RBX163">
         <Properties>
           <string name="Name">LanternPost0.361.1</string>
           <bool name="Anchored">true</bool>
@@ -5077,7 +5139,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX163">
+      <Item class="Part" referent="RBX164">
         <Properties>
           <string name="Name">LanternRoof</string>
           <bool name="Anchored">true</bool>
@@ -5112,7 +5174,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX164">
+      <Item class="Part" referent="RBX165">
         <Properties>
           <string name="Name">LanternCap</string>
           <bool name="Anchored">true</bool>
@@ -5149,11 +5211,11 @@ return BagRules
       </Item>
     </Item>
   </Item>
-  <Item class="ServerScriptService" referent="RBX167">
+  <Item class="ServerScriptService" referent="RBX168">
     <Properties>
       <string name="Name">ServerScriptService</string>
     </Properties>
-    <Item class="Script" referent="RBX168">
+    <Item class="Script" referent="RBX169">
       <Properties>
         <string name="Name">CaptureServer</string>
         <ProtectedString name="Source">local Players=game:GetService("Players")
@@ -5164,6 +5226,7 @@ local Config=require(package.Config)
 local Rules=require(package.HuntRules)
 local BagRules=require(package.BagRules)
 local World=require(script.Parent.HuntWorld)
+local Course=require(package.CourseGeometry)
 local remote=package.CaptureRemote
 local tuning=Config.Prototype
 local states,bags,limits={},{},{}
@@ -5193,6 +5256,7 @@ end
 local function freeMount(state)
  if state.monster and state.monster.Parent then
   state.monster:SetAttribute("Occupied",false)
+  state.monster:SetAttribute("Running",true)
   state.monster:SetAttribute("Steering",0)
   state.monster:SetAttribute("Angry",false)
   state.monster:SetAttribute("DashUntil",nil)
@@ -5220,11 +5284,18 @@ local function finish(player,reason,crashKind)
 end
 local function start(player)
  local previous=states[player]
- if previous and previous.phase~="GameOver" then return end
+ if previous and previous.phase~="GameOver" and previous.phase~="CourseEnd" then return end
  local character=player.Character
  local root=character and character:FindFirstChild("HumanoidRootPart")
  local humanoid=character and character:FindFirstChildOfClass("Humanoid")
  if not root or not humanoid or humanoid.Health&lt;=0 then return end
+ if previous then
+  freeMount(previous)
+  if previous.phase=="CourseEnd" and previous.root==root then
+   root.Anchored=previous.wasAnchored
+   humanoid.AutoRotate,humanoid.PlatformStand=previous.autoRotate,previous.platformStand
+  end
+ end
  World.ensure(0)
  local model=World.spawn(Vector3.new(0,2,-8))
  model:SetAttribute("Occupied",true)
@@ -5286,7 +5357,7 @@ RunService.Heartbeat:Connect(function(delta)
  World.step(dt)
  local nearZ={0}
  for player,state in pairs(states) do
-  if state.phase=="GameOver" then
+  if (state.phase=="GameOver" or state.phase=="CourseEnd") then
    if state.root.Parent then table.insert(nearZ,state.root.Position.Z) end
    continue
   end
@@ -5304,6 +5375,19 @@ RunService.Heartbeat:Connect(function(delta)
   local old=state.phase=="Riding" and state.monster and state.monster.PrimaryPart.Position or state.root.Position
   local speed=state.phase=="Airborne" and tuning.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,tuning.ForwardStudsPerSecond,tuning.SwitchDashMultiplier)
   local position=Vector3.new(math.clamp(old.X+(steer*tuning.SidewaysStudsPerSecond+buckDrift*tuning.BuckSidewaysStudsPerSecond)*dt,-tuning.RoadHalfWidth,tuning.RoadHalfWidth),old.Y,old.Z-speed*dt)
+  if state.distance+speed*dt*tuning.MetersPerStud&gt;=Course.LengthMeters then
+   state.distance=Course.LengthMeters
+   state.phase="CourseEnd" state.dashUntil=nil
+   if state.monster then state.monster:SetAttribute("Running",false) state.monster:SetAttribute("DashUntil",nil) state.monster:SetAttribute("Angry",false) state.monster:SetAttribute("AngerWarning",false) end
+   if state.monster then
+    local p=state.monster.PrimaryPart.Position
+    state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z)
+    state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
+   end
+   clearRope(state)
+   send(player,"다음 지역 준비 중")
+   continue
+  end
   state.distance+=speed*dt*tuning.MetersPerStud
   World.ensure(position.Z)
   table.insert(nearZ,position.Z)
@@ -5372,7 +5456,7 @@ for _,player in ipairs(Players:GetPlayers()) do added(player) end
         <bool name="Disabled">false</bool>
       </Properties>
     </Item>
-    <Item class="ModuleScript" referent="RBX169">
+    <Item class="ModuleScript" referent="RBX170">
       <Properties>
         <string name="Name">HuntWorld</string>
         <ProtectedString name="Source">local World = {}
@@ -5381,6 +5465,7 @@ local root, monsters, obstacles, template, tuning
 local Rules
 local monsterId
 local Motion=require(game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy"):WaitForChild("HerdMotion"))
+local Course=require(game:GetService("ReplicatedStorage").RodeoFantasy.CourseGeometry)
 local spawnSerial=0
 
 local function part(parent, name, position, size, color)
@@ -5400,24 +5485,24 @@ local function decoration(parent,name,position,size,color)
  return node
 end
 
-local function dressObstacle(rock,style)
- rock.Transparency=1 rock:SetAttribute("Style",style)
+local function dressObstacle(rock,style,scale)
+ rock.Transparency=1 rock:SetAttribute("Style",style) rock:SetAttribute("Scale",scale)
  local base=Vector3.new(rock.Position.X,0,rock.Position.Z)
- if style=="FallenLog" then
-  local log=decoration(rock,"FallenTrunk",base+Vector3.new(0,1,0),Vector3.new(3.8,2,2),Color3.fromRGB(144,96,61))
-  log.Shape=Enum.PartType.Cylinder
-  for _,side in ipairs({-1,1}) do
-   local endGrain=decoration(rock,"TreeRings",base+Vector3.new(side*1.91,1,0),Vector3.new(0.05,1.6,1.6),Color3.fromRGB(224,182,122))
-   endGrain.Shape=Enum.PartType.Cylinder
-  end
-  decoration(rock,"BrokenBranch",base+Vector3.new(0.4,2.1,0),Vector3.new(0.55,1.7,0.55),Color3.fromRGB(127,83,54))
-  decoration(rock,"LogMoss",base+Vector3.new(-0.6,1.95,0.2),Vector3.new(1.5,0.2,1),Color3.fromRGB(119,159,82))
+ local function detail(name,pos,size,color)
+  return decoration(rock,name,base+pos*scale,size*scale,color)
+ end
+ if style=="Tree" then
+  detail("TreeTrunk",Vector3.new(0,2.2,0),Vector3.new(1.25,4.4,1.25),Color3.fromRGB(146,101,70))
+  detail("TreeRoots",Vector3.new(0,0.25,0),Vector3.new(2.4,0.5,2.4),Color3.fromRGB(165,117,77))
+  detail("LeafCrown",Vector3.new(0,4.3,0),Vector3.new(3.8,2.1,3.8),Color3.fromRGB(112,165,85))
+  detail("LeafTop",Vector3.new(-0.2,5.65,0.1),Vector3.new(2.8,0.7,2.8),Color3.fromRGB(153,195,105))
+  detail("LeafHighlight",Vector3.new(0.7,5.25,-0.7),Vector3.new(1.8,0.25,1.5),Color3.fromRGB(174,210,119))
  else
-  local stone=decoration(rock,"Boulder",base+Vector3.new(0,1.15,0),Vector3.new(3.8,2.3,3.8),Color3.fromRGB(177,157,123))
+  local stone=detail("Boulder",Vector3.new(0,1.15,0),Vector3.new(3.8,2.3,3.8),Color3.fromRGB(177,157,123))
   stone.CFrame*=CFrame.Angles(0,0,0.06)
-  decoration(rock,"StoneCap",base+Vector3.new(-0.3,2.5,0.15),Vector3.new(2.7,0.7,2.6),Color3.fromRGB(199,181,143))
-  decoration(rock,"Moss",base+Vector3.new(-0.6,2.91,0.1),Vector3.new(1.6,0.12,1.5),Color3.fromRGB(124,166,87))
-  decoration(rock,"StoneChip",base+Vector3.new(1.45,0.4,1.35),Vector3.new(0.9,0.8,0.9),Color3.fromRGB(163,146,113))
+  detail("StoneCap",Vector3.new(-0.3,2.5,0.15),Vector3.new(2.7,0.7,2.6),Color3.fromRGB(199,181,143))
+  detail("Moss",Vector3.new(-0.6,2.91,0.1),Vector3.new(1.6,0.12,1.5),Color3.fromRGB(124,166,87))
+  detail("StoneChip",Vector3.new(1.45,0.4,1.35),Vector3.new(0.9,0.8,0.9),Color3.fromRGB(163,146,113))
  end
 end
 
@@ -5450,7 +5535,7 @@ end
 function World.ensure(z)
 	local center = math.floor(z / tuning.GroundChunkStuds + 0.5)
 	for index = center - 2, center + 1 do
-		if chunks[index] then continue end
+		if chunks[index] or index*tuning.GroundChunkStuds &lt; -Course.LengthStuds-128 or index*tuning.GroundChunkStuds&gt;128 then continue end
 		local chunk = Instance.new("Folder")
 		chunk.Name, chunk.Parent = "Road_" .. index, root
 		chunks[index] = chunk
@@ -5460,23 +5545,30 @@ function World.ensure(z)
 		local random = Random.new(9101 + math.abs(index) * 137)
 		for offset = -112,112,32 do
 			local rowZ = start + offset
+   if rowZ &lt; -Course.LengthStuds or rowZ&gt;128 then continue end
+   local edge=Course.width(rowZ)
+   local median=Course.median(rowZ)
+   if median&gt;0 then
+    decoration(chunk,"ForkRidge",Vector3.new(0,1.5,rowZ),Vector3.new(median*2,3,32),Color3.fromRGB(203,143,91))
+    decoration(chunk,"ForkGrass",Vector3.new(0,3.1,rowZ),Vector3.new(median*2,0.2,32),Color3.fromRGB(133,179,96))
+   end
    for _, side in ipairs({-1,1}) do
     local height=8+random:NextInteger(0,3)
-    decoration(chunk,"CanyonBase",Vector3.new(side*40,2,rowZ),Vector3.new(10,4,32),Color3.fromRGB(220,151,97))
-    decoration(chunk,"CanyonStratum",Vector3.new(side*42,4.5,rowZ),Vector3.new(10,1,32),Color3.fromRGB(249,191,128))
-    decoration(chunk,"CanyonUpper",Vector3.new(side*44,5+height/2,rowZ),Vector3.new(12,height,32),Color3.fromRGB(201,126,80))
-    decoration(chunk,"GrassCap",Vector3.new(side*44,5+height+0.25,rowZ),Vector3.new(12,0.5,32),Color3.fromRGB(122,170,92))
-    decoration(chunk,"GrassEdge",Vector3.new(side*32,0.08,rowZ),Vector3.new(6,0.16,32),Color3.fromRGB(143,190,96))
+    decoration(chunk,"CanyonBase",Vector3.new(side*(edge+5),2,rowZ),Vector3.new(10,4,32),Color3.fromRGB(220,151,97))
+    decoration(chunk,"CanyonStratum",Vector3.new(side*(edge+7),4.5,rowZ),Vector3.new(10,1,32),Color3.fromRGB(249,191,128))
+    decoration(chunk,"CanyonUpper",Vector3.new(side*(edge+9),5+height/2,rowZ),Vector3.new(12,height,32),Color3.fromRGB(201,126,80))
+    decoration(chunk,"GrassCap",Vector3.new(side*(edge+9),5+height+0.25,rowZ),Vector3.new(12,0.5,32),Color3.fromRGB(122,170,92))
+    decoration(chunk,"GrassEdge",Vector3.new(side*(edge-3),0.08,rowZ),Vector3.new(6,0.16,32),Color3.fromRGB(143,190,96))
     for i=1,3 do
      local z=rowZ+random:NextNumber(-14,14)
-     local x=side*random:NextNumber(32,34)
+     local x=side*random:NextNumber(edge-3,edge-1)
      decoration(chunk,"GrassTuft",Vector3.new(x,0.45,z),Vector3.new(0.5,0.9,0.5),Color3.fromRGB(109,161,77))
     end
     if random:NextNumber()&lt;0.4 then
      local treeZ=rowZ+random:NextNumber(-8,8)
-     decoration(chunk,"TreeTrunk",Vector3.new(side*48,5+height+2,treeZ),Vector3.new(1.4,4,1.4),Color3.fromRGB(152,99,67))
-     decoration(chunk,"TreeCrown",Vector3.new(side*48,5+height+5,treeZ),Vector3.new(6,4,6),Color3.fromRGB(115,163,90))
-     decoration(chunk,"TreeTop",Vector3.new(side*48,5+height+7,treeZ),Vector3.new(4,2,4),Color3.fromRGB(146,190,107))
+     decoration(chunk,"TreeTrunk",Vector3.new(side*(edge+13),5+height+2,treeZ),Vector3.new(1.4,4,1.4),Color3.fromRGB(152,99,67))
+     decoration(chunk,"TreeCrown",Vector3.new(side*(edge+13),5+height+5,treeZ),Vector3.new(6,4,6),Color3.fromRGB(115,163,90))
+     decoration(chunk,"TreeTop",Vector3.new(side*(edge+13),5+height+7,treeZ),Vector3.new(4,2,4),Color3.fromRGB(146,190,107))
     end
    end
    for i=1,3 do
@@ -5484,14 +5576,26 @@ function World.ensure(z)
    end
 			-- Leave the run launch area clear; all other rows contain moving herds.
 			if rowZ &lt; -20 or rowZ &gt; 30 then
-				for _, x in ipairs({-18,-6,6,18}) do
+				local lanes={}
+    local ranges=Course.ranges(rowZ,4)
+    for _,range in ipairs(ranges) do
+     for i=1,4/#ranges do table.insert(lanes,range[1]+(range[2]-range[1])*i/(4/#ranges+1)) end
+    end
+    for _, x in ipairs(lanes) do
 					if random:NextNumber() &lt; tuning.HerdSpawnChance then World.spawn(Vector3.new(x,2,rowZ)) end
 				end
 				if random:NextNumber() &lt; tuning.RockSpawnChance then
-					local rock = part(obstacles, "Rock", Vector3.new(random:NextInteger(-3,3)*8,1.5,rowZ-12), Vector3.new(4,3,4), Color3.fromRGB(167,130,99))
-					rock:SetAttribute("Chunk", index)
-					rock.CanCollide = false -- server swept collision is authoritative
-     dressObstacle(rock,(index+math.floor(offset/32))%3==0 and "FallenLog" or "MossyRock")
+					local kind=(math.abs(index)*8+math.floor((offset+112)/32))%4
+     local style=kind&gt;=2 and "Tree" or "MossyRock"
+     local scale=kind%2==1 and 2 or 1
+     local bounds=Course.ranges(rowZ-12,2*scale+2)
+     local range=bounds[random:NextInteger(1,#bounds)]
+     local x=random:NextNumber(range[1],range[2])
+     local height=(style=="Tree" and 6 or 3)*scale
+     local rock=part(obstacles,"Rock",Vector3.new(x,height/2,rowZ-12),Vector3.new(4*scale,height,4*scale),Color3.fromRGB(167,130,99))
+     rock:SetAttribute("Chunk",index)
+     rock.CanCollide=false -- server swept collision is authoritative
+     dressObstacle(rock,style,scale)
 				end
 			end
 		end
@@ -5510,7 +5614,7 @@ function World.step(dt)
 			-- Only the authoritative root moves. Clients own all visual body poses.
    local p,half=model.PrimaryPart.Position,model.PrimaryPart.Size/2
    if motion.wasOccupied then motion.home,motion.vx,motion.wasOccupied=p.X,0,false end
-   local x,z,vx=Motion.step(motion,p.X,p.Z,dt,rocks,tuning,half.X,half.Z,Rules)
+   local x,z,vx=Motion.step(motion,p.X,p.Z,dt,rocks,tuning,half.X,half.Z,Rules,Course)
    model.PrimaryPart.CFrame=CFrame.new(x,p.Y,z)*CFrame.Angles(0,-math.atan2(vx,tuning.HerdStudsPerSecond),0)
    model:SetAttribute("Steering",vx/tuning.SidewaysStudsPerSecond)
 		 model:SetAttribute("HerdVelocity",Vector3.new(vx,0,(z-p.Z)/math.max(dt,0.000001)))
@@ -5533,7 +5637,10 @@ end
 -- Contact while riding: include moving herds and the visible inner canyon face.
 function World.mountedHit(from,to,mount)
  local half=mount.PrimaryPart.Size/2
- if math.max(math.abs(from.X),math.abs(to.X))+half.X&gt;=tuning.RoadHalfWidth then return "Wall" end
+ for i=0,4 do
+  local p=from:Lerp(to,i/4)
+  if not Course.contains(p.X,p.Z-half.Z,half.X) or not Course.contains(p.X,p.Z+half.Z,half.X) then return "Wall" end
+ end
  for other in pairs(animals) do
   if other==mount or not other.Parent then continue end
   local old=previousPositions[other] or other.PrimaryPart.Position
@@ -5577,17 +5684,17 @@ return World
       </Properties>
     </Item>
   </Item>
-  <Item class="StarterPlayer" referent="RBX170">
+  <Item class="StarterPlayer" referent="RBX171">
     <Properties>
       <string name="Name">StarterPlayer</string>
       <float name="CameraMaxZoomDistance">40</float>
       <float name="CameraMinZoomDistance">8</float>
     </Properties>
-    <Item class="StarterPlayerScripts" referent="RBX171">
+    <Item class="StarterPlayerScripts" referent="RBX172">
       <Properties>
         <string name="Name">StarterPlayerScripts</string>
       </Properties>
-      <Item class="LocalScript" referent="RBX172">
+      <Item class="LocalScript" referent="RBX173">
         <Properties>
           <string name="Name">CaptureClient</string>
           <ProtectedString name="Source">local Players=game:GetService("Players")
@@ -5604,6 +5711,8 @@ local animator=require(script.Parent:WaitForChild("RideAnimator"))
 local rider=require(script.Parent:WaitForChild("RiderPresentation"))
 local gauge=require(script.Parent:WaitForChild("TamingGauge"))
 local crashEffect=require(script.Parent:WaitForChild("CrashEffect"))
+local audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local dash=require(script.Parent:WaitForChild("DashPresentation"))
 local markers=require(script.Parent:WaitForChild("DistanceMarkers"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
 local state={phase="Idle",started=0,count=0,pending=0,distance=0}
@@ -5644,7 +5753,7 @@ local beams={}
 for i=1,32 do
  beams[i]=make("Beam",{Attachment0=ringPoints[i],Attachment1=ringPoints[i%32+1],Width0=0.12,Width1=0.12,FaceCamera=true,Color=ColorSequence.new(Color3.fromRGB(255,224,83)),Enabled=false},ring)
 end
-local function active() return state.phase~="Idle" and state.phase~="GameOver" end
+local function active() return state.phase~="Idle" and state.phase~="GameOver" and state.phase~="CourseEnd" end
 local function steering()
  if state.phase~="Riding" then return 0 end
  if right or left then return (right and 1 or 0)-(left and 1 or 0) end
@@ -5716,7 +5825,7 @@ remote.OnClientEvent:Connect(function(kind,data)
  if data.message then notice,noticeUntil=data.message,os.clock()+3 end
  startButton.Visible=not active()
  startButton.Text=state.phase=="GameOver" and "다시 사냥하기" or "사냥 시작"
- cameraMode(active())
+ cameraMode(active() or state.phase=="CourseEnd")
  bag.Text=string.format("가방: %d마리 · 모인 돈: %d원",state.count,state.pending)
 end)
 player.CharacterAdded:Connect(function() state.phase="Idle" cameraMode(false) remote:FireServer("Sync") end)
@@ -5729,7 +5838,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  if state.phase~="Airborne" then flightFrame=nil end
  if active() and root then
   local mount=state.monster and frames[state.monster]
-  if state.phase=="Riding" and mount then
+  if (state.phase=="Riding" or state.phase=="CourseEnd") and mount then
    visualFrame=mount*CFrame.new(0,t.RideHeightStuds,t.RideForwardStuds)
   elseif state.phase=="Lassoing" and mount and state.origin then
    local p=math.clamp((clock-state.started)/(state.landingSeconds or t.JumpSeconds),0,1)
@@ -5743,19 +5852,22 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   end
  end
  rider.update(player.Character,state.phase,visualFrame,dt,clock,state.dashUntil)
+ dash.update(state.phase,visualFrame,clock,state.dashUntil,t.SwitchDashSeconds)
  crashEffect.update(player.Character,state.phase,clock)
+ audio.update(state,monsters,root and root.Position,clock)
  local displayDistance=state.distance or 0
  if active() then
   local speed=state.phase=="Airborne" and t.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,t.ForwardStudsPerSecond,t.SwitchDashMultiplier)
   displayDistance+=math.clamp(clock-(state.sampleTime or clock),0,0.3)*speed*t.MetersPerStud
  end
- markers.update(active(),displayDistance,visualFrame,t.MetersPerStud)
+ markers.update(active() or state.phase=="CourseEnd",displayDistance,visualFrame,t.MetersPerStud)
+ displayDistance=math.min(displayDistance,1000)
  distance.Text=string.format("%dm",math.floor(displayDistance))
  highlight.Enabled=false
  panel.Visible=not active()
  gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),state.tamed,workspace.CurrentCamera)
  for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
- if active() and root then
+ if (active() or state.phase=="CourseEnd") and root then
   -- Follow horizontal movement; jumping should not lift the whole view.
   local groundFocus=Vector3.new(0,t.CameraGroundFocusStuds,visualFrame.Position.Z)
   local target=CFrame.lookAt(groundFocus+Vector3.new(t.CameraSideStuds,t.CameraHeightStuds,t.CameraBehindStuds),groundFocus+Vector3.new(0,0,-t.CameraLookAheadStuds))
@@ -5785,6 +5897,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   status.Text="스페이스바로 다음 몬스터를 잡으세요!"
   instruction.Text="노란 원 안에 몬스터가 들어오면 줄이 연결됩니다"
  elseif state.phase=="Lassoing" then status.Text="날아가서 탑승하는 중…" instruction.Text="탑승 후 계속 타고 달릴 수 있어요"
+ elseif state.phase=="CourseEnd" then status.Text="1,000m · 다음 지역 준비 중" instruction.Text="초원 시험 구간이 끝났어요 · 사냥 시작으로 다시 달릴 수 있어요"
  elseif state.phase=="GameOver" then status.Text="사냥 종료" instruction.Text="다시 사냥하기로 재도전 · 가방 수익은 유지"
  else status.Text="로데오 스트릿 · 루미돈 사냥" instruction.Text="사냥 시작 → A·D 좌우 이동 → 스페이스바 점프 → 다시 눌러 줄" end
  if os.clock()&lt;noticeUntil and not state.angerAt then status.Text=notice end
@@ -5794,7 +5907,7 @@ remote:FireServer("Sync")
           <bool name="Disabled">false</bool>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="RBX173">
+      <Item class="ModuleScript" referent="RBX174">
         <Properties>
           <string name="Name">RideAnimator</string>
           <ProtectedString name="Source">-- Procedural visual motion for the native part model. Never changes its mount root.
@@ -5952,7 +6065,7 @@ return RideAnimator
 </ProtectedString>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="RBX174">
+      <Item class="ModuleScript" referent="RBX175">
         <Properties>
           <string name="Name">RiderPresentation</string>
           <ProtectedString name="Source">-- Local presentation only; server still owns capture, movement and collisions.
@@ -6123,7 +6236,7 @@ return Presentation
 </ProtectedString>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="RBX175">
+      <Item class="ModuleScript" referent="RBX176">
         <Properties>
           <string name="Name">TamingGauge</string>
           <ProtectedString name="Source">-- Original, asset-free circular taming indicator following the rendered mount.
@@ -6173,7 +6286,7 @@ return Gauge
 </ProtectedString>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="RBX176">
+      <Item class="ModuleScript" referent="RBX177">
         <Properties>
           <string name="Name">CrashEffect</string>
           <ProtectedString name="Source">-- Cartoon breakup using temporary visual clones; never destroys the real avatar.
@@ -6237,7 +6350,7 @@ return Effect
 </ProtectedString>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="RBX177">
+      <Item class="ModuleScript" referent="RBX178">
         <Properties>
           <string name="Name">DistanceMarkers</string>
           <ProtectedString name="Source">-- Local course markings projected from the server's run distance, not global map Z.
@@ -6265,7 +6378,7 @@ function Markers.update(active,distance,frame,metersPerStud)
  if not active or not frame then
   for _,gate in pairs(gates) do gate.model:Destroy() end gates={} return
  end
- local nextDistance=(math.floor(distance/1000)+1)*1000
+ local nextDistance=1000 -- only the first meadow is implemented
  for value,gate in pairs(gates) do
   if value&lt;nextDistance-1000 or value&gt;nextDistance then gate.model:Destroy() gates[value]=nil end
  end
@@ -6278,9 +6391,125 @@ return Markers
 </ProtectedString>
         </Properties>
       </Item>
+      <Item class="ModuleScript" referent="RBX179">
+        <Properties>
+          <string name="Name">AudioPresentation</string>
+          <ProtectedString name="Source">local Audio={}
+local service=game:GetService("SoundService")
+local config=require(game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy"):WaitForChild("Config"))
+local sounds,hooves={},{}
+local previousPhase,previousCount=nil,nil
+local function sound(name,id,parent,volume,looped)
+ local s=Instance.new("Sound") s.Name=name s.SoundId=id s.Volume=volume
+ s.Looped=looped or false s.Parent=parent return s
+end
+local function initialize()
+ if sounds.BGM then return end
+ for _,kind in ipairs({"BGM","Jump","Rope","Land","Success"}) do
+  sounds[kind]=sound("Rodeo"..kind,config.Audio[kind],service,kind=="BGM" and config.Audio.MusicVolume or config.Audio.EffectsVolume,kind=="BGM")
+ end
+ sounds.Rope.Volume=0.18 sounds.Success.PlaybackSpeed=1.4
+ sounds.BGM:Play()
+end
+local function play(kind)
+ local s=sounds[kind] s:Stop() s.TimePosition=0 s:Play()
+end
+function Audio.update(state,monsters,position,clock)
+ initialize()
+ local active=state.phase~="Idle" and state.phase~="GameOver" and state.phase~="CourseEnd"
+ if previousPhase and previousPhase~=state.phase then
+  if state.phase=="Airborne" then play("Jump")
+  elseif state.phase=="Lassoing" then play("Rope")
+  elseif state.phase=="Riding" then play("Land") end
+ end
+ if previousCount and (state.count or 0)&gt;previousCount then play("Success") end
+ previousPhase,previousCount=state.phase,state.count or 0
+ local candidates={}
+ if active and position then
+  for _,model in ipairs(monsters:GetChildren()) do
+   local root=model.PrimaryPart
+   local velocity=model:GetAttribute("HerdVelocity")
+   local moving=model:GetAttribute("Occupied") or not velocity or velocity.Magnitude&gt;1
+   if root and model:GetAttribute("Running") and moving then
+    local distance=(root.Position-position).Magnitude
+    if distance&lt;70 then table.insert(candidates,{model=model,distance=distance}) end
+   end
+  end
+ end
+ table.sort(candidates,function(a,b) return a.distance&lt;b.distance end)
+ local kept={}
+ for i=1,math.min(6,#candidates) do
+  local model=candidates[i].model kept[model]=true
+  local s=hooves[model]
+  if not s then
+   s=sound("RodeoHooves",config.Audio.Hooves,model.PrimaryPart,0.16,true)
+   s.RollOffMinDistance,s.RollOffMaxDistance=6,70
+   s.RollOffMode=Enum.RollOffMode.InverseTapered hooves[model]=s s:Play()
+  end
+  local dash=model:GetAttribute("DashUntil")
+  s.PlaybackSpeed=dash and clock&lt;dash and 1.5 or 1
+ end
+ for model,s in pairs(hooves) do
+  if not kept[model] or not model.Parent then s:Destroy() hooves[model]=nil end
+ end
+end
+return Audio
+</ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX180">
+        <Properties>
+          <string name="Name">DashPresentation</string>
+          <ProtectedString name="Source">-- Local wind geometry, active only during the existing switch dash.
+local Dash={}
+local anchor,points,beams
+local function clear()
+ if anchor then anchor:Destroy() anchor=nil end
+end
+function Dash.update(phase,frame,clock,untilTime,duration)
+ if phase~="Riding" or not frame or not untilTime or clock&gt;=untilTime then clear() return end
+ if not anchor then
+  anchor=Instance.new("Part") anchor.Name="LocalDashWind"
+  anchor.Anchored=true anchor.Transparency=1 anchor.Size=Vector3.one
+  anchor.CanCollide,anchor.CanTouch,anchor.CanQuery=false,false,false
+  anchor.Parent=workspace points={} beams={}
+  for i=1,80 do local a=Instance.new("Attachment") a.Parent=anchor points[i]=a end
+  for i=1,72 do
+   local beam=Instance.new("Beam") beam.FaceCamera=true
+   if i&lt;=64 then
+    local group=math.floor((i-1)/32)*32
+    beam.Attachment0=points[i] beam.Attachment1=points[group+i%32+1]
+   else beam.Attachment0=points[65+(i-65)*2] beam.Attachment1=points[66+(i-65)*2] end
+   beam.Width0,beam.Width1=0.16,0.08
+   beam.Color=ColorSequence.new(Color3.fromRGB(255,249,222))
+   beam.LightEmission=0.2 beam.Parent=anchor beams[i]=beam
+  end
+ end
+ anchor.CFrame=frame*CFrame.new(0,-1,0)
+ local progress=math.clamp(1-(untilTime-clock)/duration,0,1)
+ for group=0,1 do
+  local radius=3.2+progress*3+group*0.9
+  for i=1,32 do
+   local angle=(i-1)/32*math.pi*2
+   points[group*32+i].Position=Vector3.new(math.cos(angle)*radius,math.sin(angle)*radius,1+progress*7+group*3)
+  end
+ end
+ for i=0,7 do
+  local angle=i/8*math.pi*2+0.2
+  local radius=3.7+math.sin(clock*20+i)*0.3
+  local start=Vector3.new(math.cos(angle)*radius,math.sin(angle)*radius,-3)
+  points[65+i*2].Position=start
+  points[66+i*2].Position=start+Vector3.new(0,0,5+progress*6)
+ end
+ for _,beam in ipairs(beams) do beam.Transparency=NumberSequence.new(0.45+progress*0.55) end
+end
+return Dash
+</ProtectedString>
+        </Properties>
+      </Item>
     </Item>
   </Item>
-  <Item class="Lighting" referent="RBX178">
+  <Item class="Lighting" referent="RBX181">
     <Properties>
       <string name="Name">Lighting</string>
       <float name="ClockTime">13</float>

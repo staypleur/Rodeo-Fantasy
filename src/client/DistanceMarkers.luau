@@ -23,7 +23,7 @@ function Markers.update(active,distance,frame,metersPerStud)
  if not active or not frame then
   for _,gate in pairs(gates) do gate.model:Destroy() end gates={} return
  end
- local nextDistance=(math.floor(distance/1000)+1)*1000
+ local nextDistance=1000 -- only the first meadow is implemented
  for value,gate in pairs(gates) do
   if value<nextDistance-1000 or value>nextDistance then gate.model:Destroy() gates[value]=nil end
  end

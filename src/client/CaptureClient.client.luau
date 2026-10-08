@@ -12,6 +12,8 @@ local animator=require(script.Parent:WaitForChild("RideAnimator"))
 local rider=require(script.Parent:WaitForChild("RiderPresentation"))
 local gauge=require(script.Parent:WaitForChild("TamingGauge"))
 local crashEffect=require(script.Parent:WaitForChild("CrashEffect"))
+local audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local dash=require(script.Parent:WaitForChild("DashPresentation"))
 local markers=require(script.Parent:WaitForChild("DistanceMarkers"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
 local state={phase="Idle",started=0,count=0,pending=0,distance=0}
@@ -52,7 +54,7 @@ local beams={}
 for i=1,32 do
  beams[i]=make("Beam",{Attachment0=ringPoints[i],Attachment1=ringPoints[i%32+1],Width0=0.12,Width1=0.12,FaceCamera=true,Color=ColorSequence.new(Color3.fromRGB(255,224,83)),Enabled=false},ring)
 end
-local function active() return state.phase~="Idle" and state.phase~="GameOver" end
+local function active() return state.phase~="Idle" and state.phase~="GameOver" and state.phase~="CourseEnd" end
 local function steering()
  if state.phase~="Riding" then return 0 end
  if right or left then return (right and 1 or 0)-(left and 1 or 0) end
@@ -124,7 +126,7 @@ remote.OnClientEvent:Connect(function(kind,data)
  if data.message then notice,noticeUntil=data.message,os.clock()+3 end
  startButton.Visible=not active()
  startButton.Text=state.phase=="GameOver" and "다시 사냥하기" or "사냥 시작"
- cameraMode(active())
+ cameraMode(active() or state.phase=="CourseEnd")
  bag.Text=string.format("가방: %d마리 · 모인 돈: %d원",state.count,state.pending)
 end)
 player.CharacterAdded:Connect(function() state.phase="Idle" cameraMode(false) remote:FireServer("Sync") end)
@@ -137,7 +139,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  if state.phase~="Airborne" then flightFrame=nil end
  if active() and root then
   local mount=state.monster and frames[state.monster]
-  if state.phase=="Riding" and mount then
+  if (state.phase=="Riding" or state.phase=="CourseEnd") and mount then
    visualFrame=mount*CFrame.new(0,t.RideHeightStuds,t.RideForwardStuds)
   elseif state.phase=="Lassoing" and mount and state.origin then
    local p=math.clamp((clock-state.started)/(state.landingSeconds or t.JumpSeconds),0,1)
@@ -151,19 +153,22 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   end
  end
  rider.update(player.Character,state.phase,visualFrame,dt,clock,state.dashUntil)
+ dash.update(state.phase,visualFrame,clock,state.dashUntil,t.SwitchDashSeconds)
  crashEffect.update(player.Character,state.phase,clock)
+ audio.update(state,monsters,root and root.Position,clock)
  local displayDistance=state.distance or 0
  if active() then
   local speed=state.phase=="Airborne" and t.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,t.ForwardStudsPerSecond,t.SwitchDashMultiplier)
   displayDistance+=math.clamp(clock-(state.sampleTime or clock),0,0.3)*speed*t.MetersPerStud
  end
- markers.update(active(),displayDistance,visualFrame,t.MetersPerStud)
+ markers.update(active() or state.phase=="CourseEnd",displayDistance,visualFrame,t.MetersPerStud)
+ displayDistance=math.min(displayDistance,1000)
  distance.Text=string.format("%dm",math.floor(displayDistance))
  highlight.Enabled=false
  panel.Visible=not active()
  gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),state.tamed,workspace.CurrentCamera)
  for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
- if active() and root then
+ if (active() or state.phase=="CourseEnd") and root then
   -- Follow horizontal movement; jumping should not lift the whole view.
   local groundFocus=Vector3.new(0,t.CameraGroundFocusStuds,visualFrame.Position.Z)
   local target=CFrame.lookAt(groundFocus+Vector3.new(t.CameraSideStuds,t.CameraHeightStuds,t.CameraBehindStuds),groundFocus+Vector3.new(0,0,-t.CameraLookAheadStuds))
@@ -193,6 +198,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   status.Text="스페이스바로 다음 몬스터를 잡으세요!"
   instruction.Text="노란 원 안에 몬스터가 들어오면 줄이 연결됩니다"
  elseif state.phase=="Lassoing" then status.Text="날아가서 탑승하는 중…" instruction.Text="탑승 후 계속 타고 달릴 수 있어요"
+ elseif state.phase=="CourseEnd" then status.Text="1,000m · 다음 지역 준비 중" instruction.Text="초원 시험 구간이 끝났어요 · 사냥 시작으로 다시 달릴 수 있어요"
  elseif state.phase=="GameOver" then status.Text="사냥 종료" instruction.Text="다시 사냥하기로 재도전 · 가방 수익은 유지"
  else status.Text="로데오 스트릿 · 루미돈 사냥" instruction.Text="사냥 시작 → A·D 좌우 이동 → 스페이스바 점프 → 다시 눌러 줄" end
  if os.clock()<noticeUntil and not state.angerAt then status.Text=notice end

@@ -39,6 +39,17 @@ driver.OnServerInvoke=function(player,action,value)
   local blocker=world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-4))
   blocker:SetAttribute("TestKeep",true)
   return blocker
+ elseif action=="SafeLane" then
+  for _,mount in ipairs(workspace.RodeoPrototype.Monsters:GetChildren()) do
+   if mount:GetAttribute("Occupied") then local p=mount.PrimaryPart.Position mount.PrimaryPart.CFrame=CFrame.new(18,p.Y,p.Z) end
+  end
+  return true
+ elseif action=="ShortCourse" then
+  require(RS.RodeoFantasy.Config).Prototype.MetersPerStud=1000
+  return true
+ elseif action=="ResetCourse" then
+  require(RS.RodeoFantasy.Config).Prototype.MetersPerStud=0.625
+  return true
  elseif action=="Finish" then
   print("HUNT_TEST_SERVER_RESULT: "..value)
   task.defer(function() service:EndTest(value) end)
@@ -104,6 +115,11 @@ local success,problem=pcall(function()
   check(onScreen and point.Y/camera.ViewportSize.Y>0.5 and point.Y/camera.ViewportSize.Y<0.8,"rider must be in lower screen with forward road visible")
  end
  check(state.count==0,"bag must start empty")
+ local music=game:GetService("SoundService"):WaitForChild("RodeoBGM")
+ waitFor(function() return music.IsLoaded and music.IsPlaying end,"BGM must load and play")
+ check(music.Looped,"BGM must loop")
+ waitFor(function() return state.monster.PrimaryPart:FindFirstChild("RodeoHooves")~=nil end,"mounted hoof sound missing")
+ check(state.monster.PrimaryPart.RodeoHooves.Looped,"hoof recording must loop while running")
  local bound=game:GetService("ContextActionService"):GetBoundActionInfo("RodeoJump")
  local spaceBound=false
  for _,key in ipairs(bound.inputTypes or {}) do if key==Enum.KeyCode.Space then spaceBound=true end end
@@ -152,6 +168,7 @@ local success,problem=pcall(function()
  check(state.dashUntil and state.dashUntil>workspace:GetServerTimeNow(),"switch must start short dash")
  waitFor(function() local a=character.HumanoidRootPart:FindFirstChild("FlightTrailAnchor") return a and a:FindFirstChildOfClass("Trail") and a:FindFirstChildOfClass("Trail").Enabled end,"switch dash must display brief speed trail")
  check(character.HumanoidRootPart.FlightTrailAnchor:FindFirstChildOfClass("Trail").Enabled,"dash trail must appear")
+ check(workspace:FindFirstChild("LocalDashWind")~=nil,"switch dash must surround rider with wind")
  check(state.protectedUntil>workspace:GetServerTimeNow(),"landing protection missing")
  local worstOffset=0
  local samples=0
@@ -181,6 +198,7 @@ local success,problem=pcall(function()
  remote:FireServer("Start")
  waitFor(function() return state.phase=="Riding" end,"restart failed")
  check(state.count==oldCount+1,"restart must keep bag")
+ driver:InvokeServer("SafeLane")
  waitFor(function() return state.angerAt~=nil end,"anger warning missing")
  local angryMonster=state.monster
  waitFor(function() return angryMonster.PrimaryPart:FindFirstChild("AngerWarning")~=nil end,"exclamation missing")
@@ -213,6 +231,21 @@ local success,problem=pcall(function()
  remote:FireServer("Start")
  waitFor(function() return state.phase=="Riding" end,"restart after breakup failed")
  check(character.Head.LocalTransparencyModifier<1,"restart must restore avatar visibility")
+ local finalMount=state.monster
+ driver:InvokeServer("ShortCourse")
+ waitFor(function() return state.phase=="CourseEnd" end,"1000m must pause the run")
+ check(state.distance==1000 and character.HumanoidRootPart.Anchored,"course end must stop at 1000m without restoring walking")
+ local finalPosition=character.HumanoidRootPart.Position
+ task.wait(0.35)
+ check((character.HumanoidRootPart.Position-finalPosition).Magnitude<0.01,"course end must stay still")
+ check(not finalMount:GetAttribute("Running") and not workspace:FindFirstChild("LocalDashWind"),"course end must stop gallop and dash visuals")
+ driver:InvokeServer("ResetCourse")
+ remote:FireServer("Start")
+ waitFor(function() return state.phase=="Riding" and state.monster~=finalMount end,"course end must allow restart")
+ check(not finalMount:GetAttribute("Occupied"),"restart must release paused mount")
+ remote:FireServer("Jump")
+ waitFor(function() return state.phase=="GameOver" end,"run after course end must end normally")
+ check(not character.HumanoidRootPart.Anchored,"restart after course end must preserve original character restoration")
 end)
 driver:InvokeServer("Finish",success and ("PASS: "..checks.." hunting Play checks") or ("FAIL: "..tostring(problem)))
 ]==]

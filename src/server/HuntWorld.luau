@@ -4,6 +4,7 @@ local root, monsters, obstacles, template, tuning
 local Rules
 local monsterId
 local Motion=require(game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy"):WaitForChild("HerdMotion"))
+local Course=require(game:GetService("ReplicatedStorage").RodeoFantasy.CourseGeometry)
 local spawnSerial=0
 
 local function part(parent, name, position, size, color)
@@ -23,24 +24,24 @@ local function decoration(parent,name,position,size,color)
  return node
 end
 
-local function dressObstacle(rock,style)
- rock.Transparency=1 rock:SetAttribute("Style",style)
+local function dressObstacle(rock,style,scale)
+ rock.Transparency=1 rock:SetAttribute("Style",style) rock:SetAttribute("Scale",scale)
  local base=Vector3.new(rock.Position.X,0,rock.Position.Z)
- if style=="FallenLog" then
-  local log=decoration(rock,"FallenTrunk",base+Vector3.new(0,1,0),Vector3.new(3.8,2,2),Color3.fromRGB(144,96,61))
-  log.Shape=Enum.PartType.Cylinder
-  for _,side in ipairs({-1,1}) do
-   local endGrain=decoration(rock,"TreeRings",base+Vector3.new(side*1.91,1,0),Vector3.new(0.05,1.6,1.6),Color3.fromRGB(224,182,122))
-   endGrain.Shape=Enum.PartType.Cylinder
-  end
-  decoration(rock,"BrokenBranch",base+Vector3.new(0.4,2.1,0),Vector3.new(0.55,1.7,0.55),Color3.fromRGB(127,83,54))
-  decoration(rock,"LogMoss",base+Vector3.new(-0.6,1.95,0.2),Vector3.new(1.5,0.2,1),Color3.fromRGB(119,159,82))
+ local function detail(name,pos,size,color)
+  return decoration(rock,name,base+pos*scale,size*scale,color)
+ end
+ if style=="Tree" then
+  detail("TreeTrunk",Vector3.new(0,2.2,0),Vector3.new(1.25,4.4,1.25),Color3.fromRGB(146,101,70))
+  detail("TreeRoots",Vector3.new(0,0.25,0),Vector3.new(2.4,0.5,2.4),Color3.fromRGB(165,117,77))
+  detail("LeafCrown",Vector3.new(0,4.3,0),Vector3.new(3.8,2.1,3.8),Color3.fromRGB(112,165,85))
+  detail("LeafTop",Vector3.new(-0.2,5.65,0.1),Vector3.new(2.8,0.7,2.8),Color3.fromRGB(153,195,105))
+  detail("LeafHighlight",Vector3.new(0.7,5.25,-0.7),Vector3.new(1.8,0.25,1.5),Color3.fromRGB(174,210,119))
  else
-  local stone=decoration(rock,"Boulder",base+Vector3.new(0,1.15,0),Vector3.new(3.8,2.3,3.8),Color3.fromRGB(177,157,123))
+  local stone=detail("Boulder",Vector3.new(0,1.15,0),Vector3.new(3.8,2.3,3.8),Color3.fromRGB(177,157,123))
   stone.CFrame*=CFrame.Angles(0,0,0.06)
-  decoration(rock,"StoneCap",base+Vector3.new(-0.3,2.5,0.15),Vector3.new(2.7,0.7,2.6),Color3.fromRGB(199,181,143))
-  decoration(rock,"Moss",base+Vector3.new(-0.6,2.91,0.1),Vector3.new(1.6,0.12,1.5),Color3.fromRGB(124,166,87))
-  decoration(rock,"StoneChip",base+Vector3.new(1.45,0.4,1.35),Vector3.new(0.9,0.8,0.9),Color3.fromRGB(163,146,113))
+  detail("StoneCap",Vector3.new(-0.3,2.5,0.15),Vector3.new(2.7,0.7,2.6),Color3.fromRGB(199,181,143))
+  detail("Moss",Vector3.new(-0.6,2.91,0.1),Vector3.new(1.6,0.12,1.5),Color3.fromRGB(124,166,87))
+  detail("StoneChip",Vector3.new(1.45,0.4,1.35),Vector3.new(0.9,0.8,0.9),Color3.fromRGB(163,146,113))
  end
 end
 
@@ -73,7 +74,7 @@ end
 function World.ensure(z)
 	local center = math.floor(z / tuning.GroundChunkStuds + 0.5)
 	for index = center - 2, center + 1 do
-		if chunks[index] then continue end
+		if chunks[index] or index*tuning.GroundChunkStuds < -Course.LengthStuds-128 or index*tuning.GroundChunkStuds>128 then continue end
 		local chunk = Instance.new("Folder")
 		chunk.Name, chunk.Parent = "Road_" .. index, root
 		chunks[index] = chunk
@@ -83,23 +84,30 @@ function World.ensure(z)
 		local random = Random.new(9101 + math.abs(index) * 137)
 		for offset = -112,112,32 do
 			local rowZ = start + offset
+   if rowZ < -Course.LengthStuds or rowZ>128 then continue end
+   local edge=Course.width(rowZ)
+   local median=Course.median(rowZ)
+   if median>0 then
+    decoration(chunk,"ForkRidge",Vector3.new(0,1.5,rowZ),Vector3.new(median*2,3,32),Color3.fromRGB(203,143,91))
+    decoration(chunk,"ForkGrass",Vector3.new(0,3.1,rowZ),Vector3.new(median*2,0.2,32),Color3.fromRGB(133,179,96))
+   end
    for _, side in ipairs({-1,1}) do
     local height=8+random:NextInteger(0,3)
-    decoration(chunk,"CanyonBase",Vector3.new(side*40,2,rowZ),Vector3.new(10,4,32),Color3.fromRGB(220,151,97))
-    decoration(chunk,"CanyonStratum",Vector3.new(side*42,4.5,rowZ),Vector3.new(10,1,32),Color3.fromRGB(249,191,128))
-    decoration(chunk,"CanyonUpper",Vector3.new(side*44,5+height/2,rowZ),Vector3.new(12,height,32),Color3.fromRGB(201,126,80))
-    decoration(chunk,"GrassCap",Vector3.new(side*44,5+height+0.25,rowZ),Vector3.new(12,0.5,32),Color3.fromRGB(122,170,92))
-    decoration(chunk,"GrassEdge",Vector3.new(side*32,0.08,rowZ),Vector3.new(6,0.16,32),Color3.fromRGB(143,190,96))
+    decoration(chunk,"CanyonBase",Vector3.new(side*(edge+5),2,rowZ),Vector3.new(10,4,32),Color3.fromRGB(220,151,97))
+    decoration(chunk,"CanyonStratum",Vector3.new(side*(edge+7),4.5,rowZ),Vector3.new(10,1,32),Color3.fromRGB(249,191,128))
+    decoration(chunk,"CanyonUpper",Vector3.new(side*(edge+9),5+height/2,rowZ),Vector3.new(12,height,32),Color3.fromRGB(201,126,80))
+    decoration(chunk,"GrassCap",Vector3.new(side*(edge+9),5+height+0.25,rowZ),Vector3.new(12,0.5,32),Color3.fromRGB(122,170,92))
+    decoration(chunk,"GrassEdge",Vector3.new(side*(edge-3),0.08,rowZ),Vector3.new(6,0.16,32),Color3.fromRGB(143,190,96))
     for i=1,3 do
      local z=rowZ+random:NextNumber(-14,14)
-     local x=side*random:NextNumber(32,34)
+     local x=side*random:NextNumber(edge-3,edge-1)
      decoration(chunk,"GrassTuft",Vector3.new(x,0.45,z),Vector3.new(0.5,0.9,0.5),Color3.fromRGB(109,161,77))
     end
     if random:NextNumber()<0.4 then
      local treeZ=rowZ+random:NextNumber(-8,8)
-     decoration(chunk,"TreeTrunk",Vector3.new(side*48,5+height+2,treeZ),Vector3.new(1.4,4,1.4),Color3.fromRGB(152,99,67))
-     decoration(chunk,"TreeCrown",Vector3.new(side*48,5+height+5,treeZ),Vector3.new(6,4,6),Color3.fromRGB(115,163,90))
-     decoration(chunk,"TreeTop",Vector3.new(side*48,5+height+7,treeZ),Vector3.new(4,2,4),Color3.fromRGB(146,190,107))
+     decoration(chunk,"TreeTrunk",Vector3.new(side*(edge+13),5+height+2,treeZ),Vector3.new(1.4,4,1.4),Color3.fromRGB(152,99,67))
+     decoration(chunk,"TreeCrown",Vector3.new(side*(edge+13),5+height+5,treeZ),Vector3.new(6,4,6),Color3.fromRGB(115,163,90))
+     decoration(chunk,"TreeTop",Vector3.new(side*(edge+13),5+height+7,treeZ),Vector3.new(4,2,4),Color3.fromRGB(146,190,107))
     end
    end
    for i=1,3 do
@@ -107,14 +115,26 @@ function World.ensure(z)
    end
 			-- Leave the run launch area clear; all other rows contain moving herds.
 			if rowZ < -20 or rowZ > 30 then
-				for _, x in ipairs({-18,-6,6,18}) do
+				local lanes={}
+    local ranges=Course.ranges(rowZ,4)
+    for _,range in ipairs(ranges) do
+     for i=1,4/#ranges do table.insert(lanes,range[1]+(range[2]-range[1])*i/(4/#ranges+1)) end
+    end
+    for _, x in ipairs(lanes) do
 					if random:NextNumber() < tuning.HerdSpawnChance then World.spawn(Vector3.new(x,2,rowZ)) end
 				end
 				if random:NextNumber() < tuning.RockSpawnChance then
-					local rock = part(obstacles, "Rock", Vector3.new(random:NextInteger(-3,3)*8,1.5,rowZ-12), Vector3.new(4,3,4), Color3.fromRGB(167,130,99))
-					rock:SetAttribute("Chunk", index)
-					rock.CanCollide = false -- server swept collision is authoritative
-     dressObstacle(rock,(index+math.floor(offset/32))%3==0 and "FallenLog" or "MossyRock")
+					local kind=(math.abs(index)*8+math.floor((offset+112)/32))%4
+     local style=kind>=2 and "Tree" or "MossyRock"
+     local scale=kind%2==1 and 2 or 1
+     local bounds=Course.ranges(rowZ-12,2*scale+2)
+     local range=bounds[random:NextInteger(1,#bounds)]
+     local x=random:NextNumber(range[1],range[2])
+     local height=(style=="Tree" and 6 or 3)*scale
+     local rock=part(obstacles,"Rock",Vector3.new(x,height/2,rowZ-12),Vector3.new(4*scale,height,4*scale),Color3.fromRGB(167,130,99))
+     rock:SetAttribute("Chunk",index)
+     rock.CanCollide=false -- server swept collision is authoritative
+     dressObstacle(rock,style,scale)
 				end
 			end
 		end
@@ -133,7 +153,7 @@ function World.step(dt)
 			-- Only the authoritative root moves. Clients own all visual body poses.
    local p,half=model.PrimaryPart.Position,model.PrimaryPart.Size/2
    if motion.wasOccupied then motion.home,motion.vx,motion.wasOccupied=p.X,0,false end
-   local x,z,vx=Motion.step(motion,p.X,p.Z,dt,rocks,tuning,half.X,half.Z,Rules)
+   local x,z,vx=Motion.step(motion,p.X,p.Z,dt,rocks,tuning,half.X,half.Z,Rules,Course)
    model.PrimaryPart.CFrame=CFrame.new(x,p.Y,z)*CFrame.Angles(0,-math.atan2(vx,tuning.HerdStudsPerSecond),0)
    model:SetAttribute("Steering",vx/tuning.SidewaysStudsPerSecond)
 		 model:SetAttribute("HerdVelocity",Vector3.new(vx,0,(z-p.Z)/math.max(dt,0.000001)))
@@ -156,7 +176,10 @@ end
 -- Contact while riding: include moving herds and the visible inner canyon face.
 function World.mountedHit(from,to,mount)
  local half=mount.PrimaryPart.Size/2
- if math.max(math.abs(from.X),math.abs(to.X))+half.X>=tuning.RoadHalfWidth then return "Wall" end
+ for i=0,4 do
+  local p=from:Lerp(to,i/4)
+  if not Course.contains(p.X,p.Z-half.Z,half.X) or not Course.contains(p.X,p.Z+half.Z,half.X) then return "Wall" end
+ end
  for other in pairs(animals) do
   if other==mount or not other.Parent then continue end
   local old=previousPositions[other] or other.PrimaryPart.Position
