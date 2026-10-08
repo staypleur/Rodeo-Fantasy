@@ -1727,14 +1727,15 @@ Config.Hunt = {
 
 -- These are tuning values for testing, not finalized game balance/art.
 Config.Prototype = {
-	MetersPerStud = 0.28,
-	ForwardStudsPerSecond = 40,
-	SidewaysStudsPerSecond = 22,
-	JumpSeconds = 0.45,
+	MetersPerStud = 0.625,
+	ForwardStudsPerSecond = 64,
+	SidewaysStudsPerSecond = 32,
+	JumpSeconds = 0.28,
+	IntroSeconds = 0.55,
 	JumpArcStuds = 10,
 	RoadHalfWidth = 35,
-	HerdStudsPerSecond = 24,
-	AirStudsPerSecond = 60,
+	HerdStudsPerSecond = 44,
+	AirStudsPerSecond = 80,
 	LassoRangeStuds = 12,
 	FlightSeconds = 1.2,
 	BuckWarningSeconds = 2,
@@ -1742,9 +1743,10 @@ Config.Prototype = {
 	GroundChunkStuds = 256,
 	RideHeightStuds = 4,
 	RespawnSeconds = 1,
-	CameraHeightStuds = 65,
-	CameraBehindStuds = 18,
-	CameraLookAheadStuds = 12,
+	CameraHeightStuds = 68,
+	CameraBehindStuds = 22,
+	CameraLookAheadStuds = 16,
+	CameraSideStuds = 14,
 	CameraGroundFocusStuds = 2,
 	CameraFieldOfView = 50,
 }
@@ -3480,6 +3482,15 @@ local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
  state.rope=nil
 end
+local function attachRope(state)
+ local from,to=Instance.new("Attachment"),Instance.new("Attachment")
+ from.Parent,to.Parent=state.root,state.monster.PrimaryPart
+ local rope=Instance.new("Beam")
+ rope.Attachment0,rope.Attachment1=from,to
+ rope.Width0,rope.Width1,rope.FaceCamera=0.1,0.1,true
+ rope.Color,rope.Parent=ColorSequence.new(Color3.fromRGB(230,181,72)),state.root
+ state.rope={from,to,rope}
+end
 local function freeMount(state)
  if state.monster and state.monster.Parent then
   state.monster:SetAttribute("Occupied",false)
@@ -3512,9 +3523,12 @@ local function start(player)
  local model=World.spawn(Vector3.new(0,2,-8))
  model:SetAttribute("Occupied",true)
  model:SetAttribute("Angry",false)
- states[player]={phase="Riding",started=now(),monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),held=false,distance=0,tamed=false}
+ states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),held=false,distance=0,tamed=false}
  root.Anchored,humanoid.AutoRotate,humanoid.PlatformStand=true,false,true
- root.CFrame=model:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
+ root.CFrame=CFrame.new(0,2+tuning.RideHeightStuds,18)
+ states[player].origin=root.CFrame
+ states[player].protectedUntil=now()+tuning.IntroSeconds+tuning.LandingGraceSeconds
+ attachRope(states[player])
  send(player)
 end
 local function launch(player,state)
@@ -3535,13 +3549,8 @@ local function lasso(player,state)
  state.monster,state.phase,state.started=model,"Lassoing",now()
  state.protectedUntil=now()+tuning.JumpSeconds+tuning.LandingGraceSeconds
  state.origin=state.root.CFrame
- local from,to=Instance.new("Attachment"),Instance.new("Attachment")
- from.Parent,to.Parent=state.root,model.PrimaryPart
- local rope=Instance.new("Beam")
- rope.Attachment0,rope.Attachment1=from,to
- rope.Width0,rope.Width1,rope.FaceCamera=0.1,0.1,true
- rope.Color,rope.Parent=ColorSequence.new(Color3.fromRGB(230,181,72)),state.root
- state.rope={from,to,rope}
+ state.landingSeconds=tuning.JumpSeconds
+ attachRope(state)
  send(player)
 end
 remote.OnServerEvent:Connect(function(player,action,value)
@@ -3549,7 +3558,8 @@ remote.OnServerEvent:Connect(function(player,action,value)
  if action~="Sync" and action~="Start" and action~="Hold" and action~="Steer" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
- local interval=action=="Steer" and 0.04 or action=="Hold" and 0.04 or 0.25
+ -- Preserve both edges of a quick tap; movement and sync remain throttled.
+ local interval=action=="Hold" and 0 or action=="Steer" and 0.04 or 0.25
  if now()-(stamps[action] or -math.huge)&lt;interval then return end
  stamps[action]=now()
  if action=="Sync" then send(player) return end
@@ -3562,6 +3572,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
   local released=state.held and not value
   state.held=value
   if released and state.phase=="Riding" then launch(player,state) end
+  if value and state.phase=="Airborne" then lasso(player,state) end
  end
 end)
 RunService.Heartbeat:Connect(function(delta)
@@ -3592,16 +3603,18 @@ RunService.Heartbeat:Connect(function(delta)
    local p=state.monster.PrimaryPart.Position
    state.monster:PivotTo(CFrame.new(p.X,2,p.Z-tuning.ForwardStudsPerSecond*dt))
    local saddle=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
-   state.root.CFrame=state.origin:Lerp(saddle,math.clamp((clock-state.started)/tuning.JumpSeconds,0,1))
+   local landingSeconds=state.landingSeconds or tuning.JumpSeconds
+   local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
+   state.root.CFrame=state.origin:Lerp(saddle,landingProgress)*CFrame.new(0,math.sin(math.pi*landingProgress)*tuning.JumpArcStuds*0.5,0)
    if clock&gt;=(state.protectedUntil or 0) and World.hit(p,state.monster.PrimaryPart.Position) then finish(player,"장애물에 부딪혔어요.") continue end
-   if clock-state.started&gt;=tuning.JumpSeconds then
+   if clock-state.started&gt;=landingSeconds then
     clearRope(state)
     state.phase,state.started,state.tamed="Riding",clock,state.monster:GetAttribute("Tamed_"..player.UserId)==true
     state.protectedUntil=clock+tuning.LandingGraceSeconds
     state.monster:SetAttribute("RunStarted",clock)
     state.monster:SetAttribute("Angry",false)
     send(player)
-    if not state.held then launch(player,state) end
+    -- A release while still flying is not a new jump after landing.
    end
   elseif state.phase=="Riding" then
    if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end
@@ -3903,8 +3916,8 @@ RunService.RenderStepped:Connect(function(dt)
  if active() and root then
   local t=Config.Prototype
   -- Follow horizontal movement; jumping should not lift the whole view.
-  local groundFocus=Vector3.new(root.Position.X,t.CameraGroundFocusStuds,root.Position.Z)
-  local target=CFrame.lookAt(groundFocus+Vector3.new(0,t.CameraHeightStuds,t.CameraBehindStuds),groundFocus+Vector3.new(0,0,-t.CameraLookAheadStuds))
+  local groundFocus=Vector3.new(0,t.CameraGroundFocusStuds,root.Position.Z)
+  local target=CFrame.lookAt(groundFocus+Vector3.new(t.CameraSideStuds,t.CameraHeightStuds,t.CameraBehindStuds),groundFocus+Vector3.new(0,0,-t.CameraLookAheadStuds))
   workspace.CurrentCamera.CFrame=workspace.CurrentCamera.CFrame:Lerp(target,1-math.exp(-10*dt))
   if os.clock()-lastSteer&gt;=0.1 then remote:FireServer("Steer",steering()) lastSteer=os.clock() end
  end
@@ -3921,7 +3934,7 @@ RunService.RenderStepped:Connect(function(dt)
  end
  if state.phase=="Riding" then
   fill.Size=UDim2.fromScale(state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),1)
-  status.Text=state.angerAt and "화났어요! 손을 떼고 점프하세요!" or state.tamed and "길들이기 성공 · 다음 몬스터로!" or "루미돈 길들이는 중 ♥"
+  status.Text=state.angerAt and "화났어요! 손을 떼고 점프하세요!" or state.tamed and "길들이기 성공 · 계속 타고 달리세요" or "루미돈 길들이는 중 ♥"
   instruction.Text="누른 채 좌우로 움직이기 / A·D · 손을 떼면 점프"
   if clock&lt;(state.protectedUntil or 0) then
    instruction.Text=string.format("착지 보호 %.1f초 · 누른 채 좌우 이동 / 손을 떼면 점프",state.protectedUntil-clock)
@@ -3929,10 +3942,10 @@ RunService.RenderStepped:Connect(function(dt)
  elseif state.phase=="Airborne" then
   status.Text="다시 눌러 다음 몬스터를 잡으세요!"
   instruction.Text="노란 원 안에 몬스터가 들어오면 줄이 연결됩니다"
- elseif state.phase=="Lassoing" then status.Text="줄로 연결해 탑승 중…" instruction.Text="계속 누르고 계세요"
+ elseif state.phase=="Lassoing" then status.Text="날아가서 탑승하는 중…" instruction.Text="탑승 후 계속 타고 달릴 수 있어요"
  elseif state.phase=="GameOver" then status.Text="사냥 종료" instruction.Text="다시 사냥하기로 재도전 · 가방 수익은 유지"
  else status.Text="로데오 스트릿 · 루미돈 사냥" instruction.Text="사냥 시작 → 누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기" end
- if os.clock()&lt;noticeUntil then status.Text=notice end
+ if os.clock()&lt;noticeUntil and not state.angerAt then status.Text=notice end
 end)
 remote:FireServer("Sync")
 </ProtectedString>
@@ -3945,6 +3958,7 @@ remote:FireServer("Sync")
           <ProtectedString name="Source">-- Procedural visual motion for the native part model. Never changes its mount root.
 local RideAnimator = {}
 local poses = {}
+local warnings = {}
 
 local function remember(model)
 	local root = model.PrimaryPart
@@ -3967,6 +3981,9 @@ function RideAnimator.update(monsters, clock, cameraPosition)
 	for model, pose in pairs(poses) do
 		if model.Parent ~= monsters then poses[model] = nil end
 	end
+	for model, warning in pairs(warnings) do
+		if model.Parent ~= monsters then warning:Destroy() warnings[model] = nil end
+	end
 	for _, model in ipairs(monsters:GetChildren()) do
 		local root = model.PrimaryPart
 		if not root then continue end
@@ -3977,6 +3994,19 @@ function RideAnimator.update(monsters, clock, cameraPosition)
 		pose = pose or remember(model)
 		local phase = (clock - (model:GetAttribute("RunStarted") or clock)) * math.pi * 7
 		local angry = model:GetAttribute("Angry") == true
+		local warning = warnings[model]
+		if angry and not warning then
+			warning = Instance.new("BillboardGui")
+			warning.Name, warning.Size, warning.StudsOffset = "AngerWarning", UDim2.fromOffset(60, 70), Vector3.new(0, 4.5, 0)
+			warning.AlwaysOnTop, warning.Adornee, warning.Parent = true, root, root
+			local label = Instance.new("TextLabel")
+			label.Size, label.BackgroundTransparency, label.Text = UDim2.fromScale(1, 1), 1, "!"
+			label.Font, label.TextSize = Enum.Font.GothamBlack, 58
+			label.TextColor3, label.TextStrokeTransparency = Color3.fromRGB(255, 104, 55), 0
+			label.Parent = warning
+			warnings[model] = warning
+		end
+		if warning then warning.Enabled = angry end
 		local bob = running and ((angry and 0.32 or 0.07) * math.sin(phase * 2)) or 0
 		local lean = running and (model:GetAttribute("Steering") or 0) * -0.09 or 0
 		local frame = root.CFrame * CFrame.new(0, bob, 0) * CFrame.Angles(0, 0, lean)

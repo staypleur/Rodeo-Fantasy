@@ -23,6 +23,15 @@ local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
  state.rope=nil
 end
+local function attachRope(state)
+ local from,to=Instance.new("Attachment"),Instance.new("Attachment")
+ from.Parent,to.Parent=state.root,state.monster.PrimaryPart
+ local rope=Instance.new("Beam")
+ rope.Attachment0,rope.Attachment1=from,to
+ rope.Width0,rope.Width1,rope.FaceCamera=0.1,0.1,true
+ rope.Color,rope.Parent=ColorSequence.new(Color3.fromRGB(230,181,72)),state.root
+ state.rope={from,to,rope}
+end
 local function freeMount(state)
  if state.monster and state.monster.Parent then
   state.monster:SetAttribute("Occupied",false)
@@ -55,9 +64,12 @@ local function start(player)
  local model=World.spawn(Vector3.new(0,2,-8))
  model:SetAttribute("Occupied",true)
  model:SetAttribute("Angry",false)
- states[player]={phase="Riding",started=now(),monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),held=false,distance=0,tamed=false}
+ states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),held=false,distance=0,tamed=false}
  root.Anchored,humanoid.AutoRotate,humanoid.PlatformStand=true,false,true
- root.CFrame=model:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
+ root.CFrame=CFrame.new(0,2+tuning.RideHeightStuds,18)
+ states[player].origin=root.CFrame
+ states[player].protectedUntil=now()+tuning.IntroSeconds+tuning.LandingGraceSeconds
+ attachRope(states[player])
  send(player)
 end
 local function launch(player,state)
@@ -78,13 +90,8 @@ local function lasso(player,state)
  state.monster,state.phase,state.started=model,"Lassoing",now()
  state.protectedUntil=now()+tuning.JumpSeconds+tuning.LandingGraceSeconds
  state.origin=state.root.CFrame
- local from,to=Instance.new("Attachment"),Instance.new("Attachment")
- from.Parent,to.Parent=state.root,model.PrimaryPart
- local rope=Instance.new("Beam")
- rope.Attachment0,rope.Attachment1=from,to
- rope.Width0,rope.Width1,rope.FaceCamera=0.1,0.1,true
- rope.Color,rope.Parent=ColorSequence.new(Color3.fromRGB(230,181,72)),state.root
- state.rope={from,to,rope}
+ state.landingSeconds=tuning.JumpSeconds
+ attachRope(state)
  send(player)
 end
 remote.OnServerEvent:Connect(function(player,action,value)
@@ -92,7 +99,8 @@ remote.OnServerEvent:Connect(function(player,action,value)
  if action~="Sync" and action~="Start" and action~="Hold" and action~="Steer" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
- local interval=action=="Steer" and 0.04 or action=="Hold" and 0.04 or 0.25
+ -- Preserve both edges of a quick tap; movement and sync remain throttled.
+ local interval=action=="Hold" and 0 or action=="Steer" and 0.04 or 0.25
  if now()-(stamps[action] or -math.huge)<interval then return end
  stamps[action]=now()
  if action=="Sync" then send(player) return end
@@ -105,6 +113,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
   local released=state.held and not value
   state.held=value
   if released and state.phase=="Riding" then launch(player,state) end
+  if value and state.phase=="Airborne" then lasso(player,state) end
  end
 end)
 RunService.Heartbeat:Connect(function(delta)
@@ -135,16 +144,18 @@ RunService.Heartbeat:Connect(function(delta)
    local p=state.monster.PrimaryPart.Position
    state.monster:PivotTo(CFrame.new(p.X,2,p.Z-tuning.ForwardStudsPerSecond*dt))
    local saddle=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
-   state.root.CFrame=state.origin:Lerp(saddle,math.clamp((clock-state.started)/tuning.JumpSeconds,0,1))
+   local landingSeconds=state.landingSeconds or tuning.JumpSeconds
+   local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
+   state.root.CFrame=state.origin:Lerp(saddle,landingProgress)*CFrame.new(0,math.sin(math.pi*landingProgress)*tuning.JumpArcStuds*0.5,0)
    if clock>=(state.protectedUntil or 0) and World.hit(p,state.monster.PrimaryPart.Position) then finish(player,"장애물에 부딪혔어요.") continue end
-   if clock-state.started>=tuning.JumpSeconds then
+   if clock-state.started>=landingSeconds then
     clearRope(state)
     state.phase,state.started,state.tamed="Riding",clock,state.monster:GetAttribute("Tamed_"..player.UserId)==true
     state.protectedUntil=clock+tuning.LandingGraceSeconds
     state.monster:SetAttribute("RunStarted",clock)
     state.monster:SetAttribute("Angry",false)
     send(player)
-    if not state.held then launch(player,state) end
+    -- A release while still flying is not a new jump after landing.
    end
   elseif state.phase=="Riding" then
    if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end

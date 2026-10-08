@@ -124,8 +124,8 @@ RunService.RenderStepped:Connect(function(dt)
  if active() and root then
   local t=Config.Prototype
   -- Follow horizontal movement; jumping should not lift the whole view.
-  local groundFocus=Vector3.new(root.Position.X,t.CameraGroundFocusStuds,root.Position.Z)
-  local target=CFrame.lookAt(groundFocus+Vector3.new(0,t.CameraHeightStuds,t.CameraBehindStuds),groundFocus+Vector3.new(0,0,-t.CameraLookAheadStuds))
+  local groundFocus=Vector3.new(0,t.CameraGroundFocusStuds,root.Position.Z)
+  local target=CFrame.lookAt(groundFocus+Vector3.new(t.CameraSideStuds,t.CameraHeightStuds,t.CameraBehindStuds),groundFocus+Vector3.new(0,0,-t.CameraLookAheadStuds))
   workspace.CurrentCamera.CFrame=workspace.CurrentCamera.CFrame:Lerp(target,1-math.exp(-10*dt))
   if os.clock()-lastSteer>=0.1 then remote:FireServer("Steer",steering()) lastSteer=os.clock() end
  end
@@ -142,7 +142,7 @@ RunService.RenderStepped:Connect(function(dt)
  end
  if state.phase=="Riding" then
   fill.Size=UDim2.fromScale(state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),1)
-  status.Text=state.angerAt and "화났어요! 손을 떼고 점프하세요!" or state.tamed and "길들이기 성공 · 다음 몬스터로!" or "루미돈 길들이는 중 ♥"
+  status.Text=state.angerAt and "화났어요! 손을 떼고 점프하세요!" or state.tamed and "길들이기 성공 · 계속 타고 달리세요" or "루미돈 길들이는 중 ♥"
   instruction.Text="누른 채 좌우로 움직이기 / A·D · 손을 떼면 점프"
   if clock<(state.protectedUntil or 0) then
    instruction.Text=string.format("착지 보호 %.1f초 · 누른 채 좌우 이동 / 손을 떼면 점프",state.protectedUntil-clock)
@@ -150,9 +150,9 @@ RunService.RenderStepped:Connect(function(dt)
  elseif state.phase=="Airborne" then
   status.Text="다시 눌러 다음 몬스터를 잡으세요!"
   instruction.Text="노란 원 안에 몬스터가 들어오면 줄이 연결됩니다"
- elseif state.phase=="Lassoing" then status.Text="줄로 연결해 탑승 중…" instruction.Text="계속 누르고 계세요"
+ elseif state.phase=="Lassoing" then status.Text="날아가서 탑승하는 중…" instruction.Text="탑승 후 계속 타고 달릴 수 있어요"
  elseif state.phase=="GameOver" then status.Text="사냥 종료" instruction.Text="다시 사냥하기로 재도전 · 가방 수익은 유지"
  else status.Text="로데오 스트릿 · 루미돈 사냥" instruction.Text="사냥 시작 → 누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기" end
- if os.clock()<noticeUntil then status.Text=notice end
+ if os.clock()<noticeUntil and not state.angerAt then status.Text=notice end
 end)
 remote:FireServer("Sync")
