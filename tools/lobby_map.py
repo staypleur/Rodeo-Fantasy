@@ -1,4 +1,4 @@
-"""Editable native Roblox geometry for the agreed pastel resort lobby."""
+"""Original brick village with physical studs, tiled paths and block-built greenery."""
 import math
 def build_lobby(workspace, item, part, prop):
     lobby, _ = item(workspace, "Folder", "RodeoLobby")
@@ -15,6 +15,18 @@ def build_lobby(workspace, item, part, prop):
                 else: prop(properties,"token",surface,3)
             mat=properties.find("token[@name='Material']")
             if mat is not None: mat.text="272"
+        # Physical studs remain visible even when legacy SurfaceType studs are not rendered.
+        if name in ("MeadowIsland","PenGrass","GardenPad","MiddleWalk","GardenPath","CounterTop","TreeCanopy","TreeTop","FencePost","PavingStone","PlazaBrick"):
+            spacing=6 if name=="MeadowIsland" else 2.8
+            top=pos[1]+size[1]/2
+            yaw=math.radians(rotation[1])
+            for ix in range(max(1,int(size[0]/spacing))):
+                for iz in range(max(1,int(size[2]/spacing))):
+                    lx=(ix-(max(1,int(size[0]/spacing))-1)/2)*spacing
+                    lz=(iz-(max(1,int(size[2]/spacing))-1)/2)*spacing
+                    stud,sp=part(node,"BrickStud",(6000+pos[0]+lx*math.cos(yaw)+lz*math.sin(yaw),top+.07,pos[2]-lx*math.sin(yaw)+lz*math.cos(yaw)),(.14,.72,.72),tuple(min(255,v+6) for v in color),rotation=(0,0,90))
+                    prop(sp,"token","shape",2);prop(sp,"token","Material",272)
+                    prop(sp,"bool","CanCollide",False);prop(sp,"bool","CanTouch",False);prop(sp,"bool","CanQuery",False)
         return node
     def circle(parent, name, pos, radius, height, color):
         node = block(parent, name, pos, (height, radius*2, radius*2), color, (0, 0, 90))
@@ -35,6 +47,12 @@ def build_lobby(workspace, item, part, prop):
         return board
     block(lobby, "MeadowIsland", (0, -3, 0), (316, 6, 316), (110, 153, 84))
     circle(lobby, "CentralPlaza", (0, .08, 0), 32, .16, cream)
+    # Low block paving covers the round plaza without introducing a raised central platform.
+    for x in range(-28,29,4):
+        for z in range(-28,29,4):
+            if x*x+z*z>30*30: continue
+            color=((194,179,150),(215,201,175),(169,184,177),(203,186,151))[(x//4+z//4)%4]
+            block(lobby,"PlazaBrick",(x,.21,z),(3.8,.12,3.8),color)
     plots, _ = item(lobby, "Folder", "Plots")
     colors = [(233,140,143),(243,178,111),(247,225,129),(147,204,154),(137,189,230),(111,132,186),(188,154,220),(245,244,236)]
     for index in range(8):
@@ -49,7 +67,7 @@ def build_lobby(workspace, item, part, prop):
         prop(marker.find("Properties"),"float","Transparency",1)
         block(plot, "GardenPad", point(0, .12, 0), (58, .24, 64), colors[index], (0, yaw, 0))
         block(plot, "MiddleWalk", point(0, .27, 0), (7, .1, 64), cream, (0, yaw, 0))
-        block(lobby,"GardenPath",(math.sin(angle)*61,.09,math.cos(angle)*61),(7,.18,65),cream,(0,yaw,0))
+        block(lobby,"GardenPath",(math.sin(angle)*61,.09,math.cos(angle)*61),(7,.3,65),cream,(0,yaw,0))
         sign(plot, "OwnerBoard", point(0, 10, -33), " ", color=colors[index], rotation=(0, yaw, 0), width=20)
         for x in (-10,10):
             block(plot,"SignPost",point(x,5,-33),(.9,10,.9),(173,130,91))
@@ -60,7 +78,7 @@ def build_lobby(workspace, item, part, prop):
                 number=row*2+col+1
                 pen, _ = item(pens, "Model", f"Pen_{number}")
                 px, pz = (-16,16)[col], (-1 if row == 0 else 1)*15
-                block(pen, "PenGrass", point(px, .3, pz), (22, .12, 24), (166, 189, 155), (0, yaw, 0))
+                block(pen, "PenGrass", point(px, .3, pz), (22, .22, 24), (166, 189, 155), (0, yaw, 0))
                 side=-1 if px<0 else 1
                 inner_x=px-side*11
                 outer_x=px+side*11

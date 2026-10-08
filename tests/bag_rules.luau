@@ -54,3 +54,9 @@ local gains=Rules.accrue(payouts,3,3,1)
 assert(#gains==3 and gains[1].amount==1 and gains[2].amount==2 and gains[3].amount==3)
 assert(#Rules.accrue(payouts,3,3,1)==0,"same production tick must not show duplicate coins")
 print("PASS: exact per-monster production events without duplicate ticks")
+
+for stars=1,10 do
+ local sample={incomeAmount=3,stars=stars}
+ assert(Rules.income(sample)==3*2^(stars-1))
+end
+print("PASS: per-star doubling from one through ten stars")

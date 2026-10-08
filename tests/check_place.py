@@ -19,6 +19,7 @@ expected = {
     "CollectionQuery": "src/shared/CollectionQuery.luau",
     "ProgressService": "src/server/ProgressService.luau",
     "JournalUI": "src/client/JournalUI.luau",
+    "CreatureMesh": "src/client/CreatureMesh.luau",
     "MonsterPortrait": "src/client/MonsterPortrait.luau",
     "RecordService": "src/server/RecordService.luau",
     "RecordRules": "src/shared/RecordRules.luau",
@@ -122,3 +123,9 @@ for model in furnishings:
   for path in paths: assert not overlaps(poly,path), node.findtext("Properties/string[@name='Name']")+" blocks a ranch path"
   checked+=1
 print(f"PASS: center spawn, one ladder, smooth final airship/open basket, {checked} furnishings clear all eight paths")
+
+physical_studs=[n for n in lobby.iter("Item") if n.findtext("Properties/string[@name='Name']")=="BrickStud"]
+assert len(physical_studs)>3000, "brick village must use actual visible geometry, not only a surface token"
+assert all(n.findtext("Properties/bool[@name='CanCollide']")=="false" for n in physical_studs)
+assert any(n.findtext("Properties/string[@name='Name']")=="PlazaBrick" for n in lobby.iter("Item"))
+print(f"PASS: {len(physical_studs)} actual raised brick studs and tiled central paving")

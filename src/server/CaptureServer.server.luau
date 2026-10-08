@@ -35,7 +35,7 @@ local function sendBag(player)
  if not bag or states[player] then return end
  local items={}
  for _,item in ipairs(bag.monsters) do
-  table.insert(items,{id=item.id,assignedPen=item.assignedPen,monsterId=item.monsterId,stars=item.stars,incomeSeconds=item.incomeSeconds or Config.BagIncome.IncomeSeconds,incomeAmount=item.incomeAmount or Config.BagIncome.IncomeAmount})
+  table.insert(items,{id=item.id,assignedPen=item.assignedPen,monsterId=item.monsterId,stars=item.stars,incomeSeconds=item.incomeSeconds or Config.BagIncome.IncomeSeconds,incomeAmount=BagRules.income(item,Config.BagIncome.IncomeAmount)})
  end
  remote:FireClient(player,"Bag",items)
 end
@@ -68,6 +68,14 @@ local function freeMount(state)
  state.previousMonster,state.monster=state.monster,nil
  clearRope(state)
 end
+local function restoreAvatar(state)
+ if not state then return end
+ for part,alpha in pairs(state.hiddenParts or {}) do
+  if part.Parent then part.Transparency=alpha part:SetAttribute("CrashAlpha",nil) end
+ end
+ for gui,enabled in pairs(state.hiddenLabels or {}) do if gui.Parent then gui.Enabled=enabled gui:SetAttribute("CrashEnabled",nil) end end
+ state.hiddenParts=nil state.hiddenLabels=nil
+end
 local function finish(player,reason,crashKind)
  local state=states[player]
  if not state or state.phase=="GameOver" then return end
@@ -78,6 +86,13 @@ local function finish(player,reason,crashKind)
  freeMount(state)
  if brokenMount and brokenMount.Parent then brokenMount:Destroy() end
  state.phase="GameOver"
+ if state.crash and state.root.Parent then
+  state.hiddenParts={} state.hiddenLabels={}
+  for _,part in ipairs(state.root.Parent:GetDescendants()) do
+   if part:IsA("BasePart") then state.hiddenParts[part]=part.Transparency part:SetAttribute("CrashAlpha",part.Transparency) part.Transparency=1
+   elseif part:IsA("BillboardGui") then state.hiddenLabels[part]=part.Enabled part:SetAttribute("CrashEnabled",part.Enabled) part.Enabled=false end
+  end
+ end
  if state.root.Parent then
   state.root.Anchored=state.wasAnchored
   state.root.AssemblyLinearVelocity=Vector3.zero
@@ -94,6 +109,7 @@ local function start(player)
  if not root or not humanoid or humanoid.Health<=0 then return end
  if not previous and not Lobby.canDepart(player) then send(player,"Approach the airship to start.") return end
  if previous then
+  restoreAvatar(previous)
   freeMount(previous)
   if previous.phase=="CourseEnd" and previous.root==root then
    root.Anchored=previous.wasAnchored
@@ -175,6 +191,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
   local state=states[player]
   if state and (state.phase=="GameOver" or state.phase=="CourseEnd") then
    finish(player,"Welcome back to the lobby.")
+   restoreAvatar(state)
    state.root.CFrame=Lobby.Spawn
    states[player]=nil send(player) sendBag(player)
   end
@@ -233,7 +250,7 @@ RunService.Heartbeat:Connect(function(delta)
    position=Vector3.new(position.X,state.launchY+Rules.jumpHeight(clock-state.started,tuning.FlightSeconds,tuning.JumpArcStuds),position.Z)
    state.root.CFrame=CFrame.new(position)
    if World.hit(old,position) then finish(player,"You hit an obstacle.","Obstacle") continue end
-   if state.phase=="Airborne" and clock-state.started>=tuning.FlightSeconds then finish(player,"You missed the next monster.") end
+   if state.phase=="Airborne" and clock-state.started>=tuning.FlightSeconds then finish(player,"You missed the next monster.","Fall") end
   elseif state.phase=="Lassoing" then
    if not state.monster or not state.monster.Parent then finish(player,"You lost your mount.") continue end
    local p=state.monster.PrimaryPart.Position

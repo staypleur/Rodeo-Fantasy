@@ -40,6 +40,8 @@ assert(#world.Monsters:GetChildren()>10,"moving herd required")
 assert(#world.Obstacles:GetChildren()>0,"obstacles required")
 local animal=engine.spawn(Vector3.new(0,2,-8))
 local before=animal.PrimaryPart.Position
+-- Simulate the client materialization before inspecting its local body pose.
+require(game.StarterPlayer.StarterPlayerScripts.CreatureMesh).materialize(animal)
 local bodyBefore=animal.Body.CFrame
 engine.step(0.1)
 assert(animal.PrimaryPart.Position.Z<before.Z,"wild herd must run")
@@ -122,13 +124,17 @@ assert(not workspace:FindFirstChild("LocalCowboyLasso"),"rope must clean up")
 assert(shoulder.C0==original,"restore avatar joints after hunting")
 assert(not avatarRoot:FindFirstChild("FlightTrailAnchor") and not avatarRoot:FindFirstChild("FlightTrailEnd"),"flight attachments must clean up")
 local effect=require(game:GetService("StarterPlayer").StarterPlayerScripts.CrashEffect)
-effect.start(rig,3)
+local crashLabel=Instance.new("BillboardGui") crashLabel.Name="ExplorerNameplate" crashLabel.Enabled=false crashLabel:SetAttribute("CrashEnabled",true) crashLabel.Parent=torso
+  torso:SetAttribute("CrashAlpha",0) torso.Transparency=1
+  effect.start(rig,3)
 assert(torso.LocalTransparencyModifier==1 and workspace:FindFirstChild("LocalCrashShard"),"collision must scatter visible clones")
 local shard=workspace:FindFirstChild("LocalCrashShard")
 local shardBefore=shard.CFrame
-effect.update(rig,"GameOver",3.2)
+assert(not crashLabel.Enabled,"name/level must disappear with avatar")
+  effect.update(rig,"GameOver",3.2)
 assert(shard.CFrame~=shardBefore and rig.Parent~=nil,"shards must move without breaking real joints")
 effect.update(rig,"Riding",3.3)
+assert(crashLabel.Enabled,"retry must restore the original name/level label")
 assert(torso.LocalTransparencyModifier==0 and not workspace:FindFirstChild("LocalCrashShard"),"restart must restore avatar and clear shards")
 rig:Destroy()
 print("RODEO_STUDIO_SMOKE_PASS: MeadowMouse, quadruped animation, running herds, lasso candidates, swept obstacles and cleanup")
@@ -203,6 +209,7 @@ assert(count>=4 and count<=74,"opening must have a bounded nearby herd")
 engine.replenish(0,1,nil,true,128)
 for _=1,5 do engine.replenish(0,1,nil,true,128) end
 assert(#world.Monsters:GetChildren()<=74,"repeated priming must retain the bounded shared buffer")
+engine.step(config.Prototype.IntroSeconds)
 local displayed=0 for _ in pairs(engine.visibleSet(0,1)) do displayed+=1 end
 assert(displayed>=4 and displayed<=6,"opening display must have four to six wild animals")
 local visible=0

@@ -21,3 +21,5 @@
 ![잡초까마귀](../assets/concepts/meadow/weedcrow-evolutions.png)
 
 실제 부품 설계의 오프라인 미리보기: [A계열20모델](../assets/previews/meadow-approved-a-models.png). 이 렌더는 Studio 스크린샷이 아니며 기본 부품을 근사 투영한 것이다. B/C는 실제 모델로 제작하지 않고 후보 그림/프롬프트로 보관한다.
+
+2026-10-08 추가: A계열20개 실제3D OBJ/MTL을 assets/meshes/meadow에 저장했다. 게임 실행 시 CreatureMesh가 직접 만든 몸체/잎 메시를 적용한다. 오프라인 미리보기도 같은 메시 정점/면을 사용하며 실제 Studio 캡처는 아니다.

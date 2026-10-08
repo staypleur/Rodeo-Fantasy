@@ -17,6 +17,7 @@ local catch=require(script.Parent:WaitForChild("CatchPresentation"))
 local dash=require(script.Parent:WaitForChild("DashPresentation"))
 local markers=require(script.Parent:WaitForChild("DistanceMarkers"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
+monsters.DescendantAdded:Connect(function(part) if part:IsA("BasePart") then part.LocalTransparencyModifier=1 end end)
 local state={phase="Idle",started=0,count=0,pending=0,distance=0}
 local held,left,right=false,false,false
 local pointerOrigin,pointerX,lastSteer=nil,nil,0
@@ -34,6 +35,7 @@ local gui=make("ScreenGui",{Name="RodeoCaptureUI",ResetOnSpawn=false,DisplayOrde
 local function text(parent,value,pos,size,font)
  return make("TextLabel",{Text=value,Position=pos,Size=size,TextSize=font or 18,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(255,245,219),BackgroundTransparency=1,TextWrapped=true},parent)
 end
+task.spawn(function() require(script.Parent.CreatureMesh).prepare() end)
 local incomeFX=require(script.Parent:WaitForChild("IncomeEffects"))
 local bagUI=require(script.Parent:WaitForChild("BagUI")).new(gui,remote)
 local journalUI=require(script.Parent:WaitForChild("JournalUI")).new(gui,remote)

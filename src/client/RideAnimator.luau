@@ -10,6 +10,7 @@ local tuning = require(package:WaitForChild("Config")).Prototype
 local Rules = require(package:WaitForChild("HuntRules"))
 local restFrames = {}
 local Catalog=require(package.MonsterCatalog)
+local Mesh=require(script.Parent.CreatureMesh)
 local dust={}
 local contexts=setmetatable({},{__mode="k"})
 local function clearHerdPath(from,to,root)
@@ -104,7 +105,8 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
     continue
    end
   end
-		local outline=model:FindFirstChild("LocalCreatureOutline")
+		Mesh.materialize(model)
+  local outline=model:FindFirstChild("LocalCreatureOutline")
   if outlineCount<20 then
    if not outline then
     outline=Instance.new("Highlight") outline.Name="LocalCreatureOutline" outline.Adornee=model
@@ -113,6 +115,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
    end
    outline.Enabled=true outlineCount+=1
   elseif outline then outline:Destroy() end
+  if not Mesh.failed and not model:GetAttribute("MeshDecorated") then task.spawn(Mesh.decorate,model) end
   local running = model:GetAttribute("Running") == true
 		local pose = poses[model]
 		if not pose and not running and not model:GetAttribute("BagItemId") then continue end

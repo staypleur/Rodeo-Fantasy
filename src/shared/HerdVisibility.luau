@@ -18,24 +18,24 @@ function View.select(candidates,z,aspect,t,limit,previous)
  local visible={}
  local selected={} local count=0
  local function entry(candidate)
-  return not previous or candidate.emerging or not View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,.62)
+  return not previous or candidate.emerging or candidate.atDen or not View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1)
  end
  for _,candidate in ipairs(candidates) do
-  if previous and previous[candidate.key] and count<(limit or 6) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,.95) then
+  if previous and previous[candidate.key] and count<(limit or 6) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then
    selected[candidate.key]=true count+=1
   end
-  if entry(candidate) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t) then
-   candidate.score=(candidate.z-z+15)^2+candidate.x*candidate.x*.2
+  if entry(candidate) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1.15) then
+   candidate.score=(candidate.z-z+15)^2+candidate.x*candidate.x*.2+(View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) and 0 or 1000000)
    table.insert(visible,candidate)
   end
  end
  table.sort(visible,function(a,b) if a.score==b.score then return a.serial<b.serial end return a.score<b.score end)
- -- Keep four catchable runners while allowing up to two animals to visibly exit caves.
+ -- Prefer ready runners, then fill the visible herd with animals leaving caves.
  for _,candidate in ipairs(visible) do
-  if not selected[candidate.key] and not candidate.emerging and count<4 then selected[candidate.key]=true count+=1 end
+  if not selected[candidate.key] and not candidate.emerging and count<4 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then selected[candidate.key]=true count+=1 end
  end
  for _,candidate in ipairs(visible) do
-  if not selected[candidate.key] and candidate.emerging and count<math.min(limit or 6,6) then selected[candidate.key]=true count+=1 end
+  if not selected[candidate.key] and candidate.emerging and count<math.min(limit or 6,6) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then selected[candidate.key]=true count+=1 end
  end
  for _,candidate in ipairs(visible) do
   if not selected[candidate.key] and count<(limit or 6) then selected[candidate.key]=true count+=1 end

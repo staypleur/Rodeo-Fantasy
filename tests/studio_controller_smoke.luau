@@ -115,7 +115,7 @@ advance(0.8)
 check(latest.count==1,"same individual must not grant twice")
 event(player,"Jump")
 advance(config.Prototype.FlightSeconds+0.5)
-check(latest.phase=="GameOver" and not root.Anchored,"missed airborne catch must end and restore")
+check(latest.phase=="GameOver" and latest.crash and latest.endReason=="Fall" and root.Transparency==1,"missed airborne catch must break and hide avatar")
 root.CFrame=game.ServerScriptService.LobbyWorld and workspace.RodeoLobby.Airport.Departure.CFrame+Vector3.new(0,0,4) or root.CFrame
 event(player,"Start")
 check(latest.phase=="Lassoing" and latest.count==1,"restart flight must retain bag")

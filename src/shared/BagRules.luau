@@ -10,11 +10,15 @@ function BagRules.grant(session, monsterId, clock, incomeSeconds, incomeAmount)
 	table.insert(session.monsters, { id=session.serial, monsterId = monsterId, stars = 1, lastIncome = clock, incomeSeconds=incomeSeconds, incomeAmount=incomeAmount })
 end
 
+function BagRules.income(monster, fallback)
+ return (monster.incomeAmount or fallback or 1)*2^(math.clamp(math.floor(monster.stars or 1),1,10)-1)
+end
+
 function BagRules.accrue(session, clock, seconds, amount)
  local gains={}
 	for _, monster in ipairs(session.monsters) do
 		local interval=monster.incomeSeconds or seconds
-        local rate=monster.incomeAmount or amount
+        local rate=BagRules.income(monster,amount)
 		local ticks = math.floor(math.max(0, clock - monster.lastIncome) / interval)
 		session.pending += ticks * rate
         session.totalProduced = (session.totalProduced or 0) + ticks * rate

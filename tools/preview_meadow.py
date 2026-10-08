@@ -1,6 +1,7 @@
 """Offline native-part geometry preview; not a Roblox screenshot or concept-image edit."""
 from PIL import Image,ImageDraw,ImageFont
 from meadow_models import components,SPECIES,STAGES,BODY_SCALES
+from export_creature_meshes import geometry,transform
 from pathlib import Path
 import math
 W,H=1920,1900
@@ -26,20 +27,8 @@ for row,id in enumerate(SPECIES):
   unit/=BODY_SCALES[id] # overview fits the growth stages; gameplay sizes remain distinct
   center=222 if id in ('RockElephant','GrassBoar','TreeWolf') else 235
   for p in parts:
-   sx,sy,sz=(a/2 for a in p['size'])
-   vertices=[];faces=[]
-   if p['shape']=='Ball':
-    for a in range(9):
-     lat=-math.pi/2+math.pi*a/8
-     for b in range(13):
-      lon=math.tau*b/12
-      vertices.append((sx*math.cos(lat)*math.cos(lon),sy*math.sin(lat),sz*math.cos(lat)*math.sin(lon)))
-    for a in range(8):
-     for b in range(12): faces.append((a*13+b,a*13+b+1,(a+1)*13+b+1,(a+1)*13+b))
-   else:
-    vertices=[(x*sx,y*sy,z*sz) for x,y,z in ((-1,-1,-1),(1,-1,-1),(1,1,-1),(-1,1,-1),(-1,-1,1),(1,-1,1),(1,1,1),(-1,1,1))]
-    faces=[(0,1,2,3),(5,4,7,6),(4,0,3,7),(1,5,6,2),(3,2,6,7),(4,5,1,0)]
-   world=[tuple(v+k for v,k in zip(rotation(q,p['rotation']),p['position'])) for q in vertices]
+   vertices,faces=geometry(p,star)
+   world=[transform(q,p) for q in vertices]
    for face in faces:
     points=[world[k] for k in face];a,b,c=points[:3]
     u=tuple(b[k]-a[k] for k in range(3));v=tuple(c[k]-a[k] for k in range(3))

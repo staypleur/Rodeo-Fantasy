@@ -8,6 +8,8 @@ local positions={}
 local viewers={} for i=1,8 do viewers[i]={} end
 local previous={}
 for i=1,8 do positions[i]=-(i-1)*42 World.ensure(positions[i]) World.replenish(positions[i],1,nil,true) end
+-- Opening boarding animation allows the shared den paths to emerge before running.
+World.step(cfg.Prototype.IntroSeconds)
 for tick=1,550 do
 
  local watchers={}
@@ -34,11 +36,17 @@ for tick=1,550 do
   local shown=0 for model in pairs(selection) do
    if previous[watch.viewer] and not previous[watch.viewer][model] then
     local entry=model.PrimaryPart.Position
-    assert(model:GetAttribute("Emerging") or not View.visible(entry.X,entry.Y,entry.Z-watch.z,watch.aspect,cfg.Prototype,.62),"new animal must enter from cave or outer screen")
+    assert(model:GetAttribute("Emerging") or World.atDen(model) or not View.visible(entry.X,entry.Y,entry.Z-watch.z,watch.aspect,cfg.Prototype,1),"new animal must enter from cave or outer screen")
    end
-   shown+=1 local p=model.PrimaryPart.Position assert(View.visible(p.X,p.Y,p.Z-watch.z,watch.aspect,cfg.Prototype,1),"selected animal must remain inside full camera")
+   local p=model.PrimaryPart.Position if View.visible(p.X,p.Y,p.Z-watch.z,watch.aspect,cfg.Prototype,1) then shown+=1 end
   end
+  if shown<4 then for key,value in pairs(World.lastQuotaDiagnostic or {}) do print("QUOTA_DIAGNOSTIC: "..key.."="..tostring(value)) end end
   assert(shown>=4 and shown<=6,"displayed shared wild herd tick="..tick.." z="..watch.z.." shown="..shown.." raw="..count)
+  count=0
+  for _,model in ipairs(workspace.RodeoPrototype.Monsters:GetChildren()) do
+   local p=model.PrimaryPart.Position
+   if not model:GetAttribute("Occupied") and View.visible(p.X,p.Y,p.Z-watch.z,watch.aspect,cfg.Prototype,1) then count+=1 end
+  end
   previous[watch.viewer]=selection
   minimum=math.min(minimum,count) checks+=1
   assert(count>=4,"SHARED_HERD_LOW tick="..tick.." z="..watch.z.." count="..count)

@@ -28,14 +28,15 @@ def components(species="MeadowMouse",stars=1):
             a=k*math.tau/3
             add(name,(p[0]+math.sin(a)*size*.4,p[1],p[2]+math.cos(a)*size*.4),(size,.1,size),greens[2])
     def eyes(headw,y,z,adult=False):
+        gaze=.68 if stage==3 else .84 if adult else 1
         for side,sg in (("Left",-1),("Right",1)):
             x=sg*headw*.31
-            add(side+"EyeRim",(x,y,z+.025),(.66,.78,.18),(160,109,65))
-            add(side+"EyeWhite",(x,y,z-.07),(.57,.7,.16),(255,248,225))
-            add(side+"Iris",(x-sg*.025,y,z-.16),(.39,.58,.13),(118,74,35))
-            add(side+"Pupil",(x-sg*.03,y,z-.215),(.24,.44,.08),(36,36,38))
-            add(side+"Shine",(x-sg*.1,y+.17,z-.263),(.12,.16,.045),(255,255,248))
-            if adult: add(side+"Brow",(x,y+.48,z),(.73,.17,.21),brown,rotation=(0,0,sg*14))
+            add(side+"EyeRim",(x,y,z+.025),(.66,.78*gaze,.18),(160,109,65))
+            add(side+"EyeWhite",(x,y,z-.07),(.57,.7*gaze,.16),(255,248,225))
+            add(side+"Iris",(x-sg*.025,y,z-.16),(.39,.58*gaze,.13),(118,74,35))
+            add(side+"Pupil",(x-sg*.03,y,z-.215),(.24,.44*gaze,.08),(36,36,38))
+            add(side+"Shine",(x-sg*.1,y+.17*gaze,z-.263),(.12,.16,.045),(255,255,248))
+            if adult: add(side+"Brow",(x,y+.48*gaze,z),(.73,.17,.21),brown,rotation=(0,0,sg*14))
     def feet(width,zfront,zback,height,hoof=False):
         for side,sg in (("Left",-1),("Right",1)):
             for which,z in (("Front",zfront),("Back",zback)):
@@ -76,6 +77,9 @@ def components(species="MeadowMouse",stars=1):
             sg=-1 if n%2 else 1
             leaf("CloakLeaf",(sg*.88,.8-(n%4)*.19,-.2+(n//4)*.5),1.05+stage*.15,.5,(35,sg*35,sg*30))
         if stage>=2:
+            for n in range(9):
+                a=math.pi*n/8
+                add("CrownVine",(math.cos(a)*.86,1.4+math.sin(a)*.22,-1.25),(.28,.14,.18),(201,162,88) if stage==3 else brown,rotation=(0,0,90-math.degrees(a)))
             for sg in (-1,1): clover("CloakClover",(sg*.95,.76,.9),.3)
     elif species in ("GrassBoar","TreeWolf"):
         boar=species=="GrassBoar";body=(119,158,73) if boar else (178,205,173)

@@ -32,7 +32,7 @@ local replaced=View.select(items,0,1,t,6,stable)
 assert(not replaced[99],"hidden central runners must not suddenly appear when a slot opens")
 local edge
 for dz=-20,-200,-1 do
- if View.visible(0,2,dz,1,t,.98) and not View.visible(0,2,dz,1,t,.62) then edge={key=100,x=0,y=2,z=dz,serial=100} break end
+ if View.visible(0,2,dz,1,t,1.15) and not View.visible(0,2,dz,1,t,1) then edge={key=100,x=0,y=2,z=dz,serial=100} break end
 end
 assert(edge) table.insert(items,edge)
 local arrivals=View.select(items,0,1,t,6,stable)

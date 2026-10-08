@@ -33,6 +33,7 @@ local rules=require(game.ReplicatedStorage.RodeoFantasy.HuntRules)
 local View=require(game.ReplicatedStorage.RodeoFantasy.HerdVisibility)
 World.init(workspace.RodeoPrototype,game.ServerStorage.RodeoMonsterTemplate,cfg,rules)
 for _,aspect in ipairs({0.5625,1,16/9}) do
+ local viewer={}
  workspace.RodeoPrototype.Monsters:ClearAllChildren()
  for tick=1,750 do
 
@@ -41,12 +42,12 @@ for _,aspect in ipairs({0.5625,1,16/9}) do
   if tick==1 then World.replenish(z,aspect,nil,true) end
   World.step(0.1) World.maintain({{z=z,aspect=aspect}})
   local count=0
-  for _,model in ipairs(workspace.RodeoPrototype.Monsters:GetChildren()) do
+  for model in pairs(World.visibleSet(z,aspect,viewer)) do
    local p=model.PrimaryPart.Position
-   if View.visible(p.X,p.Y,p.Z-z,aspect,cfg.Prototype) then count+=1 end
+   if View.visible(p.X,p.Y,p.Z-z,aspect,cfg.Prototype,1) then count+=1 end
   end
-  assert(count>=4,"visible herd aspect="..aspect.." tick="..tick.." z="..z.." count="..count)
+  assert(count>=4 and count<=6,"visible herd aspect="..aspect.." tick="..tick.." z="..z.." count="..count)
   World.cleanup({z})
  end
 end
-print("CONTINUOUS_VISIBLE_HERD_PASS: minimum four across 75 seconds (the full 1,000m course) and three screen ratios")
+print("CONTINUOUS_VISIBLE_HERD_PASS: four to six across 75 seconds (the full 1,000m course) and three screen ratios")
