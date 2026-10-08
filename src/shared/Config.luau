@@ -2,8 +2,8 @@
 local Config = {}
 
 Config.Monster = {
-	Id = "Charmander",
-	Name = "파이리",
+	Id = "Lumidon",
+	Name = "루미돈",
 }
 
 -- Merging/evolution remain pending.
@@ -39,6 +39,7 @@ Config.Prototype = {
 	LassoRangeStuds = 12,
 	FlightSeconds = 1.2,
 	BuckWarningSeconds = 2,
+	LandingGraceSeconds = 2,
 	GroundChunkStuds = 256,
 	RideHeightStuds = 4,
 	RespawnSeconds = 1,

@@ -3,7 +3,7 @@ from pathlib import Path
 import copy
 import math
 import xml.etree.ElementTree as ET
-from charmander_model import components
+from lumidon_model import components
 
 ROOT = Path(__file__).resolve().parents[1]
 document = ET.Element("roblox", version="4")
@@ -89,24 +89,19 @@ def monster(parent, name, position):
             mesh, mesh_props = item(body, "SpecialMesh", "Shape")
             prop(mesh_props, "token", "MeshType", 3)  # Enum.MeshType.Sphere
             prop(mesh_props, "Vector3", "Scale", vector(1, 1, 1))
-        if component["flame"]:
-            flame, flame_props = item(body, "Fire", "EmberFlame")
-            prop(flame_props, "float", "size", 2)
-            prop(flame_props, "float", "heat_xml", 0.5)
-            prop(flame_props, "Color3", "Color", dict(R=1, G=0.36, B=0.06))
-            prop(flame_props, "Color3", "SecondaryColor", dict(R=1, G=0.88, B=0.28))
-            light, light_props = item(body, "PointLight", "EmberGlow")
+        if component.get("glow"):
+            light, light_props = item(body, "PointLight", "LanternLight")
             prop(light_props, "Color3", "Color", dict(R=1, G=0.49, B=0.13))
             prop(light_props, "float", "Brightness", 0.35)
             prop(light_props, "float", "Range", 4)
     billboard, bill_props = item(root, "BillboardGui", "Nameplate")
     prop(bill_props, "UDim2", "Size", dict(XS=0, XO=240, YS=0, YO=65))
-    prop(bill_props, "Vector3", "StudsOffset", vector(0, 4.8, 0))
+    prop(bill_props, "Vector3", "StudsOffset", vector(0, 3.5, 0))
     prop(bill_props, "bool", "AlwaysOnTop", True)
     label, label_props = item(billboard, "TextLabel", "Label")
     prop(label_props, "UDim2", "Size", dict(XS=1, XO=0, YS=1, YO=0))
     prop(label_props, "float", "BackgroundTransparency", 1)
-    prop(label_props, "string", "Text", "파이리")
+    prop(label_props, "string", "Text", "루미돈")
     prop(label_props, "float", "TextSize", 18)
     prop(label_props, "Color3", "TextColor3", dict(R=1, G=1, B=1))
     prop(label_props, "float", "TextStrokeTransparency", 0.3)
@@ -157,9 +152,9 @@ print(f"Built {output.name} ({output.stat().st_size:,} bytes)")
 # A standalone, editable model is included for reuse.
 model_document = ET.Element("roblox", version="4")
 model_copy = copy.deepcopy(model_template)
-model_copy.find("Properties/string[@name='Name']").text = "Charmander"
+model_copy.find("Properties/string[@name='Name']").text = "Lumidon"
 model_document.append(model_copy)
 ET.indent(model_document, space="  ")
-model_output = output.parent / "Charmander.rbxmx"
+model_output = output.parent / "Lumidon.rbxmx"
 ET.ElementTree(model_document).write(model_output, encoding="utf-8", xml_declaration=True)
 print(f"Built {model_output.name} ({len(components())} visual parts)")

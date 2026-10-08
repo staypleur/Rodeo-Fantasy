@@ -29,9 +29,9 @@ assert place.find("Item[@class='ServerScriptService']/Item[@class='Script']") is
 assert place.find("Item[@class='StarterPlayer']/Item[@class='StarterPlayerScripts']/Item[@class='LocalScript']") is not None
 print(f"PASS: XML structure, unique references, script placement and all {len(expected)} embedded sources")
 
-standalone = ET.parse(root / "dist/Charmander.rbxmx").getroot()
+standalone = ET.parse(root / "dist/Lumidon.rbxmx").getroot()
 model = standalone.find("Item[@class='Model']")
-assert model is not None and model.find("Properties/string[@name='Name']").text == "Charmander"
+assert model is not None and model.find("Properties/string[@name='Name']").text == "Lumidon"
 model_refs = {node.attrib["referent"] for node in model.iter("Item")}
 for ref in model.iter("Ref"):
     assert ref.text in model_refs, "standalone model must not depend on the place"

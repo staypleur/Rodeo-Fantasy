@@ -2,7 +2,7 @@
 from pathlib import Path
 import math
 from PIL import Image, ImageDraw, ImageFont
-from charmander_model import components
+from lumidon_model import components
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -23,9 +23,9 @@ draw=ImageDraw.Draw(image)
 font_path='C:/Windows/Fonts/malgun.ttf'
 font=ImageFont.truetype(font_path,30)
 small=ImageFont.truetype(font_path,21)
-draw.text((50,30),'파이리 · 블록 펫 모델',font=font,fill=(64,48,37))
+draw.text((50,30),'루미돈 · 블록 펫 모델',font=font,fill=(64,48,37))
 draw.text((50,78),'실제 모델 부품의 구조 미리보기 (Studio 화면 아님)',font=small,fill=(99,87,72))
-for center,camera,label in [(350,(3,5,-12),'앞모습'),(1050,(-8,5,10),'뒷모습 / 꼬리 불꽃')]:
+for center,camera,label in [(350,(3,5,-12),'앞모습'),(1050,(-8,5,10),'뒷모습 / 작은 등불')]:
     normal=unit(camera)
     right=unit((-camera[2],0,camera[0]))
     up=cross(right,normal)
@@ -48,8 +48,8 @@ for center,camera,label in [(350,(3,5,-12),'앞모습'),(1050,(-8,5,10),'뒷모�
     for _,polygon,color in sorted(faces,key=lambda f:f[0]):
         draw.polygon(polygon,fill=color)
     draw.text((center-110,770),label,font=small,fill=(64,48,37))
-draw.text((50,843),'표면 돌기와 움직이는 불꽃 효과는 Studio에서 표시됩니다.',font=small,fill=(99,87,72))
-output=ROOT/'assets/models/charmander-brick-preview.png'
+draw.text((50,843),'표면 돌기와 등불 빛 효과는 Studio에서 표시됩니다.',font=small,fill=(99,87,72))
+output=ROOT/'assets/models/lumidon-brick-preview.png'
 image.save(output)
 print(output)
 

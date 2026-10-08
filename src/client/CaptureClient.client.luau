@@ -5,11 +5,11 @@ local UIS=game:GetService("UserInputService")
 local CAS=game:GetService("ContextActionService")
 local player=Players.LocalPlayer
 local package=RS:WaitForChild("RodeoFantasy")
-local Config=require(package.Config)
-local Rules=require(package.HuntRules)
-local remote=package.CaptureRemote
-local animator=require(script.Parent.RideAnimator)
-local monsters=workspace.RodeoPrototype.Monsters
+local Config=require(package:WaitForChild("Config"))
+local Rules=require(package:WaitForChild("HuntRules"))
+local remote=package:WaitForChild("CaptureRemote")
+local animator=require(script.Parent:WaitForChild("RideAnimator"))
+local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
 local state={phase="Idle",started=0,count=0,pending=0,distance=0}
 local held,left,right=false,false,false
 local pointerOrigin,pointerX,lastSteer=nil,nil,0
@@ -30,7 +30,7 @@ local bag=text(gui,"가방: 0마리 · 모인 돈: 0원",UDim2.fromOffset(16,64)
 local panel=make("Frame",{AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,128),BackgroundColor3=Color3.fromRGB(36,29,25),BackgroundTransparency=0.15,BorderSizePixel=0},gui)
 make("UISizeConstraint",{MaxSize=Vector2.new(650,128)},panel)
 make("UICorner",{CornerRadius=UDim.new(0,14)},panel)
-local status=text(panel,"로데오 스트릿 · 파이리 사냥",UDim2.fromOffset(12,6),UDim2.new(1,-24,0,32),20)
+local status=text(panel,"로데오 스트릿 · 루미돈 사냥",UDim2.fromOffset(12,6),UDim2.new(1,-24,0,32),20)
 local instruction=text(panel,"누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기",UDim2.fromOffset(12,42),UDim2.new(1,-24,0,32),15)
 local progress=make("Frame",{Name="TamingProgress",Position=UDim2.new(0,16,0,90),Size=UDim2.new(1,-32,0,14),BackgroundColor3=Color3.fromRGB(94,70,50),BorderSizePixel=0,Visible=false},panel)
 local fill=make("Frame",{Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(244,127,115),BorderSizePixel=0},progress)
@@ -133,7 +133,7 @@ RunService.RenderStepped:Connect(function(dt)
   ring.Position=Vector3.new(root.Position.X,0.15,root.Position.Z)
   local nearest,best=nil,Config.Prototype.LassoRangeStuds^2
   for _,model in ipairs(monsters:GetChildren()) do
-   if model.PrimaryPart and not model:GetAttribute("Occupied") then
+   if model.PrimaryPart and model~=state.previousMonster and not model:GetAttribute("Occupied") then
     local d=model.PrimaryPart.Position-root.Position
     if d.X*d.X+d.Z*d.Z<best then nearest,best=model,d.X*d.X+d.Z*d.Z end
    end
@@ -142,14 +142,17 @@ RunService.RenderStepped:Connect(function(dt)
  end
  if state.phase=="Riding" then
   fill.Size=UDim2.fromScale(state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),1)
-  status.Text=state.angerAt and "화났어요! 손을 떼고 점프하세요!" or state.tamed and "길들이기 성공 · 다음 포켓몬으로!" or "파이리 길들이는 중 ♥"
+  status.Text=state.angerAt and "화났어요! 손을 떼고 점프하세요!" or state.tamed and "길들이기 성공 · 다음 몬스터로!" or "루미돈 길들이는 중 ♥"
   instruction.Text="누른 채 좌우로 움직이기 / A·D · 손을 떼면 점프"
+  if clock<(state.protectedUntil or 0) then
+   instruction.Text=string.format("착지 보호 %.1f초 · 누른 채 좌우 이동 / 손을 떼면 점프",state.protectedUntil-clock)
+  end
  elseif state.phase=="Airborne" then
-  status.Text="다시 눌러 다음 포켓몬을 잡으세요!"
-  instruction.Text="노란 원 안에 포켓몬이 들어오면 줄이 연결됩니다"
+  status.Text="다시 눌러 다음 몬스터를 잡으세요!"
+  instruction.Text="노란 원 안에 몬스터가 들어오면 줄이 연결됩니다"
  elseif state.phase=="Lassoing" then status.Text="줄로 연결해 탑승 중…" instruction.Text="계속 누르고 계세요"
  elseif state.phase=="GameOver" then status.Text="사냥 종료" instruction.Text="다시 사냥하기로 재도전 · 가방 수익은 유지"
- else status.Text="로데오 스트릿 · 파이리 사냥" instruction.Text="사냥 시작 → 누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기" end
+ else status.Text="로데오 스트릿 · 루미돈 사냥" instruction.Text="사냥 시작 → 누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기" end
  if os.clock()<noticeUntil then status.Text=notice end
 end)
 remote:FireServer("Sync")

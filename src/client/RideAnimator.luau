@@ -9,7 +9,8 @@ local function remember(model)
 	for _, part in ipairs(model:GetDescendants()) do
 		if part:IsA("BasePart") and part ~= root then
 			local side = string.sub(part.Name,1,4)=="Left" and "Left" or string.sub(part.Name,1,5)=="Right" and "Right" or nil
-			local leg = side and (string.find(part.Name,"Leg",1,true) or string.find(part.Name,"Paw",1,true) or string.find(part.Name,"Claw",1,true)) and "Back" or nil
+			local movingLeg = side and (string.find(part.Name,"Leg",1,true) or string.find(part.Name,"Paw",1,true) or string.find(part.Name,"HoofLine",1,true))
+			local leg = movingLeg and (string.find(part.Name,"Front",1,true) and "Front" or "Back") or nil
 			if not leg then side=nil end
 			table.insert(pose, { part = part, rest = root.CFrame:ToObjectSpace(part.CFrame), side = side, leg = leg })
 		end
@@ -39,9 +40,9 @@ function RideAnimator.update(monsters, clock, cameraPosition)
 			if not entry.part.Parent then continue end
 			local localFrame = entry.rest
 			if running and entry.side then
-				local opposite = entry.side == "Left"
+				local opposite = (entry.side == "Left") ~= (entry.leg == "Front")
 				local swing = math.sin(phase + (opposite and math.pi or 0)) * 0.3
-				local joint = CFrame.new(entry.side == "Left" and -0.84 or 0.84, -0.65, 0.03)
+				local joint = CFrame.new(entry.side == "Left" and -0.88 or 0.88, -0.87, entry.leg == "Front" and -0.91 or 1.17)
 				localFrame = joint * CFrame.Angles(swing, 0, 0) * joint:Inverse() * entry.rest
 			end
 			entry.part.CFrame = frame * localFrame

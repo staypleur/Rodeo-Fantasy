@@ -7,7 +7,7 @@ local function check(value)
 end
 Rules.accrue(bag, 100, 2, 1)
 check(bag.pending == 0 and #bag.monsters == 0)
-Rules.grant(bag, "Charmander", 100)
+Rules.grant(bag, "Lumidon", 100)
 check(#bag.monsters == 1 and bag.monsters[1].stars == 1)
 Rules.accrue(bag, 101.99, 2, 1)
 check(bag.pending == 0)
@@ -15,12 +15,12 @@ Rules.accrue(bag, 102, 2, 1)
 check(bag.pending == 1 and bag.balance == 0)
 Rules.accrue(bag, 102, 2, 1)
 check(bag.pending == 1)
-Rules.grant(bag, "Charmander", 103)
+Rules.grant(bag, "Lumidon", 103)
 Rules.accrue(bag, 105, 2, 1)
 check(bag.pending == 3)
 check(bag.monsters[1].lastIncome == 104 and bag.monsters[2].lastIncome == 105)
 -- There is no slot or equipped flag: every owned monster earns independently.
-for _ = 1, 3 do Rules.grant(bag, "Charmander", 105) end
+for _ = 1, 3 do Rules.grant(bag, "Lumidon", 105) end
 check(#bag.monsters == 5)
 Rules.accrue(bag, 107, 2, 1)
 check(bag.pending == 8)
