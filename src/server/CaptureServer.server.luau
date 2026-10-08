@@ -1,6 +1,7 @@
 local Players=game:GetService("Players")
 local RS=game:GetService("ReplicatedStorage")
 local RunService=game:GetService("RunService")
+local PhysicsService=game:GetService("PhysicsService")
 local package=RS:WaitForChild("RodeoFantasy")
 local Config=require(package.Config)
 local Catalog=require(package.MonsterCatalog)
@@ -14,9 +15,30 @@ local Course=require(package.CourseGeometry)
 local remote=package.CaptureRemote
 local tuning=Config.Prototype
 local states,bags,limits,views={},{},{},{}
+local worlds,worldRoots={},{}
+local runs=Instance.new("Folder") runs.Name="PrivateHunts" runs.Parent=game:GetService("Workspace")
 local lastSync,lastCleanup,lastHerd=0,0,0
-World.init(workspace.RodeoPrototype,game:GetService("ServerStorage").RodeoMonsterTemplate,Config,Rules)
-World.ensure(0)
+local huntGroups={}
+for index=1,8 do
+ local name="RodeoHunt"..index
+ pcall(function() PhysicsService:RegisterCollisionGroup(name) end)
+ PhysicsService:CollisionGroupSetCollidable(name,name,true)
+ PhysicsService:CollisionGroupSetCollidable(name,"Default",true)
+ huntGroups[index]=name
+end
+for a=1,8 do for b=1,8 do if a~=b then PhysicsService:CollisionGroupSetCollidable(huntGroups[a],huntGroups[b],false) end end end
+local function setCharacterGroup(player,groupName)
+ local character=player.Character
+ if not character then return end
+ for _,part in ipairs(character:GetDescendants()) do if part:IsA("BasePart") then part.CollisionGroup=groupName end end
+end
+local function isolateRoot(folder,groupName)
+ local function assign(instance) if instance:IsA("BasePart") then instance.CollisionGroup=groupName end end
+ for _,instance in ipairs(folder:GetDescendants()) do assign(instance) end
+ folder.DescendantAdded:Connect(assign)
+end
+
+for _,name in ipairs({"PreviewMonster","PreviewGround"}) do local preview=workspace.RodeoPrototype:FindFirstChild(name) if preview then preview:Destroy() end end
 local function now() return workspace:GetServerTimeNow() end
 local function baseSpeed(state)
  return state and state.monster and state.monster:GetAttribute("RideSpeed") or tuning.ForwardStudsPerSecond
@@ -27,8 +49,8 @@ local function send(player,message)
  local gains=BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
  Records.sample(player,bag.totalProduced or 0,state and state.distance or 0)
  local wildIds={}
- if state then for model in pairs(World.visibleSet(state.root.Position.Z,views[player],player)) do table.insert(wildIds,model:GetAttribute("SpawnSerial")) end end
- remote:FireClient(player,"State",{income=not state and gains or nil,progress=Progress.snapshot(player),wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,tameSeconds=state and state.monster and Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds or 5,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
+ if state then for model in pairs(worlds[player].visibleSet(state.root.Position.Z,views[player],player)) do table.insert(wildIds,model:GetAttribute("SpawnSerial")) end end
+ remote:FireClient(player,"State",{huntRoot=worldRoots[player],initialLanding=state and state.initialLanding,income=not state and gains or nil,progress=Progress.snapshot(player),wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,tameSeconds=state and state.monster and Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds or 5,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
 end
 local function sendBag(player)
  local bag=bags[player]
@@ -116,19 +138,23 @@ local function start(player)
    humanoid.AutoRotate,humanoid.PlatformStand=previous.autoRotate,previous.platformStand
   end
  end
- World.resetVisibility(player)
- World.ensure(0)
- local watchers={}
- for other,run in pairs(states) do
-  if other~=player and run.phase~="GameOver" and run.phase~="CourseEnd" then table.insert(watchers,{z=run.root.Position.Z,aspect=views[other] or 1}) end
- end
- World.replenish(0,views[player] or 1,watchers,true)
+ if worldRoots[player] then worldRoots[player]:Destroy() end
+ local rootFolder=Instance.new("Folder") rootFolder.Name=tostring(player.UserId) rootFolder:SetAttribute("OwnerUserId",player.UserId)
+ local slot=player:GetAttribute("LobbySlot")
+ local collisionGroup=huntGroups[slot]
+ if collisionGroup then setCharacterGroup(player,collisionGroup) end
+ local herd=Instance.new("Folder") herd.Name="Monsters" herd.Parent=rootFolder
+ rootFolder.Parent=runs
+ if collisionGroup then isolateRoot(rootFolder,collisionGroup) end
+ local World=World.new() worlds[player]=World worldRoots[player]=rootFolder
+ World.init(rootFolder,game:GetService("ServerStorage").RodeoMonsterTemplate,Config,Rules)
+ World.ensure(0) World.replenish(0,views[player] or 1,nil,true,40)
  local model=World.spawn(Vector3.new(0,2,-8))
  model:SetAttribute("Occupied",true)
- model:SetAttribute("Angry",false)
- states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),distance=0,tamed=false}
+ model:SetAttribute("Angry",false) model:SetAttribute("InitialLanding",true)
+ states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,initialLanding=true,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),distance=0,tamed=false}
  root.Anchored,humanoid.AutoRotate,humanoid.PlatformStand=true,false,true
- root.CFrame=CFrame.new(0,2+tuning.RideHeightStuds,18)
+ root.CFrame=model:GetPivot()*CFrame.new(0,model:GetAttribute("SaddleHeight") or tuning.RideHeightStuds,8)
  states[player].origin=root.CFrame
  attachRope(states[player])
  send(player)
@@ -142,11 +168,14 @@ local function launch(player,state)
  send(player)
 end
 local function lasso(player,state)
+ local World=worlds[player]
  local model=World.nearest(state.root.Position,state.previousMonster,World.visibleSet(state.root.Position.Z,views[player],player))
  if not model then return end
  local params=RaycastParams.new()
  params.FilterType=Enum.RaycastFilterType.Exclude
- params.FilterDescendantsInstances={state.root.Parent,workspace.RodeoPrototype.Monsters}
+ local excluded={state.root.Parent,worldRoots[player].Monsters}
+ for other,folder in pairs(worldRoots) do if other~=player then table.insert(excluded,folder) end end
+ params.FilterDescendantsInstances=excluded
  if workspace:Raycast(state.root.Position,model.PrimaryPart.Position-state.root.Position,params) then return end
  model:SetAttribute("Occupied",true)
  state.monster,state.phase,state.started=model,"Lassoing",now()
@@ -193,6 +222,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
    finish(player,"Welcome back to the lobby.")
    restoreAvatar(state)
    state.root.CFrame=Lobby.Spawn
+   setCharacterGroup(player,"Default")
    states[player]=nil send(player) sendBag(player)
   end
   return
@@ -208,10 +238,11 @@ remote.OnServerEvent:Connect(function(player,action,value)
 end)
 RunService.Heartbeat:Connect(function(delta)
  local clock,dt=now(),math.min(delta,0.1)
- World.step(dt)
+ for _,world in pairs(worlds) do world.step(dt) end
  local nearZ={0}
  local watchers={}
  for player,state in pairs(states) do
+  local World=worlds[player]
   if (state.phase=="GameOver" or state.phase=="CourseEnd") then
    if state.root.Parent then table.insert(nearZ,state.root.Position.Z) end
    continue
@@ -254,7 +285,7 @@ RunService.Heartbeat:Connect(function(delta)
   elseif state.phase=="Lassoing" then
    if not state.monster or not state.monster.Parent then finish(player,"You lost your mount.") continue end
    local p=state.monster.PrimaryPart.Position
-   state.monster.PrimaryPart.CFrame=CFrame.new(p.X,state.monster:GetAttribute("RootHeight") or 2,p.Z-baseSpeed(state)*dt)
+   state.monster.PrimaryPart.CFrame=CFrame.new(p.X,state.monster:GetAttribute("RootHeight") or 2,p.Z-(state.initialLanding and 0 or baseSpeed(state)*dt))
    local saddle=state.monster:GetPivot()*CFrame.new(0,state.monster:GetAttribute("SaddleHeight") or tuning.RideHeightStuds,tuning.RideForwardStuds)
    local landingSeconds=state.landingSeconds or tuning.JumpSeconds
    local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
@@ -262,6 +293,7 @@ RunService.Heartbeat:Connect(function(delta)
    if World.hit(p,state.monster.PrimaryPart.Position,state.monster:GetAttribute("Flying")) then finish(player,"You hit an obstacle.","Obstacle") continue end
    if clock-state.started>=landingSeconds then
     clearRope(state)
+    state.initialLanding=nil state.monster:SetAttribute("InitialLanding",nil)
     state.phase,state.started,state.tamed="Riding",clock,state.monster:GetAttribute("Tamed_"..player.UserId)==true
     state.dashUntil=state.pendingDash and clock+tuning.SwitchDashSeconds or nil
     state.pendingDash=nil
@@ -300,19 +332,21 @@ RunService.Heartbeat:Connect(function(delta)
   end
   table.insert(watchers,{z=state.root.Position.Z,aspect=views[player] or 1})
  end
- if clock-lastHerd>=0.25 then lastHerd=clock World.maintain(watchers) end
+ if clock-lastHerd>=0.25 then lastHerd=clock for player,state in pairs(states) do if state.phase~="GameOver" and state.phase~="CourseEnd" then worlds[player].maintain({{z=state.root.Position.Z,aspect=views[player] or 1}}) end end end
  if clock-lastSync>=0.25 then lastSync=clock for _,player in ipairs(Players:GetPlayers()) do send(player) end end
- if clock-lastCleanup>=3 then lastCleanup=clock World.cleanup(nearZ) end
+ if clock-lastCleanup>=3 then lastCleanup=clock for player,world in pairs(worlds) do world.cleanup({states[player] and states[player].root.Position.Z or 0}) end end
 end)
 local function added(player)
  if not Lobby.assign(player) then player:Kick("This server holds up to 8 players.") return end
+ player.CharacterAdded:Connect(function() task.defer(function() if not states[player] then setCharacterGroup(player,"Default") end end) end)
+ if player.Character then setCharacterGroup(player,"Default") end
  player.CanLoadCharacterAppearance=true
  if player.UserId>0 then player.CharacterAppearanceId=player.UserId end
  bags[player]=BagRules.new() Progress.join(player)
  player.CharacterRemoving:Connect(function() finish(player,"Hunt ended") states[player]=nil end)
 end
 Players.PlayerAdded:Connect(added)
-Players.PlayerRemoving:Connect(function(player) send(player) World.resetVisibility(player) Records.leave(player) Progress.leave(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil end)
+Players.PlayerRemoving:Connect(function(player) send(player) if worlds[player] then worlds[player].resetVisibility(player) end Records.leave(player) Progress.leave(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil if worldRoots[player] then worldRoots[player]:Destroy() end worlds[player],worldRoots[player]=nil,nil end)
 for _,player in ipairs(Players:GetPlayers()) do added(player) end
 
 if RunService:IsRunning() then Records.start() Progress.start() end

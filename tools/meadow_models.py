@@ -24,9 +24,9 @@ def components(species="MeadowMouse",stars=1):
             add(name+"Petal",(p[0]+math.sin(a)*size*.55,p[1],p[2]+math.cos(a)*size*.55),(size,.12,size),(250,243,215))
         add(name+"Heart",(p[0],p[1]+.05,p[2]),(size*.45,.15,size*.45),(235,196,88))
     def clover(name,p,size=.4):
-        for k in range(3):
-            a=k*math.tau/3
-            add(name,(p[0]+math.sin(a)*size*.4,p[1],p[2]+math.cos(a)*size*.4),(size,.1,size),greens[2])
+        for k in range(4):
+            a=k*math.tau/4
+            add(name,(p[0]+math.sin(a)*size*.42,p[1],p[2]+math.cos(a)*size*.42),(size,.12,size),greens[2],rotation=(0,math.degrees(a),0))
     def eyes(headw,y,z,adult=False):
         gaze=.68 if stage==3 else .84 if adult else 1
         for side,sg in (("Left",-1),("Right",1)):
@@ -40,7 +40,7 @@ def components(species="MeadowMouse",stars=1):
     def feet(width,zfront,zback,height,hoof=False):
         for side,sg in (("Left",-1),("Right",1)):
             for which,z in (("Front",zfront),("Back",zback)):
-                add(side+which+"Leg",(sg*width,-height*.6,z),(.65,height,.72),body)
+                add(side+which+"Leg",(sg*width,-height*.77,z),(.76,height*.62,.8),body)
                 add(side+which+"Paw",(sg*width,-height-.12,z-.12),(.82,.38,.98),(71,65,51) if hoof else cream)
                 if not hoof:
                     for toe in (-.2,0,.2): add(side+which+"Claw",(sg*width+toe,-height-.08,z-.57),(.14,.15,.18),(188,160,116))
@@ -48,7 +48,7 @@ def components(species="MeadowMouse",stars=1):
         for layer in range(layers):
             for j in range(7+stage*2):
                 a=j*math.tau/(7+stage*2)
-                leaf("ManeLeaf",(math.sin(a)*width,p[1]+math.cos(a)*.35-layer*.2,p[2]+layer*.45),1+stage*.16,.4+stage*.06,(math.cos(a)*35,math.degrees(a),math.sin(a)*35))
+                leaf("ManeLeaf",(math.sin(a)*width,p[1]+math.cos(a)*.35-layer*.2,p[2]+layer*.45),1+stage*.22,.68+stage*.11,(math.cos(a)*35,math.degrees(a),math.sin(a)*35))
 
     if species=="MeadowMouse":
         body=(210,169,120)
@@ -56,26 +56,31 @@ def components(species="MeadowMouse",stars=1):
         add("BackPatch",(0,.42,.43),(1.5,1.3,2.1),body)
         headw=2.1-stage*.055
         add("Head",(0,.5,-1.23),(headw,1.72,1.52),body)
-        add("Muzzle",(0,.18,-1.98),(1.45,.76,.75),cream)
+        add("FaceMask",(0,.35,-1.93),(1.69,1.24,.44),cream)
+        add("Muzzle",(0,.1,-2.02),(1.38,.68,.65),cream)
+        for j in range(5):
+            x=(j-2)*.13
+            add("MouthSmile",(x,-.08+abs(x)*.17,-2.35),(.15,.033,.04),(103,68,46),"Block",(0,0,-20 if x<0 else 20))
         add("Nose",(0,.45,-2.36),(.31,.24,.2),pink)
         eyes(headw,.76,-1.99,stage>=2)
         for side,sg in (("Left",-1),("Right",1)):
             add(side+"Ear",(sg*1.02,1.36,-1.03),(1.28,1.6,.48),body,rotation=(0,sg*8,sg*-15))
-            add(side+"EarInner",(sg*1.02,1.38,-1.3),(.97,1.28,.16),pink,rotation=(0,sg*8,sg*-15))
+            add(side+"EarRim",(sg*1.02,1.38,-1.29),(1.1,1.43,.22),cream,rotation=(0,sg*8,sg*-15))
+            add(side+"EarInner",(sg*1.02,1.39,-1.42),(.94,1.21,.13),pink,rotation=(0,sg*8,sg*-15))
             add(side+"Cheek",(sg*.67,.14,-2.11),(.6,.28,.16),cream)
             for j in range(2): add(side+"Whisker",(sg*(.78+j*.05),.22-j*.17,-2.08),(.95,.035,.035),(143,117,91),"Block",(0,0,sg*(10-j*22)))
         feet(.7,-.65,1.0,1.62)
         for n in range(10+stage*2):
             t=n/(9+stage*2);a=t*2.2
             add("TailCurve",(math.sin(a)*(1+stage*.1),-.1+t*1.15,1.58+t*.8),(.17,.17,.35),body,rotation=(0,math.degrees(a),0))
-        clover("TailClover",(.9,1.3,2.4),.42+stage*.07)
+        clover("TailClover",(.9,1.3,2.4),.5+stage*.1)
         leaf("CrownSprout",(-.2,1.65,-1.22),.7,.4,(0,-30,-25))
         leaf("CrownSprout",(.2,1.7,-1.22),.9,.42,(0,35,25))
         mane((0,.2,-.72),.83,1+stage)
         if stage: flower("ForeheadFlower",(0,1.55,-1.67),.25)
         for n in range(stage*4):
             sg=-1 if n%2 else 1
-            leaf("CloakLeaf",(sg*.88,.8-(n%4)*.19,-.2+(n//4)*.5),1.05+stage*.15,.5,(35,sg*35,sg*30))
+            leaf("CloakLeaf",(sg*.88,.8-(n%4)*.19,-.2+(n//4)*.5),1.12+stage*.2,.82+stage*.12,(35,sg*35,sg*30))
         if stage>=2:
             for n in range(9):
                 a=math.pi*n/8

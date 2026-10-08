@@ -1,3 +1,4 @@
+local function createWorld()
 local World = {}
 local chunks, animals, previousPositions = {}, {}, {}
 local root, monsters, obstacles, template, tuning
@@ -9,8 +10,6 @@ local Visibility=require(game.ReplicatedStorage.RodeoFantasy.HerdVisibility)
 local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
 local spawnSerial=0
 local crateRows={}
-local dens={}
-local denByPosition={}
 
 local function part(parent, name, position, size, color)
 	local item = Instance.new("Part")
@@ -89,6 +88,7 @@ function World.spawn(position,speciesId,stars)
  -- for displayed creatures, instead of replicating hundreds of hidden body parts per runner.
  for _,node in ipairs(model:GetChildren()) do if node~=model.PrimaryPart then node:Destroy() end end
  model:SetAttribute("VisualDeferred",true)
+ local plate=model.PrimaryPart:FindFirstChild("Nameplate") if plate then plate:Destroy() end
  model.Name = id
 	model:SetAttribute("MonsterId", id)
  model:SetAttribute("Stars",stars)
@@ -130,21 +130,6 @@ function World.ensure(z)
    if median>0 then
     decoration(chunk,"ForkRidge",Vector3.new(0,1.5,rowZ),Vector3.new(median*2,3,32),Color3.fromRGB(203,143,91))
     decoration(chunk,"ForkGrass",Vector3.new(0,3.1,rowZ),Vector3.new(median*2,0.2,32),Color3.fromRGB(133,179,96))
-   end
-   do -- regular entrances on both canyon sides
-    for _,portZ in ipairs({rowZ,rowZ+16}) do
-    for _,side in ipairs({-1,1}) do
-     local mouth=Vector3.new(side*(edge-6.8),6,portZ)
-     decoration(chunk,"DenRoof",Vector3.new(side*(edge-.4),12.8,portZ),Vector3.new(13,1.5,16),Color3.fromRGB(158,130,93))
-     decoration(chunk,"DenOpening",mouth,Vector3.new(.35,12,14),Color3.fromRGB(57,69,53))
-     decoration(chunk,"DenLintel",mouth+Vector3.new(0,6.4,0),Vector3.new(1.2,1.2,16),Color3.fromRGB(205,161,116))
-     for _,front in ipairs({-1,1}) do decoration(chunk,"DenPillar",mouth+Vector3.new(0,0,front*7.5),Vector3.new(1.2,12,1.1),Color3.fromRGB(205,161,116)) end
-     decoration(chunk,"HighNestOpening",Vector3.new(side*(edge-6.7),16,portZ),Vector3.new(.4,6,10),Color3.fromRGB(49,62,47))
-     decoration(chunk,"NestLedge",Vector3.new(side*(edge-7.2),12.9,portZ),Vector3.new(2,.6,11),Color3.fromRGB(142,120,85))
-     table.insert(dens,{z=portZ,side=side,chunk=index})
-     denByPosition[side..":"..portZ]=index
-    end
-   end
    end
    for _, side in ipairs({-1,1}) do
     local height=18+random:NextInteger(0,3) -- wall top remains above flying creatures
@@ -256,72 +241,16 @@ end
 
 local displayed=setmetatable({},{__mode="k"})
 function World.resetVisibility(viewer) displayed[viewer]=nil end
-function World.atDen(model)
- if not model:GetAttribute("BornAtDen") then return false end
- local p=model.PrimaryPart.Position
- if math.abs(p.X)<Course.width(p.Z)-10.5 then return false end
- local denZ=math.floor(p.Z/16+.5)*16 local side=p.X<0 and -1 or 1
- local chunk=denByPosition[side..":"..denZ]
- return chunk~=nil and chunks[chunk]~=nil and math.abs(p.Z-denZ)<=7 and math.abs(p.X-side*(Course.width(denZ)-6.5))<=4
-end
+function World.atDen() return false end
 function World.visibleSet(z,aspect,viewer)
- aspect=aspect or 1
- local function candidates()
-  local result={}
-  for model in pairs(animals) do
-   if model.Parent and not model:GetAttribute("Occupied") then
-    local p=model.PrimaryPart.Position
-    table.insert(result,{key=model,x=p.X,y=p.Y,z=p.Z,serial=model:GetAttribute("SpawnSerial") or 0,emerging=model:GetAttribute("Emerging"),atDen=World.atDen(model)})
-   end
+ local candidates={}
+ for model in pairs(animals) do
+  if model.Parent and not model:GetAttribute("Occupied") then
+   local p=model.PrimaryPart.Position
+   table.insert(candidates,{key=model,x=p.X,y=p.Y,z=p.Z,serial=model:GetAttribute("SpawnSerial") or 0})
   end
-  return result
  end
- local result=Visibility.select(candidates(),z,aspect,tuning,6,viewer and displayed[viewer])
- local count=0
- for model in pairs(result) do local p=model.PrimaryPart.Position if Visibility.visible(p.X,p.Y,p.Z-z,aspect,tuning,1) then count+=1 end end
- -- Fill a low camera quota at a visible entrance, never by revealing a hidden road animal.
- -- An extra runner covers the short emergence animation. Shared callers count the same births.
- if count<5 then
-  for model in pairs(result) do local p=model.PrimaryPart.Position if not Visibility.visible(p.X,p.Y,p.Z-z,aspect,tuning,1) then result[model]=nil end end
-  local exits={}
-  for _,den in ipairs(dens) do
-   if den.z-z < -135 or den.z-z>45 then continue end
-   for _,offset in ipairs({-6,6}) do
-    local entryZ=den.z+offset
-    local id=Catalog.pick(math.max(0,-z*tuning.MetersPerStud),spawnSerial)
-    local mouth=den.side*(Course.width(entryZ)-6.5)
-    if Visibility.visible(mouth,Catalog[id].RootHeight,entryZ-z,aspect,tuning,.96) then
-     table.insert(exits,{den=den,z=entryZ,id=id,x=mouth,score=(entryZ-z+20)^2})
-    end
-   end
-  end
-  table.sort(exits,function(a,b) return a.score<b.score end)
-  local occupied,blocked=0,0
-  for _,exit in ipairs(exits) do
-   if count>=5 then break end
-   local clear=true
-   for model in pairs(animals) do
-    if model.Parent and model:GetAttribute("Flying")==Catalog[exit.id].Flying then local p=model.PrimaryPart.Position if math.abs(p.X-exit.x)<4 and math.abs(p.Z-exit.z)<8 then clear=false break end end
-   end
-   if not clear then occupied+=1 continue end
-   local half=({Small=1.6,Medium=2.2,Large=4.2})[Catalog[exit.id].SizeClass]
-   local target=exit.den.side*math.max(Course.median(exit.z-18)+half+2,Course.width(exit.z)*.3)
-   local waiting=false
-   for _,rock in ipairs(obstacles:GetChildren()) do
-    if not Catalog[exit.id].Flying and not rock:GetAttribute("Broken") and Rules.sweptBox(exit.x,2,exit.z,target,2,exit.z-18,rock.Position.X,rock.Position.Y,rock.Position.Z,rock.Size.X,rock.Size.Y,rock.Size.Z,half) then
-     waiting=true
-     if Rules.sweptBox(exit.x,2,exit.z,exit.x,2,exit.z,rock.Position.X,rock.Position.Y,rock.Position.Z,rock.Size.X,rock.Size.Y,rock.Size.Z,half) then clear=false break end
-    end
-   end
-   if not clear then blocked+=1 continue end
-   local model=World.spawn(Vector3.new(exit.x,2,exit.z),exit.id)
-   model:SetAttribute("Emerging",true) model:SetAttribute("BornAtDen",true)
-   model:SetAttribute("DenZ",exit.den.z) model:SetAttribute("DenSide",exit.den.side)
-   animals[model].entry={from=exit.x,to=waiting and exit.x or target,home=target,age=0,waiting=waiting}
-   result[model]=true count+=1
-  end
-  World.lastQuotaDiagnostic={count=count,exits=#exits,occupied=occupied,blocked=blocked,id=exits[1] and exits[1].id or "none",aspect=aspect}
- end
+ local result=Visibility.select(candidates,z,aspect or 1,tuning,6,viewer and displayed[viewer])
  if viewer then displayed[viewer]=result end
  return result
 end
@@ -336,97 +265,41 @@ function World.nearest(position, excluded, selected)
 	return best
 end
 
--- One shared herd: reserve animals ahead before faster riders reach them.
--- After opening setup, animals emerge from visible or distant cave mouths.
+-- Private run: preload the opening scene; later births are strictly beyond the camera.
 function World.replenish(z,aspect,watchers,prime,budget)
  aspect=aspect or 1
- watchers=watchers or {{z=z,aspect=aspect}}
- budget=budget or 32
- local ahead,visible=0,0
- for model in pairs(animals) do
-  if model.Parent and not model:GetAttribute("Occupied") then
-   local p=model.PrimaryPart.Position
-   if p.Z<z+12 and p.Z>=z-340 then ahead+=1 end
-   if not model:GetAttribute("Emerging") and Visibility.visible(p.X,p.Y,p.Z-z,aspect,tuning) then visible+=1 end
-  end
- end
- local obstacleCount=0
- for _,rock in ipairs(obstacles:GetChildren()) do
-  if not rock:GetAttribute("Broken") and Visibility.visible(rock.Position.X,2,rock.Position.Z-z,aspect,tuning) then obstacleCount+=1 end
- end
- -- A small buffer covers cave emergence and moving camera; visible density follows obstacles.
- local targetVisible=math.max(aspect<.8 and 16 or 12,obstacleCount+1)
  local created=0
- for offset=(prime and -10 or 40),340,10 do
-  if ahead>=24 or (ahead>=12 and visible>=6) then break end
-  if created>=budget then break end
+ local lanes={-0.72,-0.24,0.24,0.72}
+ for offset=prime and -12 or 0,220,8 do
+  if created>=(budget or 24) then break end
   local targetZ=z-offset
-  if targetZ < -Course.LengthStuds-340 then continue end
-  local row=0
-  local orders={{1,6,2,5,3,4},{2,5,1,6,3,4},{3,4,2,5,1,6}}
-  for _,i in ipairs(orders[math.floor(offset/10)%3+1]) do
-   for _,range in ipairs(Course.ranges(targetZ,3)) do
-    local jitter=math.sin(spawnSerial*2.399+offset)*1.1
-    local x=math.clamp(range[1]+(range[2]-range[1])*i/7+jitter,range[1],range[2])
-    local speciesId=Catalog.pick(math.max(0,-z*tuning.MetersPerStud),spawnSerial)
-    local onScreen=Visibility.visible(x,Catalog[speciesId].RootHeight,targetZ-z,aspect,tuning)
-    local safe=not onScreen or visible<targetVisible
-    if prime and offset<100 and math.abs(x)<6 then safe=false end
-    -- Visible mouths are allowed: animals physically walk out, never appear mid-road.
-    if safe and prime then
-     for _,rock in ipairs(obstacles:GetChildren()) do
-      if not rock:GetAttribute("Broken") and math.abs(rock.Position.X-x)<rock.Size.X/2+2 and math.abs(rock.Position.Z-targetZ)<rock.Size.Z/2+4 then safe=false break end
-     end
+  local id=Catalog.pick(math.max(0,-z*tuning.MetersPerStud),spawnSerial)
+  for _,range in ipairs(Course.ranges(targetZ,5)) do
+   for laneIndex,lane in ipairs(lanes) do
+    local x=(range[1]+range[2])/2+lane*(range[2]-range[1])/2
+    local onScreen=Visibility.visible(x,Catalog[id].RootHeight,targetZ-z,aspect,tuning,1.2)
+    if onScreen and not prime then continue end
+    local safe=true
+    for other in pairs(animals) do
+     if other.Parent then local p=other.PrimaryPart.Position if math.abs(p.X-x)<8 and math.abs(p.Z-targetZ)<18 then safe=false break end end
     end
-    if safe and prime then
-     for other in pairs(animals) do
-      if other.Parent and math.abs(other.PrimaryPart.Position.X-x)<5 and math.abs(other.PrimaryPart.Position.Z-targetZ)<9 then safe=false break end
-     end
+    for _,rock in ipairs(obstacles:GetChildren()) do
+     if not Catalog[id].Flying and not rock:GetAttribute("Broken") and math.abs(rock.Position.X-x)<rock.Size.X/2+5 and math.abs(rock.Position.Z-targetZ)<rock.Size.Z/2+10 then safe=false break end
     end
     if safe then
-     do
-      local best=nil local distance=math.huge
-      for _,den in ipairs(dens) do
-       if den.side==(x<0 and -1 or 1) and math.abs(den.z-targetZ)<distance then best=den distance=math.abs(den.z-targetZ) end
-      end
-      if not best or distance>34 then continue end
-      local entryZ=best.z+(spawnSerial%2==0 and -6 or 6)
-      local mouth=best.side*(Course.width(entryZ)-6.5)
-      local bodyHalf=({Small=1.6,Medium=2.2,Large=4.2})[Catalog[speciesId].SizeClass]
-      local exit=best.side*math.max(Course.median(best.z-18)+bodyHalf+2,Course.width(best.z-18)*.3)
-      local clear=true
-      for _,rock in ipairs(obstacles:GetChildren()) do
-       if not rock:GetAttribute("Broken") and Rules.sweptBox(mouth,2,entryZ,exit,2,entryZ-18,rock.Position.X,rock.Position.Y,rock.Position.Z,rock.Size.X,rock.Size.Y,rock.Size.Z,2.5) then clear=false break end
-      end
-      for other in pairs(animals) do
-       if other.Parent and other:GetAttribute("Flying")==Catalog[speciesId].Flying and math.abs(other.PrimaryPart.Position.Z-entryZ)<9 and other.PrimaryPart.Position.X*best.side>0 then clear=false break end
-      end
-      if not clear then continue end
-      local model=World.spawn(Vector3.new(mouth,2,entryZ),speciesId)
-      model:SetAttribute("Emerging",true)
-      model:SetAttribute("BornAtDen",true)
-      model:SetAttribute("DenZ",best.z)
-      model:SetAttribute("DenSide",best.side)
-      animals[model].entry={from=mouth,to=exit,home=best.side*math.max(Course.median(best.z-66)+5,Course.width(best.z)*.2),age=0}
-     end
-     ahead+=1 created+=1 row+=1
-     if prime and onScreen then visible+=1 end
+     local model=World.spawn(Vector3.new(x,2,targetZ),id)
+     model:SetAttribute("BornOutsideView",not onScreen)
+     model:SetAttribute("OpeningScene",prime==true)
+     created+=1
     end
-    if row>=2 or created>=budget then break end
+    if created>=(budget or 24) then break end
    end
-   if row>=2 or created>=budget then break end
   end
  end
  return created
 end
 function World.maintain(watchers)
- -- Furthest runner first; nearby players count the same shared animals.
- table.sort(watchers,function(a,b) return a.z<b.z end)
- local budget=32
- for _,watch in ipairs(watchers) do
-  budget-=World.replenish(watch.z,watch.aspect,watchers,false,math.min(6,budget))
-  if budget<=0 then break end
- end
+ for _,watch in ipairs(watchers) do World.replenish(watch.z,watch.aspect,nil,false,12) end
 end
 
 -- Contact while riding: include moving herds and the visible inner canyon face.
@@ -517,3 +390,7 @@ function World.cleanup(nearZ)
 end
 
 return World
+end
+local default=createWorld()
+default.new=createWorld
+return default

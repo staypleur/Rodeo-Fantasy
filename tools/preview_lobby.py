@@ -12,8 +12,8 @@ image = Image.new('RGB', (1200, 1320), (249, 245, 235))
 draw = ImageDraw.Draw(image)
 font = ImageFont.truetype('C:/Windows/Fonts/malgun.ttf', 26)
 small = ImageFont.truetype('C:/Windows/Fonts/malgun.ttf', 19)
-draw.text((40, 24), '파스텔 로비 · 실제 맵 부품의 위쪽 배치도', font=font, fill=(44, 72, 61))
-draw.text((40, 64), 'Studio 화면 아님 · 개인 구역 8개 / 목장 32개 / 목장당 2마리', font=small, fill=(74, 94, 84))
+draw.text((40, 24), 'RODEO PLANETURE · 석조 정원 A안 배치도', font=font, fill=(44, 72, 61))
+draw.text((40, 64), '실제 맵 부품 위쪽 배치 · 8인 로비 / 건물 안뜰 목장 32개', font=small, fill=(74, 94, 84))
 scale = 2.7
 def project(x, z):
     return (600 + (x - 6000)*scale, 720 + z*scale)
@@ -57,9 +57,12 @@ for n in next(p for p in lobby.findall("Item") if p.findtext("Properties/string[
     board=next(p for p in n.findall('Item') if p.findtext("Properties/string[@name='Name']")=='OwnerBoard')
     cf=board.find("Properties/CoordinateFrame[@name='CFrame']")
     x,z=project(float(cf.findtext('X')),float(cf.findtext('Z')))
-    draw.text((x,z+9), f'개인 구역 {idx}',font=small,fill=(40,67,55),anchor='mt')
-draw.text((600,790),'중앙 비행선',font=small,fill=(40,67,55),anchor='mt')
-draw.text((600,625),'중앙 광장',font=small,fill=(40,67,55),anchor='mt')
+    dx,dz=x-600,z-720
+    distance=max(1,math.hypot(dx,dz))
+    x+=dx/distance*90
+    z+=dz/distance*90
+    draw.text((x,z), f'개인 구역 {idx}',font=small,fill=(40,67,55),anchor='mm')
+draw.text((40,1240),'중앙 바닥 로고 · 거대 바다코끼리 비행선 · 각 건물 안뜰 목장 4개',font=small,fill=(44,72,61))
 out=ROOT/'assets/maps/lobby-layout-preview.png'
 out.parent.mkdir(parents=True,exist_ok=True)
 image.save(out)

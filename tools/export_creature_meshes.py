@@ -6,11 +6,25 @@ from meadow_models import components, SPECIES, STAGES
 def geometry(component, stars):
     name=component['name']
     leaf=any(word in name for word in ('Leaf','Sprout','Clover','Grass')) and 'Vein' not in name
-    if leaf:
-        vertices=[(0,0,-.5),(-.5,0,-.05),(0,0,.5),(.5,0,-.05),(0,.5,-.05),(0,-.5,-.05)]
-        faces=[]
-        for a,b in ((0,1),(1,2),(2,3),(3,0)):
-            faces.extend(((a,b,4),(b,a,5)))
+    if 'Clover' in name and 'Vein' not in name:
+        vertices=[]
+        for y in (.5,-.5):
+            for j in range(24):
+                a=math.tau*j/24
+                vertices.append((math.sin(a)**3*.5,y,-(13*math.cos(a)-5*math.cos(2*a)-2*math.cos(3*a)-math.cos(4*a))/32))
+        vertices.extend(((0,.5,0),(0,-.5,0)));faces=[]
+        for j in range(24):
+            n=(j+1)%24
+            faces.extend(((48,j,n),(49,24+n,24+j),(j,24+j,24+n),(j,24+n,n)))
+    elif leaf:
+        vertices=[];faces=[]
+        for j in range(9):
+            t=j/8;width=.5*math.sin(math.pi*t)**.8+.005;y=.38*math.sin(math.pi*t);z=t-.5
+            vertices.extend(((-width,y-.15,z),(0,y,z),(width,y-.15,z),(0,y-.3,z)))
+        for j in range(8):
+            for k in range(4):
+                n=(k+1)%4
+                faces.extend(((j*4+k,(j+1)*4+k,(j+1)*4+n),(j*4+k,(j+1)*4+n,j*4+n)))
     elif component['shape'] in ('Ball','Sphere'):
         sides,rings=(24,14) if stars>=9 else (10,6)
         vertices=[(0,.5,0),(0,-.5,0)]

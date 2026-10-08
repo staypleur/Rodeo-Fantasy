@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='utf-8'?>
 <roblox version="4">
-  <Item class="Model" referent="RBX10225">
+  <Item class="Model" referent="RBX2353">
     <Properties>
       <string name="Name">BlueSeaElephantAirship</string>
     </Properties>
-    <Item class="Part" referent="RBX10226">
+    <Item class="Part" referent="RBX2354">
       <Properties>
         <string name="Name">WalrusBody</string>
         <bool name="Anchored">true</bool>
@@ -28,19 +28,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10227">
+    <Item class="Part" referent="RBX2355">
       <Properties>
         <string name="Name">BackMantle</string>
         <bool name="Anchored">true</bool>
@@ -64,19 +64,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10228">
+    <Item class="Part" referent="RBX2356">
       <Properties>
         <string name="Name">Chest</string>
         <bool name="Anchored">true</bool>
@@ -100,19 +100,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10229">
+    <Item class="Part" referent="RBX2357">
       <Properties>
         <string name="Name">WalrusHead</string>
         <bool name="Anchored">true</bool>
@@ -136,19 +136,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10230">
+    <Item class="Part" referent="RBX2358">
       <Properties>
         <string name="Name">Forehead</string>
         <bool name="Anchored">true</bool>
@@ -172,19 +172,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10231">
+    <Item class="Part" referent="RBX2359">
       <Properties>
         <string name="Name">Muzzle</string>
         <bool name="Anchored">true</bool>
@@ -208,19 +208,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">7385807</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10232">
+    <Item class="Part" referent="RBX2360">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -244,19 +244,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10233">
+    <Item class="Part" referent="RBX2361">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -280,19 +280,19 @@
           <R22>0.9852376532240592</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10234">
+    <Item class="Part" referent="RBX2362">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -316,19 +316,19 @@
           <R22>0.9909497617679348</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10235">
+    <Item class="Part" referent="RBX2363">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -352,19 +352,19 @@
           <R22>0.9952759374651264</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10236">
+    <Item class="Part" referent="RBX2364">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -388,19 +388,19 @@
           <R22>0.9982101297677352</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10237">
+    <Item class="Part" referent="RBX2365">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -424,19 +424,19 @@
           <R22>0.9997482349425065</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10238">
+    <Item class="Part" referent="RBX2366">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -460,19 +460,19 @@
           <R22>0.9998881018102734</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10239">
+    <Item class="Part" referent="RBX2367">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -496,19 +496,19 @@
           <R22>0.9986295347545738</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10240">
+    <Item class="Part" referent="RBX2368">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -532,19 +532,19 @@
           <R22>0.9959742939952391</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10241">
+    <Item class="Part" referent="RBX2369">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -568,19 +568,19 @@
           <R22>0.9919260931265662</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10242">
+    <Item class="Part" referent="RBX2370">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -604,19 +604,19 @@
           <R22>0.9864905939235215</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10243">
+    <Item class="Part" referent="RBX2371">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -640,19 +640,19 @@
           <R22>0.9796753984232356</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10244">
+    <Item class="Part" referent="RBX2372">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -676,19 +676,19 @@
           <R22>0.9714900382928674</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10245">
+    <Item class="Part" referent="RBX2373">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -712,19 +712,19 @@
           <R22>0.9619459614987059</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10246">
+    <Item class="Part" referent="RBX2374">
       <Properties>
         <string name="Name">TrunkSegment</string>
         <bool name="Anchored">true</bool>
@@ -748,19 +748,19 @@
           <R22>0.9510565162951535</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10247">
+    <Item class="Part" referent="RBX2375">
       <Properties>
         <string name="Name">TrunkTip</string>
         <bool name="Anchored">true</bool>
@@ -784,19 +784,19 @@
           <R22>0.882947592858927</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10248">
+    <Item class="Part" referent="RBX2376">
       <Properties>
         <string name="Name">GreatEar</string>
         <bool name="Anchored">true</bool>
@@ -820,19 +820,19 @@
           <R22>0.9271838545667874</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10249">
+    <Item class="Part" referent="RBX2377">
       <Properties>
         <string name="Name">EarInner</string>
         <bool name="Anchored">true</bool>
@@ -856,19 +856,19 @@
           <R22>0.9271838545667874</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10250">
+    <Item class="Part" referent="RBX2378">
       <Properties>
         <string name="Name">EyeSocket</string>
         <bool name="Anchored">true</bool>
@@ -892,19 +892,19 @@
           <R22>0.9135454576426009</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10251">
+    <Item class="Part" referent="RBX2379">
       <Properties>
         <string name="Name">Eye</string>
         <bool name="Anchored">true</bool>
@@ -928,19 +928,19 @@
           <R22>0.9135454576426009</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">8642804</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10252">
+    <Item class="Part" referent="RBX2380">
       <Properties>
         <string name="Name">BrowArmor</string>
         <bool name="Anchored">true</bool>
@@ -964,19 +964,19 @@
           <R22>0.9396926207859084</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10253">
+    <Item class="Part" referent="RBX2381">
       <Properties>
         <string name="Name">Tusk</string>
         <bool name="Anchored">true</bool>
@@ -1000,19 +1000,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10254">
+    <Item class="Part" referent="RBX2382">
       <Properties>
         <string name="Name">Tusk</string>
         <bool name="Anchored">true</bool>
@@ -1036,19 +1036,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10255">
+    <Item class="Part" referent="RBX2383">
       <Properties>
         <string name="Name">Tusk</string>
         <bool name="Anchored">true</bool>
@@ -1072,19 +1072,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10256">
+    <Item class="Part" referent="RBX2384">
       <Properties>
         <string name="Name">Tusk</string>
         <bool name="Anchored">true</bool>
@@ -1108,19 +1108,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10257">
+    <Item class="Part" referent="RBX2385">
       <Properties>
         <string name="Name">Tusk</string>
         <bool name="Anchored">true</bool>
@@ -1144,19 +1144,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10258">
+    <Item class="Part" referent="RBX2386">
       <Properties>
         <string name="Name">Tusk</string>
         <bool name="Anchored">true</bool>
@@ -1180,19 +1180,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10259">
+    <Item class="Part" referent="RBX2387">
       <Properties>
         <string name="Name">SeaWingRoot</string>
         <bool name="Anchored">true</bool>
@@ -1221,10 +1221,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10260">
+    <Item class="Part" referent="RBX2388">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -1253,10 +1257,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10261">
+    <Item class="Part" referent="RBX2389">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -1285,10 +1293,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10262">
+    <Item class="Part" referent="RBX2390">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -1317,10 +1329,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10263">
+    <Item class="Part" referent="RBX2391">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -1349,10 +1365,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10264">
+    <Item class="Part" referent="RBX2392">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -1381,10 +1401,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10265">
+    <Item class="Part" referent="RBX2393">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -1413,10 +1437,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10266">
+    <Item class="Part" referent="RBX2394">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -1445,10 +1473,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10267">
+    <Item class="Part" referent="RBX2395">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -1477,10 +1509,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10268">
+    <Item class="Part" referent="RBX2396">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -1509,10 +1545,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10269">
+    <Item class="Part" referent="RBX2397">
       <Properties>
         <string name="Name">TailFin</string>
         <bool name="Anchored">true</bool>
@@ -1536,19 +1576,19 @@
           <R22>0.9271838545667874</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10270">
+    <Item class="Part" referent="RBX2398">
       <Properties>
         <string name="Name">TailFin</string>
         <bool name="Anchored">true</bool>
@@ -1572,19 +1612,19 @@
           <R22>0.8660254037844387</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10271">
+    <Item class="Part" referent="RBX2399">
       <Properties>
         <string name="Name">TailFin</string>
         <bool name="Anchored">true</bool>
@@ -1608,19 +1648,19 @@
           <R22>0.7880107536067219</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10272">
+    <Item class="Part" referent="RBX2400">
       <Properties>
         <string name="Name">TailFin</string>
         <bool name="Anchored">true</bool>
@@ -1644,19 +1684,19 @@
           <R22>0.6946583704589973</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10273">
+    <Item class="Part" referent="RBX2401">
       <Properties>
         <string name="Name">SideArmor</string>
         <bool name="Anchored">true</bool>
@@ -1680,19 +1720,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10274">
+    <Item class="Part" referent="RBX2402">
       <Properties>
         <string name="Name">SideArmor</string>
         <bool name="Anchored">true</bool>
@@ -1716,19 +1756,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10275">
+    <Item class="Part" referent="RBX2403">
       <Properties>
         <string name="Name">SideArmor</string>
         <bool name="Anchored">true</bool>
@@ -1752,19 +1792,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10276">
+    <Item class="Part" referent="RBX2404">
       <Properties>
         <string name="Name">SideArmor</string>
         <bool name="Anchored">true</bool>
@@ -1788,19 +1828,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10277">
+    <Item class="Part" referent="RBX2405">
       <Properties>
         <string name="Name">SideArmor</string>
         <bool name="Anchored">true</bool>
@@ -1824,19 +1864,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10278">
+    <Item class="Part" referent="RBX2406">
       <Properties>
         <string name="Name">GreatEar</string>
         <bool name="Anchored">true</bool>
@@ -1860,19 +1900,19 @@
           <R22>0.9271838545667874</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10279">
+    <Item class="Part" referent="RBX2407">
       <Properties>
         <string name="Name">EarInner</string>
         <bool name="Anchored">true</bool>
@@ -1896,19 +1936,19 @@
           <R22>0.9271838545667874</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10280">
+    <Item class="Part" referent="RBX2408">
       <Properties>
         <string name="Name">EyeSocket</string>
         <bool name="Anchored">true</bool>
@@ -1932,19 +1972,19 @@
           <R22>0.9135454576426009</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10281">
+    <Item class="Part" referent="RBX2409">
       <Properties>
         <string name="Name">Eye</string>
         <bool name="Anchored">true</bool>
@@ -1968,19 +2008,19 @@
           <R22>0.9135454576426009</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">8642804</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10282">
+    <Item class="Part" referent="RBX2410">
       <Properties>
         <string name="Name">BrowArmor</string>
         <bool name="Anchored">true</bool>
@@ -2004,19 +2044,19 @@
           <R22>0.9396926207859084</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10283">
+    <Item class="Part" referent="RBX2411">
       <Properties>
         <string name="Name">Tusk</string>
         <bool name="Anchored">true</bool>
@@ -2040,19 +2080,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10284">
+    <Item class="Part" referent="RBX2412">
       <Properties>
         <string name="Name">Tusk</string>
         <bool name="Anchored">true</bool>
@@ -2076,19 +2116,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10285">
+    <Item class="Part" referent="RBX2413">
       <Properties>
         <string name="Name">Tusk</string>
         <bool name="Anchored">true</bool>
@@ -2112,19 +2152,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10286">
+    <Item class="Part" referent="RBX2414">
       <Properties>
         <string name="Name">Tusk</string>
         <bool name="Anchored">true</bool>
@@ -2148,19 +2188,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10287">
+    <Item class="Part" referent="RBX2415">
       <Properties>
         <string name="Name">Tusk</string>
         <bool name="Anchored">true</bool>
@@ -2184,19 +2224,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10288">
+    <Item class="Part" referent="RBX2416">
       <Properties>
         <string name="Name">Tusk</string>
         <bool name="Anchored">true</bool>
@@ -2220,19 +2260,19 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10289">
+    <Item class="Part" referent="RBX2417">
       <Properties>
         <string name="Name">SeaWingRoot</string>
         <bool name="Anchored">true</bool>
@@ -2261,10 +2301,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10290">
+    <Item class="Part" referent="RBX2418">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -2293,10 +2337,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10291">
+    <Item class="Part" referent="RBX2419">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -2325,10 +2373,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10292">
+    <Item class="Part" referent="RBX2420">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -2357,10 +2409,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10293">
+    <Item class="Part" referent="RBX2421">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -2389,10 +2445,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10294">
+    <Item class="Part" referent="RBX2422">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -2421,10 +2481,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10295">
+    <Item class="Part" referent="RBX2423">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -2453,10 +2517,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10296">
+    <Item class="Part" referent="RBX2424">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -2485,10 +2553,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10297">
+    <Item class="Part" referent="RBX2425">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -2517,10 +2589,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10298">
+    <Item class="Part" referent="RBX2426">
       <Properties>
         <string name="Name">SeaWingFeather</string>
         <bool name="Anchored">true</bool>
@@ -2549,10 +2625,14 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10299">
+    <Item class="Part" referent="RBX2427">
       <Properties>
         <string name="Name">TailFin</string>
         <bool name="Anchored">true</bool>
@@ -2576,19 +2656,19 @@
           <R22>0.9271838545667874</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10300">
+    <Item class="Part" referent="RBX2428">
       <Properties>
         <string name="Name">TailFin</string>
         <bool name="Anchored">true</bool>
@@ -2612,19 +2692,19 @@
           <R22>0.8660254037844387</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10301">
+    <Item class="Part" referent="RBX2429">
       <Properties>
         <string name="Name">TailFin</string>
         <bool name="Anchored">true</bool>
@@ -2648,19 +2728,19 @@
           <R22>0.7880107536067219</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10302">
+    <Item class="Part" referent="RBX2430">
       <Properties>
         <string name="Name">TailFin</string>
         <bool name="Anchored">true</bool>
@@ -2684,19 +2764,19 @@
           <R22>0.6946583704589973</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10303">
+    <Item class="Part" referent="RBX2431">
       <Properties>
         <string name="Name">SideArmor</string>
         <bool name="Anchored">true</bool>
@@ -2720,19 +2800,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10304">
+    <Item class="Part" referent="RBX2432">
       <Properties>
         <string name="Name">SideArmor</string>
         <bool name="Anchored">true</bool>
@@ -2756,19 +2836,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10305">
+    <Item class="Part" referent="RBX2433">
       <Properties>
         <string name="Name">SideArmor</string>
         <bool name="Anchored">true</bool>
@@ -2792,19 +2872,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10306">
+    <Item class="Part" referent="RBX2434">
       <Properties>
         <string name="Name">SideArmor</string>
         <bool name="Anchored">true</bool>
@@ -2828,19 +2908,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10307">
+    <Item class="Part" referent="RBX2435">
       <Properties>
         <string name="Name">SideArmor</string>
         <bool name="Anchored">true</bool>
@@ -2864,19 +2944,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10308">
+    <Item class="Part" referent="RBX2436">
       <Properties>
         <string name="Name">DorsalCrest</string>
         <bool name="Anchored">true</bool>
@@ -2900,19 +2980,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10309">
+    <Item class="Part" referent="RBX2437">
       <Properties>
         <string name="Name">CrestGlow</string>
         <bool name="Anchored">true</bool>
@@ -2936,19 +3016,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10310">
+    <Item class="Part" referent="RBX2438">
       <Properties>
         <string name="Name">DorsalCrest</string>
         <bool name="Anchored">true</bool>
@@ -2972,19 +3052,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10311">
+    <Item class="Part" referent="RBX2439">
       <Properties>
         <string name="Name">CrestGlow</string>
         <bool name="Anchored">true</bool>
@@ -3008,19 +3088,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10312">
+    <Item class="Part" referent="RBX2440">
       <Properties>
         <string name="Name">DorsalCrest</string>
         <bool name="Anchored">true</bool>
@@ -3044,19 +3124,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10313">
+    <Item class="Part" referent="RBX2441">
       <Properties>
         <string name="Name">CrestGlow</string>
         <bool name="Anchored">true</bool>
@@ -3080,19 +3160,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10314">
+    <Item class="Part" referent="RBX2442">
       <Properties>
         <string name="Name">DorsalCrest</string>
         <bool name="Anchored">true</bool>
@@ -3116,19 +3196,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10315">
+    <Item class="Part" referent="RBX2443">
       <Properties>
         <string name="Name">CrestGlow</string>
         <bool name="Anchored">true</bool>
@@ -3152,19 +3232,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10316">
+    <Item class="Part" referent="RBX2444">
       <Properties>
         <string name="Name">DorsalCrest</string>
         <bool name="Anchored">true</bool>
@@ -3188,19 +3268,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10317">
+    <Item class="Part" referent="RBX2445">
       <Properties>
         <string name="Name">CrestGlow</string>
         <bool name="Anchored">true</bool>
@@ -3224,19 +3304,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10318">
+    <Item class="Part" referent="RBX2446">
       <Properties>
         <string name="Name">DorsalCrest</string>
         <bool name="Anchored">true</bool>
@@ -3260,19 +3340,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10319">
+    <Item class="Part" referent="RBX2447">
       <Properties>
         <string name="Name">CrestGlow</string>
         <bool name="Anchored">true</bool>
@@ -3296,19 +3376,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10320">
+    <Item class="Part" referent="RBX2448">
       <Properties>
         <string name="Name">DorsalCrest</string>
         <bool name="Anchored">true</bool>
@@ -3332,19 +3412,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10321">
+    <Item class="Part" referent="RBX2449">
       <Properties>
         <string name="Name">CrestGlow</string>
         <bool name="Anchored">true</bool>
@@ -3368,19 +3448,19 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">3</token>
+        <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
-        <token name="FrontSurface">3</token>
-        <token name="BackSurface">3</token>
-        <token name="LeftSurface">3</token>
-        <token name="RightSurface">3</token>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10322">
+    <Item class="Part" referent="RBX2450">
       <Properties>
         <string name="Name">BasketFloor</string>
         <bool name="Anchored">true</bool>
@@ -3409,9 +3489,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10323">
+    <Item class="Part" referent="RBX2451">
       <Properties>
         <string name="Name">BasketSide</string>
         <bool name="Anchored">true</bool>
@@ -3440,9 +3524,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10324">
+    <Item class="Part" referent="RBX2452">
       <Properties>
         <string name="Name">BasketFront</string>
         <bool name="Anchored">true</bool>
@@ -3471,9 +3559,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10325">
+    <Item class="Part" referent="RBX2453">
       <Properties>
         <string name="Name">BasketBack</string>
         <bool name="Anchored">true</bool>
@@ -3502,9 +3594,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10326">
+    <Item class="Part" referent="RBX2454">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -3533,9 +3629,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10327">
+    <Item class="Part" referent="RBX2455">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -3564,9 +3664,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10328">
+    <Item class="Part" referent="RBX2456">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -3595,9 +3699,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10329">
+    <Item class="Part" referent="RBX2457">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -3626,9 +3734,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10330">
+    <Item class="Part" referent="RBX2458">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -3657,9 +3769,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10331">
+    <Item class="Part" referent="RBX2459">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -3688,9 +3804,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10332">
+    <Item class="Part" referent="RBX2460">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -3719,9 +3839,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10333">
+    <Item class="Part" referent="RBX2461">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -3750,9 +3874,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10334">
+    <Item class="Part" referent="RBX2462">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -3781,9 +3909,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10335">
+    <Item class="Part" referent="RBX2463">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -3812,9 +3944,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10336">
+    <Item class="Part" referent="RBX2464">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -3843,9 +3979,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10337">
+    <Item class="Part" referent="RBX2465">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -3874,9 +4014,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10338">
+    <Item class="Part" referent="RBX2466">
       <Properties>
         <string name="Name">BasketCable</string>
         <bool name="Anchored">true</bool>
@@ -3905,9 +4049,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10339">
+    <Item class="Part" referent="RBX2467">
       <Properties>
         <string name="Name">BasketCable</string>
         <bool name="Anchored">true</bool>
@@ -3936,9 +4084,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10340">
+    <Item class="Part" referent="RBX2468">
       <Properties>
         <string name="Name">BasketRim</string>
         <bool name="Anchored">true</bool>
@@ -3967,9 +4119,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10341">
+    <Item class="Part" referent="RBX2469">
       <Properties>
         <string name="Name">BasketSide</string>
         <bool name="Anchored">true</bool>
@@ -3998,9 +4154,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10342">
+    <Item class="Part" referent="RBX2470">
       <Properties>
         <string name="Name">BasketFront</string>
         <bool name="Anchored">true</bool>
@@ -4029,9 +4189,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10343">
+    <Item class="Part" referent="RBX2471">
       <Properties>
         <string name="Name">BasketBack</string>
         <bool name="Anchored">true</bool>
@@ -4060,9 +4224,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10344">
+    <Item class="Part" referent="RBX2472">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4091,9 +4259,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10345">
+    <Item class="Part" referent="RBX2473">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4122,9 +4294,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10346">
+    <Item class="Part" referent="RBX2474">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4153,9 +4329,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10347">
+    <Item class="Part" referent="RBX2475">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4184,9 +4364,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10348">
+    <Item class="Part" referent="RBX2476">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4215,9 +4399,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10349">
+    <Item class="Part" referent="RBX2477">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4246,9 +4434,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10350">
+    <Item class="Part" referent="RBX2478">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4277,9 +4469,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10351">
+    <Item class="Part" referent="RBX2479">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4308,9 +4504,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10352">
+    <Item class="Part" referent="RBX2480">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4339,9 +4539,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10353">
+    <Item class="Part" referent="RBX2481">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4370,9 +4574,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10354">
+    <Item class="Part" referent="RBX2482">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4401,9 +4609,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10355">
+    <Item class="Part" referent="RBX2483">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4432,9 +4644,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10356">
+    <Item class="Part" referent="RBX2484">
       <Properties>
         <string name="Name">BasketCable</string>
         <bool name="Anchored">true</bool>
@@ -4463,9 +4679,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10357">
+    <Item class="Part" referent="RBX2485">
       <Properties>
         <string name="Name">BasketCable</string>
         <bool name="Anchored">true</bool>
@@ -4494,9 +4714,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10358">
+    <Item class="Part" referent="RBX2486">
       <Properties>
         <string name="Name">BasketRim</string>
         <bool name="Anchored">true</bool>
@@ -4525,9 +4749,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10359">
+    <Item class="Part" referent="RBX2487">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4556,9 +4784,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10360">
+    <Item class="Part" referent="RBX2488">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4587,9 +4819,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10361">
+    <Item class="Part" referent="RBX2489">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4618,9 +4854,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10362">
+    <Item class="Part" referent="RBX2490">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4649,9 +4889,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10363">
+    <Item class="Part" referent="RBX2491">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4680,9 +4924,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10364">
+    <Item class="Part" referent="RBX2492">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4711,9 +4959,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10365">
+    <Item class="Part" referent="RBX2493">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4742,9 +4994,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10366">
+    <Item class="Part" referent="RBX2494">
       <Properties>
         <string name="Name">BasketWeave</string>
         <bool name="Anchored">true</bool>
@@ -4773,9 +5029,13 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX10367">
+    <Item class="Part" referent="RBX2495">
       <Properties>
         <string name="Name">BasketInnerDeck</string>
         <bool name="Anchored">true</bool>
@@ -4804,6 +5064,10 @@
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">0</token>
+        <token name="BackSurface">0</token>
+        <token name="LeftSurface">0</token>
+        <token name="RightSurface">0</token>
       </Properties>
     </Item>
   </Item>

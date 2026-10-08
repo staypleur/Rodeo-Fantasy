@@ -8,25 +8,10 @@ def build_lobby(workspace, item, part, prop):
         prop(properties, "token", "Material", 1280 if name in ("MeadowIsland","PenGrass") else 816 if name in ("GardenPath","MiddleWalk","CentralPlaza","PavingStone") else 512 if name in ("BenchSeat","BenchBack","BoardingStep","BoardingDeck","LadderRail","LadderRung","Counter","CounterPlank","CounterTop","TreeTrunk","SignPost","BoardPost") else 272)
         prop(properties, "bool", "CanCollide", collide)
         prop(properties, "bool", "CanTouch", False)
-        if not name.startswith(("Sea","Basket","Ladder","Departure")):
-            for surface in ("TopSurface","FrontSurface","BackSurface","LeftSurface","RightSurface"):
-                old=properties.find(f"token[@name='{surface}']")
-                if old is not None: old.text="3"
-                else: prop(properties,"token",surface,3)
-            mat=properties.find("token[@name='Material']")
-            if mat is not None: mat.text="272"
-        # Physical studs remain visible even when legacy SurfaceType studs are not rendered.
-        if name in ("MeadowIsland","PenGrass","GardenPad","MiddleWalk","GardenPath","CounterTop","TreeCanopy","TreeTop","FencePost","PavingStone","PlazaBrick"):
-            spacing=6 if name=="MeadowIsland" else 2.8
-            top=pos[1]+size[1]/2
-            yaw=math.radians(rotation[1])
-            for ix in range(max(1,int(size[0]/spacing))):
-                for iz in range(max(1,int(size[2]/spacing))):
-                    lx=(ix-(max(1,int(size[0]/spacing))-1)/2)*spacing
-                    lz=(iz-(max(1,int(size[2]/spacing))-1)/2)*spacing
-                    stud,sp=part(node,"BrickStud",(6000+pos[0]+lx*math.cos(yaw)+lz*math.sin(yaw),top+.07,pos[2]-lx*math.sin(yaw)+lz*math.cos(yaw)),(.14,.72,.72),tuple(min(255,v+6) for v in color),rotation=(0,0,90))
-                    prop(sp,"token","shape",2);prop(sp,"token","Material",272)
-                    prop(sp,"bool","CanCollide",False);prop(sp,"bool","CanTouch",False);prop(sp,"bool","CanQuery",False)
+        for surface in ("TopSurface","FrontSurface","BackSurface","LeftSurface","RightSurface"):
+            old=properties.find(f"token[@name='{surface}']")
+            if old is not None: old.text="0"
+            else: prop(properties,"token",surface,0)
         return node
     def circle(parent, name, pos, radius, height, color):
         node = block(parent, name, pos, (height, radius*2, radius*2), color, (0, 0, 90))
@@ -45,14 +30,25 @@ def build_lobby(workspace, item, part, prop):
             prop(lp, "string", "Text", words)
             prop(lp, "Color3", "TextColor3", dict(R=.19, G=.33, B=.29))
         return board
-    block(lobby, "MeadowIsland", (0, -3, 0), (316, 6, 316), (110, 153, 84))
+    block(lobby, "MeadowIsland", (0, -3, 0), (316, 6, 316), (117, 146, 108))
     circle(lobby, "CentralPlaza", (0, .08, 0), 32, .16, cream)
-    # Low block paving covers the round plaza without introducing a raised central platform.
+    # Limestone mosaic, garden water and eight clear radial bridges.
     for x in range(-28,29,4):
         for z in range(-28,29,4):
             if x*x+z*z>30*30: continue
-            color=((194,179,150),(215,201,175),(169,184,177),(203,186,151))[(x//4+z//4)%4]
-            block(lobby,"PlazaBrick",(x,.21,z),(3.8,.12,3.8),color)
+            block(lobby,"PlazaBrick",(x,.21,z),(3.92,.12,3.92),((221,213,192),(232,225,205),(199,212,210))[(x//4+z//4)%3])
+    logo=block(lobby,"PlanetureFloorLogo",(0,.285,0),(26,.015,20),(229,222,201),collide=False)
+    gui,gp=item(logo,"SurfaceGui","Logo")
+    prop(gp,"token","Face",1);prop(gp,"Vector2","CanvasSize",dict(X=1300,Y=1000))
+    label,lp=item(gui,"TextLabel","Title")
+    prop(lp,"UDim2","Size",dict(XS=1,XO=0,YS=1,YO=0));prop(lp,"float","BackgroundTransparency",1)
+    prop(lp,"string","Text","RODEO\nPLANETURE");prop(lp,"int","Font",17);prop(lp,"int","TextSize",180)
+    prop(lp,"Color3","TextColor3",dict(R=.12,G=.33,B=.39));prop(lp,"float","TextStrokeTransparency",.8)
+    for n in range(64):
+        deg=n*360/64;a=math.radians(deg)
+        if min(abs((deg-k*45+180)%360-180) for k in range(8))<7: continue
+        block(lobby,"GardenWater",(math.sin(a)*37,.06,math.cos(a)*37),(3.7,.12,9),(81,161,183),(0,deg+90,0),collide=False)
+        block(lobby,"CanalStone",(math.sin(a)*42,.32,math.cos(a)*42),(4,.64,1),(204,208,190),(0,deg+90,0))
     plots, _ = item(lobby, "Folder", "Plots")
     colors = [(233,140,143),(243,178,111),(247,225,129),(147,204,154),(137,189,230),(111,132,186),(188,154,220),(245,244,236)]
     for index in range(8):
@@ -68,9 +64,9 @@ def build_lobby(workspace, item, part, prop):
         block(plot, "GardenPad", point(0, .12, 0), (58, .24, 64), colors[index], (0, yaw, 0))
         block(plot, "MiddleWalk", point(0, .27, 0), (7, .1, 64), cream, (0, yaw, 0))
         block(lobby,"GardenPath",(math.sin(angle)*61,.09,math.cos(angle)*61),(7,.3,65),cream,(0,yaw,0))
-        sign(plot, "OwnerBoard", point(0, 10, -33), " ", color=colors[index], rotation=(0, yaw, 0), width=20)
+        sign(plot, "OwnerBoard", point(0, 15, -34.2), " ", color=colors[index], rotation=(0, yaw, 0), width=20)
         for x in (-10,10):
-            block(plot,"SignPost",point(x,5,-33),(.9,10,.9),(173,130,91))
+            block(plot,"SignPost",point(x,7,-33),(.6,14,.6),(173,130,91))
         accent=colors[index]
         pens, _ = item(plot, "Folder", "Pens")
         for row in range(2):
@@ -92,6 +88,43 @@ def build_lobby(workspace, item, part, prop):
                     for dz in (-8.5,8.5):
                         block(pen,"GateRail",point(inner_x,h,pz+dz),(.35,.3,7),accent,(0,yaw,0))
                 sign(pen,"CapacitySign",point(inner_x,2.2,pz+4.5),str(number),rotation=(0,yaw+90,0),width=4)
+        # Four pens form one open courtyard, enclosed by an original architectural ranch.
+        stone=(232,221,193);trim=(249,238,210);roof=(42,126,133);shadow=(176,190,178)
+        def arch(name,x,z,face):
+            for side in (-1,1):
+                block(plot,name+"Pier",point(x+side*3.3,5,z),(1.3,10,1.4),stone,(0,yaw+face,0))
+            for j in range(9):
+                a=math.pi*j/8
+                block(plot,name+"Voussoir",point(x+math.cos(a)*3.3,9+math.sin(a)*3.3,z),(.95,1.3,1.5),trim,(0,yaw+face,math.degrees(a)-90))
+        for side in (-1,1):
+            for z in (-22,-10,2,14,26):
+                block(plot,"CourtyardColumn",point(side*29,6,z),(1.4,12,1.4),stone,(0,yaw,0))
+                block(plot,"ColumnBase",point(side*29,.6,z),(2.2,1.2,2.2),shadow,(0,yaw,0))
+                block(plot,"ColumnCapital",point(side*29,12,z),(2.4,.7,2.4),trim,(0,yaw,0))
+            block(plot,"ArcadeCornice",point(side*29,13,2),(2,1.6,58),stone,(0,yaw,0))
+            block(plot,"ArcadeFrieze",point(side*29,14,2),(2.6,.4,59),trim,(0,yaw,0))
+            for j in range(3):
+                block(plot,"ArcadeRoof",point(side*(28.7-j*.45),14.5+j*.4,2),(3.5-j*.5,.6,60),roof,(0,yaw,0))
+            block(plot,"GateHouseWing",point(side*20,7,-31),(16,14,3),stone,(0,yaw,0))
+            block(plot,"GateWingAccent",point(side*20,7,-32.6),(12,4,.15),colors[index],(0,yaw,0),collide=False)
+            for j in range(6): block(plot,"GateRoofTile",point(side*20,15+j*.55,-31),(18-j*.8,.55,7-j*.55),roof,(0,yaw,0))
+        arch("EntryArch",0,-32,0)
+        block(plot,"EntryEntablature",point(0,15,-32),(15,2,4),stone,(0,yaw,0))
+        block(plot,"EntryCornice",point(0,16.3,-32),(17,.6,5),trim,(0,yaw,0))
+        for j in range(8): block(plot,"EntryRoof",point(0,17+j*.65,-32),(18-j*1.5,.65,8-j*.65),roof,(0,yaw,0))
+        block(plot,"BackGallery",point(0,7,32),(58,14,2),stone,(0,yaw,0))
+        for x in (-22,-11,0,11,22):
+            block(plot,"BackWindowInset",point(x,8,30.8),(5.5,6,.2),(64,102,109),(0,yaw,0),collide=False)
+            block(plot,"WindowSill",point(x,4.8,30.5),(6.5,.5,1),trim,(0,yaw,0))
+        for sx in (-1,1):
+            for sz in (-1,1):
+                tx,tz=sx*25,sz*28
+                block(plot,"RanchTower",point(tx,12,tz),(8,24,8),stone,(0,yaw,0))
+                for j in range(8):
+                    block(plot,"TowerRoofCourse",point(tx,24.8+j*.75,tz),(10-j,.75,10-j),roof,(0,yaw,0))
+                block(plot,"TowerFinial",point(tx,31.2,tz),(.7,2,.7),(216,180,101),(0,yaw,0))
+                for yy in (3,12,23): block(plot,"TowerBelt",point(tx,yy,tz),(8.6,.45,8.6),trim,(0,yaw,0))
+                block(plot,"TowerBanner",point(tx,17,tz-4.15),(2.2,6,.15),colors[index],(0,yaw,0),collide=False)
         for side in (-1, 1):
             for n in range(5):
                 p = point(side*28, .6, -24+n*12)
@@ -104,12 +137,16 @@ def build_lobby(workspace, item, part, prop):
         shop,_=item(shops,"Model",f"Shop_{i}")
         def sb(name,pos,size,color,rx=0):
             return block(shop,name,radial_point(a,49,*pos),size,color,(rx,deg,0))
+        for side in (-1,1):
+            sb("StoneShopPier",(side*5.5,5,1),(1,10,1),(232,221,193))
+        sb("ShopBackWall",(0,4,3),(12,8,1),(232,221,193))
+        for j in range(7): sb("ShopRoof",(0,10+j*.55,0),(13-j*.65,.55,9-j*.6),(42,126,133))
         sb("Counter",(0,1.5,0),(10,3,5),(159,115,78))
         sb("CounterTop",(0,3.1,0),(10.6,.35,5.5),(199,156,104))
         for x in range(-4,5): sb("CounterPlank",(x,1.55,-2.6),(.9,2.7,.2),(170+x*2,124+x*2,83))
         for x in (-5,5):
             for z in (-2.5,2.5): sb("Post",(x,4,z),(.4,8,.4),(108,89,71))
-        for stripe in range(8):
+        for stripe in range(0):
             for j in range(4):
                 sb("Awning",(-4.4+stripe*1.25,8.3-abs(j-1.5)*.25,-2.4+j*1.6),(1.25,.16,1.7),cream if stripe%2 else ((119,165,168) if i==1 else (194,142,158)),rx=(-9 if j<2 else 9))
             sb("AwningFringe",(-4.4+stripe*1.25,7.7,-3.4),(1.25,.5,.15),cream if stripe%2 else mint)
@@ -270,8 +307,8 @@ def build_lobby(workspace, item, part, prop):
         for dx in (-3,3): block(lobby,"GardenRock",(x+dx,.7,z+3),(2,1.4,1.7),(141,148,146),(0,n*17,0))
     walls,_=item(lobby,"Folder","Boundary")
     for side in (-1,1):
-        block(walls,"GardenWall",(side*158,12,0),(4,24,320),(144,109,73))
-        block(walls,"GardenWall",(0,12,side*158),(320,24,4),(144,109,73))
+        block(walls,"GardenWall",(side*158,12,0),(4,24,320),(204,198,174))
+        block(walls,"GardenWall",(0,12,side*158),(320,24,4),(204,198,174))
         block(walls,"WallTrim",(side*158,24.5,0),(5,1,321),cream)
         block(walls,"WallTrim",(0,24.5,side*158),(321,1,5),cream)
     return lobby

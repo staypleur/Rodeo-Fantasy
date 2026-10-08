@@ -14,6 +14,9 @@ scripts = {
     for item in place.iter("Item") if item.attrib["class"] in ("Script", "LocalScript", "ModuleScript")
 }
 expected = {
+    "LevelTheme": "src/shared/LevelTheme.luau",
+    "LevelPlaque": "src/server/LevelPlaque.luau",
+    "HuntIsolation": "src/client/HuntIsolation.luau",
     "IncomeEffects": "src/client/IncomeEffects.luau",
     "ProgressRules": "src/shared/ProgressRules.luau",
     "CollectionQuery": "src/shared/CollectionQuery.luau",
@@ -124,8 +127,9 @@ for model in furnishings:
   checked+=1
 print(f"PASS: center spawn, one ladder, smooth final airship/open basket, {checked} furnishings clear all eight paths")
 
-physical_studs=[n for n in lobby.iter("Item") if n.findtext("Properties/string[@name='Name']")=="BrickStud"]
-assert len(physical_studs)>3000, "brick village must use actual visible geometry, not only a surface token"
-assert all(n.findtext("Properties/bool[@name='CanCollide']")=="false" for n in physical_studs)
-assert any(n.findtext("Properties/string[@name='Name']")=="PlazaBrick" for n in lobby.iter("Item"))
-print(f"PASS: {len(physical_studs)} actual raised brick studs and tiled central paving")
+assert not named("BrickStud"), "reference architecture uses masonry rather than plastic studs"
+assert len(named("RanchTower"))==32 and len(named("TowerRoofCourse"))==256
+assert len(named("EntryArchVoussoir"))==72
+assert named("PlanetureFloorLogo") and len(named("GardenWater"))>20
+assert named("PlazaBrick")
+print("PASS: eight masonry courtyard ranches, four pens each, teal layered roofs, radial water garden and floor logo")

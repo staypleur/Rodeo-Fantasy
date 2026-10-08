@@ -18,6 +18,7 @@ local dash=require(script.Parent:WaitForChild("DashPresentation"))
 local markers=require(script.Parent:WaitForChild("DistanceMarkers"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
 monsters.DescendantAdded:Connect(function(part) if part:IsA("BasePart") then part.LocalTransparencyModifier=1 end end)
+local isolation=require(script.Parent:WaitForChild("HuntIsolation"))
 local state={phase="Idle",started=0,count=0,pending=0,distance=0}
 local held,left,right=false,false,false
 local pointerOrigin,pointerX,lastSteer=nil,nil,0
@@ -212,6 +213,10 @@ remote.OnClientEvent:Connect(function(kind,data)
  if kind=="Journal" then journalUI.snapshot(data) return end
  if kind=="Bag" then bagUI.snapshot(data) return end
  if kind~="State" then return end
+ if data.huntRoot and data.huntRoot:FindFirstChild("Monsters") and monsters~=data.huntRoot.Monsters then
+  monsters=data.huntRoot.Monsters
+  monsters.DescendantAdded:Connect(function(part) if part:IsA("BasePart") then part.LocalTransparencyModifier=1 end end)
+ end
  if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow(),data.monsterCrashFrame,data.monsterCrashId) end
  if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
@@ -255,6 +260,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  for _,candidate in ipairs(candidates) do
   if ids[candidate.serial] then selected[candidate.key]=true end
  end
+ isolation.update(player,state.area=="Hunt")
  local frames=animator.update(monsters,clock,root and root.Position,dt,selected)
  if state.area=="Lobby" then animator.update(workspace.RodeoLobby,clock,root and root.Position,dt) end
  local t=Config.Prototype
@@ -279,7 +285,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  rider.update(player.Character,state.phase,visualFrame,dt,clock,state.dashUntil)
  dash.update(state.phase,visualFrame,clock,state.dashUntil,t.SwitchDashSeconds)
  crashEffect.update(player.Character,state.phase,clock)
- catch.crates(workspace.RodeoPrototype:FindFirstChild("Obstacles"),root and root.Position,clock,dt)
+ catch.crates(state.huntRoot and state.huntRoot:FindFirstChild("Obstacles") or workspace.RodeoPrototype:FindFirstChild("Obstacles"),root and root.Position,clock,dt)
  audio.update(state,monsters,root and root.Position,clock,selected)
  local displayDistance=state.distance or 0
  if active() then

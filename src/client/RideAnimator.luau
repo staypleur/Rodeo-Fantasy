@@ -14,7 +14,8 @@ local Mesh=require(script.Parent.CreatureMesh)
 local dust={}
 local contexts=setmetatable({},{__mode="k"})
 local function clearHerdPath(from,to,root)
- local world=workspace:FindFirstChild("RodeoPrototype")
+ local world=root:FindFirstAncestor("RodeoPrototype") or root:FindFirstAncestorWhichIsA("Folder")
+ if world and world.Name=="Monsters" then world=world.Parent end
  local obstacles=world and world:FindFirstChild("Obstacles")
  if not obstacles then return true end
  for _,rock in ipairs(obstacles:GetChildren()) do
@@ -77,13 +78,29 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
 	for model, warning in pairs(warnings) do
 		if not model:IsDescendantOf(monsters) then warning:Destroy() warnings[model] = nil end
 	end
-	local outlineCount=0
+	if monsters.Name=="RodeoLobby" then
+  local airport=monsters:FindFirstChild("Airport")
+  local ship=airport and airport:FindFirstChild("Airship")
+  if ship then
+   context.airshipFrames=context.airshipFrames or {}
+   for _,part in ipairs(ship:GetDescendants()) do
+    if part:IsA("BasePart") and (part.Name=="SeaWingRoot" or part.Name=="SeaWingFeather") then
+     local base=context.airshipFrames[part] or part.CFrame context.airshipFrames[part]=base
+     local side=base.Position.X<6000 and -1 or 1
+     local pivot=CFrame.new(6000+side*22,47,-9)
+     local beat=math.sin(clock*1.15+1.2)*.21
+     part.CFrame=pivot*CFrame.Angles(0,0,-side*beat)*pivot:Inverse()*base
+    end
+   end
+  end
+ end
+ local outlineCount=0
 	for _, model in ipairs(monsters.Name=="RodeoLobby" and monsters:GetDescendants() or monsters:GetChildren()) do
   if not model:IsA("Model") then continue end
 		local root = model.PrimaryPart
 		if not root then continue end
   local nameplate = root:FindFirstChild("Nameplate")
-  if nameplate then nameplate.Enabled = model:GetAttribute("Running") ~= true end
+  if nameplate then nameplate.Enabled = false end
 		if cameraPosition then
    local hidden=(root.Position-cameraPosition).Magnitude>220 or (selected and not model:GetAttribute("Occupied") and not selected[model])
    local record=visibility[model]
@@ -125,6 +142,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
   end
   local elapsed = math.clamp(clock-pose.received,0,0.08)
   local speed = model:GetAttribute("Occupied") and Rules.rideSpeed(clock,model:GetAttribute("DashUntil"),(model:GetAttribute("RideSpeed") or tuning.ForwardStudsPerSecond),tuning.SwitchDashMultiplier) or (model:GetAttribute("HerdSpeed") or tuning.HerdStudsPerSecond)
+  if model:GetAttribute("InitialLanding") then speed=0 end
   local steer = model:GetAttribute("Steering") or 0
   local velocity=Vector3.new(steer*tuning.SidewaysStudsPerSecond,0,-speed)
   if not model:GetAttribute("Occupied") then velocity=model:GetAttribute("HerdVelocity") or velocity end

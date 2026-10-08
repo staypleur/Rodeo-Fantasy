@@ -33,14 +33,19 @@ module.Source="return function(game,script,workspace)\n"..SSS.CaptureServer.Sour
 module.Parent=SSS
 require(module)(fakeGame,{Parent=SSS},fakeWorkspace)
 local config=require(package.Config)
-local world=require(SSS.HuntWorld)
+local factory=require(SSS.HuntWorld)
+local currentWorld
+local originalNew=factory.new
+factory.new=function() currentWorld=originalNew() return currentWorld end
+local world=setmetatable({},{__index=function(_,key) return currentWorld[key] end})
+local function runRoot() return latest.huntRoot end
 local function check(value,message) assert(value,message) checks+=1 end
 local function advance(seconds,keepObstacles,keepMonsters)
 	for _=1,math.ceil(seconds/0.1) do
 		clock+=0.1
-		if not keepObstacles then workspace.RodeoPrototype.Obstacles:ClearAllChildren() end
+		if not keepObstacles then runRoot().Obstacles:ClearAllChildren() end
 		if not keepMonsters then
-   for _,animal in ipairs(workspace.RodeoPrototype.Monsters:GetChildren()) do
+   for _,animal in ipairs(runRoot().Monsters:GetChildren()) do
     if not animal:GetAttribute("Occupied") then animal:Destroy() end
    end
   end
@@ -51,6 +56,10 @@ root.CFrame=game.ServerScriptService.LobbyWorld and workspace.RodeoLobby.Airport
 event(player,"Start")
 check(latest.phase=="Lassoing" and root.Anchored,"start must fly toward first mount")
 check(latest.count==0,"bag must start empty")
+check((root.Position-latest.monster.PrimaryPart.Position).Magnitude<9,"first boarding starts within nine studs")
+local firstMountZ=latest.monster.PrimaryPart.Position.Z
+advance(.2)
+check(latest.monster.PrimaryPart.Position.Z==firstMountZ,"first boarding must not chase a running target")
 advance(config.Prototype.IntroSeconds+0.2)
 check(latest.phase=="Riding","opening flight must land and continue riding")
 check(latest.dashUntil==nil,"opening mount must not trigger switch dash")
@@ -99,7 +108,7 @@ check(latest.count==0,"abandoned ride must not grant")
 local protectedRock=Instance.new("Part")
 protectedRock.Size=Vector3.new(4,3,4)
 protectedRock.Position=Vector3.new(root.Position.X,1.5,root.Position.Z-6)
-protectedRock.Parent=workspace.RodeoPrototype.Obstacles
+protectedRock.Parent=runRoot().Obstacles
 advance(0.3,true)
 check(latest.phase=="GameOver" and not root.Anchored,"obstacle collision immediately after landing must end run")
 check(latest.monsterCrashFrame~=nil and target.Parent==nil,"obstacle crash must remove mount and provide breakup frame")
@@ -149,7 +158,7 @@ rock.Name="ControllerTestRock"
 rock.Anchored=true
 rock.Size=Vector3.new(4,3,4)
 rock.Position=Vector3.new(root.Position.X,1.5,root.Position.Z-6)
-rock.Parent=workspace.RodeoPrototype.Obstacles
+rock.Parent=runRoot().Obstacles
 advance(0.2,true)
 check(latest.phase=="GameOver" and not root.Anchored,"swept collision must end and restore")
 check(humanoid.AutoRotate and not humanoid.PlatformStand,"normal character flags must be restored")

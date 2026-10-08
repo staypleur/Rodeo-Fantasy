@@ -32,7 +32,7 @@ function View.select(candidates,z,aspect,t,limit,previous)
  table.sort(visible,function(a,b) if a.score==b.score then return a.serial<b.serial end return a.score<b.score end)
  -- Prefer ready runners, then fill the visible herd with animals leaving caves.
  for _,candidate in ipairs(visible) do
-  if not selected[candidate.key] and not candidate.emerging and count<4 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then selected[candidate.key]=true count+=1 end
+  if not selected[candidate.key] and not candidate.emerging and count<3 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then selected[candidate.key]=true count+=1 end
  end
  for _,candidate in ipairs(visible) do
   if not selected[candidate.key] and candidate.emerging and count<math.min(limit or 6,6) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then selected[candidate.key]=true count+=1 end
@@ -42,9 +42,9 @@ function View.select(candidates,z,aspect,t,limit,previous)
  end
  -- Faster/flying herds can leave the inner window together. Fill the minimum
  -- from animals already inside the full camera, without replacing stable IDs.
- if count<4 then
+ if count<3 then
   for _,candidate in ipairs(candidates) do
-   if not selected[candidate.key] and entry(candidate) and not candidate.emerging and count<4 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,.98) then
+   if not selected[candidate.key] and entry(candidate) and not candidate.emerging and count<3 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,.98) then
     selected[candidate.key]=true count+=1
    end
   end

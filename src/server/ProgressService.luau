@@ -17,25 +17,11 @@ local function nameplate(player,level)
  local gui=head:FindFirstChild("ExplorerNameplate")
  if not gui then
   gui=Instance.new("BillboardGui") gui.Name="ExplorerNameplate" gui.Adornee=head
-  gui.Size=UDim2.fromOffset(260,46) gui.StudsOffset=Vector3.new(0,2.2,0)
+  gui.Size=UDim2.fromOffset(300,58) gui.StudsOffset=Vector3.new(0,2.2,0)
   gui.MaxDistance=120 gui.AlwaysOnTop=false gui.Parent=head
-  local emblem=Instance.new("Frame") emblem.Name="LeafLevel" emblem.BackgroundColor3=Color3.fromRGB(44,99,106)
-  emblem.BorderSizePixel=0 emblem.Size=UDim2.fromOffset(82,36) emblem.Position=UDim2.fromOffset(0,5) emblem.Parent=gui
-  local corner=Instance.new("UICorner") corner.CornerRadius=UDim.new(0,12) corner.Parent=emblem
-  local edge=Instance.new("UIStroke") edge.Color=Color3.fromRGB(150,218,196) edge.Thickness=1.5 edge.Parent=emblem
-  local leaf=Instance.new("TextLabel") leaf.Name="Leaf" leaf.Text="❧" leaf.Font=Enum.Font.Garamond leaf.TextSize=23
-  leaf.BackgroundTransparency=1 leaf.TextColor3=Color3.fromRGB(174,233,191)
-  leaf.Size=UDim2.fromOffset(25,34) leaf.Parent=emblem
-  local number=Instance.new("TextLabel") number.Name="Level" number.Font=Enum.Font.GothamBold number.TextSize=17
-  number.TextColor3=Color3.fromRGB(245,251,238) number.BackgroundTransparency=1
-  number.Position=UDim2.fromOffset(23,0) number.Size=UDim2.new(1,-25,1,0) number.TextScaled=true number.Parent=emblem
-  local name=Instance.new("TextLabel") name.Name="PlayerName" name.Font=Enum.Font.GothamBold name.TextSize=21
-  name.BackgroundTransparency=1 name.TextColor3=Color3.fromRGB(255,250,235) name.TextStrokeColor3=Color3.fromRGB(34,47,52) name.TextStrokeTransparency=.15
-  name.Position=UDim2.fromOffset(90,0) name.Size=UDim2.new(1,-90,1,0) name.TextScaled=true
-  name.TextXAlignment=Enum.TextXAlignment.Left name.Text=player.Name or player.DisplayName or "Player" name.Parent=gui
   local humanoid=character:FindFirstChildOfClass("Humanoid") if humanoid then humanoid.NameDisplayDistance=0 end
  end
- gui.LeafLevel.Level.Text=tostring(level)
+ require(script.Parent.LevelPlaque).update(gui,level,player.Name or player.DisplayName or "Player")
 end
 function S.join(player)
  local e={session=game:GetService("HttpService"):GenerateGUID(false),count=0,ack=0,saved=0,seen={},dirty=false,loading=enabled,loaded=not enabled,status=enabled and "Loading progress" or "Session progress"}

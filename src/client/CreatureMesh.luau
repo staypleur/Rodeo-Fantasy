@@ -17,9 +17,26 @@ local function build(kind)
   end
  end
  if kind=="Leaf" then
-  local a=vertex(0,0,-.5) local b=vertex(-.5,0,-.05) local c=vertex(0,0,.5) local d=vertex(.5,0,-.05)
-  local top=vertex(0,.5,-.05) local bottom=vertex(0,-.5,-.05)
-  for _,edge in ipairs({{a,b},{b,c},{c,d},{d,a}}) do triangle(edge[1],edge[2],top) triangle(edge[2],edge[1],bottom) end
+  local rows={}
+  for j=0,8 do
+   local t=j/8 local width=.5*math.sin(math.pi*t)^.8+.005
+   local y=.38*math.sin(math.pi*t) local z=t-.5
+   rows[j+1]={vertex(-width,y-.15,z),vertex(0,y,z),vertex(width,y-.15,z),vertex(0,y-.3,z)}
+  end
+  for j=1,8 do
+   for k=1,4 do local n=k%4+1
+    triangle(rows[j][k],rows[j+1][k],rows[j+1][n]) triangle(rows[j][k],rows[j+1][n],rows[j][n])
+   end
+  end
+ elseif kind=="Clover" then
+  local upper,lower={},{}
+  for j=1,24 do
+   local a=2*math.pi*(j-1)/24
+   local x=math.sin(a)^3*.5 local z=-(13*math.cos(a)-5*math.cos(2*a)-2*math.cos(3*a)-math.cos(4*a))/32
+   upper[j]=vertex(x,.5,z) lower[j]=vertex(x,-.5,z)
+  end
+  local top,bottom=vertex(0,.5,0),vertex(0,-.5,0)
+  for j=1,24 do local n=j%24+1 triangle(top,upper[j],upper[n]) triangle(bottom,lower[n],lower[j]) triangle(upper[j],lower[j],lower[n]) triangle(upper[j],lower[n],upper[n]) end
  else
   local sides=kind=="Smooth" and 24 or 10
   local rings=kind=="Smooth" and 14 or 6
@@ -41,7 +58,7 @@ local function build(kind)
  end
  local part=Asset:CreateMeshPartAsync(Content.fromObject(mesh),{CollisionFidelity=Enum.CollisionFidelity.Box})
  part.Anchored=true part.CanCollide=false part.CanTouch=false part.CanQuery=false
- part.RenderFidelity=Enum.RenderFidelity.Precise
+ part.RenderFidelity=Enum.RenderFidelity.Precise part.DoubleSided=true
  contents[kind]=mesh cache[kind]=part
  return part
 end
@@ -50,7 +67,7 @@ function M.prepare()
  while pending.prepare do task.wait() end
  if M.ready then return true end
  pending.prepare=true
- local ok,err=pcall(function() for _,kind in ipairs({"Faceted","Smooth","Leaf"}) do if not cache[kind] then build(kind) end end end)
+ local ok,err=pcall(function() for _,kind in ipairs({"Faceted","Smooth","Leaf","Clover"}) do if not cache[kind] then build(kind) end end end)
  if not ok then warn("Creature mesh unavailable; native models retained: "..tostring(err)) end
  M.ready=ok M.failed=not ok pending.prepare=false return ok
 end
@@ -76,7 +93,7 @@ function M.decorate(model)
  for _,old in ipairs(model:GetChildren()) do
   if not old:IsA("Part") or old==model.PrimaryPart or old.Transparency>=1 then continue end
   local leaf=(old.Name:find("Leaf") or old.Name:find("Sprout") or old.Name:find("Clover") or old.Name:find("Grass")) and not old.Name:find("Vein")
-  local kind=leaf and "Leaf" or old.Shape==Enum.PartType.Ball and ((model:GetAttribute("Stars") or 1)>=9 and "Smooth" or "Faceted") or nil
+  local kind=old.Name:find("Clover") and "Clover" or leaf and "Leaf" or old.Shape==Enum.PartType.Ball and ((model:GetAttribute("Stars") or 1)>=9 and "Smooth" or "Faceted") or nil
   if not kind then continue end
   local template=cache[kind] if not template then continue end
   local part=template:Clone()
