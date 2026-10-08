@@ -89,7 +89,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
    if label then label.TextTransparency=0.15+math.max(0,math.sin(clock*12))*0.45 end
   end
 		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds)
-		local lean = running and (model:GetAttribute("Steering") or 0) * -0.09 or 0
+		local lean = running and (model:GetAttribute("Steering") or 0) * -0.18 or 0
 		local frame = pose.frame * CFrame.Angles(angry and pitch or 0, 0, lean)
   displayed[model] = frame
 		for _, entry in ipairs(pose) do
@@ -101,6 +101,14 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
 				local joint = CFrame.new(entry.side == "Left" and -0.88 or 0.88, -0.87, entry.leg == "Front" and -0.91 or 1.17)
 				localFrame = CFrame.new(0,math.max(0,math.sin(phase + (opposite and math.pi or 0)))*0.22,0) * joint * CFrame.Angles(swing, 0, 0) * joint:Inverse() * entry.rest
 			end
+   if running and entry.part.Name:find("Ear") then
+    local sign=entry.part.Name:find("Left") and -1 or 1
+    local pivot=CFrame.new(sign*0.87,1.3,-1.21)
+    localFrame=pivot*CFrame.Angles(math.sin(phase)*0.12,0,sign*math.sin(phase)*0.1)*pivot:Inverse()*localFrame
+   elseif running and entry.part.Name:find("Tail") then
+    local pivot=CFrame.new(0,-0.1,1.7)
+    localFrame=pivot*CFrame.Angles(0,math.sin(phase*0.65)*0.3,0)*pivot:Inverse()*localFrame
+   end
 			entry.part.CFrame = frame * localFrame
 		end
 		if not running then poses[model] = nil end

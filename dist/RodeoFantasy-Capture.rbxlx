@@ -1745,7 +1745,8 @@ Config.Prototype = {
 	BuckSidewaysStudsPerSecond = 12,
 	LandingGraceSeconds = 2,
 	GroundChunkStuds = 256,
-	RideHeightStuds = 4,
+	RideHeightStuds = 2,
+	RideForwardStuds = -0.4,
 	RespawnSeconds = 1,
 	CameraHeightStuds = 56,
 	CameraBehindStuds = 32,
@@ -5234,7 +5235,7 @@ RunService.Heartbeat:Connect(function(delta)
    if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end
    local p=state.monster.PrimaryPart.Position
    state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z-tuning.ForwardStudsPerSecond*dt)
-   local saddle=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
+   local saddle=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
    local landingSeconds=state.landingSeconds or tuning.JumpSeconds
    local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
    state.root.CFrame=state.origin:Lerp(saddle,landingProgress)*CFrame.new(0,math.sin(math.pi*landingProgress)*tuning.JumpArcStuds*0.5,0)
@@ -5256,7 +5257,7 @@ RunService.Heartbeat:Connect(function(delta)
    local before=state.monster.PrimaryPart.Position
    state.monster.PrimaryPart.CFrame=CFrame.new(position)
    state.monster:SetAttribute("Steering",steer)
-   state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
+   state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
    local contact=World.mountedHit(before,position,state.monster)
    if contact then finish(player,contact=="Wall" and "벽에 부딪혔어요." or "다른 몬스터에 부딪혔어요.",contact) continue end
    if clock&gt;=(state.protectedUntil or 0) and World.hit(before,position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
@@ -5484,6 +5485,7 @@ local animator=require(script.Parent:WaitForChild("RideAnimator"))
 local rider=require(script.Parent:WaitForChild("RiderPresentation"))
 local gauge=require(script.Parent:WaitForChild("TamingGauge"))
 local crashEffect=require(script.Parent:WaitForChild("CrashEffect"))
+local markers=require(script.Parent:WaitForChild("DistanceMarkers"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
 local state={phase="Idle",started=0,count=0,pending=0,distance=0}
 local held,left,right=false,false,false
@@ -5607,10 +5609,10 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  if active() and root then
   local mount=state.monster and frames[state.monster]
   if state.phase=="Riding" and mount then
-   visualFrame=mount*CFrame.new(0,t.RideHeightStuds,0)
+   visualFrame=mount*CFrame.new(0,t.RideHeightStuds,t.RideForwardStuds)
   elseif state.phase=="Lassoing" and mount and state.origin then
    local p=math.clamp((clock-state.started)/(state.landingSeconds or t.JumpSeconds),0,1)
-   visualFrame=state.origin:Lerp(mount*CFrame.new(0,t.RideHeightStuds,0),p)*CFrame.new(0,math.sin(math.pi*p)*t.JumpArcStuds*0.5,0)
+   visualFrame=state.origin:Lerp(mount*CFrame.new(0,t.RideHeightStuds,t.RideForwardStuds),p)*CFrame.new(0,math.sin(math.pi*p)*t.JumpArcStuds*0.5,0)
   elseif state.phase=="Airborne" and state.position and state.launchY then
    local elapsed=math.clamp(clock-(state.sampleTime or clock),0,0.3)
    local pos=state.position+Vector3.new((state.steer or 0)*t.SidewaysStudsPerSecond,0,-t.AirStudsPerSecond)*elapsed
@@ -5621,7 +5623,13 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  end
  rider.update(player.Character,state.phase,visualFrame,dt,clock)
  crashEffect.update(player.Character,state.phase,clock)
- distance.Text=string.format("%dm",math.floor(state.distance or 0))
+ local displayDistance=state.distance or 0
+ if active() then
+  local speed=state.phase=="Airborne" and t.AirStudsPerSecond or t.ForwardStudsPerSecond
+  displayDistance+=math.clamp(clock-(state.sampleTime or clock),0,0.3)*speed*t.MetersPerStud
+ end
+ markers.update(active(),displayDistance,visualFrame,t.MetersPerStud)
+ distance.Text=string.format("%dm",math.floor(displayDistance))
  highlight.Enabled=false
  panel.Visible=not active()
  gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),state.tamed,workspace.CurrentCamera)
@@ -5759,7 +5767,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
    if label then label.TextTransparency=0.15+math.max(0,math.sin(clock*12))*0.45 end
   end
 		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds)
-		local lean = running and (model:GetAttribute("Steering") or 0) * -0.09 or 0
+		local lean = running and (model:GetAttribute("Steering") or 0) * -0.18 or 0
 		local frame = pose.frame * CFrame.Angles(angry and pitch or 0, 0, lean)
   displayed[model] = frame
 		for _, entry in ipairs(pose) do
@@ -5771,6 +5779,14 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
 				local joint = CFrame.new(entry.side == "Left" and -0.88 or 0.88, -0.87, entry.leg == "Front" and -0.91 or 1.17)
 				localFrame = CFrame.new(0,math.max(0,math.sin(phase + (opposite and math.pi or 0)))*0.22,0) * joint * CFrame.Angles(swing, 0, 0) * joint:Inverse() * entry.rest
 			end
+   if running and entry.part.Name:find("Ear") then
+    local sign=entry.part.Name:find("Left") and -1 or 1
+    local pivot=CFrame.new(sign*0.87,1.3,-1.21)
+    localFrame=pivot*CFrame.Angles(math.sin(phase)*0.12,0,sign*math.sin(phase)*0.1)*pivot:Inverse()*localFrame
+   elseif running and entry.part.Name:find("Tail") then
+    local pivot=CFrame.new(0,-0.1,1.7)
+    localFrame=pivot*CFrame.Angles(0,math.sin(phase*0.65)*0.3,0)*pivot:Inverse()*localFrame
+   end
 			entry.part.CFrame = frame * localFrame
 		end
 		if not running then poses[model] = nil end
@@ -5789,15 +5805,28 @@ return RideAnimator
 local Presentation = {}
 local character, animate, animateDisabled
 local joints, dust = {}, {}
+local constraints={}
+-- Transform is evaluated by the avatar animator before physics each frame.
+game:GetService("RunService").PreSimulation:Connect(function()
+ for joint,rest in pairs(constraints) do
+  if joint.Parent and rest.pose then joint.Transform=rest.pose end
+ end
+end)
 local lastDust = 0
 local shadow, trail, trailEnd
+local rope, ropePoints, ropeTail
+local previousPhase
 local function restore()
  for joint,rest in pairs(joints) do if joint.Parent then joint.C0=rest end end
  if animate and animate.Parent then animate.Disabled=animateDisabled end
+ for joint,rest in pairs(constraints) do if joint.Parent then joint.Transform=rest.transform end end
+ constraints={}
  joints={}
  if shadow then shadow:Destroy() shadow=nil end
  if trail then trail.Parent:Destroy() trail=nil end
  if trailEnd then trailEnd:Destroy() trailEnd=nil end
+ if rope then rope:Destroy() rope=nil end
+ previousPhase=nil
  character,animate=nil,nil
 end
 function Presentation.update(model,phase,frame,dt,clock)
@@ -5812,7 +5841,11 @@ function Presentation.update(model,phase,frame,dt,clock)
   local animator=humanoid and humanoid:FindFirstChildOfClass("Animator")
   if animator then for _,track in ipairs(animator:GetPlayingAnimationTracks()) do track:Stop(0) end end
   for _,joint in ipairs(model:GetDescendants()) do
-   if joint:IsA("Motor6D") then joints[joint]=joint.C0 joint.Transform=CFrame.identity end
+   if joint:IsA("Motor6D") then joints[joint]=joint.C0 joint.Transform=CFrame.identity
+   elseif joint:IsA("AnimationConstraint") and joint.Attachment0 then
+    constraints[joint]={frame=joint.Attachment0.CFrame,transform=joint.Transform,pose=CFrame.identity}
+    joint.Transform=CFrame.identity
+   end
   end
   shadow=Instance.new("Part")
   shadow.Name="LocalRiderShadow"
@@ -5832,27 +5865,79 @@ function Presentation.update(model,phase,frame,dt,clock)
   trail.Lifetime,trail.FaceCamera,trail.Parent=0.18,true,a
  end
  if active and root and frame then
+  -- Parts and joints may arrive after HumanoidRootPart during character replication.
+  for _,joint in ipairs(model:GetDescendants()) do
+   if joint:IsA("Motor6D") and not joints[joint] then joints[joint]=joint.C0 joint.Transform=CFrame.identity
+   elseif joint:IsA("AnimationConstraint") and joint.Attachment0 and not constraints[joint] then
+    constraints[joint]={frame=joint.Attachment0.CFrame,transform=joint.Transform,pose=CFrame.identity}
+   end
+  end
   local airborne=phase=="Airborne" or phase=="Lassoing"
   root.CFrame=frame * CFrame.Angles(airborne and -0.5 or 0,0,0)
-  for joint,rest in pairs(joints) do
-   if not joint.Parent then joints[joint]=nil continue end
-   local name=joint.Name:gsub(" ","")
+  local function poseOffset(name)
+   name=name:gsub(" ","")
    local offset=CFrame.identity
    if name:find("Shoulder") then
     local side=name:find("Left") and -1 or 1
-    offset=CFrame.Angles(airborne and 0 or -0.8,0,side*(airborne and math.pi/2 or 0.18))
+    offset=airborne and CFrame.Angles(0,0,side*math.pi/2) or (side==1 and CFrame.Angles(0.12*math.sin(clock*15),0,2.65) or CFrame.Angles(0.65,0,-0.15))
    elseif name:find("Hip") then
     local side=name:find("Left") and -1 or 1
-    offset=CFrame.Angles(airborne and 0 or -0.8,0,side*(airborne and 0.65 or 0.18))
-   elseif name:find("Knee") then offset=CFrame.Angles(airborne and 0 or 1.1,0,0)
+    offset=CFrame.Angles(airborne and 0 or 1.2,0,side*(airborne and 0.65 or 0.3))
+   elseif name:find("Knee") then offset=CFrame.Angles(airborne and 0 or -1.2,0,0)
    elseif name=="Waist" then offset=CFrame.Angles(airborne and 0.08 or 0.15,0,0) end
-   -- Rotate in the torso/limb parent space so R6 shoulders also spread sideways.
-   local target=CFrame.new(rest.Position)*offset*rest.Rotation
+   return offset
+  end
+  for joint,rest in pairs(joints) do
+   if not joint.Parent then joints[joint]=nil continue end
+   local target=CFrame.new(rest.Position)*poseOffset(joint.Name)*rest.Rotation
    joint.C0=joint.C0:Lerp(target,1-math.exp(-18*dt))
   end
+  -- Upgraded R15 avatars have AnimationConstraints rather than Motor6Ds.
+  for joint,rest in pairs(constraints) do
+   if not joint.Parent then constraints[joint]=nil continue end
+   local target=CFrame.new(rest.frame.Position)*poseOffset(joint.Name)*rest.frame.Rotation
+   rest.pose=rest.pose:Lerp(rest.frame:Inverse()*target,1-math.exp(-18*dt))
+   joint.Transform=rest.pose
+  end
+  if phase=="Riding" then
+   if not rope then
+    rope=Instance.new("Part") rope.Name="LocalCowboyLasso"
+    rope.Anchored,rope.CanCollide,rope.CanTouch,rope.CanQuery=true,false,false,false
+    rope.Transparency=1 rope.Size=Vector3.one rope.Parent=workspace
+    ropePoints={}
+    for i=1,24 do local a=Instance.new("Attachment") a.Parent=rope ropePoints[i]=a end
+    ropeTail=Instance.new("Attachment") ropeTail.Parent=rope
+    for i=1,25 do
+     local beam=Instance.new("Beam")
+     beam.Attachment0=i==25 and ropeTail or ropePoints[i]
+     beam.Attachment1=i==25 and ropePoints[1] or ropePoints[i%24+1]
+     beam.Width0,beam.Width1,beam.FaceCamera=0.09,0.09,true
+     beam.Color=ColorSequence.new(Color3.fromRGB(236,192,101)) beam.Parent=rope
+    end
+   end
+   rope.CFrame=root.CFrame
+   local hand=model:FindFirstChild("RightHand") or model:FindFirstChild("Right Arm")
+   ropeTail.Position=hand and root.CFrame:PointToObjectSpace(hand.Position) or Vector3.new(1,2,0)
+   local spin=CFrame.new(0.6,2.8,0)*CFrame.Angles(0,(clock*15)%(math.pi*2),0)*CFrame.Angles(0.25,0,0)
+   for i,a in ipairs(ropePoints) do
+    local angle=(i-1)/24*math.pi*2
+    a.Position=spin:PointToWorldSpace(Vector3.new(math.cos(angle)*1.7,0,math.sin(angle)*1.25))
+   end
+  elseif rope then rope:Destroy() rope=nil end
   shadow.CFrame=CFrame.new(frame.X,0.055,frame.Z)*CFrame.Angles(0,0,math.pi/2)
   shadow.Transparency=airborne and 0.5 or 0.75
   trail.Enabled=airborne
+  if phase=="Riding" and previousPhase and previousPhase~="Riding" then
+   for i=1,8 do
+    local puff=Instance.new("Part") puff.Name="LocalLandingDust"
+    puff.Anchored,puff.CanCollide,puff.CanTouch,puff.CanQuery=true,false,false,false
+    puff.Color=Color3.fromRGB(239,220,176) puff.Size=Vector3.one*0.7 puff.Transparency=0.45
+    local angle=i/8*math.pi*2
+    puff.Position=Vector3.new(frame.X+math.cos(angle)*2,0.3,frame.Z+math.sin(angle)*2)
+    puff.Parent=workspace table.insert(dust,{part=puff,started=clock})
+   end
+  end
+  previousPhase=phase
   if phase=="Riding" and clock-lastDust&gt;0.08 then
    lastDust=clock
    local puff=Instance.new("Part")
@@ -5863,6 +5948,10 @@ function Presentation.update(model,phase,frame,dt,clock)
    puff.Position=Vector3.new(frame.X+math.sin(clock*31),0.3,frame.Z+2)
    puff.Parent=workspace
    table.insert(dust,{part=puff,started=clock})
+   local streak=puff:Clone() streak.Name="LocalSpeedStreak"
+   streak.Size=Vector3.new(0.08,0.04,3.5) streak.Transparency=0.65
+   streak.Position=Vector3.new(frame.X+math.sin(clock*17)*8,0.08,frame.Z-9)
+   streak.Parent=workspace table.insert(dust,{part=streak,started=clock,streak=true})
   end
  end
  for i=#dust,1,-1 do
@@ -5870,8 +5959,8 @@ function Presentation.update(model,phase,frame,dt,clock)
   if p&gt;=1 then entry.part:Destroy() table.remove(dust,i)
   else
    entry.part.Transparency=0.45+p*0.55
-   entry.part.Size=Vector3.one*(0.5+p*0.65)
-   entry.part.Position+=Vector3.new(0,dt*0.6,0)
+   if not entry.streak then entry.part.Size=Vector3.one*(0.5+p*0.65) end
+   entry.part.Position+=Vector3.new(0,entry.streak and 0 or dt*0.6,0)
   end
  end
 end
@@ -5994,9 +6083,50 @@ return Effect
 </ProtectedString>
         </Properties>
       </Item>
+      <Item class="ModuleScript" referent="RBX176">
+        <Properties>
+          <string name="Name">DistanceMarkers</string>
+          <ProtectedString name="Source">-- Local course markings projected from the server's run distance, not global map Z.
+local Markers={}
+local gates={}
+local function create(distance)
+ local model=Instance.new("Model") model.Name="LocalDistanceMarker" model:SetAttribute("Meters",distance)
+ local function part(name,size,pos,color)
+  local p=Instance.new("Part") p.Name=name p.Size=size p.Position=pos p.Color=color
+  p.Anchored,p.CanCollide,p.CanTouch,p.CanQuery=true,false,false,false p.Parent=model return p
+ end
+ for i=0,19 do
+  part("FinishStripe",Vector3.new(3.5,0.04,1.5),Vector3.new(-33.25+i*3.5,0.04,0),i%2==0 and Color3.fromRGB(255,242,203) or Color3.fromRGB(238,134,97))
+ end
+ for _,side in ipairs({-1,1}) do
+  part("Post",Vector3.new(0.6,6,0.6),Vector3.new(side*33,3,0),Color3.fromRGB(112,85,62))
+  local board=part("DistanceSign",Vector3.new(7,3,0.4),Vector3.new(side*30,6,0),Color3.fromRGB(63,104,79))
+  local gui=Instance.new("SurfaceGui") gui.Face=Enum.NormalId.Back gui.CanvasSize=Vector2.new(560,240) gui.Parent=board
+  local label=Instance.new("TextLabel") label.Size=UDim2.fromScale(1,1) label.BackgroundTransparency=1
+  label.Text=tostring(distance).."m" label.TextColor3=Color3.fromRGB(255,242,203) label.Font=Enum.Font.GothamBold label.TextScaled=true label.Parent=gui
+ end
+ model.WorldPivot=CFrame.identity model.Parent=workspace return model
+end
+function Markers.update(active,distance,frame,metersPerStud)
+ if not active or not frame then
+  for _,gate in pairs(gates) do gate.model:Destroy() end gates={} return
+ end
+ local nextDistance=(math.floor(distance/1000)+1)*1000
+ for value,gate in pairs(gates) do
+  if value&lt;nextDistance-1000 or value&gt;nextDistance then gate.model:Destroy() gates[value]=nil end
+ end
+ -- Keep one forthcoming marker; refresh its projection as flying changes travel speed.
+ local gate=gates[nextDistance]
+ if not gate then gate={model=create(nextDistance)} gates[nextDistance]=gate end
+ gate.model:PivotTo(CFrame.new(0,0,frame.Z-(nextDistance-distance)/metersPerStud))
+end
+return Markers
+</ProtectedString>
+        </Properties>
+      </Item>
     </Item>
   </Item>
-  <Item class="Lighting" referent="RBX176">
+  <Item class="Lighting" referent="RBX177">
     <Properties>
       <string name="Name">Lighting</string>
       <float name="ClockTime">13</float>

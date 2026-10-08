@@ -81,9 +81,19 @@ local success,problem=pcall(function()
  local mountPoint=camera:WorldToViewportPoint(state.monster.PrimaryPart.Position)
  local gaugePoint=camera:WorldToViewportPoint(workspace.LocalTamingGaugeAnchor.Position)
  check(gaugePoint.X<mountPoint.X and gaugePoint.Y>mountPoint.Y,"gauge must stay lower-left of the monster on screen")
- task.wait(0.25)
+ task.wait(0.3)
+ local leg=character:FindFirstChild("RightUpperLeg") or character:FindFirstChild("Right Leg")
+ check(leg and (-leg.CFrame.UpVector):Dot(character.HumanoidRootPart.CFrame.LookVector)>0.6,"mounted thigh must point forward in a seated pose")
+ local rope=workspace:FindFirstChild("LocalCowboyLasso")
+ check(rope and #rope:GetChildren()==50,"mounted cowboy rope loop missing")
+ local point=rope:FindFirstChildOfClass("Attachment")
+ local before=point.Position
+ waitFor(function() return (point.Position-before).Magnitude>0.2 end,"cowboy rope must spin while riding")
+ check((point.Position-before).Magnitude>0.2,"cowboy rope must spin while riding")
  remote:FireServer("Jump")
  waitFor(function() return state.phase=="Airborne" end,"release must jump")
+ waitFor(function() return not workspace:FindFirstChild("LocalCowboyLasso") end,"spinning rope must hide on jump")
+ check(not workspace:FindFirstChild("LocalCowboyLasso"),"spinning rope must hide during airborne lasso aiming")
  local flightSeen=false
  local runService=game:GetService("RunService")
  runService:BindToRenderStep("CheckFlightPose",Enum.RenderPriority.Last.Value,function()
@@ -107,7 +117,7 @@ local success,problem=pcall(function()
  local samples=0
  runService:BindToRenderStep("CheckMountAlignment",Enum.RenderPriority.Last.Value,function()
   if state.phase=="Riding" and target:FindFirstChild("Body") then
-   local expected=Vector3.new(0,-config.Prototype.RideHeightStuds-0.05,0.15)
+   local expected=Vector3.new(0,-config.Prototype.RideHeightStuds-0.05,0.15-config.Prototype.RideForwardStuds)
    local offset=target.Body.Position-character.HumanoidRootPart.Position
    worstOffset=math.max(worstOffset,(offset-expected).Magnitude)
    samples+=1

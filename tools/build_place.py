@@ -142,6 +142,7 @@ script(starter_scripts, "ModuleScript", "RideAnimator", "src/client/RideAnimator
 script(starter_scripts, "ModuleScript", "RiderPresentation", "src/client/RiderPresentation.luau")
 script(starter_scripts, "ModuleScript", "TamingGauge", "src/client/TamingGauge.luau")
 script(starter_scripts, "ModuleScript", "CrashEffect", "src/client/CrashEffect.luau")
+script(starter_scripts, "ModuleScript", "DistanceMarkers", "src/client/DistanceMarkers.luau")
 lighting, lighting_props = item(document, "Lighting", "Lighting")
 prop(lighting_props, "float", "ClockTime", 13)
 prop(lighting_props, "float", "Brightness", 2)

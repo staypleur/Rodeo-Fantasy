@@ -155,7 +155,7 @@ RunService.Heartbeat:Connect(function(delta)
    if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end
    local p=state.monster.PrimaryPart.Position
    state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z-tuning.ForwardStudsPerSecond*dt)
-   local saddle=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
+   local saddle=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
    local landingSeconds=state.landingSeconds or tuning.JumpSeconds
    local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
    state.root.CFrame=state.origin:Lerp(saddle,landingProgress)*CFrame.new(0,math.sin(math.pi*landingProgress)*tuning.JumpArcStuds*0.5,0)
@@ -177,7 +177,7 @@ RunService.Heartbeat:Connect(function(delta)
    local before=state.monster.PrimaryPart.Position
    state.monster.PrimaryPart.CFrame=CFrame.new(position)
    state.monster:SetAttribute("Steering",steer)
-   state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
+   state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
    local contact=World.mountedHit(before,position,state.monster)
    if contact then finish(player,contact=="Wall" and "벽에 부딪혔어요." or "다른 몬스터에 부딪혔어요.",contact) continue end
    if clock>=(state.protectedUntil or 0) and World.hit(before,position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end

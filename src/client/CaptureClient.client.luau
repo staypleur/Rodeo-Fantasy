@@ -12,6 +12,7 @@ local animator=require(script.Parent:WaitForChild("RideAnimator"))
 local rider=require(script.Parent:WaitForChild("RiderPresentation"))
 local gauge=require(script.Parent:WaitForChild("TamingGauge"))
 local crashEffect=require(script.Parent:WaitForChild("CrashEffect"))
+local markers=require(script.Parent:WaitForChild("DistanceMarkers"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
 local state={phase="Idle",started=0,count=0,pending=0,distance=0}
 local held,left,right=false,false,false
@@ -135,10 +136,10 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  if active() and root then
   local mount=state.monster and frames[state.monster]
   if state.phase=="Riding" and mount then
-   visualFrame=mount*CFrame.new(0,t.RideHeightStuds,0)
+   visualFrame=mount*CFrame.new(0,t.RideHeightStuds,t.RideForwardStuds)
   elseif state.phase=="Lassoing" and mount and state.origin then
    local p=math.clamp((clock-state.started)/(state.landingSeconds or t.JumpSeconds),0,1)
-   visualFrame=state.origin:Lerp(mount*CFrame.new(0,t.RideHeightStuds,0),p)*CFrame.new(0,math.sin(math.pi*p)*t.JumpArcStuds*0.5,0)
+   visualFrame=state.origin:Lerp(mount*CFrame.new(0,t.RideHeightStuds,t.RideForwardStuds),p)*CFrame.new(0,math.sin(math.pi*p)*t.JumpArcStuds*0.5,0)
   elseif state.phase=="Airborne" and state.position and state.launchY then
    local elapsed=math.clamp(clock-(state.sampleTime or clock),0,0.3)
    local pos=state.position+Vector3.new((state.steer or 0)*t.SidewaysStudsPerSecond,0,-t.AirStudsPerSecond)*elapsed
@@ -149,7 +150,13 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  end
  rider.update(player.Character,state.phase,visualFrame,dt,clock)
  crashEffect.update(player.Character,state.phase,clock)
- distance.Text=string.format("%dm",math.floor(state.distance or 0))
+ local displayDistance=state.distance or 0
+ if active() then
+  local speed=state.phase=="Airborne" and t.AirStudsPerSecond or t.ForwardStudsPerSecond
+  displayDistance+=math.clamp(clock-(state.sampleTime or clock),0,0.3)*speed*t.MetersPerStud
+ end
+ markers.update(active(),displayDistance,visualFrame,t.MetersPerStud)
+ distance.Text=string.format("%dm",math.floor(displayDistance))
  highlight.Enabled=false
  panel.Visible=not active()
  gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),state.tamed,workspace.CurrentCamera)

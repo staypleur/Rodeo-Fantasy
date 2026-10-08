@@ -23,6 +23,7 @@ expected = {
     "RideAnimator": "src/client/RideAnimator.luau",
     "RiderPresentation": "src/client/RiderPresentation.luau",
     "TamingGauge": "src/client/TamingGauge.luau",
+    "DistanceMarkers": "src/client/DistanceMarkers.luau",
     "CrashEffect": "src/client/CrashEffect.luau",
 }
 assert set(scripts) == set(expected)

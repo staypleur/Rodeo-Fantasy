@@ -98,7 +98,25 @@ presentation.update(rig,"Airborne",CFrame.new(0,12,0),1,2)
 assert(shoulder.C0~=original and avatarRoot.CFrame.LookVector.Y<-.4,"distinct flight pose")
 assert((shoulder.C0.Rotation*original.Rotation:Inverse()).YVector.X>0.99,"R15 arm must point sideways")
 assert((classic.C0.Rotation*classicOriginal.Rotation:Inverse()).YVector.X>0.99,"R6 arm must point sideways")
+local hip=Instance.new("Motor6D") hip.Name="RightHip" hip.Parent=avatarRoot
+local hipRest=hip.C0
+-- Register new joints through a fresh presentation lifecycle.
+presentation.clear()
+local a0=Instance.new("Attachment") a0.Parent=avatarRoot
+local a1=Instance.new("Attachment") a1.Parent=torso
+local upgraded=Instance.new("AnimationConstraint") upgraded.Name="RightHip"
+upgraded.Attachment0,upgraded.Attachment1=a0,a1 upgraded.Parent=avatarRoot
+presentation.update(rig,"Riding",CFrame.new(0,4,0),1,1800000000.2)
+assert((-hip.C0.UpVector).Z<-.8,"classic thigh pose must point forward")
+assert((-upgraded.Transform.UpVector).Z<-.8,"upgraded thigh pose must point forward")
+local rope=workspace:FindFirstChild("LocalCowboyLasso")
+assert(rope and #rope:GetChildren()==50,"cowboy loop must have connected rope segments")
+local first=rope:FindFirstChildOfClass("Attachment") local before=first.Position
+presentation.update(rig,"Riding",CFrame.new(0,4,0),0.1,1800000000.3)
+assert((first.Position-before).Magnitude>.2,"cowboy loop must visibly rotate")
 presentation.update(rig,"GameOver",nil,1,2.5)
+assert(hip.C0==hipRest and upgraded.Transform==CFrame.identity,"both joint types must restore")
+assert(not workspace:FindFirstChild("LocalCowboyLasso"),"rope must clean up")
 assert(shoulder.C0==original,"restore avatar joints after hunting")
 assert(not avatarRoot:FindFirstChild("FlightTrailAnchor") and not avatarRoot:FindFirstChild("FlightTrailEnd"),"flight attachments must clean up")
 local effect=require(game:GetService("StarterPlayer").StarterPlayerScripts.CrashEffect)
@@ -112,3 +130,16 @@ effect.update(rig,"Riding",3.3)
 assert(torso.LocalTransparencyModifier==0 and not workspace:FindFirstChild("LocalCrashShard"),"restart must restore avatar and clear shards")
 rig:Destroy()
 print("RODEO_STUDIO_SMOKE_PASS: Lumidon, quadruped animation, running herds, lasso candidates, swept obstacles and cleanup")
+
+local markers=require(game:GetService("StarterPlayer").StarterPlayerScripts.DistanceMarkers)
+markers.update(true,995,CFrame.new(0,4,-400),0.625)
+local gate=workspace:FindFirstChild("LocalDistanceMarker")
+assert(gate and gate:GetAttribute("Meters")==1000,"first map milestone must show 1000m")
+assert(math.abs(gate:GetPivot().Z-(-408))<0.01,"milestone must align with remaining server distance")
+markers.update(true,1001,CFrame.new(0,4,-410),0.625)
+local nextFound=false
+for _,m in ipairs(workspace:GetChildren()) do if m.Name=="LocalDistanceMarker" and m:GetAttribute("Meters")==2000 then nextFound=true end end
+assert(nextFound,"next 1000m milestone must be generated")
+markers.update(false,0,nil,0.625)
+assert(not workspace:FindFirstChild("LocalDistanceMarker"),"milestones must clean up on run end")
+print("RODEO_MILESTONES_PASS")
