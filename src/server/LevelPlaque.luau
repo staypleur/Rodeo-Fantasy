@@ -12,12 +12,13 @@ function P.update(gui,level,name)
  local nameWidth=math.ceil(TextService:GetTextSize(name,17,Enum.Font.GothamBold,Vector2.new(1000,100)).X)+4
  local nameX=31+levelWidth+10
  local width=math.max(140,nameX+nameWidth+30)
- gui.Size=UDim2.fromOffset(math.ceil(width*.73),44)
+ gui:SetAttribute("NameplateRevision",2)
+ gui.Size=UDim2.fromOffset(math.ceil(width*.6),35)
  if gui:GetAttribute("ThemeTier")~=tier or gui:GetAttribute("LayoutWidth")~=width or gui:GetAttribute("LevelWidth")~=levelWidth then
   gui:ClearAllChildren() gui:SetAttribute("ThemeTier",tier) gui:SetAttribute("Theme",theme.name)
   gui:SetAttribute("LayoutWidth",width) gui:SetAttribute("LevelWidth",levelWidth)
   local canvas=node("Frame","PlaqueCanvas",{BackgroundTransparency=1,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(width,58)},gui)
-  local scale=Instance.new("UIScale") scale.Name="CompactPlaqueScale" scale.Scale=.73 scale.Parent=canvas
+  local scale=Instance.new("UIScale") scale.Name="CompactPlaqueScale" scale.Scale=.6 scale.Parent=canvas
   local function block(name,x,y,w,h,color,z)
    return node("Frame",name,{BorderSizePixel=0,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundColor3=color,ZIndex=z or 1},canvas)
   end

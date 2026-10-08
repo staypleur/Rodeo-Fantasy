@@ -20,7 +20,9 @@ local function nameplate(player,level)
   gui.Size=UDim2.fromOffset(160,44) gui.Parent=head
   local humanoid=character:FindFirstChildOfClass("Humanoid") if humanoid then humanoid.NameDisplayDistance=0 end
  end
- gui.StudsOffset=Vector3.zero gui.StudsOffsetWorldSpace=Vector3.new(0,3.2,0)
+ -- Camera-relative lift plus a fixed screen gap stays above hats at overhead angles.
+ gui.StudsOffset=Vector3.new(0,1.5,0) gui.StudsOffsetWorldSpace=Vector3.zero
+ gui.SizeOffset=Vector2.new(0,2)
  gui.MaxDistance=120 gui.AlwaysOnTop=true
  require(script.Parent.LevelPlaque).update(gui,level,player.Name or player.DisplayName or "Player")
 end
