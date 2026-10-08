@@ -358,3 +358,9 @@
 - Roblox Studio Importer의 20개 모델 일괄 가져오기, 경험 소유자 계정 업로드, 가져온 모델을 장소 템플릿에 연결, F5 확인, 게시 순서를 문서화했다. 이 환경은 Roblox 사용자 계정/Studio Importer 접근이 없어 계정 업로드와 Publish는 사용자가 Studio에서 해야 한다.
 - 최신 `dist/RodeoFantasy-Capture.rbxlx`는 석조 정원 A안 로비를 포함하지만, 공개 Roblox 게임은 Studio에서 장소를 다시 열고 Publish 해야 갱신된다. 로컬 파일 생성이나 Git 푸시만으로 게시 경험은 바뀌지 않는다.
 - 검증: GLB 20개 생성 완료, 고유한 이름의 메시 파트 수 28–40/model, 총 15.0MB. GLB 헤더/JSON/Body 부품/고유 부품 이름을 전부 검사했고, `dist/RodeoFantasy-Capture.rbxlx`를 최신 소스로 다시 빌드했다. Studio Importer에 실제 업로드/재삽입/F5는 미실행이므로 OBJ-to-Roblox 결과와 게임 내 외형은 아직 확인되지 않았다.
+
+## 2026-10-09 — 가져온 몬스터의 색·방향·가시성 수정
+
+- 사용자 Studio 시험에서 쥐가 뒤로 달리고 단색 회색으로 보이는 문제를 확인했다. 원인은 합친 GLB 노드 이름이 기존 부품 템플릿과 달라 `RideAnimator`가 알아보지 못한 몸통·얼굴 메시를 숨겼고, Importer 재질 색에만 의존해 `MeshPart.Color`를 직접 지정하지 않은 것이었다.
+- 20개 GLB의 모든 메시 노드명에 원래 색상 코드를 저장하고, 설치 스크립트가 이름에서 색을 읽어 각 MeshPart에 입히게 했다. 사냥 애니메이터는 `ImportedA` 모델의 합쳐진 메시를 숨기지 않고 실제 템플릿의 상대 위치에서 유지하도록 수정했다. 방향은 원본 Blender/Roblox 기준인 -Z 전진을 유지한다. 얼굴/앞부분이 숨겨져 뒤로 달리는 것처럼 보였던 현상을 먼저 해결한다.
+- 수정 모델/스크립트는 재가져오기와 재설치가 필요하다. 이번 수정 완료 후 Studio Importer에서 최신 GLB 20개를 가져오고, 최신 Command Bar 설치 스크립트를 실행해 F5 확인해야 한다. 기존 사용자 게시물에 바로 반영된 상태는 아니다.

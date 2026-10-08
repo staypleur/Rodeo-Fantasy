@@ -113,11 +113,16 @@ def make_glb(obj_path: Path, output_path: Path):
         color_name = "rgb_" + "".join(f"{round(channel * 255):02X}" for channel in color[:3])
         materials[color_name] = color
         batch_key = (group, color_name)
-        node_name = group if group.startswith("Static_") else group
-        if node_name in used_node_names:
-            node_name = group + "_" + color_name[4:]
-        used_node_names.add(node_name)
-        batch = batches.setdefault(batch_key, {"name": node_name, "material": color_name, "verts": [], "normals": [], "indices": []})
+        batch = batches.get(batch_key)
+        if batch is None:
+            # Preserve material color in the name as a robust Studio fallback.
+            # The importer can omit a glTF material's baseColorFactor on some presets.
+            node_name = group + "__C" + color_name[4:]
+            if node_name in used_node_names:
+                raise ValueError(f"Duplicate GLB node name: {node_name} in {obj_path.name}")
+            used_node_names.add(node_name)
+            batch = {"name": node_name, "material": color_name, "verts": [], "normals": [], "indices": []}
+            batches[batch_key] = batch
         verts = []
         normals = []
         indices = []

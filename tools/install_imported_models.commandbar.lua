@@ -16,11 +16,16 @@ for _, id in ipairs(species) do
 		local source = imported:FindFirstChild(sourceName)
 		assert(source and source:IsA("Model"), "Missing imported Model: " .. sourceName)
 		local parts = {}
+		local hasBody = false
 		for _, node in ipairs(source:GetDescendants()) do
-			if node:IsA("MeshPart") then table.insert(parts, node) end
+			if node:IsA("MeshPart") then
+				assert(node.Name:match("^.-__C%x%x%x%x%x%x$"), sourceName .. " mesh name lost its color code: " .. node.Name)
+				table.insert(parts, node)
+				if node.Name:match("^Body__C%x%x%x%x%x%x$") then hasBody = true end
+			end
 		end
 		assert(#parts >= 10, sourceName .. " imported with too few MeshParts")
-		assert(source:FindFirstChild("Body", true), sourceName .. " is missing the named Body mesh")
+		assert(hasBody, sourceName .. " is missing the named Body mesh")
 		local visual = package:FindFirstChild(catalog.visual(id, stars))
 		local template = ServerStorage:FindFirstChild(catalog.template(id, stars))
 		assert(visual and visual:IsA("Model"), "Missing visual template: " .. catalog.visual(id, stars))
@@ -39,6 +44,15 @@ local function replaceGeometry(target, source, parts)
 	local sourcePivot = source:GetPivot()
 	for _, sourcePart in ipairs(parts) do
 		local mesh = sourcePart:Clone()
+		local groupName, rgb = sourcePart.Name:match("^(.-)__C(%x%x%x%x%x%x)$")
+		assert(groupName and rgb, "Mesh node is missing its encoded color: " .. sourcePart.Name)
+		mesh.Name = groupName
+		mesh.Color = Color3.fromRGB(
+			tonumber(string.sub(rgb, 1, 2), 16),
+			tonumber(string.sub(rgb, 3, 4), 16),
+			tonumber(string.sub(rgb, 5, 6), 16)
+		)
+		mesh.Material = Enum.Material.SmoothPlastic
 		mesh.Anchored = true
 		mesh.CanCollide, mesh.CanTouch, mesh.CanQuery = false, false, false
 		mesh.CFrame = root.CFrame * sourcePivot:ToObjectSpace(sourcePart.CFrame)
@@ -46,6 +60,7 @@ local function replaceGeometry(target, source, parts)
 	end
 	target.PrimaryPart = root
 	target:SetAttribute("MeshDecorated", true)
+	target:SetAttribute("ImportedA", true)
 end
 
 for _, item in ipairs(install) do

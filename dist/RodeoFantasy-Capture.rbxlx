@@ -296764,7 +296764,6 @@ local template = package:WaitForChild("VisualTemplate")
 local templateRoot=template:WaitForChild("MountRoot")
 local tuning = require(package:WaitForChild("Config")).Prototype
 local Rules = require(package:WaitForChild("HuntRules"))
-local restFrames = {}
 local Catalog=require(package.MonsterCatalog)
 local Mesh=require(script.Parent.CreatureMesh)
 local dust={}
@@ -296786,22 +296785,24 @@ local function remember(model, existing)
  local speciesId=model:GetAttribute("MonsterId") or "MeadowMouse"
  local referenceTemplate=package:WaitForChild(Catalog.visual(speciesId,model:GetAttribute("Stars") or 1))
  local referenceRoot=referenceTemplate:WaitForChild("MountRoot")
- local key=speciesId.."_"..Catalog.stage(model:GetAttribute("Stars") or 1)
- restFrames[key]=restFrames[key] or {}
- local rest=restFrames[key]
 	if not root then return nil end
-	local pose = existing or {frame = root.CFrame, sample = root.CFrame, received = nil, tracked={}}
+	local pose = existing or {frame = root.CFrame, sample = root.CFrame, received = nil, tracked={}, restByPart={}}
  if existing and not pose.dirty then return pose end
  if not pose.watch then pose.watch=model.DescendantAdded:Connect(function(part) if part:IsA("BasePart") then pose.dirty=true end end) end
  pose.dirty=false
 	for _, part in ipairs(model:GetDescendants()) do
 		if part:IsA("BasePart") and part ~= root and not pose.tracked[part] then
-   if not rest[part.Name] then
+   local restFrame
+   if model:GetAttribute("ImportedA") then
+    -- Imported meshes already carry their correct per-model offsets; many are
+    -- color-batched nodes whose names do not exist in the old part template.
+    restFrame=root.CFrame:ToObjectSpace(part.CFrame)
+   else
     local reference=referenceTemplate:FindFirstChild(part.Name,true)
     if not reference or not reference:IsA("BasePart") then
      part.LocalTransparencyModifier=1 pose.dirty=true continue
     end
-    rest[part.Name]=referenceRoot.CFrame:ToObjectSpace(reference.CFrame)
+    restFrame=referenceRoot.CFrame:ToObjectSpace(reference.CFrame)
    end
    part.LocalTransparencyModifier=0
 			local side = string.sub(part.Name,1,4)=="Left" and "Left" or string.sub(part.Name,1,5)=="Right" and "Right" or nil
@@ -296809,7 +296810,9 @@ local function remember(model, existing)
 			local leg = movingLeg and (string.find(part.Name,"Front",1,true) and "Front" or "Back") or nil
 			if not leg then side=nil end
 			pose.tracked[part]=true
-			table.insert(pose, { part = part, rest = rest[part.Name], side = side, leg = leg })
+   local entry={part=part,rest=restFrame,side=side,leg=leg}
+   pose.restByPart[part]=restFrame
+   table.insert(pose,entry)
 		end
 	end
 	poses[model] = pose
@@ -296960,7 +296963,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
 				local opposite = (entry.side == "Left") ~= (entry.leg == "Front")
 				local swing = math.sin(phase + (opposite and math.pi or 0)) * 0.85
 				local legPart=model:FindFirstChild(entry.side..entry.leg.."Leg")
-    local legRest=legPart and pose.tracked[legPart] and restFrames[(model:GetAttribute("MonsterId") or "MeadowMouse").."_"..Catalog.stage(model:GetAttribute("Stars") or 1)][legPart.Name]
+			local legRest=legPart and pose.restByPart[legPart]
     local joint=CFrame.new(legRest and (legRest.Position+Vector3.new(0,legPart.Size.Y*.5,0)) or entry.rest.Position)
 				localFrame = CFrame.new(0,math.max(0,math.sin(phase + (opposite and math.pi or 0)))*0.22,0) * joint * CFrame.Angles(swing, 0, 0) * joint:Inverse() * entry.rest
 			end
