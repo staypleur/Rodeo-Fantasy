@@ -51,7 +51,7 @@ local success,problem=pcall(function()
  remote:FireServer("Start")
  waitFor(function() return state.phase=="Lassoing" end,"opening flight missing")
  waitFor(function() return state.phase=="Riding" end,"opening landing failed")
- waitFor(function() return workspace.CurrentCamera.CameraType==Enum.CameraType.Scriptable and workspace.CurrentCamera.CFrame.LookVector.Y < -0.8 end,"high camera did not activate")
+ waitFor(function() return workspace.CurrentCamera.CameraType==Enum.CameraType.Scriptable and workspace.CurrentCamera.CFrame.LookVector.Y < -0.7 end,"angled camera did not activate")
  check(workspace.CurrentCamera.FieldOfView==config.Prototype.CameraFieldOfView,"hunt field of view must apply")
  local camera=workspace.CurrentCamera
  check(math.abs(camera.CFrame.Position.X-config.Prototype.CameraSideStuds)<0.5,"diagonal camera must follow road center")
@@ -64,6 +64,15 @@ local success,problem=pcall(function()
  task.wait(0.25)
  remote:FireServer("Hold",false)
  waitFor(function() return state.phase=="Airborne" end,"release must jump")
+ local flightSeen=false
+ local runService=game:GetService("RunService")
+ runService:BindToRenderStep("CheckFlightPose",Enum.RenderPriority.Last.Value,function()
+  if state.phase=="Airborne" and character.HumanoidRootPart.CFrame.LookVector.Y<-.3 then flightSeen=true end
+ end)
+ task.wait(0.08)
+ runService:UnbindFromRenderStep("CheckFlightPose")
+ check(flightSeen,"airborne character must lean forward when rendered")
+ check(character.HumanoidRootPart:FindFirstChild("FlightTrailAnchor")~=nil,"flight trail must exist")
  local oldCount=state.count
  local target=driver:InvokeServer("Target")
  task.wait(0.06)
@@ -74,7 +83,19 @@ local success,problem=pcall(function()
  check(state.count==oldCount,"old incomplete ride must not grant")
  check(target:GetAttribute("Occupied"),"target must be occupied")
  check(state.protectedUntil>workspace:GetServerTimeNow(),"landing protection missing")
+ local worstOffset=0
+ local samples=0
+ runService:BindToRenderStep("CheckMountAlignment",Enum.RenderPriority.Last.Value,function()
+  if state.phase=="Riding" and target:FindFirstChild("Body") then
+   local expected=Vector3.new(0,-config.Prototype.RideHeightStuds-0.05,0.15)
+   local offset=target.Body.Position-character.HumanoidRootPart.Position
+   worstOffset=math.max(worstOffset,(offset-expected).Magnitude)
+   samples+=1
+  end
+ end)
  task.wait(0.5)
+ runService:UnbindFromRenderStep("CheckMountAlignment")
+ check(samples>0 and worstOffset<0.1,"mounted body and avatar must stay aligned across rendered frames")
  check(state.phase=="Riding" and state.monster==target,"early release must not force repeated flights")
  remote:FireServer("Hold",true)
  waitFor(function() return state.count==oldCount+1 end,"taming did not grant")
@@ -99,5 +120,8 @@ end)
 driver:InvokeServer("Finish",success and ("PASS: "..checks.." hunting Play checks") or ("FAIL: "..tostring(problem)))
 ]==]
 client.Parent=game:GetService("StarterPlayer").StarterPlayerScripts
+-- Let the CLI document finish opening before entering Play.
+task.wait(2)
 local result=game:GetService("StudioTestService"):ExecutePlayModeAsync("LumidonHunt")
-print("HUNT_PLAY_RESULT: "..tostring(result))
+assert(type(result)=="string" and string.sub(result,1,5)=="PASS:","Play did not pass: "..tostring(result))
+print("HUNT_PLAY_RESULT: "..result)

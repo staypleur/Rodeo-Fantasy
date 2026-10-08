@@ -37,10 +37,10 @@
             <R21>0.0</R21>
             <R22>1.0</R22>
           </CoordinateFrame>
-          <Color3uint8 name="Color3uint8">12822135</Color3uint8>
+          <Color3uint8 name="Color3uint8">11719541</Color3uint8>
           <token name="TopSurface">0</token>
           <token name="BottomSurface">0</token>
-          <token name="Material">1296</token>
+          <token name="Material">272</token>
         </Properties>
       </Item>
       <Item class="SpawnLocation" referent="RBX5">
@@ -66,7 +66,7 @@
             <R21>0.0</R21>
             <R22>1.0</R22>
           </CoordinateFrame>
-          <Color3uint8 name="Color3uint8">12822135</Color3uint8>
+          <Color3uint8 name="Color3uint8">11719541</Color3uint8>
           <token name="TopSurface">0</token>
           <token name="BottomSurface">0</token>
           <bool name="Neutral">true</bool>
@@ -1743,10 +1743,10 @@ Config.Prototype = {
 	GroundChunkStuds = 256,
 	RideHeightStuds = 4,
 	RespawnSeconds = 1,
-	CameraHeightStuds = 68,
-	CameraBehindStuds = 22,
+	CameraHeightStuds = 56,
+	CameraBehindStuds = 32,
 	CameraLookAheadStuds = 16,
-	CameraSideStuds = 14,
+	CameraSideStuds = 22,
 	CameraGroundFocusStuds = 2,
 	CameraFieldOfView = 50,
 }
@@ -1834,18 +1834,1627 @@ return BagRules
           <string name="Name">CaptureRemote</string>
         </Properties>
       </Item>
+      <Item class="Model" referent="RBX63">
+        <Properties>
+          <string name="Name">VisualTemplate</string>
+          <Ref name="PrimaryPart">RBX64</Ref>
+        </Properties>
+        <Item class="Part" referent="RBX64">
+          <Properties>
+            <string name="Name">MountRoot</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>2.5</X>
+              <Y>2</Y>
+              <Z>4.6</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>0</Y>
+              <Z>0</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">11488548</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <float name="Transparency">1</float>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanQuery">false</bool>
+            <bool name="CanTouch">false</bool>
+          </Properties>
+          <Item class="BillboardGui" referent="RBX112">
+            <Properties>
+              <string name="Name">Nameplate</string>
+              <UDim2 name="Size">
+                <XS>0</XS>
+                <XO>240</XO>
+                <YS>0</YS>
+                <YO>65</YO>
+              </UDim2>
+              <Vector3 name="StudsOffset">
+                <X>0</X>
+                <Y>3.5</Y>
+                <Z>0</Z>
+              </Vector3>
+              <bool name="AlwaysOnTop">true</bool>
+            </Properties>
+            <Item class="TextLabel" referent="RBX113">
+              <Properties>
+                <string name="Name">Label</string>
+                <UDim2 name="Size">
+                  <XS>1</XS>
+                  <XO>0</XO>
+                  <YS>1</YS>
+                  <YO>0</YO>
+                </UDim2>
+                <float name="BackgroundTransparency">1</float>
+                <string name="Text">루미돈</string>
+                <float name="TextSize">18</float>
+                <Color3 name="TextColor3">
+                  <R>1</R>
+                  <G>1</G>
+                  <B>1</B>
+                </Color3>
+                <float name="TextStrokeTransparency">0.3</float>
+              </Properties>
+            </Item>
+          </Item>
+        </Item>
+        <Item class="Part" referent="RBX65">
+          <Properties>
+            <string name="Name">Body</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>2.35</X>
+              <Y>1.9</Y>
+              <Z>3.0</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>-0.05</Y>
+              <Z>0.15</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">10204575</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX66">
+          <Properties>
+            <string name="Name">Back</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>2.05</X>
+              <Y>0.3</Y>
+              <Z>2.45</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>0.99</Y>
+              <Z>0.22</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">10204575</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX67">
+          <Properties>
+            <string name="Name">Belly</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>1.85</X>
+              <Y>0.2</Y>
+              <Z>2.45</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>-1.03</Y>
+              <Z>0.05</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16771516</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX68">
+          <Properties>
+            <string name="Name">Head</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>2.4</X>
+              <Y>1.65</Y>
+              <Z>1.45</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>0.35</Y>
+              <Z>-1.52</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">10204575</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX69">
+          <Properties>
+            <string name="Name">HeadCrown</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>1.95</X>
+              <Y>0.2</Y>
+              <Z>1.15</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>1.26</Y>
+              <Z>-1.46</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">10204575</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX70">
+          <Properties>
+            <string name="Name">Snout</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>1.58</X>
+              <Y>0.83</Y>
+              <Z>0.52</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>-0.02</Y>
+              <Z>-2.41</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16234925</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX71">
+          <Properties>
+            <string name="Name">NoseTop</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>1.32</X>
+              <Y>0.12</Y>
+              <Z>0.37</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>0.45</Y>
+              <Z>-2.32</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16234925</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX72">
+          <Properties>
+            <string name="Name">Smile</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.55</X>
+              <Y>0.055</Y>
+              <Z>0.025</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>-0.32</Y>
+              <Z>-2.685</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">3552570</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX73">
+          <Properties>
+            <string name="Name">LeftEar</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.62</X>
+              <Y>0.62</Y>
+              <Z>0.38</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.87</X>
+              <Y>1.57</Y>
+              <Z>-1.21</Z>
+              <R00>0.9659258262890683</R00>
+              <R01>-0.25881904510252074</R01>
+              <R02>0.0</R02>
+              <R10>0.25881904510252074</R10>
+              <R11>0.9659258262890683</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">7573885</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX74">
+          <Properties>
+            <string name="Name">LeftEarInner</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.34</X>
+              <Y>0.37</Y>
+              <Z>0.045</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.87</X>
+              <Y>1.57</Y>
+              <Z>-1.42</Z>
+              <R00>0.9659258262890683</R00>
+              <R01>-0.25881904510252074</R01>
+              <R02>0.0</R02>
+              <R10>0.25881904510252074</R10>
+              <R11>0.9659258262890683</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16234925</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX75">
+          <Properties>
+            <string name="Name">LeftEyeWhite</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.48</X>
+              <Y>0.65</Y>
+              <Z>0.06</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.83</X>
+              <Y>0.61</Y>
+              <Z>-2.265</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16777209</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX76">
+          <Properties>
+            <string name="Name">LeftPupil</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.32</X>
+              <Y>0.49</Y>
+              <Z>0.045</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.81</X>
+              <Y>0.61</Y>
+              <Z>-2.307</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">3552570</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX77">
+          <Properties>
+            <string name="Name">LeftShine</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.12</X>
+              <Y>0.15</Y>
+              <Z>0.025</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.75</X>
+              <Y>0.75</Y>
+              <Z>-2.339</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16777215</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX78">
+          <Properties>
+            <string name="Name">LeftNostril</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.15</X>
+              <Y>0.22</Y>
+              <Z>0.025</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.35</X>
+              <Y>0.02</Y>
+              <Z>-2.685</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">9461597</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX79">
+          <Properties>
+            <string name="Name">LeftCheek</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.29</X>
+              <Y>0.2</Y>
+              <Z>0.03</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-1.0</X>
+              <Y>0.02</Y>
+              <Z>-2.275</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16234925</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX80">
+          <Properties>
+            <string name="Name">LeftFrontLeg</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.61</X>
+              <Y>0.82</Y>
+              <Z>0.67</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.88</X>
+              <Y>-1.28</Y>
+              <Z>-0.91</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">10204575</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX81">
+          <Properties>
+            <string name="Name">LeftFrontPaw</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.73</X>
+              <Y>0.24</Y>
+              <Z>0.84</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.88</X>
+              <Y>-1.8</Y>
+              <Z>-1.01</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16771516</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX82">
+          <Properties>
+            <string name="Name">LeftFrontHoofLine</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.035</X>
+              <Y>0.17</Y>
+              <Z>0.02</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.88</X>
+              <Y>-1.8</Y>
+              <Z>-1.44</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">7573885</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX83">
+          <Properties>
+            <string name="Name">LeftBackLeg</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.61</X>
+              <Y>0.82</Y>
+              <Z>0.67</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.88</X>
+              <Y>-1.28</Y>
+              <Z>1.17</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">10204575</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX84">
+          <Properties>
+            <string name="Name">LeftBackPaw</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.73</X>
+              <Y>0.24</Y>
+              <Z>0.84</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.88</X>
+              <Y>-1.8</Y>
+              <Z>1.0699999999999998</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16771516</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX85">
+          <Properties>
+            <string name="Name">LeftBackHoofLine</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.035</X>
+              <Y>0.17</Y>
+              <Z>0.02</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.88</X>
+              <Y>-1.8</Y>
+              <Z>0.6399999999999999</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">7573885</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX86">
+          <Properties>
+            <string name="Name">RightEar</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.62</X>
+              <Y>0.62</Y>
+              <Z>0.38</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.87</X>
+              <Y>1.57</Y>
+              <Z>-1.21</Z>
+              <R00>0.9659258262890683</R00>
+              <R01>0.25881904510252074</R01>
+              <R02>0.0</R02>
+              <R10>-0.25881904510252074</R10>
+              <R11>0.9659258262890683</R11>
+              <R12>-0.0</R12>
+              <R20>-0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">7573885</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX87">
+          <Properties>
+            <string name="Name">RightEarInner</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.34</X>
+              <Y>0.37</Y>
+              <Z>0.045</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.87</X>
+              <Y>1.57</Y>
+              <Z>-1.42</Z>
+              <R00>0.9659258262890683</R00>
+              <R01>0.25881904510252074</R01>
+              <R02>0.0</R02>
+              <R10>-0.25881904510252074</R10>
+              <R11>0.9659258262890683</R11>
+              <R12>-0.0</R12>
+              <R20>-0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16234925</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX88">
+          <Properties>
+            <string name="Name">RightEyeWhite</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.48</X>
+              <Y>0.65</Y>
+              <Z>0.06</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.83</X>
+              <Y>0.61</Y>
+              <Z>-2.265</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16777209</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX89">
+          <Properties>
+            <string name="Name">RightPupil</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.32</X>
+              <Y>0.49</Y>
+              <Z>0.045</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.81</X>
+              <Y>0.61</Y>
+              <Z>-2.307</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">3552570</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX90">
+          <Properties>
+            <string name="Name">RightShine</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.12</X>
+              <Y>0.15</Y>
+              <Z>0.025</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.75</X>
+              <Y>0.75</Y>
+              <Z>-2.339</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16777215</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX91">
+          <Properties>
+            <string name="Name">RightNostril</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.15</X>
+              <Y>0.22</Y>
+              <Z>0.025</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.35</X>
+              <Y>0.02</Y>
+              <Z>-2.685</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">9461597</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX92">
+          <Properties>
+            <string name="Name">RightCheek</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.29</X>
+              <Y>0.2</Y>
+              <Z>0.03</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>1.0</X>
+              <Y>0.02</Y>
+              <Z>-2.275</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16234925</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX93">
+          <Properties>
+            <string name="Name">RightFrontLeg</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.61</X>
+              <Y>0.82</Y>
+              <Z>0.67</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.88</X>
+              <Y>-1.28</Y>
+              <Z>-0.91</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">10204575</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX94">
+          <Properties>
+            <string name="Name">RightFrontPaw</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.73</X>
+              <Y>0.24</Y>
+              <Z>0.84</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.88</X>
+              <Y>-1.8</Y>
+              <Z>-1.01</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16771516</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX95">
+          <Properties>
+            <string name="Name">RightFrontHoofLine</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.035</X>
+              <Y>0.17</Y>
+              <Z>0.02</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.88</X>
+              <Y>-1.8</Y>
+              <Z>-1.44</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">7573885</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX96">
+          <Properties>
+            <string name="Name">RightBackLeg</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.61</X>
+              <Y>0.82</Y>
+              <Z>0.67</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.88</X>
+              <Y>-1.28</Y>
+              <Z>1.17</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">10204575</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX97">
+          <Properties>
+            <string name="Name">RightBackPaw</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.73</X>
+              <Y>0.24</Y>
+              <Z>0.84</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.88</X>
+              <Y>-1.8</Y>
+              <Z>1.0699999999999998</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16771516</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX98">
+          <Properties>
+            <string name="Name">RightBackHoofLine</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.035</X>
+              <Y>0.17</Y>
+              <Z>0.02</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.88</X>
+              <Y>-1.8</Y>
+              <Z>0.6399999999999999</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">7573885</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX99">
+          <Properties>
+            <string name="Name">TailBase</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.36</X>
+              <Y>0.35</Y>
+              <Z>0.69</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>-0.1</Y>
+              <Z>1.92</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">10204575</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX100">
+          <Properties>
+            <string name="Name">TailCurl</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.62</X>
+              <Y>0.28</Y>
+              <Z>0.3</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.2</X>
+              <Y>0.13</Y>
+              <Z>2.24</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">10204575</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX101">
+          <Properties>
+            <string name="Name">TailTip</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.24</X>
+              <Y>0.44</Y>
+              <Z>0.3</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.45</X>
+              <Y>-0.08</Y>
+              <Z>2.24</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">10204575</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX102">
+          <Properties>
+            <string name="Name">LanternSaddle</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>1.18</X>
+              <Y>0.18</Y>
+              <Z>1.15</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>1.21</Y>
+              <Z>0.74</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">9990725</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX103">
+          <Properties>
+            <string name="Name">LanternBase</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.8</X>
+              <Y>0.19</Y>
+              <Z>0.8</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>1.43</Y>
+              <Z>0.74</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">9990725</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX104">
+          <Properties>
+            <string name="Name">LanternGlow</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.61</X>
+              <Y>0.74</Y>
+              <Z>0.61</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>1.88</Y>
+              <Z>0.74</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">16767859</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">288</token>
+          </Properties>
+          <Item class="PointLight" referent="RBX105">
+            <Properties>
+              <string name="Name">LanternLight</string>
+              <Color3 name="Color">
+                <R>1</R>
+                <G>0.49</G>
+                <B>0.13</B>
+              </Color3>
+              <float name="Brightness">0.35</float>
+              <float name="Range">4</float>
+            </Properties>
+          </Item>
+        </Item>
+        <Item class="Part" referent="RBX106">
+          <Properties>
+            <string name="Name">LanternPost-0.360.38</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.09</X>
+              <Y>0.8</Y>
+              <Z>0.09</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.36</X>
+              <Y>1.88</Y>
+              <Z>0.38</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">9990725</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX107">
+          <Properties>
+            <string name="Name">LanternPost-0.361.1</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.09</X>
+              <Y>0.8</Y>
+              <Z>0.09</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>-0.36</X>
+              <Y>1.88</Y>
+              <Z>1.1</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">9990725</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX108">
+          <Properties>
+            <string name="Name">LanternPost0.360.38</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.09</X>
+              <Y>0.8</Y>
+              <Z>0.09</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.36</X>
+              <Y>1.88</Y>
+              <Z>0.38</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">9990725</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX109">
+          <Properties>
+            <string name="Name">LanternPost0.361.1</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.09</X>
+              <Y>0.8</Y>
+              <Z>0.09</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0.36</X>
+              <Y>1.88</Y>
+              <Z>1.1</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">9990725</Color3uint8>
+            <token name="TopSurface">0</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX110">
+          <Properties>
+            <string name="Name">LanternRoof</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.95</X>
+              <Y>0.17</Y>
+              <Z>0.95</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>2.36</Y>
+              <Z>0.74</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">9990725</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+        <Item class="Part" referent="RBX111">
+          <Properties>
+            <string name="Name">LanternCap</string>
+            <bool name="Anchored">true</bool>
+            <Vector3 name="size">
+              <X>0.47</X>
+              <Y>0.13</Y>
+              <Z>0.47</Z>
+            </Vector3>
+            <CoordinateFrame name="CFrame">
+              <X>0</X>
+              <Y>2.5</Y>
+              <Z>0.74</Z>
+              <R00>1.0</R00>
+              <R01>0.0</R01>
+              <R02>0.0</R02>
+              <R10>0.0</R10>
+              <R11>1.0</R11>
+              <R12>-0.0</R12>
+              <R20>0.0</R20>
+              <R21>0.0</R21>
+              <R22>1.0</R22>
+            </CoordinateFrame>
+            <Color3uint8 name="Color3uint8">9990725</Color3uint8>
+            <token name="TopSurface">3</token>
+            <token name="BottomSurface">0</token>
+            <bool name="CanCollide">false</bool>
+            <bool name="CanTouch">false</bool>
+            <token name="Material">272</token>
+            <token name="FrontSurface">3</token>
+            <token name="BackSurface">3</token>
+            <token name="LeftSurface">3</token>
+            <token name="RightSurface">3</token>
+          </Properties>
+        </Item>
+      </Item>
     </Item>
   </Item>
-  <Item class="ServerStorage" referent="RBX63">
+  <Item class="ServerStorage" referent="RBX114">
     <Properties>
       <string name="Name">ServerStorage</string>
     </Properties>
-    <Item class="Model" referent="RBX64">
+    <Item class="Model" referent="RBX115">
       <Properties>
         <string name="Name">RodeoMonsterTemplate</string>
-        <Ref name="PrimaryPart">RBX65</Ref>
+        <Ref name="PrimaryPart">RBX116</Ref>
       </Properties>
-      <Item class="Part" referent="RBX65">
+      <Item class="Part" referent="RBX116">
         <Properties>
           <string name="Name">MountRoot</string>
           <bool name="Anchored">true</bool>
@@ -1876,7 +3485,7 @@ return BagRules
           <bool name="CanQuery">false</bool>
           <bool name="CanTouch">false</bool>
         </Properties>
-        <Item class="BillboardGui" referent="RBX113">
+        <Item class="BillboardGui" referent="RBX164">
           <Properties>
             <string name="Name">Nameplate</string>
             <UDim2 name="Size">
@@ -1892,7 +3501,7 @@ return BagRules
             </Vector3>
             <bool name="AlwaysOnTop">true</bool>
           </Properties>
-          <Item class="TextLabel" referent="RBX114">
+          <Item class="TextLabel" referent="RBX165">
             <Properties>
               <string name="Name">Label</string>
               <UDim2 name="Size">
@@ -1914,7 +3523,7 @@ return BagRules
           </Item>
         </Item>
       </Item>
-      <Item class="Part" referent="RBX66">
+      <Item class="Part" referent="RBX117">
         <Properties>
           <string name="Name">Body</string>
           <bool name="Anchored">true</bool>
@@ -1949,7 +3558,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX67">
+      <Item class="Part" referent="RBX118">
         <Properties>
           <string name="Name">Back</string>
           <bool name="Anchored">true</bool>
@@ -1984,7 +3593,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX68">
+      <Item class="Part" referent="RBX119">
         <Properties>
           <string name="Name">Belly</string>
           <bool name="Anchored">true</bool>
@@ -2019,7 +3628,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX69">
+      <Item class="Part" referent="RBX120">
         <Properties>
           <string name="Name">Head</string>
           <bool name="Anchored">true</bool>
@@ -2054,7 +3663,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX70">
+      <Item class="Part" referent="RBX121">
         <Properties>
           <string name="Name">HeadCrown</string>
           <bool name="Anchored">true</bool>
@@ -2089,7 +3698,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX71">
+      <Item class="Part" referent="RBX122">
         <Properties>
           <string name="Name">Snout</string>
           <bool name="Anchored">true</bool>
@@ -2124,7 +3733,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX72">
+      <Item class="Part" referent="RBX123">
         <Properties>
           <string name="Name">NoseTop</string>
           <bool name="Anchored">true</bool>
@@ -2159,7 +3768,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX73">
+      <Item class="Part" referent="RBX124">
         <Properties>
           <string name="Name">Smile</string>
           <bool name="Anchored">true</bool>
@@ -2190,7 +3799,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX74">
+      <Item class="Part" referent="RBX125">
         <Properties>
           <string name="Name">LeftEar</string>
           <bool name="Anchored">true</bool>
@@ -2225,7 +3834,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX75">
+      <Item class="Part" referent="RBX126">
         <Properties>
           <string name="Name">LeftEarInner</string>
           <bool name="Anchored">true</bool>
@@ -2256,7 +3865,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX76">
+      <Item class="Part" referent="RBX127">
         <Properties>
           <string name="Name">LeftEyeWhite</string>
           <bool name="Anchored">true</bool>
@@ -2287,7 +3896,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX77">
+      <Item class="Part" referent="RBX128">
         <Properties>
           <string name="Name">LeftPupil</string>
           <bool name="Anchored">true</bool>
@@ -2318,7 +3927,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX78">
+      <Item class="Part" referent="RBX129">
         <Properties>
           <string name="Name">LeftShine</string>
           <bool name="Anchored">true</bool>
@@ -2349,7 +3958,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX79">
+      <Item class="Part" referent="RBX130">
         <Properties>
           <string name="Name">LeftNostril</string>
           <bool name="Anchored">true</bool>
@@ -2380,7 +3989,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX80">
+      <Item class="Part" referent="RBX131">
         <Properties>
           <string name="Name">LeftCheek</string>
           <bool name="Anchored">true</bool>
@@ -2411,7 +4020,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX81">
+      <Item class="Part" referent="RBX132">
         <Properties>
           <string name="Name">LeftFrontLeg</string>
           <bool name="Anchored">true</bool>
@@ -2446,7 +4055,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX82">
+      <Item class="Part" referent="RBX133">
         <Properties>
           <string name="Name">LeftFrontPaw</string>
           <bool name="Anchored">true</bool>
@@ -2481,7 +4090,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX83">
+      <Item class="Part" referent="RBX134">
         <Properties>
           <string name="Name">LeftFrontHoofLine</string>
           <bool name="Anchored">true</bool>
@@ -2512,7 +4121,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX84">
+      <Item class="Part" referent="RBX135">
         <Properties>
           <string name="Name">LeftBackLeg</string>
           <bool name="Anchored">true</bool>
@@ -2547,7 +4156,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX85">
+      <Item class="Part" referent="RBX136">
         <Properties>
           <string name="Name">LeftBackPaw</string>
           <bool name="Anchored">true</bool>
@@ -2582,7 +4191,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX86">
+      <Item class="Part" referent="RBX137">
         <Properties>
           <string name="Name">LeftBackHoofLine</string>
           <bool name="Anchored">true</bool>
@@ -2613,7 +4222,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX87">
+      <Item class="Part" referent="RBX138">
         <Properties>
           <string name="Name">RightEar</string>
           <bool name="Anchored">true</bool>
@@ -2648,7 +4257,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX88">
+      <Item class="Part" referent="RBX139">
         <Properties>
           <string name="Name">RightEarInner</string>
           <bool name="Anchored">true</bool>
@@ -2679,7 +4288,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX89">
+      <Item class="Part" referent="RBX140">
         <Properties>
           <string name="Name">RightEyeWhite</string>
           <bool name="Anchored">true</bool>
@@ -2710,7 +4319,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX90">
+      <Item class="Part" referent="RBX141">
         <Properties>
           <string name="Name">RightPupil</string>
           <bool name="Anchored">true</bool>
@@ -2741,7 +4350,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX91">
+      <Item class="Part" referent="RBX142">
         <Properties>
           <string name="Name">RightShine</string>
           <bool name="Anchored">true</bool>
@@ -2772,7 +4381,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX92">
+      <Item class="Part" referent="RBX143">
         <Properties>
           <string name="Name">RightNostril</string>
           <bool name="Anchored">true</bool>
@@ -2803,7 +4412,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX93">
+      <Item class="Part" referent="RBX144">
         <Properties>
           <string name="Name">RightCheek</string>
           <bool name="Anchored">true</bool>
@@ -2834,7 +4443,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX94">
+      <Item class="Part" referent="RBX145">
         <Properties>
           <string name="Name">RightFrontLeg</string>
           <bool name="Anchored">true</bool>
@@ -2869,7 +4478,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX95">
+      <Item class="Part" referent="RBX146">
         <Properties>
           <string name="Name">RightFrontPaw</string>
           <bool name="Anchored">true</bool>
@@ -2904,7 +4513,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX96">
+      <Item class="Part" referent="RBX147">
         <Properties>
           <string name="Name">RightFrontHoofLine</string>
           <bool name="Anchored">true</bool>
@@ -2935,7 +4544,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX97">
+      <Item class="Part" referent="RBX148">
         <Properties>
           <string name="Name">RightBackLeg</string>
           <bool name="Anchored">true</bool>
@@ -2970,7 +4579,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX98">
+      <Item class="Part" referent="RBX149">
         <Properties>
           <string name="Name">RightBackPaw</string>
           <bool name="Anchored">true</bool>
@@ -3005,7 +4614,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX99">
+      <Item class="Part" referent="RBX150">
         <Properties>
           <string name="Name">RightBackHoofLine</string>
           <bool name="Anchored">true</bool>
@@ -3036,7 +4645,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX100">
+      <Item class="Part" referent="RBX151">
         <Properties>
           <string name="Name">TailBase</string>
           <bool name="Anchored">true</bool>
@@ -3071,7 +4680,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX101">
+      <Item class="Part" referent="RBX152">
         <Properties>
           <string name="Name">TailCurl</string>
           <bool name="Anchored">true</bool>
@@ -3106,7 +4715,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX102">
+      <Item class="Part" referent="RBX153">
         <Properties>
           <string name="Name">TailTip</string>
           <bool name="Anchored">true</bool>
@@ -3141,7 +4750,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX103">
+      <Item class="Part" referent="RBX154">
         <Properties>
           <string name="Name">LanternSaddle</string>
           <bool name="Anchored">true</bool>
@@ -3176,7 +4785,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX104">
+      <Item class="Part" referent="RBX155">
         <Properties>
           <string name="Name">LanternBase</string>
           <bool name="Anchored">true</bool>
@@ -3211,7 +4820,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX105">
+      <Item class="Part" referent="RBX156">
         <Properties>
           <string name="Name">LanternGlow</string>
           <bool name="Anchored">true</bool>
@@ -3241,7 +4850,7 @@ return BagRules
           <bool name="CanTouch">false</bool>
           <token name="Material">288</token>
         </Properties>
-        <Item class="PointLight" referent="RBX106">
+        <Item class="PointLight" referent="RBX157">
           <Properties>
             <string name="Name">LanternLight</string>
             <Color3 name="Color">
@@ -3254,7 +4863,7 @@ return BagRules
           </Properties>
         </Item>
       </Item>
-      <Item class="Part" referent="RBX107">
+      <Item class="Part" referent="RBX158">
         <Properties>
           <string name="Name">LanternPost-0.360.38</string>
           <bool name="Anchored">true</bool>
@@ -3285,7 +4894,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX108">
+      <Item class="Part" referent="RBX159">
         <Properties>
           <string name="Name">LanternPost-0.361.1</string>
           <bool name="Anchored">true</bool>
@@ -3316,7 +4925,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX109">
+      <Item class="Part" referent="RBX160">
         <Properties>
           <string name="Name">LanternPost0.360.38</string>
           <bool name="Anchored">true</bool>
@@ -3347,7 +4956,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX110">
+      <Item class="Part" referent="RBX161">
         <Properties>
           <string name="Name">LanternPost0.361.1</string>
           <bool name="Anchored">true</bool>
@@ -3378,7 +4987,7 @@ return BagRules
           <token name="Material">272</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX111">
+      <Item class="Part" referent="RBX162">
         <Properties>
           <string name="Name">LanternRoof</string>
           <bool name="Anchored">true</bool>
@@ -3413,7 +5022,7 @@ return BagRules
           <token name="RightSurface">3</token>
         </Properties>
       </Item>
-      <Item class="Part" referent="RBX112">
+      <Item class="Part" referent="RBX163">
         <Properties>
           <string name="Name">LanternCap</string>
           <bool name="Anchored">true</bool>
@@ -3450,11 +5059,11 @@ return BagRules
       </Item>
     </Item>
   </Item>
-  <Item class="ServerScriptService" referent="RBX115">
+  <Item class="ServerScriptService" referent="RBX166">
     <Properties>
       <string name="Name">ServerScriptService</string>
     </Properties>
-    <Item class="Script" referent="RBX116">
+    <Item class="Script" referent="RBX167">
       <Properties>
         <string name="Name">CaptureServer</string>
         <ProtectedString name="Source">local Players=game:GetService("Players")
@@ -3476,7 +5085,7 @@ local function send(player,message)
  local state,bag=states[player],bags[player]
  if not bag then return end
  BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
- remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,protectedUntil=state and state.protectedUntil or 0,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message})
+ remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,protectedUntil=state and state.protectedUntil or 0,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0})
 end
 local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
@@ -3601,7 +5210,7 @@ RunService.Heartbeat:Connect(function(delta)
   elseif state.phase=="Lassoing" then
    if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end
    local p=state.monster.PrimaryPart.Position
-   state.monster:PivotTo(CFrame.new(p.X,2,p.Z-tuning.ForwardStudsPerSecond*dt))
+   state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z-tuning.ForwardStudsPerSecond*dt)
    local saddle=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
    local landingSeconds=state.landingSeconds or tuning.JumpSeconds
    local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
@@ -3620,7 +5229,7 @@ RunService.Heartbeat:Connect(function(delta)
    if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end
    position=Vector3.new(position.X,2,position.Z)
    local before=state.monster.PrimaryPart.Position
-   state.monster:PivotTo(CFrame.new(position))
+   state.monster.PrimaryPart.CFrame=CFrame.new(position)
    state.monster:SetAttribute("Steering",steer)
    state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
    if clock&gt;=(state.protectedUntil or 0) and World.hit(before,position) then finish(player,"장애물에 부딪혔어요.") continue end
@@ -3649,7 +5258,7 @@ for _,player in ipairs(Players:GetPlayers()) do added(player) end
         <bool name="Disabled">false</bool>
       </Properties>
     </Item>
-    <Item class="ModuleScript" referent="RBX117">
+    <Item class="ModuleScript" referent="RBX168">
       <Properties>
         <string name="Name">HuntWorld</string>
         <ProtectedString name="Source">local World = {}
@@ -3665,6 +5274,14 @@ local function part(parent, name, position, size, color)
 	item.Material = Enum.Material.Sand
 	item.Parent = parent
 	return item
+end
+
+local function decoration(parent,name,position,size,color)
+ local node=part(parent,name,position,size,color)
+ node.Material=Enum.Material.SmoothPlastic
+ node.CanCollide,node.CanTouch,node.CanQuery=false,false,false
+ node.TopSurface,node.BottomSurface=Enum.SurfaceType.Smooth,Enum.SurfaceType.Smooth
+ return node
 end
 
 function World.init(world, modelTemplate, config, rules)
@@ -3684,7 +5301,7 @@ function World.spawn(position)
 	model:SetAttribute("MonsterId", monsterId)
 	model:SetAttribute("Occupied", false)
 	model:SetAttribute("Running", true)
-	model:SetAttribute("RunStarted", workspace:GetServerTimeNow())
+	model:SetAttribute("RunStarted", workspace:GetServerTimeNow() - (math.abs(position.X*0.17+position.Z*0.023)%1))
 	model:SetAttribute("Steering", 0)
 	model:PivotTo(CFrame.new(position))
 	model.Parent = monsters
@@ -3700,23 +5317,40 @@ function World.ensure(z)
 		chunk.Name, chunk.Parent = "Road_" .. index, root
 		chunks[index] = chunk
 		local start = index * tuning.GroundChunkStuds
-		part(chunk, "Sand", Vector3.new(0,-1,start), Vector3.new(80,2,tuning.GroundChunkStuds), Color3.fromRGB(195,166,119))
+		local meadow=part(chunk, "Meadow", Vector3.new(0,-1,start), Vector3.new(80,2,tuning.GroundChunkStuds), Color3.fromRGB(178,211,117))
+  meadow.Material=Enum.Material.SmoothPlastic
 		local random = Random.new(9101 + math.abs(index) * 137)
 		for offset = -112,112,32 do
 			local rowZ = start + offset
-			for _, side in ipairs({-1,1}) do
-				local wall = part(chunk, "Canyon", Vector3.new(side*44,4,rowZ), Vector3.new(8,8+random:NextInteger(0,4),32), Color3.fromRGB(174,115,68))
-				wall.CanCollide = false
-				local ledge = part(chunk, "CanyonLedge", Vector3.new(side*41,1,rowZ), Vector3.new(4,2,30), Color3.fromRGB(153,97,58))
-				ledge.CanCollide = false
-			end
+   for _, side in ipairs({-1,1}) do
+    local height=8+random:NextInteger(0,3)
+    decoration(chunk,"CanyonBase",Vector3.new(side*45,2,rowZ),Vector3.new(10,4,32),Color3.fromRGB(220,151,97))
+    decoration(chunk,"CanyonStratum",Vector3.new(side*47,4.5,rowZ),Vector3.new(10,1,32),Color3.fromRGB(249,191,128))
+    decoration(chunk,"CanyonUpper",Vector3.new(side*49,5+height/2,rowZ),Vector3.new(12,height,32),Color3.fromRGB(201,126,80))
+    decoration(chunk,"GrassCap",Vector3.new(side*49,5+height+0.25,rowZ),Vector3.new(12,0.5,32),Color3.fromRGB(122,170,92))
+    decoration(chunk,"GrassEdge",Vector3.new(side*37,0.08,rowZ),Vector3.new(6,0.16,32),Color3.fromRGB(143,190,96))
+    for i=1,3 do
+     local z=rowZ+random:NextNumber(-14,14)
+     local x=side*random:NextNumber(37,39)
+     decoration(chunk,"GrassTuft",Vector3.new(x,0.45,z),Vector3.new(0.5,0.9,0.5),Color3.fromRGB(109,161,77))
+    end
+    if random:NextNumber()&lt;0.4 then
+     local treeZ=rowZ+random:NextNumber(-8,8)
+     decoration(chunk,"TreeTrunk",Vector3.new(side*53,5+height+2,treeZ),Vector3.new(1.4,4,1.4),Color3.fromRGB(152,99,67))
+     decoration(chunk,"TreeCrown",Vector3.new(side*53,5+height+5,treeZ),Vector3.new(6,4,6),Color3.fromRGB(115,163,90))
+     decoration(chunk,"TreeTop",Vector3.new(side*53,5+height+7,treeZ),Vector3.new(4,2,4),Color3.fromRGB(146,190,107))
+    end
+   end
+   for i=1,3 do
+    decoration(chunk,"MeadowPatch",Vector3.new(random:NextNumber(-29,29),0.025,rowZ+random:NextNumber(-14,14)),Vector3.new(random:NextNumber(2,5),0.05,random:NextNumber(3,8)),Color3.fromRGB(187,218,128))
+   end
 			-- Leave the run launch area clear; all other rows contain moving herds.
 			if rowZ &lt; -20 or rowZ &gt; 30 then
 				for _, x in ipairs({-18,-6,6,18}) do
 					if random:NextNumber() &lt; 0.65 then World.spawn(Vector3.new(x,2,rowZ)) end
 				end
 				if random:NextNumber() &lt; 0.55 then
-					local rock = part(obstacles, "Rock", Vector3.new(random:NextInteger(-3,3)*8,1.5,rowZ-12), Vector3.new(4,3,4), Color3.fromRGB(126,91,65))
+					local rock = part(obstacles, "Rock", Vector3.new(random:NextInteger(-3,3)*8,1.5,rowZ-12), Vector3.new(4,3,4), Color3.fromRGB(167,130,99))
 					rock:SetAttribute("Chunk", index)
 					rock.CanCollide = false -- server swept collision is authoritative
 				end
@@ -3729,7 +5363,8 @@ function World.step(dt)
 	for model in pairs(animals) do
 		if not model.Parent then animals[model] = nil continue end
 		if not model:GetAttribute("Occupied") then
-			model:PivotTo(model:GetPivot() + Vector3.new(0,0,-tuning.HerdStudsPerSecond*dt))
+			-- Only the authoritative root moves. Clients own all visual body poses.
+			model.PrimaryPart.CFrame += Vector3.new(0,0,-tuning.HerdStudsPerSecond*dt)
 		end
 	end
 end
@@ -3777,17 +5412,17 @@ return World
       </Properties>
     </Item>
   </Item>
-  <Item class="StarterPlayer" referent="RBX118">
+  <Item class="StarterPlayer" referent="RBX169">
     <Properties>
       <string name="Name">StarterPlayer</string>
       <float name="CameraMaxZoomDistance">40</float>
       <float name="CameraMinZoomDistance">8</float>
     </Properties>
-    <Item class="StarterPlayerScripts" referent="RBX119">
+    <Item class="StarterPlayerScripts" referent="RBX170">
       <Properties>
         <string name="Name">StarterPlayerScripts</string>
       </Properties>
-      <Item class="LocalScript" referent="RBX120">
+      <Item class="LocalScript" referent="RBX171">
         <Properties>
           <string name="Name">CaptureClient</string>
           <ProtectedString name="Source">local Players=game:GetService("Players")
@@ -3801,11 +5436,13 @@ local Config=require(package:WaitForChild("Config"))
 local Rules=require(package:WaitForChild("HuntRules"))
 local remote=package:WaitForChild("CaptureRemote")
 local animator=require(script.Parent:WaitForChild("RideAnimator"))
+local rider=require(script.Parent:WaitForChild("RiderPresentation"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
 local state={phase="Idle",started=0,count=0,pending=0,distance=0}
 local held,left,right=false,false,false
 local pointerOrigin,pointerX,lastSteer=nil,nil,0
 local notice,noticeUntil="",0
+local flightFrame=nil
 local savedType,savedSubject,savedFieldOfView=nil,nil,nil
 local function make(kind,props,parent)
  local node=Instance.new(kind)
@@ -3817,15 +5454,15 @@ local gui=make("ScreenGui",{Name="RodeoCaptureUI",ResetOnSpawn=false,DisplayOrde
 local function text(parent,value,pos,size,font)
  return make("TextLabel",{Text=value,Position=pos,Size=size,TextSize=font or 18,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(255,245,219),BackgroundTransparency=1,TextWrapped=true},parent)
 end
-local distance=text(gui,"0m",UDim2.fromOffset(16,16),UDim2.fromOffset(160,48),32)
-local bag=text(gui,"가방: 0마리 · 모인 돈: 0원",UDim2.fromOffset(16,64),UDim2.fromOffset(360,32),16)
-local panel=make("Frame",{AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,128),BackgroundColor3=Color3.fromRGB(36,29,25),BackgroundTransparency=0.15,BorderSizePixel=0},gui)
-make("UISizeConstraint",{MaxSize=Vector2.new(650,128)},panel)
+local distance=text(gui,"0m",UDim2.new(0.5,-80,0,12),UDim2.fromOffset(160,48),32)
+local bag=text(gui,"가방: 0마리 · 모인 돈: 0원",UDim2.fromOffset(16,64),UDim2.fromOffset(320,32),14)
+local panel=make("Frame",{AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,94),BackgroundColor3=Color3.fromRGB(43,67,49),BackgroundTransparency=0.22,BorderSizePixel=0},gui)
+make("UISizeConstraint",{MaxSize=Vector2.new(510,94)},panel)
 make("UICorner",{CornerRadius=UDim.new(0,14)},panel)
-local status=text(panel,"로데오 스트릿 · 루미돈 사냥",UDim2.fromOffset(12,6),UDim2.new(1,-24,0,32),20)
-local instruction=text(panel,"누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기",UDim2.fromOffset(12,42),UDim2.new(1,-24,0,32),15)
-local progress=make("Frame",{Name="TamingProgress",Position=UDim2.new(0,16,0,90),Size=UDim2.new(1,-32,0,14),BackgroundColor3=Color3.fromRGB(94,70,50),BorderSizePixel=0,Visible=false},panel)
-local fill=make("Frame",{Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(244,127,115),BorderSizePixel=0},progress)
+local status=text(panel,"로데오 스트릿 · 루미돈 사냥",UDim2.fromOffset(12,4),UDim2.new(1,-24,0,28),18)
+local instruction=text(panel,"누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기",UDim2.fromOffset(12,34),UDim2.new(1,-24,0,28),13)
+local progress=make("Frame",{Name="TamingProgress",Position=UDim2.new(0,16,0,72),Size=UDim2.new(1,-32,0,14),BackgroundColor3=Color3.fromRGB(72,97,71),BorderSizePixel=0,Visible=false},panel)
+local fill=make("Frame",{Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(255,192,101),BorderSizePixel=0},progress)
 local startButton=make("TextButton",{Name="StartHunt",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.52),Size=UDim2.fromOffset(230,64),Text="사냥 시작",TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(219,103,41)},gui)
 make("UICorner",{CornerRadius=UDim.new(0,16)},startButton)
 local highlight=make("Highlight",{Enabled=false,FillTransparency=0.82,OutlineColor=Color3.fromRGB(255,222,91)},gui)
@@ -3897,6 +5534,7 @@ UIS.WindowFocusReleased:Connect(function()
 end)
 remote.OnClientEvent:Connect(function(kind,data)
  if kind~="State" then return end
+ if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
  if data.message then notice,noticeUntil=data.message,os.clock()+3 end
  startButton.Visible=not active()
@@ -3905,24 +5543,44 @@ remote.OnClientEvent:Connect(function(kind,data)
  bag.Text=string.format("가방: %d마리 · 모인 돈: %d원",state.count,state.pending)
 end)
 player.CharacterAdded:Connect(function() state.phase="Idle" cameraMode(false) remote:FireServer("Sync") end)
-RunService.RenderStepped:Connect(function(dt)
+RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Camera.Value+1, function(dt)
  local clock=workspace:GetServerTimeNow()
  local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
- animator.update(monsters,clock,root and root.Position)
+ local frames=animator.update(monsters,clock,root and root.Position,dt)
+ local t=Config.Prototype
+ local visualFrame=root and root.CFrame
+ if state.phase~="Airborne" then flightFrame=nil end
+ if active() and root then
+  local mount=state.monster and frames[state.monster]
+  if state.phase=="Riding" and mount then
+   visualFrame=mount*CFrame.new(0,t.RideHeightStuds,0)
+  elseif state.phase=="Lassoing" and mount and state.origin then
+   local p=math.clamp((clock-state.started)/(state.landingSeconds or t.JumpSeconds),0,1)
+   visualFrame=state.origin:Lerp(mount*CFrame.new(0,t.RideHeightStuds,0),p)*CFrame.new(0,math.sin(math.pi*p)*t.JumpArcStuds*0.5,0)
+  elseif state.phase=="Airborne" and state.position and state.launchY then
+   local elapsed=math.clamp(clock-(state.sampleTime or clock),0,0.3)
+   local pos=state.position+Vector3.new((state.steer or 0)*t.SidewaysStudsPerSecond,0,-t.AirStudsPerSecond)*elapsed
+   local target=CFrame.new(math.clamp(pos.X,-t.RoadHalfWidth,t.RoadHalfWidth),state.launchY+Rules.jumpHeight(clock-state.started,t.FlightSeconds,t.JumpArcStuds),pos.Z)
+   flightFrame=(flightFrame or root.CFrame):Lerp(target,1-math.exp(-22*dt))
+   visualFrame=flightFrame
+  end
+ end
+ rider.update(player.Character,state.phase,visualFrame,dt,clock)
  distance.Text=string.format("%dm",math.floor(state.distance or 0))
  highlight.Enabled=false
  progress.Visible=state.phase=="Riding"
  for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
  if active() and root then
-  local t=Config.Prototype
   -- Follow horizontal movement; jumping should not lift the whole view.
-  local groundFocus=Vector3.new(0,t.CameraGroundFocusStuds,root.Position.Z)
+  local groundFocus=Vector3.new(0,t.CameraGroundFocusStuds,visualFrame.Position.Z)
   local target=CFrame.lookAt(groundFocus+Vector3.new(t.CameraSideStuds,t.CameraHeightStuds,t.CameraBehindStuds),groundFocus+Vector3.new(0,0,-t.CameraLookAheadStuds))
-  workspace.CurrentCamera.CFrame=workspace.CurrentCamera.CFrame:Lerp(target,1-math.exp(-10*dt))
+  -- The followed visual position is already smoothed; a second camera lag hides jumps.
+  workspace.CurrentCamera.CFrame=target
+  workspace.CurrentCamera.Focus=CFrame.new(groundFocus)
   if os.clock()-lastSteer&gt;=0.1 then remote:FireServer("Steer",steering()) lastSteer=os.clock() end
  end
  if state.phase=="Airborne" and root then
-  ring.Position=Vector3.new(root.Position.X,0.15,root.Position.Z)
+  ring.Position=Vector3.new(visualFrame.Position.X,0.15,visualFrame.Position.Z)
   local nearest,best=nil,Config.Prototype.LassoRangeStuds^2
   for _,model in ipairs(monsters:GetChildren()) do
    if model.PrimaryPart and model~=state.previousMonster and not model:GetAttribute("Occupied") then
@@ -3952,32 +5610,43 @@ remote:FireServer("Sync")
           <bool name="Disabled">false</bool>
         </Properties>
       </Item>
-      <Item class="ModuleScript" referent="RBX121">
+      <Item class="ModuleScript" referent="RBX172">
         <Properties>
           <string name="Name">RideAnimator</string>
           <ProtectedString name="Source">-- Procedural visual motion for the native part model. Never changes its mount root.
 local RideAnimator = {}
 local poses = {}
 local warnings = {}
+local package = game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy")
+local template = package:WaitForChild("VisualTemplate")
+local tuning = require(package:WaitForChild("Config")).Prototype
+local restFrames = {}
+for _, part in ipairs(template:GetDescendants()) do
+ if part:IsA("BasePart") and part ~= template.PrimaryPart then
+  restFrames[part.Name] = template.PrimaryPart.CFrame:ToObjectSpace(part.CFrame)
+ end
+end
 
 local function remember(model)
 	local root = model.PrimaryPart
 	if not root then return nil end
-	local pose = {}
+	local pose = {frame = root.CFrame, sample = root.CFrame, received = nil}
 	for _, part in ipairs(model:GetDescendants()) do
 		if part:IsA("BasePart") and part ~= root then
 			local side = string.sub(part.Name,1,4)=="Left" and "Left" or string.sub(part.Name,1,5)=="Right" and "Right" or nil
 			local movingLeg = side and (string.find(part.Name,"Leg",1,true) or string.find(part.Name,"Paw",1,true) or string.find(part.Name,"HoofLine",1,true))
 			local leg = movingLeg and (string.find(part.Name,"Front",1,true) and "Front" or "Back") or nil
 			if not leg then side=nil end
-			table.insert(pose, { part = part, rest = root.CFrame:ToObjectSpace(part.CFrame), side = side, leg = leg })
+			table.insert(pose, { part = part, rest = restFrames[part.Name] or root.CFrame:ToObjectSpace(part.CFrame), side = side, leg = leg })
 		end
 	end
 	poses[model] = pose
 	return pose
 end
 
-function RideAnimator.update(monsters, clock, cameraPosition)
+function RideAnimator.update(monsters, clock, cameraPosition, dt)
+ dt = dt or 1/60
+ local displayed = {}
 	for model, pose in pairs(poses) do
 		if model.Parent ~= monsters then poses[model] = nil end
 	end
@@ -3987,11 +5656,32 @@ function RideAnimator.update(monsters, clock, cameraPosition)
 	for _, model in ipairs(monsters:GetChildren()) do
 		local root = model.PrimaryPart
 		if not root then continue end
-		if cameraPosition and (root.Position-cameraPosition).Magnitude&gt;220 then continue end
+  local nameplate = root:FindFirstChild("Nameplate")
+  if nameplate then nameplate.Enabled = model:GetAttribute("Running") ~= true end
+		if cameraPosition then
+   local hidden=(root.Position-cameraPosition).Magnitude&gt;220
+   for _,part in ipairs(model:GetChildren()) do
+    if part:IsA("BasePart") and part~=root then part.LocalTransparencyModifier=hidden and 1 or 0 end
+   end
+   if hidden then continue end
+  end
 		local running = model:GetAttribute("Running") == true
 		local pose = poses[model]
 		if not pose and not running then continue end
 		pose = pose or remember(model)
+  if pose.sample ~= root.CFrame or not pose.received then
+   pose.sample, pose.received = root.CFrame, clock
+  end
+  local elapsed = math.clamp(clock-pose.received,0,0.08)
+  local speed = model:GetAttribute("Occupied") and tuning.ForwardStudsPerSecond or tuning.HerdStudsPerSecond
+  local steer = model:GetAttribute("Steering") or 0
+  local target = pose.sample + Vector3.new(steer*tuning.SidewaysStudsPerSecond,0,-speed)*(running and elapsed or 0)
+  if (target.Position-pose.frame.Position).Magnitude&gt;30 or not running then
+   pose.frame = target
+  else
+   pose.frame = pose.frame:Lerp(target,1-math.exp(-22*dt))
+  end
+  displayed[model] = pose.frame
 		local phase = (clock - (model:GetAttribute("RunStarted") or clock)) * math.pi * 7
 		local angry = model:GetAttribute("Angry") == true
 		local warning = warnings[model]
@@ -4007,39 +5697,136 @@ function RideAnimator.update(monsters, clock, cameraPosition)
 			warnings[model] = warning
 		end
 		if warning then warning.Enabled = angry end
-		local bob = running and ((angry and 0.32 or 0.07) * math.sin(phase * 2)) or 0
+		local bob = angry and 0.2 * math.sin(phase * 2) or 0
 		local lean = running and (model:GetAttribute("Steering") or 0) * -0.09 or 0
-		local frame = root.CFrame * CFrame.new(0, bob, 0) * CFrame.Angles(0, 0, lean)
+		local frame = pose.frame * CFrame.new(0, bob, 0) * CFrame.Angles(angry and math.sin(phase)*0.08 or 0, 0, lean)
 		for _, entry in ipairs(pose) do
 			if not entry.part.Parent then continue end
 			local localFrame = entry.rest
 			if running and entry.side then
 				local opposite = (entry.side == "Left") ~= (entry.leg == "Front")
-				local swing = math.sin(phase + (opposite and math.pi or 0)) * 0.3
+				local swing = math.sin(phase + (opposite and math.pi or 0)) * 0.55
 				local joint = CFrame.new(entry.side == "Left" and -0.88 or 0.88, -0.87, entry.leg == "Front" and -0.91 or 1.17)
-				localFrame = joint * CFrame.Angles(swing, 0, 0) * joint:Inverse() * entry.rest
+				localFrame = CFrame.new(0,math.max(0,math.sin(phase + (opposite and math.pi or 0)))*0.22,0) * joint * CFrame.Angles(swing, 0, 0) * joint:Inverse() * entry.rest
 			end
 			entry.part.CFrame = frame * localFrame
 		end
 		if not running then poses[model] = nil end
 	end
+ return displayed
 end
 
 return RideAnimator
 </ProtectedString>
         </Properties>
       </Item>
+      <Item class="ModuleScript" referent="RBX173">
+        <Properties>
+          <string name="Name">RiderPresentation</string>
+          <ProtectedString name="Source">-- Local presentation only; server still owns capture, movement and collisions.
+local Presentation = {}
+local character, animate, animateDisabled
+local joints, dust = {}, {}
+local lastDust = 0
+local shadow, trail, trailEnd
+local function restore()
+ for joint,rest in pairs(joints) do if joint.Parent then joint.C0=rest end end
+ if animate and animate.Parent then animate.Disabled=animateDisabled end
+ joints={}
+ if shadow then shadow:Destroy() shadow=nil end
+ if trail then trail.Parent:Destroy() trail=nil end
+ if trailEnd then trailEnd:Destroy() trailEnd=nil end
+ character,animate=nil,nil
+end
+function Presentation.update(model,phase,frame,dt,clock)
+ local active=phase~="Idle" and phase~="GameOver"
+ if character and (character~=model or not active) then restore() end
+ local root=model and model:FindFirstChild("HumanoidRootPart")
+ if active and root and not character then
+  character=model
+  animate=model:FindFirstChild("Animate")
+  if animate then animateDisabled=animate.Disabled animate.Disabled=true end
+  local humanoid=model:FindFirstChildOfClass("Humanoid")
+  local animator=humanoid and humanoid:FindFirstChildOfClass("Animator")
+  if animator then for _,track in ipairs(animator:GetPlayingAnimationTracks()) do track:Stop(0) end end
+  for _,joint in ipairs(model:GetDescendants()) do
+   if joint:IsA("Motor6D") then joints[joint]=joint.C0 joint.Transform=CFrame.identity end
+  end
+  shadow=Instance.new("Part")
+  shadow.Name="LocalRiderShadow"
+  shadow.Shape=Enum.PartType.Cylinder
+  shadow.Size=Vector3.new(0.04,4,4)
+  shadow.Color=Color3.fromRGB(71,89,54)
+  shadow.Transparency=0.65
+  shadow.Anchored,shadow.CanCollide,shadow.CanTouch,shadow.CanQuery=true,false,false,false
+  shadow.Parent=workspace
+  local a=Instance.new("Attachment") a.Name="FlightTrailAnchor" a.Position=Vector3.new(-0.7,0,0) a.Parent=root
+  local b=Instance.new("Attachment") b.Name="FlightTrailEnd" b.Position=Vector3.new(0.7,0,0) b.Parent=a
+  -- Both attachments must be parented to the root to use its coordinate space.
+  b.Parent=root trailEnd=b
+  trail=Instance.new("Trail") trail.Attachment0,trail.Attachment1=a,b
+  trail.Color=ColorSequence.new(Color3.fromRGB(255,236,172))
+  trail.Transparency=NumberSequence.new({NumberSequenceKeypoint.new(0,0.45),NumberSequenceKeypoint.new(1,1)})
+  trail.Lifetime,trail.FaceCamera,trail.Parent=0.18,true,a
+ end
+ if active and root and frame then
+  local airborne=phase=="Airborne" or phase=="Lassoing"
+  root.CFrame=frame * CFrame.Angles(airborne and -0.5 or 0,0,0)
+  for joint,rest in pairs(joints) do
+   if not joint.Parent then joints[joint]=nil continue end
+   local name=joint.Name:gsub(" ","")
+   local offset=CFrame.identity
+   if name:find("Shoulder") then
+    local side=name:find("Left") and -1 or 1
+    offset=CFrame.Angles(airborne and -0.65 or -0.8,0,side*(airborne and 0.9 or 0.18))
+   elseif name:find("Hip") then
+    local side=name:find("Left") and -1 or 1
+    offset=CFrame.Angles(airborne and -0.2 or -0.8,0,side*(airborne and 0.25 or 0.18))
+   elseif name:find("Knee") then offset=CFrame.Angles(airborne and 0.25 or 1.1,0,0)
+   elseif name=="Waist" then offset=CFrame.Angles(airborne and 0.08 or 0.15,0,0) end
+   joint.C0=joint.C0:Lerp(rest*offset,1-math.exp(-18*dt))
+  end
+  shadow.CFrame=CFrame.new(frame.X,0.055,frame.Z)*CFrame.Angles(0,0,math.pi/2)
+  shadow.Transparency=airborne and 0.5 or 0.75
+  trail.Enabled=airborne
+  if phase=="Riding" and clock-lastDust&gt;0.08 then
+   lastDust=clock
+   local puff=Instance.new("Part")
+   puff.Name="LocalHoofDust" puff.Anchored=true
+   puff.CanCollide,puff.CanTouch,puff.CanQuery=false,false,false
+   puff.Color=Color3.fromRGB(239,220,176) puff.Material=Enum.Material.SmoothPlastic
+   puff.Size=Vector3.new(0.5,0.5,0.5) puff.Transparency=0.45
+   puff.Position=Vector3.new(frame.X+math.sin(clock*31),0.3,frame.Z+2)
+   puff.Parent=workspace
+   table.insert(dust,{part=puff,started=clock})
+  end
+ end
+ for i=#dust,1,-1 do
+  local entry=dust[i] local p=(clock-entry.started)/0.45
+  if p&gt;=1 then entry.part:Destroy() table.remove(dust,i)
+  else
+   entry.part.Transparency=0.45+p*0.55
+   entry.part.Size=Vector3.one*(0.5+p*0.65)
+   entry.part.Position+=Vector3.new(0,dt*0.6,0)
+  end
+ end
+end
+function Presentation.clear() restore() end
+return Presentation
+</ProtectedString>
+        </Properties>
+      </Item>
     </Item>
   </Item>
-  <Item class="Lighting" referent="RBX122">
+  <Item class="Lighting" referent="RBX174">
     <Properties>
       <string name="Name">Lighting</string>
-      <float name="ClockTime">14</float>
+      <float name="ClockTime">13</float>
       <float name="Brightness">2</float>
       <Color3 name="Ambient">
-        <R>0.5</R>
-        <G>0.5</G>
-        <B>0.5</B>
+        <R>0.65</R>
+        <G>0.62</G>
+        <B>0.56</B>
       </Color3>
     </Properties>
   </Item>

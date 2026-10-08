@@ -17,7 +17,7 @@ local function send(player,message)
  local state,bag=states[player],bags[player]
  if not bag then return end
  BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
- remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,protectedUntil=state and state.protectedUntil or 0,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message})
+ remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,protectedUntil=state and state.protectedUntil or 0,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0})
 end
 local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
@@ -142,7 +142,7 @@ RunService.Heartbeat:Connect(function(delta)
   elseif state.phase=="Lassoing" then
    if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end
    local p=state.monster.PrimaryPart.Position
-   state.monster:PivotTo(CFrame.new(p.X,2,p.Z-tuning.ForwardStudsPerSecond*dt))
+   state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z-tuning.ForwardStudsPerSecond*dt)
    local saddle=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
    local landingSeconds=state.landingSeconds or tuning.JumpSeconds
    local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
@@ -161,7 +161,7 @@ RunService.Heartbeat:Connect(function(delta)
    if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end
    position=Vector3.new(position.X,2,position.Z)
    local before=state.monster.PrimaryPart.Position
-   state.monster:PivotTo(CFrame.new(position))
+   state.monster.PrimaryPart.CFrame=CFrame.new(position)
    state.monster:SetAttribute("Steering",steer)
    state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
    if clock>=(state.protectedUntil or 0) and World.hit(before,position) then finish(player,"장애물에 부딪혔어요.") continue end

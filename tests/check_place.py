@@ -21,6 +21,7 @@ expected = {
     "HuntWorld": "src/server/HuntWorld.luau",
     "CaptureClient": "src/client/CaptureClient.client.luau",
     "RideAnimator": "src/client/RideAnimator.luau",
+    "RiderPresentation": "src/client/RiderPresentation.luau",
 }
 assert set(scripts) == set(expected)
 for name, source in expected.items():

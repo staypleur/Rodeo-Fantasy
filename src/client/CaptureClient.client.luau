@@ -9,11 +9,13 @@ local Config=require(package:WaitForChild("Config"))
 local Rules=require(package:WaitForChild("HuntRules"))
 local remote=package:WaitForChild("CaptureRemote")
 local animator=require(script.Parent:WaitForChild("RideAnimator"))
+local rider=require(script.Parent:WaitForChild("RiderPresentation"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
 local state={phase="Idle",started=0,count=0,pending=0,distance=0}
 local held,left,right=false,false,false
 local pointerOrigin,pointerX,lastSteer=nil,nil,0
 local notice,noticeUntil="",0
+local flightFrame=nil
 local savedType,savedSubject,savedFieldOfView=nil,nil,nil
 local function make(kind,props,parent)
  local node=Instance.new(kind)
@@ -25,15 +27,15 @@ local gui=make("ScreenGui",{Name="RodeoCaptureUI",ResetOnSpawn=false,DisplayOrde
 local function text(parent,value,pos,size,font)
  return make("TextLabel",{Text=value,Position=pos,Size=size,TextSize=font or 18,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(255,245,219),BackgroundTransparency=1,TextWrapped=true},parent)
 end
-local distance=text(gui,"0m",UDim2.fromOffset(16,16),UDim2.fromOffset(160,48),32)
-local bag=text(gui,"가방: 0마리 · 모인 돈: 0원",UDim2.fromOffset(16,64),UDim2.fromOffset(360,32),16)
-local panel=make("Frame",{AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,128),BackgroundColor3=Color3.fromRGB(36,29,25),BackgroundTransparency=0.15,BorderSizePixel=0},gui)
-make("UISizeConstraint",{MaxSize=Vector2.new(650,128)},panel)
+local distance=text(gui,"0m",UDim2.new(0.5,-80,0,12),UDim2.fromOffset(160,48),32)
+local bag=text(gui,"가방: 0마리 · 모인 돈: 0원",UDim2.fromOffset(16,64),UDim2.fromOffset(320,32),14)
+local panel=make("Frame",{AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,94),BackgroundColor3=Color3.fromRGB(43,67,49),BackgroundTransparency=0.22,BorderSizePixel=0},gui)
+make("UISizeConstraint",{MaxSize=Vector2.new(510,94)},panel)
 make("UICorner",{CornerRadius=UDim.new(0,14)},panel)
-local status=text(panel,"로데오 스트릿 · 루미돈 사냥",UDim2.fromOffset(12,6),UDim2.new(1,-24,0,32),20)
-local instruction=text(panel,"누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기",UDim2.fromOffset(12,42),UDim2.new(1,-24,0,32),15)
-local progress=make("Frame",{Name="TamingProgress",Position=UDim2.new(0,16,0,90),Size=UDim2.new(1,-32,0,14),BackgroundColor3=Color3.fromRGB(94,70,50),BorderSizePixel=0,Visible=false},panel)
-local fill=make("Frame",{Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(244,127,115),BorderSizePixel=0},progress)
+local status=text(panel,"로데오 스트릿 · 루미돈 사냥",UDim2.fromOffset(12,4),UDim2.new(1,-24,0,28),18)
+local instruction=text(panel,"누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기",UDim2.fromOffset(12,34),UDim2.new(1,-24,0,28),13)
+local progress=make("Frame",{Name="TamingProgress",Position=UDim2.new(0,16,0,72),Size=UDim2.new(1,-32,0,14),BackgroundColor3=Color3.fromRGB(72,97,71),BorderSizePixel=0,Visible=false},panel)
+local fill=make("Frame",{Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(255,192,101),BorderSizePixel=0},progress)
 local startButton=make("TextButton",{Name="StartHunt",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.52),Size=UDim2.fromOffset(230,64),Text="사냥 시작",TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(219,103,41)},gui)
 make("UICorner",{CornerRadius=UDim.new(0,16)},startButton)
 local highlight=make("Highlight",{Enabled=false,FillTransparency=0.82,OutlineColor=Color3.fromRGB(255,222,91)},gui)
@@ -105,6 +107,7 @@ UIS.WindowFocusReleased:Connect(function()
 end)
 remote.OnClientEvent:Connect(function(kind,data)
  if kind~="State" then return end
+ if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
  if data.message then notice,noticeUntil=data.message,os.clock()+3 end
  startButton.Visible=not active()
@@ -113,24 +116,44 @@ remote.OnClientEvent:Connect(function(kind,data)
  bag.Text=string.format("가방: %d마리 · 모인 돈: %d원",state.count,state.pending)
 end)
 player.CharacterAdded:Connect(function() state.phase="Idle" cameraMode(false) remote:FireServer("Sync") end)
-RunService.RenderStepped:Connect(function(dt)
+RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Camera.Value+1, function(dt)
  local clock=workspace:GetServerTimeNow()
  local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
- animator.update(monsters,clock,root and root.Position)
+ local frames=animator.update(monsters,clock,root and root.Position,dt)
+ local t=Config.Prototype
+ local visualFrame=root and root.CFrame
+ if state.phase~="Airborne" then flightFrame=nil end
+ if active() and root then
+  local mount=state.monster and frames[state.monster]
+  if state.phase=="Riding" and mount then
+   visualFrame=mount*CFrame.new(0,t.RideHeightStuds,0)
+  elseif state.phase=="Lassoing" and mount and state.origin then
+   local p=math.clamp((clock-state.started)/(state.landingSeconds or t.JumpSeconds),0,1)
+   visualFrame=state.origin:Lerp(mount*CFrame.new(0,t.RideHeightStuds,0),p)*CFrame.new(0,math.sin(math.pi*p)*t.JumpArcStuds*0.5,0)
+  elseif state.phase=="Airborne" and state.position and state.launchY then
+   local elapsed=math.clamp(clock-(state.sampleTime or clock),0,0.3)
+   local pos=state.position+Vector3.new((state.steer or 0)*t.SidewaysStudsPerSecond,0,-t.AirStudsPerSecond)*elapsed
+   local target=CFrame.new(math.clamp(pos.X,-t.RoadHalfWidth,t.RoadHalfWidth),state.launchY+Rules.jumpHeight(clock-state.started,t.FlightSeconds,t.JumpArcStuds),pos.Z)
+   flightFrame=(flightFrame or root.CFrame):Lerp(target,1-math.exp(-22*dt))
+   visualFrame=flightFrame
+  end
+ end
+ rider.update(player.Character,state.phase,visualFrame,dt,clock)
  distance.Text=string.format("%dm",math.floor(state.distance or 0))
  highlight.Enabled=false
  progress.Visible=state.phase=="Riding"
  for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
  if active() and root then
-  local t=Config.Prototype
   -- Follow horizontal movement; jumping should not lift the whole view.
-  local groundFocus=Vector3.new(0,t.CameraGroundFocusStuds,root.Position.Z)
+  local groundFocus=Vector3.new(0,t.CameraGroundFocusStuds,visualFrame.Position.Z)
   local target=CFrame.lookAt(groundFocus+Vector3.new(t.CameraSideStuds,t.CameraHeightStuds,t.CameraBehindStuds),groundFocus+Vector3.new(0,0,-t.CameraLookAheadStuds))
-  workspace.CurrentCamera.CFrame=workspace.CurrentCamera.CFrame:Lerp(target,1-math.exp(-10*dt))
+  -- The followed visual position is already smoothed; a second camera lag hides jumps.
+  workspace.CurrentCamera.CFrame=target
+  workspace.CurrentCamera.Focus=CFrame.new(groundFocus)
   if os.clock()-lastSteer>=0.1 then remote:FireServer("Steer",steering()) lastSteer=os.clock() end
  end
  if state.phase=="Airborne" and root then
-  ring.Position=Vector3.new(root.Position.X,0.15,root.Position.Z)
+  ring.Position=Vector3.new(visualFrame.Position.X,0.15,visualFrame.Position.Z)
   local nearest,best=nil,Config.Prototype.LassoRangeStuds^2
   for _,model in ipairs(monsters:GetChildren()) do
    if model.PrimaryPart and model~=state.previousMonster and not model:GetAttribute("Occupied") then
