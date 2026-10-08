@@ -14,7 +14,7 @@ local state={phase="Idle",started=0,count=0,pending=0,distance=0}
 local held,left,right=false,false,false
 local pointerOrigin,pointerX,lastSteer=nil,nil,0
 local notice,noticeUntil="",0
-local savedType,savedSubject=nil,nil
+local savedType,savedSubject,savedFieldOfView=nil,nil,nil
 local function make(kind,props,parent)
  local node=Instance.new(kind)
  for k,v in pairs(props) do node[k]=v end
@@ -69,14 +69,16 @@ end
 local function cameraMode(enabled)
  local camera=workspace.CurrentCamera
  if enabled and savedType==nil then
-  savedType,savedSubject=camera.CameraType,camera.CameraSubject
+  savedType,savedSubject,savedFieldOfView=camera.CameraType,camera.CameraSubject,camera.FieldOfView
   CAS:BindActionAtPriority("RodeoSteer",keyAction,false,Enum.ContextActionPriority.High.Value+1,Enum.KeyCode.A,Enum.KeyCode.D,Enum.KeyCode.W,Enum.KeyCode.S,Enum.KeyCode.Space)
   camera.CameraType=Enum.CameraType.Scriptable
+  camera.FieldOfView=Config.Prototype.CameraFieldOfView
  elseif not enabled and savedType~=nil then
   CAS:UnbindAction("RodeoSteer")
   camera.CameraType=savedType
+  camera.FieldOfView=savedFieldOfView
   if savedSubject and savedSubject.Parent then camera.CameraSubject=savedSubject end
-  savedType,savedSubject=nil,nil
+  savedType,savedSubject,savedFieldOfView=nil,nil,nil
   held,left,right=false,false,false
  end
 end
@@ -121,7 +123,9 @@ RunService.RenderStepped:Connect(function(dt)
  for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
  if active() and root then
   local t=Config.Prototype
-  local target=CFrame.lookAt(root.Position+Vector3.new(0,t.CameraHeightStuds,t.CameraBehindStuds),root.Position+Vector3.new(0,0,-t.CameraLookAheadStuds))
+  -- Follow horizontal movement; jumping should not lift the whole view.
+  local groundFocus=Vector3.new(root.Position.X,t.CameraGroundFocusStuds,root.Position.Z)
+  local target=CFrame.lookAt(groundFocus+Vector3.new(0,t.CameraHeightStuds,t.CameraBehindStuds),groundFocus+Vector3.new(0,0,-t.CameraLookAheadStuds))
   workspace.CurrentCamera.CFrame=workspace.CurrentCamera.CFrame:Lerp(target,1-math.exp(-10*dt))
   if os.clock()-lastSteer>=0.1 then remote:FireServer("Steer",steering()) lastSteer=os.clock() end
  end

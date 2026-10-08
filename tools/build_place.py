@@ -78,6 +78,13 @@ def monster(parent, name, position):
         prop(body_props, "bool", "CanCollide", False)
         prop(body_props, "bool", "CanTouch", False)
         prop(body_props, "token", "Material", 288 if component["neon"] else 272)
+        if component.get("studs"):
+            for surface in ("TopSurface", "FrontSurface", "BackSurface", "LeftSurface", "RightSurface"):
+                existing = body_props.find(f"token[@name='{surface}']")
+                if existing is not None:
+                    existing.text = "3"
+                else:
+                    prop(body_props, "token", surface, 3)  # Visual studs; no automatic joints.
         if shape == "Sphere":
             mesh, mesh_props = item(body, "SpecialMesh", "Shape")
             prop(mesh_props, "token", "MeshType", 3)  # Enum.MeshType.Sphere

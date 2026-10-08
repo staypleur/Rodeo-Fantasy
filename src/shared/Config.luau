@@ -42,9 +42,11 @@ Config.Prototype = {
 	GroundChunkStuds = 256,
 	RideHeightStuds = 4,
 	RespawnSeconds = 1,
-	CameraHeightStuds = 28,
-	CameraBehindStuds = 27,
-	CameraLookAheadStuds = 18,
+	CameraHeightStuds = 65,
+	CameraBehindStuds = 18,
+	CameraLookAheadStuds = 12,
+	CameraGroundFocusStuds = 2,
+	CameraFieldOfView = 50,
 }
 
 return Config
