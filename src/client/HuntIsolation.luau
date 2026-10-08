@@ -2,7 +2,17 @@
 local I={}
 local watched=setmetatable({},{__mode="k"})
 local avatars=setmetatable({},{__mode="k"})
+local ownNameplates=setmetatable({},{__mode="k"})
 function I.update(player,hunting)
+ local character=player.Character
+ if character then
+  for _,node in ipairs(character:GetDescendants()) do
+   if node:IsA("BillboardGui") and node.Name=="ExplorerNameplate" then
+    if ownNameplates[node]==nil then ownNameplates[node]=node.Enabled end
+    node.Enabled=not hunting and ownNameplates[node]
+   end
+  end
+ end
  local runs=workspace:FindFirstChild("PrivateHunts")
  if runs then for _,folder in ipairs(runs:GetChildren()) do
   if not watched[folder] then
