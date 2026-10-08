@@ -1,5 +1,5 @@
 local World = {}
-local chunks, animals = {}, {}
+local chunks, animals, previousPositions = {}, {}, {}
 local root, monsters, obstacles, template, tuning
 local Rules
 local monsterId
@@ -61,21 +61,21 @@ function World.ensure(z)
 			local rowZ = start + offset
    for _, side in ipairs({-1,1}) do
     local height=8+random:NextInteger(0,3)
-    decoration(chunk,"CanyonBase",Vector3.new(side*45,2,rowZ),Vector3.new(10,4,32),Color3.fromRGB(220,151,97))
-    decoration(chunk,"CanyonStratum",Vector3.new(side*47,4.5,rowZ),Vector3.new(10,1,32),Color3.fromRGB(249,191,128))
-    decoration(chunk,"CanyonUpper",Vector3.new(side*49,5+height/2,rowZ),Vector3.new(12,height,32),Color3.fromRGB(201,126,80))
-    decoration(chunk,"GrassCap",Vector3.new(side*49,5+height+0.25,rowZ),Vector3.new(12,0.5,32),Color3.fromRGB(122,170,92))
-    decoration(chunk,"GrassEdge",Vector3.new(side*37,0.08,rowZ),Vector3.new(6,0.16,32),Color3.fromRGB(143,190,96))
+    decoration(chunk,"CanyonBase",Vector3.new(side*40,2,rowZ),Vector3.new(10,4,32),Color3.fromRGB(220,151,97))
+    decoration(chunk,"CanyonStratum",Vector3.new(side*42,4.5,rowZ),Vector3.new(10,1,32),Color3.fromRGB(249,191,128))
+    decoration(chunk,"CanyonUpper",Vector3.new(side*44,5+height/2,rowZ),Vector3.new(12,height,32),Color3.fromRGB(201,126,80))
+    decoration(chunk,"GrassCap",Vector3.new(side*44,5+height+0.25,rowZ),Vector3.new(12,0.5,32),Color3.fromRGB(122,170,92))
+    decoration(chunk,"GrassEdge",Vector3.new(side*32,0.08,rowZ),Vector3.new(6,0.16,32),Color3.fromRGB(143,190,96))
     for i=1,3 do
      local z=rowZ+random:NextNumber(-14,14)
-     local x=side*random:NextNumber(37,39)
+     local x=side*random:NextNumber(32,34)
      decoration(chunk,"GrassTuft",Vector3.new(x,0.45,z),Vector3.new(0.5,0.9,0.5),Color3.fromRGB(109,161,77))
     end
     if random:NextNumber()<0.4 then
      local treeZ=rowZ+random:NextNumber(-8,8)
-     decoration(chunk,"TreeTrunk",Vector3.new(side*53,5+height+2,treeZ),Vector3.new(1.4,4,1.4),Color3.fromRGB(152,99,67))
-     decoration(chunk,"TreeCrown",Vector3.new(side*53,5+height+5,treeZ),Vector3.new(6,4,6),Color3.fromRGB(115,163,90))
-     decoration(chunk,"TreeTop",Vector3.new(side*53,5+height+7,treeZ),Vector3.new(4,2,4),Color3.fromRGB(146,190,107))
+     decoration(chunk,"TreeTrunk",Vector3.new(side*48,5+height+2,treeZ),Vector3.new(1.4,4,1.4),Color3.fromRGB(152,99,67))
+     decoration(chunk,"TreeCrown",Vector3.new(side*48,5+height+5,treeZ),Vector3.new(6,4,6),Color3.fromRGB(115,163,90))
+     decoration(chunk,"TreeTop",Vector3.new(side*48,5+height+7,treeZ),Vector3.new(4,2,4),Color3.fromRGB(146,190,107))
     end
    end
    for i=1,3 do
@@ -98,7 +98,8 @@ end
 
 function World.step(dt)
 	for model in pairs(animals) do
-		if not model.Parent then animals[model] = nil continue end
+		if not model.Parent then animals[model] = nil previousPositions[model]=nil continue end
+		previousPositions[model] = model.PrimaryPart.Position
 		if not model:GetAttribute("Occupied") then
 			-- Only the authoritative root moves. Clients own all visual body poses.
 			model.PrimaryPart.CFrame += Vector3.new(0,0,-tuning.HerdStudsPerSecond*dt)
@@ -115,6 +116,21 @@ function World.nearest(position, excluded)
 		if distance <= bestDistance then best, bestDistance = model, distance end
 	end
 	return best
+end
+
+-- Contact while riding: include moving herds and the visible inner canyon face.
+function World.mountedHit(from,to,mount)
+ local half=mount.PrimaryPart.Size/2
+ if math.max(math.abs(from.X),math.abs(to.X))+half.X>=tuning.RoadHalfWidth then return "Wall" end
+ for other in pairs(animals) do
+  if other==mount or not other.Parent then continue end
+  local old=previousPositions[other] or other.PrimaryPart.Position
+  local current=other.PrimaryPart.Position
+  local a,b=from-old,to-current
+  local size=other.PrimaryPart.Size+mount.PrimaryPart.Size
+  if Rules.sweptBox(a.X,a.Y,a.Z,b.X,b.Y,b.Z,0,0,0,size.X,size.Y,size.Z,0) then return "Monster" end
+ end
+ return nil
 end
 
 function World.hit(from, to)
@@ -137,10 +153,10 @@ function World.cleanup(nearZ)
 		end
 	end
 	for model in pairs(animals) do
-		if not model.Parent then animals[model] = nil continue end
+		if not model.Parent then animals[model] = nil previousPositions[model]=nil continue end
 		local keep = model:GetAttribute("Occupied")
 		for _, z in ipairs(nearZ) do if math.abs(model.PrimaryPart.Position.Z-z) < tuning.GroundChunkStuds*4 then keep = true break end end
-		if not keep then model:Destroy() animals[model] = nil end
+		if not keep then model:Destroy() animals[model] = nil previousPositions[model]=nil end
 	end
 end
 

@@ -10,6 +10,8 @@ local Rules=require(package:WaitForChild("HuntRules"))
 local remote=package:WaitForChild("CaptureRemote")
 local animator=require(script.Parent:WaitForChild("RideAnimator"))
 local rider=require(script.Parent:WaitForChild("RiderPresentation"))
+local gauge=require(script.Parent:WaitForChild("TamingGauge"))
+local crashEffect=require(script.Parent:WaitForChild("CrashEffect"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
 local state={phase="Idle",started=0,count=0,pending=0,distance=0}
 local held,left,right=false,false,false
@@ -29,13 +31,11 @@ local function text(parent,value,pos,size,font)
 end
 local distance=text(gui,"0m",UDim2.new(0.5,-80,0,12),UDim2.fromOffset(160,48),32)
 local bag=text(gui,"가방: 0마리 · 모인 돈: 0원",UDim2.fromOffset(16,64),UDim2.fromOffset(320,32),14)
-local panel=make("Frame",{AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,94),BackgroundColor3=Color3.fromRGB(43,67,49),BackgroundTransparency=0.22,BorderSizePixel=0},gui)
+local panel=make("Frame",{Name="HuntHelp",AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,94),BackgroundColor3=Color3.fromRGB(43,67,49),BackgroundTransparency=0.22,BorderSizePixel=0},gui)
 make("UISizeConstraint",{MaxSize=Vector2.new(510,94)},panel)
 make("UICorner",{CornerRadius=UDim.new(0,14)},panel)
 local status=text(panel,"로데오 스트릿 · 루미돈 사냥",UDim2.fromOffset(12,4),UDim2.new(1,-24,0,28),18)
-local instruction=text(panel,"누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기",UDim2.fromOffset(12,34),UDim2.new(1,-24,0,28),13)
-local progress=make("Frame",{Name="TamingProgress",Position=UDim2.new(0,16,0,72),Size=UDim2.new(1,-32,0,14),BackgroundColor3=Color3.fromRGB(72,97,71),BorderSizePixel=0,Visible=false},panel)
-local fill=make("Frame",{Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(255,192,101),BorderSizePixel=0},progress)
+local instruction=text(panel,"A·D 좌우 이동 → 스페이스바 점프 → 다시 눌러 줄",UDim2.fromOffset(12,34),UDim2.new(1,-24,0,28),13)
 local startButton=make("TextButton",{Name="StartHunt",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.52),Size=UDim2.fromOffset(230,64),Text="사냥 시작",TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(219,103,41)},gui)
 make("UICorner",{CornerRadius=UDim.new(0,16)},startButton)
 local highlight=make("Highlight",{Enabled=false,FillTransparency=0.82,OutlineColor=Color3.fromRGB(255,222,91)},gui)
@@ -61,6 +61,7 @@ local function steering()
  return 0
 end
 local function keyAction(_,inputState,input)
+ if UIS:GetFocusedTextBox() then return Enum.ContextActionResult.Pass end
  local down=inputState==Enum.UserInputState.Begin
  if inputState==Enum.UserInputState.Cancel then left,right=false,false else
   if input.KeyCode==Enum.KeyCode.A then left=down end
@@ -68,15 +69,24 @@ local function keyAction(_,inputState,input)
  end
  return Enum.ContextActionResult.Sink
 end
+local function jumpAction(_,inputState)
+ if UIS:GetFocusedTextBox() or not active() then return Enum.ContextActionResult.Pass end
+ if inputState==Enum.UserInputState.Begin then remote:FireServer("Jump") end
+ return Enum.ContextActionResult.Sink
+end
 local function cameraMode(enabled)
  local camera=workspace.CurrentCamera
  if enabled and savedType==nil then
   savedType,savedSubject,savedFieldOfView=camera.CameraType,camera.CameraSubject,camera.FieldOfView
-  CAS:BindActionAtPriority("RodeoSteer",keyAction,false,Enum.ContextActionPriority.High.Value+1,Enum.KeyCode.A,Enum.KeyCode.D,Enum.KeyCode.W,Enum.KeyCode.S,Enum.KeyCode.Space)
+  CAS:BindActionAtPriority("RodeoSteer",keyAction,false,Enum.ContextActionPriority.High.Value+1,Enum.KeyCode.A,Enum.KeyCode.D,Enum.KeyCode.W,Enum.KeyCode.S)
+  CAS:BindActionAtPriority("RodeoJump",jumpAction,true,Enum.ContextActionPriority.High.Value+2,Enum.KeyCode.Space)
+  CAS:SetTitle("RodeoJump","점프 / 줄")
+  CAS:SetPosition("RodeoJump",UDim2.new(1,-95,1,-160))
   camera.CameraType=Enum.CameraType.Scriptable
   camera.FieldOfView=Config.Prototype.CameraFieldOfView
  elseif not enabled and savedType~=nil then
   CAS:UnbindAction("RodeoSteer")
+  CAS:UnbindAction("RodeoJump")
   camera.CameraType=savedType
   camera.FieldOfView=savedFieldOfView
   if savedSubject and savedSubject.Parent then camera.CameraSubject=savedSubject end
@@ -89,7 +99,6 @@ UIS.InputBegan:Connect(function(input,processed)
  if processed or not active() then return end
  if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
   held=true pointerOrigin,pointerX=input.Position.X,input.Position.X
-  remote:FireServer("Hold",true)
  end
 end)
 UIS.InputChanged:Connect(function(input)
@@ -97,16 +106,16 @@ UIS.InputChanged:Connect(function(input)
 end)
 UIS.InputEnded:Connect(function(input)
  if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-  if held then held=false remote:FireServer("Hold",false) end
+  held=false
   pointerOrigin,pointerX=nil,nil
  end
 end)
 UIS.WindowFocusReleased:Connect(function()
- if held then remote:FireServer("Hold",false) end
  held,left,right=false,false,false
 end)
 remote.OnClientEvent:Connect(function(kind,data)
  if kind~="State" then return end
+ if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow()) end
  if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
  if data.message then notice,noticeUntil=data.message,os.clock()+3 end
@@ -139,9 +148,11 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   end
  end
  rider.update(player.Character,state.phase,visualFrame,dt,clock)
+ crashEffect.update(player.Character,state.phase,clock)
  distance.Text=string.format("%dm",math.floor(state.distance or 0))
  highlight.Enabled=false
- progress.Visible=state.phase=="Riding"
+ panel.Visible=not active()
+ gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),state.tamed,state.angerAt~=nil)
  for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
  if active() and root then
   -- Follow horizontal movement; jumping should not lift the whole view.
@@ -164,18 +175,17 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   if nearest then highlight.Adornee,highlight.Enabled=nearest,true end
  end
  if state.phase=="Riding" then
-  fill.Size=UDim2.fromScale(state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),1)
-  status.Text=state.angerAt and "화났어요! 손을 떼고 점프하세요!" or state.tamed and "길들이기 성공 · 계속 타고 달리세요" or "루미돈 길들이는 중 ♥"
-  instruction.Text="누른 채 좌우로 움직이기 / A·D · 손을 떼면 점프"
+  status.Text=state.angerAt and "화났어요! 스페이스바로 점프하세요!" or state.tamed and "길들이기 성공 · 계속 타고 달리세요" or "루미돈 길들이는 중 ♥"
+  instruction.Text="A·D로 좌우 이동 · 스페이스바로 점프 / 공중에서 다시 누르면 줄"
   if clock<(state.protectedUntil or 0) then
-   instruction.Text=string.format("착지 보호 %.1f초 · 누른 채 좌우 이동 / 손을 떼면 점프",state.protectedUntil-clock)
+   instruction.Text=string.format("착지 보호 %.1f초 · A·D 좌우 이동 / 스페이스바 점프",state.protectedUntil-clock)
   end
  elseif state.phase=="Airborne" then
-  status.Text="다시 눌러 다음 몬스터를 잡으세요!"
+  status.Text="스페이스바로 다음 몬스터를 잡으세요!"
   instruction.Text="노란 원 안에 몬스터가 들어오면 줄이 연결됩니다"
  elseif state.phase=="Lassoing" then status.Text="날아가서 탑승하는 중…" instruction.Text="탑승 후 계속 타고 달릴 수 있어요"
  elseif state.phase=="GameOver" then status.Text="사냥 종료" instruction.Text="다시 사냥하기로 재도전 · 가방 수익은 유지"
- else status.Text="로데오 스트릿 · 루미돈 사냥" instruction.Text="사냥 시작 → 누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기" end
+ else status.Text="로데오 스트릿 · 루미돈 사냥" instruction.Text="사냥 시작 → A·D 좌우 이동 → 스페이스바 점프 → 다시 눌러 줄" end
  if os.clock()<noticeUntil and not state.angerAt then status.Text=notice end
 end)
 remote:FireServer("Sync")

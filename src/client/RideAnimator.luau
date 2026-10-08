@@ -5,6 +5,7 @@ local warnings = {}
 local package = game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy")
 local template = package:WaitForChild("VisualTemplate")
 local tuning = require(package:WaitForChild("Config")).Prototype
+local Rules = require(package:WaitForChild("HuntRules"))
 local restFrames = {}
 for _, part in ipairs(template:GetDescendants()) do
  if part:IsA("BasePart") and part ~= template.PrimaryPart then
@@ -66,7 +67,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
   else
    pose.frame = pose.frame:Lerp(target,1-math.exp(-22*dt))
   end
-  displayed[model] = pose.frame
+
 		local phase = (clock - (model:GetAttribute("RunStarted") or clock)) * math.pi * 7
 		local angry = model:GetAttribute("Angry") == true
 		local warning = warnings[model]
@@ -82,9 +83,10 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
 			warnings[model] = warning
 		end
 		if warning then warning.Enabled = angry end
-		local bob = angry and 0.2 * math.sin(phase * 2) or 0
+		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds)
 		local lean = running and (model:GetAttribute("Steering") or 0) * -0.09 or 0
-		local frame = pose.frame * CFrame.new(0, bob, 0) * CFrame.Angles(angry and math.sin(phase)*0.08 or 0, 0, lean)
+		local frame = pose.frame * CFrame.Angles(angry and pitch or 0, 0, lean)
+  displayed[model] = frame
 		for _, entry in ipairs(pose) do
 			if not entry.part.Parent then continue end
 			local localFrame = entry.rest

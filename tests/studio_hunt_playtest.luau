@@ -12,11 +12,21 @@ local world=require(script.Parent.HuntWorld)
 game:GetService("RunService").Heartbeat:Connect(function()
  local obstacles=workspace.RodeoPrototype:FindFirstChild("Obstacles")
  if obstacles then obstacles:ClearAllChildren() end
+ for _,animal in ipairs(workspace.RodeoPrototype.Monsters:GetChildren()) do
+  if not animal:GetAttribute("Occupied") and not animal:GetAttribute("TestKeep") then animal:Destroy() end
+ end
 end)
 driver.OnServerInvoke=function(player,action,value)
  if action=="Target" then
   local root=player.Character.HumanoidRootPart
-  return world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-3))
+  local target=world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-3))
+  target:SetAttribute("TestKeep",true)
+  return target
+ elseif action=="Collision" then
+  local root=player.Character.HumanoidRootPart
+  local blocker=world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-4))
+  blocker:SetAttribute("TestKeep",true)
+  return blocker
  elseif action=="Finish" then
   print("HUNT_TEST_SERVER_RESULT: "..value)
   task.defer(function() service:EndTest(value) end)
@@ -60,9 +70,16 @@ local success,problem=pcall(function()
   check(onScreen and point.Y/camera.ViewportSize.Y>0.5 and point.Y/camera.ViewportSize.Y<0.8,"rider must be in lower screen with forward road visible")
  end
  check(state.count==0,"bag must start empty")
- remote:FireServer("Hold",true)
+ local bound=game:GetService("ContextActionService"):GetBoundActionInfo("RodeoJump")
+ local spaceBound=false
+ for _,key in ipairs(bound.inputTypes or {}) do if key==Enum.KeyCode.Space then spaceBound=true end end
+ check(spaceBound,"space key must bind jump/lasso action")
+ check(not player.PlayerGui.RodeoCaptureUI.HuntHelp.Visible,"riding must hide bottom explanations")
+ waitFor(function() return workspace:FindFirstChild("LocalTamingGaugeAnchor")~=nil end,"mounted gauge missing")
+ local mountedGauge=workspace.LocalTamingGaugeAnchor.MountedTamingGauge
+ check(mountedGauge.Enabled and mountedGauge.Frame.Heart.Text=="♥","mounted heart gauge must be visible")
  task.wait(0.25)
- remote:FireServer("Hold",false)
+ remote:FireServer("Jump")
  waitFor(function() return state.phase=="Airborne" end,"release must jump")
  local flightSeen=false
  local runService=game:GetService("RunService")
@@ -76,9 +93,9 @@ local success,problem=pcall(function()
  local oldCount=state.count
  local target=driver:InvokeServer("Target")
  task.wait(0.06)
- remote:FireServer("Hold",true)
+ remote:FireServer("Jump")
  waitFor(function() return state.phase=="Lassoing" end,"lasso failed")
- remote:FireServer("Hold",false)
+ remote:FireServer("Jump")
  waitFor(function() return state.phase=="Riding" and state.monster==target end,"landing failed")
  check(state.count==oldCount,"old incomplete ride must not grant")
  check(target:GetAttribute("Occupied"),"target must be occupied")
@@ -97,12 +114,12 @@ local success,problem=pcall(function()
  runService:UnbindFromRenderStep("CheckMountAlignment")
  check(samples>0 and worstOffset<0.1,"mounted body and avatar must stay aligned across rendered frames")
  check(state.phase=="Riding" and state.monster==target,"early release must not force repeated flights")
- remote:FireServer("Hold",true)
  waitFor(function() return state.count==oldCount+1 end,"taming did not grant")
  check(state.tamed and state.phase=="Riding","taming must continue run")
+ check(mountedGauge.Frame.Arc64.BackgroundColor3==Color3.fromRGB(255,137,207),"taming must fill the entire circular gauge")
  task.wait(0.8)
  check(state.count==oldCount+1,"taming must not duplicate")
- remote:FireServer("Hold",false)
+ remote:FireServer("Jump")
  waitFor(function() return state.phase=="GameOver" end,"missed jump must end run")
  check(not character.HumanoidRootPart.Anchored,"end must restore movement")
  waitFor(function() return workspace.CurrentCamera.CameraType~=Enum.CameraType.Scriptable end,"camera must restore")
@@ -114,8 +131,27 @@ local success,problem=pcall(function()
  local angryMonster=state.monster
  waitFor(function() return angryMonster.PrimaryPart:FindFirstChild("AngerWarning")~=nil end,"exclamation missing")
  check(angryMonster.PrimaryPart.AngerWarning.Enabled,"anger exclamation must be visible")
+ local lowY,highY=math.huge,-math.huge
+ local buckUntil=os.clock()+0.65
+ repeat
+  local y=angryMonster.PrimaryPart.Position.Y
+  lowY,highY=math.min(lowY,y),math.max(highY,y)
+  task.wait(0.03)
+ until os.clock()>buckUntil
+ check(highY-lowY>1,"anger must physically hop repeatedly")
  waitFor(function() return state.phase=="GameOver" end,"anger must buck off")
  check(not character.HumanoidRootPart.Anchored,"buck off must restore movement")
+ remote:FireServer("Start")
+ waitFor(function() return state.phase=="Riding" end,"collision test restart failed")
+ driver:InvokeServer("Collision")
+ waitFor(function() return state.phase=="GameOver" and state.crash end,"monster collision must end the run")
+ waitFor(function() return workspace:FindFirstChild("LocalCrashShard")~=nil end,"cartoon body breakup missing")
+ check(character.Parent~=nil and character:FindFirstChild("HumanoidRootPart")~=nil,"breakup must preserve real avatar")
+ task.wait(1.3)
+ check(workspace:FindFirstChild("LocalCrashShard")==nil,"breakup shards must clean up")
+ remote:FireServer("Start")
+ waitFor(function() return state.phase=="Riding" end,"restart after breakup failed")
+ check(character.Head.LocalTransparencyModifier<1,"restart must restore avatar visibility")
 end)
 driver:InvokeServer("Finish",success and ("PASS: "..checks.." hunting Play checks") or ("FAIL: "..tostring(problem)))
 ]==]

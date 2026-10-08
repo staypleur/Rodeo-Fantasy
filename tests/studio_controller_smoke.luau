@@ -35,11 +35,16 @@ require(module)(fakeGame,{Parent=SSS},fakeWorkspace)
 local config=require(package.Config)
 local world=require(SSS.HuntWorld)
 local function check(value,message) assert(value,message) checks+=1 end
-local function advance(seconds,keepObstacles)
+local function advance(seconds,keepObstacles,keepMonsters)
 	for _=1,math.ceil(seconds/0.1) do
 		clock+=0.1
 		if not keepObstacles then workspace.RodeoPrototype.Obstacles:ClearAllChildren() end
-		heartbeat(0.1)
+		if not keepMonsters then
+   for _,animal in ipairs(workspace.RodeoPrototype.Monsters:GetChildren()) do
+    if not animal:GetAttribute("Occupied") then animal:Destroy() end
+   end
+  end
+  heartbeat(0.1)
 	end
 end
 event(player,"Start")
@@ -55,24 +60,22 @@ event(player,"Steer",0/0)
 advance(0.1)
 check(root.Position.X==root.Position.X,"NaN steering must not corrupt position")
 event(player,"Steer",0)
-event(player,"Hold","invalid")
+event(player,"Jump","invalid")
 check(latest.phase=="Riding","invalid input must not jump")
 advance(0.2)
-event(player,"Hold",true)
 advance(0.2)
-event(player,"Hold",false)
-check(latest.phase=="Airborne","release must launch")
+event(player,"Jump")
+check(latest.phase=="Airborne","space action must launch")
 check(not latest.monster,"previous mount must be released")
 advance(0.1)
 local target=world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-3))
-event(player,"Hold",true)
-check(latest.phase=="Lassoing" and target:GetAttribute("Occupied"),"hold must lasso nearest eligible target")
-event(player,"Hold",false)
-check(latest.phase=="Lassoing","quick press and release must preserve landing")
+event(player,"Jump")
+check(latest.phase=="Lassoing" and target:GetAttribute("Occupied"),"second space action must lasso nearest eligible target")
+event(player,"Jump")
+check(latest.phase=="Lassoing","space during landing must preserve landing")
 advance(0.6)
 check(latest.phase=="Riding" and latest.monster==target,"rope must finish landing")
-check(latest.phase~="Airborne","release during landing must not force another jump")
-event(player,"Hold",true)
+check(latest.phase~="Airborne","space during landing must not queue another jump")
 check(latest.count==0,"abandoned ride must not grant")
 local protectedRock=Instance.new("Part")
 protectedRock.Size=Vector3.new(4,3,4)
@@ -88,7 +91,7 @@ check(latest.count==1 and latest.tamed,"sustained ride must tame")
 check(latest.phase=="Riding","taming must keep running")
 advance(0.8)
 check(latest.count==1,"same individual must not grant twice")
-event(player,"Hold",false)
+event(player,"Jump")
 advance(config.Prototype.FlightSeconds+0.5)
 check(latest.phase=="GameOver" and not root.Anchored,"missed airborne catch must end and restore")
 event(player,"Start")
@@ -96,6 +99,16 @@ check(latest.phase=="Lassoing" and latest.count==1,"restart flight must retain b
 advance(config.Prototype.IntroSeconds+config.Hunt.AngerSeconds+0.4)
 check(latest.angerAt~=nil and latest.phase=="Riding","anger must warn before buck-off")
 check(latest.monster:GetAttribute("Angry"),"anger must mark ridden monster")
+local angryMount=latest.monster
+local angryX=root.Position.X
+advance(0.2)
+check(angryMount.PrimaryPart.Position.Y>2.1,"anger must physically buck upward")
+check(math.abs(root.Position.X-angryX)>0.01,"anger must shove the rider sideways")
+event(player,"Steer",1)
+local steeringX=root.Position.X
+advance(0.1)
+check(math.abs(root.Position.X-steeringX)<config.Prototype.SidewaysStudsPerSecond*0.1,"angry ride must reduce steering authority")
+event(player,"Steer",0)
 advance(config.Prototype.BuckWarningSeconds+0.4)
 check(latest.phase=="GameOver" and not root.Anchored,"anger must end and restore")
 event(player,"Start")
@@ -109,6 +122,21 @@ rock.Parent=workspace.RodeoPrototype.Obstacles
 advance(0.2,true)
 check(latest.phase=="GameOver" and not root.Anchored,"swept collision must end and restore")
 check(humanoid.AutoRotate and not humanoid.PlatformStand,"normal character flags must be restored")
+-- New contact types ignore rock-only landing protection.
+event(player,"Start")
+advance(config.Prototype.IntroSeconds+0.2)
+local blocker=world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-4))
+advance(0.1,false,true)
+check(latest.phase=="GameOver" and latest.endReason=="Monster" and latest.crash,"mounted monster contact must crash")
+check(blocker.Parent~=nil,"collision must not break the monster")
+event(player,"Start")
+advance(config.Prototype.IntroSeconds+0.2)
+for _=1,35 do
+ event(player,"Steer",1)
+ advance(0.1)
+ if latest.phase=="GameOver" then break end
+end
+check(latest.phase=="GameOver" and latest.endReason=="Wall" and latest.crash,"canyon contact must crash instead of clamping forever")
 module:Destroy()
 character:Destroy()
 print("HUNT_CONTROLLER_SMOKE_PASS: "..checks.." actual controller checks with native world and controlled clock")

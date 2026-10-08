@@ -53,13 +53,15 @@ function Presentation.update(model,phase,frame,dt,clock)
    local offset=CFrame.identity
    if name:find("Shoulder") then
     local side=name:find("Left") and -1 or 1
-    offset=CFrame.Angles(airborne and -0.65 or -0.8,0,side*(airborne and 0.9 or 0.18))
+    offset=CFrame.Angles(airborne and 0 or -0.8,0,side*(airborne and math.pi/2 or 0.18))
    elseif name:find("Hip") then
     local side=name:find("Left") and -1 or 1
-    offset=CFrame.Angles(airborne and -0.2 or -0.8,0,side*(airborne and 0.25 or 0.18))
-   elseif name:find("Knee") then offset=CFrame.Angles(airborne and 0.25 or 1.1,0,0)
+    offset=CFrame.Angles(airborne and 0 or -0.8,0,side*(airborne and 0.65 or 0.18))
+   elseif name:find("Knee") then offset=CFrame.Angles(airborne and 0 or 1.1,0,0)
    elseif name=="Waist" then offset=CFrame.Angles(airborne and 0.08 or 0.15,0,0) end
-   joint.C0=joint.C0:Lerp(rest*offset,1-math.exp(-18*dt))
+   -- Rotate in the torso/limb parent space so R6 shoulders also spread sideways.
+   local target=CFrame.new(rest.Position)*offset*rest.Rotation
+   joint.C0=joint.C0:Lerp(target,1-math.exp(-18*dt))
   end
   shadow.CFrame=CFrame.new(frame.X,0.055,frame.Z)*CFrame.Angles(0,0,math.pi/2)
   shadow.Transparency=airborne and 0.5 or 0.75

@@ -1739,6 +1739,10 @@ Config.Prototype = {
 	LassoRangeStuds = 12,
 	FlightSeconds = 1.2,
 	BuckWarningSeconds = 2,
+	BuckCycleSeconds = 0.55,
+	BuckHeightStuds = 2.4,
+	AngrySteerMultiplier = 0.35,
+	BuckSidewaysStudsPerSecond = 12,
 	LandingGraceSeconds = 2,
 	GroundChunkStuds = 256,
 	RideHeightStuds = 4,
@@ -1763,6 +1767,13 @@ local Rules = {}
 
 function Rules.jumpHeight(elapsed, duration, height)
 	return math.sin(math.clamp(elapsed / duration, 0, 1) * math.pi) * height
+end
+
+-- One ground-to-ground hop. Shared only for synchronized presentation and server motion.
+function Rules.buck(elapsed,cycle,height)
+ local phase=(math.max(elapsed,0)%cycle)/cycle
+ local direction=math.floor(math.max(elapsed,0)/cycle)%2==0 and 1 or -1
+ return math.sin(math.pi*phase)*height, math.sin(math.pi*phase)*direction, math.sin(math.pi*phase*2)*0.28
 end
 
 function Rules.progress(elapsed, duration)
@@ -5085,7 +5096,7 @@ local function send(player,message)
  local state,bag=states[player],bags[player]
  if not bag then return end
  BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
- remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,protectedUntil=state and state.protectedUntil or 0,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0})
+ remote:FireClient(player,"State",{phase=state and state.phase or "Idle",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,protectedUntil=state and state.protectedUntil or 0,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0})
 end
 local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
@@ -5105,13 +5116,16 @@ local function freeMount(state)
   state.monster:SetAttribute("Occupied",false)
   state.monster:SetAttribute("Steering",0)
   state.monster:SetAttribute("Angry",false)
+  state.monster:SetAttribute("AngerStarted",nil)
  end
  state.previousMonster,state.monster=state.monster,nil
  clearRope(state)
 end
-local function finish(player,reason)
+local function finish(player,reason,crashKind)
  local state=states[player]
  if not state or state.phase=="GameOver" then return end
+ state.crash=crashKind~=nil
+ state.endReason=crashKind
  freeMount(state)
  state.phase="GameOver"
  if state.root.Parent then
@@ -5132,7 +5146,7 @@ local function start(player)
  local model=World.spawn(Vector3.new(0,2,-8))
  model:SetAttribute("Occupied",true)
  model:SetAttribute("Angry",false)
- states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),held=false,distance=0,tamed=false}
+ states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),distance=0,tamed=false}
  root.Anchored,humanoid.AutoRotate,humanoid.PlatformStand=true,false,true
  root.CFrame=CFrame.new(0,2+tuning.RideHeightStuds,18)
  states[player].origin=root.CFrame
@@ -5164,11 +5178,11 @@ local function lasso(player,state)
 end
 remote.OnServerEvent:Connect(function(player,action,value)
  if type(action)~="string" or not bags[player] then return end
- if action~="Sync" and action~="Start" and action~="Hold" and action~="Steer" then return end
+ if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
- -- Preserve both edges of a quick tap; movement and sync remain throttled.
- local interval=action=="Hold" and 0 or action=="Steer" and 0.04 or 0.25
+ -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
+ local interval=action=="Jump" and 0.08 or action=="Steer" and 0.04 or 0.25
  if now()-(stamps[action] or -math.huge)&lt;interval then return end
  stamps[action]=now()
  if action=="Sync" then send(player) return end
@@ -5177,11 +5191,9 @@ remote.OnServerEvent:Connect(function(player,action,value)
  if not state or state.phase=="GameOver" then return end
  if action=="Steer" and type(value)=="number" and value==value and value&gt;=-1 and value&lt;=1 then
   state.steer,state.steerAt=value,now()
- elseif action=="Hold" and type(value)=="boolean" then
-  local released=state.held and not value
-  state.held=value
-  if released and state.phase=="Riding" then launch(player,state) end
-  if value and state.phase=="Airborne" then lasso(player,state) end
+ elseif action=="Jump" and value==nil then
+  if state.phase=="Riding" then launch(player,state)
+  elseif state.phase=="Airborne" then lasso(player,state) end
  end
 end)
 RunService.Heartbeat:Connect(function(delta)
@@ -5195,17 +5207,22 @@ RunService.Heartbeat:Connect(function(delta)
   end
   if not state.root.Parent or player.Character~=state.root.Parent or state.humanoid.Health&lt;=0 then finish(player,"사냥 종료") continue end
   local steer=clock-state.steerAt&lt;0.5 and state.steer or 0
+  local buckHeight,buckDrift=0,0
+  if state.phase=="Riding" and Config.Hunt.BucksOff and clock-state.started&gt;=Config.Hunt.AngerSeconds then
+   state.angerAt=state.angerAt or clock
+   buckHeight,buckDrift=Rules.buck(clock-state.angerAt,tuning.BuckCycleSeconds,tuning.BuckHeightStuds)
+   steer*=tuning.AngrySteerMultiplier
+  end
   local old=state.root.Position
   local speed=state.phase=="Airborne" and tuning.AirStudsPerSecond or tuning.ForwardStudsPerSecond
-  local position=Vector3.new(math.clamp(old.X+steer*tuning.SidewaysStudsPerSecond*dt,-tuning.RoadHalfWidth,tuning.RoadHalfWidth),old.Y,old.Z-speed*dt)
+  local position=Vector3.new(math.clamp(old.X+(steer*tuning.SidewaysStudsPerSecond+buckDrift*tuning.BuckSidewaysStudsPerSecond)*dt,-tuning.RoadHalfWidth,tuning.RoadHalfWidth),old.Y,old.Z-speed*dt)
   state.distance+=speed*dt*tuning.MetersPerStud
   World.ensure(position.Z)
   table.insert(nearZ,position.Z)
   if state.phase=="Airborne" then
    position=Vector3.new(position.X,state.launchY+Rules.jumpHeight(clock-state.started,tuning.FlightSeconds,tuning.JumpArcStuds),position.Z)
    state.root.CFrame=CFrame.new(position)
-   if clock&gt;=(state.protectedUntil or 0) and World.hit(old,position) then finish(player,"장애물에 부딪혔어요.") continue end
-   if state.held then lasso(player,state) end
+   if clock&gt;=(state.protectedUntil or 0) and World.hit(old,position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
    if state.phase=="Airborne" and clock-state.started&gt;=tuning.FlightSeconds then finish(player,"다음 몬스터를 잡지 못했어요.") end
   elseif state.phase=="Lassoing" then
    if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end
@@ -5215,30 +5232,34 @@ RunService.Heartbeat:Connect(function(delta)
    local landingSeconds=state.landingSeconds or tuning.JumpSeconds
    local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
    state.root.CFrame=state.origin:Lerp(saddle,landingProgress)*CFrame.new(0,math.sin(math.pi*landingProgress)*tuning.JumpArcStuds*0.5,0)
-   if clock&gt;=(state.protectedUntil or 0) and World.hit(p,state.monster.PrimaryPart.Position) then finish(player,"장애물에 부딪혔어요.") continue end
+   if clock&gt;=(state.protectedUntil or 0) and World.hit(p,state.monster.PrimaryPart.Position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
    if clock-state.started&gt;=landingSeconds then
     clearRope(state)
     state.phase,state.started,state.tamed="Riding",clock,state.monster:GetAttribute("Tamed_"..player.UserId)==true
     state.protectedUntil=clock+tuning.LandingGraceSeconds
     state.monster:SetAttribute("RunStarted",clock)
     state.monster:SetAttribute("Angry",false)
+    state.monster:SetAttribute("AngerStarted",nil)
     send(player)
-    -- A release while still flying is not a new jump after landing.
+    -- Space presses during landing are not queued as a new jump.
    end
   elseif state.phase=="Riding" then
    if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end
-   position=Vector3.new(position.X,2,position.Z)
+   position=Vector3.new(position.X,2+buckHeight,position.Z)
    local before=state.monster.PrimaryPart.Position
    state.monster.PrimaryPart.CFrame=CFrame.new(position)
    state.monster:SetAttribute("Steering",steer)
    state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,0)
-   if clock&gt;=(state.protectedUntil or 0) and World.hit(before,position) then finish(player,"장애물에 부딪혔어요.") continue end
+   local contact=World.mountedHit(before,position,state.monster)
+   if contact then finish(player,contact=="Wall" and "벽에 부딪혔어요." or "다른 몬스터에 부딪혔어요.",contact) continue end
+   if clock&gt;=(state.protectedUntil or 0) and World.hit(before,position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
    if not state.tamed and clock-state.started&gt;=Config.Hunt.TameSeconds then
     state.tamed=true BagRules.grant(bags[player],Config.Monster.Id,clock) send(player,Config.Monster.Name.." 길들이기 성공! 가방에 추가됐어요.")
     state.monster:SetAttribute("Tamed_"..player.UserId,true)
    end
    if Config.Hunt.BucksOff and clock-state.started&gt;=Config.Hunt.AngerSeconds then
     state.angerAt=state.angerAt or clock
+    state.monster:SetAttribute("AngerStarted",state.angerAt)
     state.monster:SetAttribute("Angry",true)
     if clock-state.angerAt&gt;=tuning.BuckWarningSeconds then finish(player,Config.Monster.Name.."이 화가 나서 떨어뜨렸어요.") end
    end
@@ -5262,7 +5283,7 @@ for _,player in ipairs(Players:GetPlayers()) do added(player) end
       <Properties>
         <string name="Name">HuntWorld</string>
         <ProtectedString name="Source">local World = {}
-local chunks, animals = {}, {}
+local chunks, animals, previousPositions = {}, {}, {}
 local root, monsters, obstacles, template, tuning
 local Rules
 local monsterId
@@ -5324,21 +5345,21 @@ function World.ensure(z)
 			local rowZ = start + offset
    for _, side in ipairs({-1,1}) do
     local height=8+random:NextInteger(0,3)
-    decoration(chunk,"CanyonBase",Vector3.new(side*45,2,rowZ),Vector3.new(10,4,32),Color3.fromRGB(220,151,97))
-    decoration(chunk,"CanyonStratum",Vector3.new(side*47,4.5,rowZ),Vector3.new(10,1,32),Color3.fromRGB(249,191,128))
-    decoration(chunk,"CanyonUpper",Vector3.new(side*49,5+height/2,rowZ),Vector3.new(12,height,32),Color3.fromRGB(201,126,80))
-    decoration(chunk,"GrassCap",Vector3.new(side*49,5+height+0.25,rowZ),Vector3.new(12,0.5,32),Color3.fromRGB(122,170,92))
-    decoration(chunk,"GrassEdge",Vector3.new(side*37,0.08,rowZ),Vector3.new(6,0.16,32),Color3.fromRGB(143,190,96))
+    decoration(chunk,"CanyonBase",Vector3.new(side*40,2,rowZ),Vector3.new(10,4,32),Color3.fromRGB(220,151,97))
+    decoration(chunk,"CanyonStratum",Vector3.new(side*42,4.5,rowZ),Vector3.new(10,1,32),Color3.fromRGB(249,191,128))
+    decoration(chunk,"CanyonUpper",Vector3.new(side*44,5+height/2,rowZ),Vector3.new(12,height,32),Color3.fromRGB(201,126,80))
+    decoration(chunk,"GrassCap",Vector3.new(side*44,5+height+0.25,rowZ),Vector3.new(12,0.5,32),Color3.fromRGB(122,170,92))
+    decoration(chunk,"GrassEdge",Vector3.new(side*32,0.08,rowZ),Vector3.new(6,0.16,32),Color3.fromRGB(143,190,96))
     for i=1,3 do
      local z=rowZ+random:NextNumber(-14,14)
-     local x=side*random:NextNumber(37,39)
+     local x=side*random:NextNumber(32,34)
      decoration(chunk,"GrassTuft",Vector3.new(x,0.45,z),Vector3.new(0.5,0.9,0.5),Color3.fromRGB(109,161,77))
     end
     if random:NextNumber()&lt;0.4 then
      local treeZ=rowZ+random:NextNumber(-8,8)
-     decoration(chunk,"TreeTrunk",Vector3.new(side*53,5+height+2,treeZ),Vector3.new(1.4,4,1.4),Color3.fromRGB(152,99,67))
-     decoration(chunk,"TreeCrown",Vector3.new(side*53,5+height+5,treeZ),Vector3.new(6,4,6),Color3.fromRGB(115,163,90))
-     decoration(chunk,"TreeTop",Vector3.new(side*53,5+height+7,treeZ),Vector3.new(4,2,4),Color3.fromRGB(146,190,107))
+     decoration(chunk,"TreeTrunk",Vector3.new(side*48,5+height+2,treeZ),Vector3.new(1.4,4,1.4),Color3.fromRGB(152,99,67))
+     decoration(chunk,"TreeCrown",Vector3.new(side*48,5+height+5,treeZ),Vector3.new(6,4,6),Color3.fromRGB(115,163,90))
+     decoration(chunk,"TreeTop",Vector3.new(side*48,5+height+7,treeZ),Vector3.new(4,2,4),Color3.fromRGB(146,190,107))
     end
    end
    for i=1,3 do
@@ -5361,7 +5382,8 @@ end
 
 function World.step(dt)
 	for model in pairs(animals) do
-		if not model.Parent then animals[model] = nil continue end
+		if not model.Parent then animals[model] = nil previousPositions[model]=nil continue end
+		previousPositions[model] = model.PrimaryPart.Position
 		if not model:GetAttribute("Occupied") then
 			-- Only the authoritative root moves. Clients own all visual body poses.
 			model.PrimaryPart.CFrame += Vector3.new(0,0,-tuning.HerdStudsPerSecond*dt)
@@ -5378,6 +5400,21 @@ function World.nearest(position, excluded)
 		if distance &lt;= bestDistance then best, bestDistance = model, distance end
 	end
 	return best
+end
+
+-- Contact while riding: include moving herds and the visible inner canyon face.
+function World.mountedHit(from,to,mount)
+ local half=mount.PrimaryPart.Size/2
+ if math.max(math.abs(from.X),math.abs(to.X))+half.X&gt;=tuning.RoadHalfWidth then return "Wall" end
+ for other in pairs(animals) do
+  if other==mount or not other.Parent then continue end
+  local old=previousPositions[other] or other.PrimaryPart.Position
+  local current=other.PrimaryPart.Position
+  local a,b=from-old,to-current
+  local size=other.PrimaryPart.Size+mount.PrimaryPart.Size
+  if Rules.sweptBox(a.X,a.Y,a.Z,b.X,b.Y,b.Z,0,0,0,size.X,size.Y,size.Z,0) then return "Monster" end
+ end
+ return nil
 end
 
 function World.hit(from, to)
@@ -5400,10 +5437,10 @@ function World.cleanup(nearZ)
 		end
 	end
 	for model in pairs(animals) do
-		if not model.Parent then animals[model] = nil continue end
+		if not model.Parent then animals[model] = nil previousPositions[model]=nil continue end
 		local keep = model:GetAttribute("Occupied")
 		for _, z in ipairs(nearZ) do if math.abs(model.PrimaryPart.Position.Z-z) &lt; tuning.GroundChunkStuds*4 then keep = true break end end
-		if not keep then model:Destroy() animals[model] = nil end
+		if not keep then model:Destroy() animals[model] = nil previousPositions[model]=nil end
 	end
 end
 
@@ -5437,6 +5474,8 @@ local Rules=require(package:WaitForChild("HuntRules"))
 local remote=package:WaitForChild("CaptureRemote")
 local animator=require(script.Parent:WaitForChild("RideAnimator"))
 local rider=require(script.Parent:WaitForChild("RiderPresentation"))
+local gauge=require(script.Parent:WaitForChild("TamingGauge"))
+local crashEffect=require(script.Parent:WaitForChild("CrashEffect"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
 local state={phase="Idle",started=0,count=0,pending=0,distance=0}
 local held,left,right=false,false,false
@@ -5456,13 +5495,11 @@ local function text(parent,value,pos,size,font)
 end
 local distance=text(gui,"0m",UDim2.new(0.5,-80,0,12),UDim2.fromOffset(160,48),32)
 local bag=text(gui,"가방: 0마리 · 모인 돈: 0원",UDim2.fromOffset(16,64),UDim2.fromOffset(320,32),14)
-local panel=make("Frame",{AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,94),BackgroundColor3=Color3.fromRGB(43,67,49),BackgroundTransparency=0.22,BorderSizePixel=0},gui)
+local panel=make("Frame",{Name="HuntHelp",AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,94),BackgroundColor3=Color3.fromRGB(43,67,49),BackgroundTransparency=0.22,BorderSizePixel=0},gui)
 make("UISizeConstraint",{MaxSize=Vector2.new(510,94)},panel)
 make("UICorner",{CornerRadius=UDim.new(0,14)},panel)
 local status=text(panel,"로데오 스트릿 · 루미돈 사냥",UDim2.fromOffset(12,4),UDim2.new(1,-24,0,28),18)
-local instruction=text(panel,"누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기",UDim2.fromOffset(12,34),UDim2.new(1,-24,0,28),13)
-local progress=make("Frame",{Name="TamingProgress",Position=UDim2.new(0,16,0,72),Size=UDim2.new(1,-32,0,14),BackgroundColor3=Color3.fromRGB(72,97,71),BorderSizePixel=0,Visible=false},panel)
-local fill=make("Frame",{Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(255,192,101),BorderSizePixel=0},progress)
+local instruction=text(panel,"A·D 좌우 이동 → 스페이스바 점프 → 다시 눌러 줄",UDim2.fromOffset(12,34),UDim2.new(1,-24,0,28),13)
 local startButton=make("TextButton",{Name="StartHunt",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.52),Size=UDim2.fromOffset(230,64),Text="사냥 시작",TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(219,103,41)},gui)
 make("UICorner",{CornerRadius=UDim.new(0,16)},startButton)
 local highlight=make("Highlight",{Enabled=false,FillTransparency=0.82,OutlineColor=Color3.fromRGB(255,222,91)},gui)
@@ -5488,6 +5525,7 @@ local function steering()
  return 0
 end
 local function keyAction(_,inputState,input)
+ if UIS:GetFocusedTextBox() then return Enum.ContextActionResult.Pass end
  local down=inputState==Enum.UserInputState.Begin
  if inputState==Enum.UserInputState.Cancel then left,right=false,false else
   if input.KeyCode==Enum.KeyCode.A then left=down end
@@ -5495,15 +5533,24 @@ local function keyAction(_,inputState,input)
  end
  return Enum.ContextActionResult.Sink
 end
+local function jumpAction(_,inputState)
+ if UIS:GetFocusedTextBox() or not active() then return Enum.ContextActionResult.Pass end
+ if inputState==Enum.UserInputState.Begin then remote:FireServer("Jump") end
+ return Enum.ContextActionResult.Sink
+end
 local function cameraMode(enabled)
  local camera=workspace.CurrentCamera
  if enabled and savedType==nil then
   savedType,savedSubject,savedFieldOfView=camera.CameraType,camera.CameraSubject,camera.FieldOfView
-  CAS:BindActionAtPriority("RodeoSteer",keyAction,false,Enum.ContextActionPriority.High.Value+1,Enum.KeyCode.A,Enum.KeyCode.D,Enum.KeyCode.W,Enum.KeyCode.S,Enum.KeyCode.Space)
+  CAS:BindActionAtPriority("RodeoSteer",keyAction,false,Enum.ContextActionPriority.High.Value+1,Enum.KeyCode.A,Enum.KeyCode.D,Enum.KeyCode.W,Enum.KeyCode.S)
+  CAS:BindActionAtPriority("RodeoJump",jumpAction,true,Enum.ContextActionPriority.High.Value+2,Enum.KeyCode.Space)
+  CAS:SetTitle("RodeoJump","점프 / 줄")
+  CAS:SetPosition("RodeoJump",UDim2.new(1,-95,1,-160))
   camera.CameraType=Enum.CameraType.Scriptable
   camera.FieldOfView=Config.Prototype.CameraFieldOfView
  elseif not enabled and savedType~=nil then
   CAS:UnbindAction("RodeoSteer")
+  CAS:UnbindAction("RodeoJump")
   camera.CameraType=savedType
   camera.FieldOfView=savedFieldOfView
   if savedSubject and savedSubject.Parent then camera.CameraSubject=savedSubject end
@@ -5516,7 +5563,6 @@ UIS.InputBegan:Connect(function(input,processed)
  if processed or not active() then return end
  if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
   held=true pointerOrigin,pointerX=input.Position.X,input.Position.X
-  remote:FireServer("Hold",true)
  end
 end)
 UIS.InputChanged:Connect(function(input)
@@ -5524,16 +5570,16 @@ UIS.InputChanged:Connect(function(input)
 end)
 UIS.InputEnded:Connect(function(input)
  if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
-  if held then held=false remote:FireServer("Hold",false) end
+  held=false
   pointerOrigin,pointerX=nil,nil
  end
 end)
 UIS.WindowFocusReleased:Connect(function()
- if held then remote:FireServer("Hold",false) end
  held,left,right=false,false,false
 end)
 remote.OnClientEvent:Connect(function(kind,data)
  if kind~="State" then return end
+ if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow()) end
  if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
  if data.message then notice,noticeUntil=data.message,os.clock()+3 end
@@ -5566,9 +5612,11 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   end
  end
  rider.update(player.Character,state.phase,visualFrame,dt,clock)
+ crashEffect.update(player.Character,state.phase,clock)
  distance.Text=string.format("%dm",math.floor(state.distance or 0))
  highlight.Enabled=false
- progress.Visible=state.phase=="Riding"
+ panel.Visible=not active()
+ gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),state.tamed,state.angerAt~=nil)
  for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
  if active() and root then
   -- Follow horizontal movement; jumping should not lift the whole view.
@@ -5591,18 +5639,17 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   if nearest then highlight.Adornee,highlight.Enabled=nearest,true end
  end
  if state.phase=="Riding" then
-  fill.Size=UDim2.fromScale(state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),1)
-  status.Text=state.angerAt and "화났어요! 손을 떼고 점프하세요!" or state.tamed and "길들이기 성공 · 계속 타고 달리세요" or "루미돈 길들이는 중 ♥"
-  instruction.Text="누른 채 좌우로 움직이기 / A·D · 손을 떼면 점프"
+  status.Text=state.angerAt and "화났어요! 스페이스바로 점프하세요!" or state.tamed and "길들이기 성공 · 계속 타고 달리세요" or "루미돈 길들이는 중 ♥"
+  instruction.Text="A·D로 좌우 이동 · 스페이스바로 점프 / 공중에서 다시 누르면 줄"
   if clock&lt;(state.protectedUntil or 0) then
-   instruction.Text=string.format("착지 보호 %.1f초 · 누른 채 좌우 이동 / 손을 떼면 점프",state.protectedUntil-clock)
+   instruction.Text=string.format("착지 보호 %.1f초 · A·D 좌우 이동 / 스페이스바 점프",state.protectedUntil-clock)
   end
  elseif state.phase=="Airborne" then
-  status.Text="다시 눌러 다음 몬스터를 잡으세요!"
+  status.Text="스페이스바로 다음 몬스터를 잡으세요!"
   instruction.Text="노란 원 안에 몬스터가 들어오면 줄이 연결됩니다"
  elseif state.phase=="Lassoing" then status.Text="날아가서 탑승하는 중…" instruction.Text="탑승 후 계속 타고 달릴 수 있어요"
  elseif state.phase=="GameOver" then status.Text="사냥 종료" instruction.Text="다시 사냥하기로 재도전 · 가방 수익은 유지"
- else status.Text="로데오 스트릿 · 루미돈 사냥" instruction.Text="사냥 시작 → 누르고 달리기 → 떼서 점프 → 다시 눌러 줄 던지기" end
+ else status.Text="로데오 스트릿 · 루미돈 사냥" instruction.Text="사냥 시작 → A·D 좌우 이동 → 스페이스바 점프 → 다시 눌러 줄" end
  if os.clock()&lt;noticeUntil and not state.angerAt then status.Text=notice end
 end)
 remote:FireServer("Sync")
@@ -5620,6 +5667,7 @@ local warnings = {}
 local package = game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy")
 local template = package:WaitForChild("VisualTemplate")
 local tuning = require(package:WaitForChild("Config")).Prototype
+local Rules = require(package:WaitForChild("HuntRules"))
 local restFrames = {}
 for _, part in ipairs(template:GetDescendants()) do
  if part:IsA("BasePart") and part ~= template.PrimaryPart then
@@ -5681,7 +5729,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
   else
    pose.frame = pose.frame:Lerp(target,1-math.exp(-22*dt))
   end
-  displayed[model] = pose.frame
+
 		local phase = (clock - (model:GetAttribute("RunStarted") or clock)) * math.pi * 7
 		local angry = model:GetAttribute("Angry") == true
 		local warning = warnings[model]
@@ -5697,9 +5745,10 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
 			warnings[model] = warning
 		end
 		if warning then warning.Enabled = angry end
-		local bob = angry and 0.2 * math.sin(phase * 2) or 0
+		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds)
 		local lean = running and (model:GetAttribute("Steering") or 0) * -0.09 or 0
-		local frame = pose.frame * CFrame.new(0, bob, 0) * CFrame.Angles(angry and math.sin(phase)*0.08 or 0, 0, lean)
+		local frame = pose.frame * CFrame.Angles(angry and pitch or 0, 0, lean)
+  displayed[model] = frame
 		for _, entry in ipairs(pose) do
 			if not entry.part.Parent then continue end
 			local localFrame = entry.rest
@@ -5778,13 +5827,15 @@ function Presentation.update(model,phase,frame,dt,clock)
    local offset=CFrame.identity
    if name:find("Shoulder") then
     local side=name:find("Left") and -1 or 1
-    offset=CFrame.Angles(airborne and -0.65 or -0.8,0,side*(airborne and 0.9 or 0.18))
+    offset=CFrame.Angles(airborne and 0 or -0.8,0,side*(airborne and math.pi/2 or 0.18))
    elseif name:find("Hip") then
     local side=name:find("Left") and -1 or 1
-    offset=CFrame.Angles(airborne and -0.2 or -0.8,0,side*(airborne and 0.25 or 0.18))
-   elseif name:find("Knee") then offset=CFrame.Angles(airborne and 0.25 or 1.1,0,0)
+    offset=CFrame.Angles(airborne and 0 or -0.8,0,side*(airborne and 0.65 or 0.18))
+   elseif name:find("Knee") then offset=CFrame.Angles(airborne and 0 or 1.1,0,0)
    elseif name=="Waist" then offset=CFrame.Angles(airborne and 0.08 or 0.15,0,0) end
-   joint.C0=joint.C0:Lerp(rest*offset,1-math.exp(-18*dt))
+   -- Rotate in the torso/limb parent space so R6 shoulders also spread sideways.
+   local target=CFrame.new(rest.Position)*offset*rest.Rotation
+   joint.C0=joint.C0:Lerp(target,1-math.exp(-18*dt))
   end
   shadow.CFrame=CFrame.new(frame.X,0.055,frame.Z)*CFrame.Angles(0,0,math.pi/2)
   shadow.Transparency=airborne and 0.5 or 0.75
@@ -5816,9 +5867,120 @@ return Presentation
 </ProtectedString>
         </Properties>
       </Item>
+      <Item class="ModuleScript" referent="RBX174">
+        <Properties>
+          <string name="Name">TamingGauge</string>
+          <ProtectedString name="Source">-- Original, asset-free circular taming indicator following the rendered mount.
+local Gauge={}
+local anchor,billboard,heart
+local segments={}
+local function create()
+ anchor=Instance.new("Part")
+ anchor.Name="LocalTamingGaugeAnchor" anchor.Anchored=true anchor.Transparency=1
+ anchor.CanCollide,anchor.CanTouch,anchor.CanQuery=false,false,false
+ anchor.Size=Vector3.one anchor.Parent=workspace
+ billboard=Instance.new("BillboardGui")
+ billboard.Name="MountedTamingGauge" billboard.Size=UDim2.fromOffset(82,82)
+ billboard.AlwaysOnTop=true billboard.Adornee=anchor billboard.Parent=anchor
+ local disk=Instance.new("Frame") disk.Size=UDim2.fromScale(1,1)
+ disk.BackgroundColor3=Color3.fromRGB(66,61,48) disk.BackgroundTransparency=0.15 disk.BorderSizePixel=0 disk.Parent=billboard
+ local corner=Instance.new("UICorner") corner.CornerRadius=UDim.new(1,0) corner.Parent=disk
+ for i=1,64 do
+  local angle=(i-0.5)/64*math.pi*2-math.pi/2
+  local segment=Instance.new("Frame")
+  segment.Name="Arc"..i segment.AnchorPoint=Vector2.new(0.5,0.5)
+  segment.Position=UDim2.fromScale(0.5+math.cos(angle)*0.44,0.5+math.sin(angle)*0.44)
+  segment.Size=UDim2.fromOffset(7,4.3) segment.Rotation=math.deg(angle)
+  segment.BorderSizePixel=0 segment.BackgroundColor3=Color3.fromRGB(106,99,78) segment.Parent=disk
+  segments[i]=segment
+ end
+ heart=Instance.new("TextLabel") heart.Name="Heart" heart.Size=UDim2.fromScale(1,1)
+ heart.BackgroundTransparency=1 heart.Text="♥" heart.Font=Enum.Font.GothamBlack
+ heart.TextSize=44 heart.TextColor3=Color3.fromRGB(255,139,209) heart.Parent=disk
+end
+function Gauge.update(frame,progress,tamed,angry)
+ if not frame then if billboard then billboard.Enabled=false end return end
+ if not anchor then create() end
+ billboard.Enabled=true anchor.CFrame=frame*CFrame.new(3.5,5,0)
+ local completed=math.floor(math.clamp(progress,0,1)*64+0.0001)
+ for i,segment in ipairs(segments) do
+  segment.BackgroundColor3=i&lt;=completed and Color3.fromRGB(255,137,207) or Color3.fromRGB(106,99,78)
+ end
+ heart.Text=angry and "!" or "♥"
+ heart.TextColor3=angry and Color3.fromRGB(255,167,96) or Color3.fromRGB(255,139,209)
+ heart.TextTransparency=tamed and 0 or 0.1
+end
+return Gauge
+</ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBX175">
+        <Properties>
+          <string name="Name">CrashEffect</string>
+          <ProtectedString name="Source">-- Cartoon breakup using temporary visual clones; never destroys the real avatar.
+local Effect={}
+local shards,hidden={},{}
+local character,started
+local function clear()
+ for _,entry in ipairs(shards) do entry.part:Destroy() end
+ for part,value in pairs(hidden) do if part.Parent then part.LocalTransparencyModifier=value end end
+ shards,hidden={},{}
+ character,started=nil,nil
+end
+function Effect.start(model,clock)
+ clear()
+ if not model then return end
+ character,started=model,clock
+ local root=model:FindFirstChild("HumanoidRootPart")
+ local center=root and root.Position or Vector3.zero
+ local index=0
+ for _,original in ipairs(model:GetDescendants()) do
+  if not original:IsA("BasePart") then continue end
+  hidden[original]=original.LocalTransparencyModifier
+  original.LocalTransparencyModifier=1
+  if original.Name=="HumanoidRootPart" or original.Transparency&gt;=1 then continue end
+  index+=1
+  local archived=original.Archivable original.Archivable=true
+  local shard=original:Clone() original.Archivable=archived
+  for _,item in ipairs(shard:GetDescendants()) do
+   if item:IsA("JointInstance") or item:IsA("Constraint") or item:IsA("LuaSourceContainer") or item:IsA("Attachment") or item:IsA("ParticleEmitter") or item:IsA("Sound") or item:IsA("Trail") or item:IsA("Beam") then item:Destroy() end
+  end
+  shard.Name="LocalCrashShard" shard.Anchored=true
+  shard.LocalTransparencyModifier=0
+  shard.CanCollide,shard.CanTouch,shard.CanQuery=false,false,false
+  shard.Parent=workspace
+  local direction=original.Position-center
+  local radial=Vector3.new(direction.X,0,direction.Z)
+  if radial.Magnitude&lt;0.1 then radial=Vector3.new(math.cos(index*2.4),0,math.sin(index*2.4)) end
+  local velocity=radial.Unit*12+Vector3.new(0,12+index%4,10)
+  table.insert(shards,{part=shard,origin=shard.CFrame,velocity=velocity,alpha=original.Transparency,spin=Vector3.new(index%3+1,1,index%2+1)})
+ end
+end
+function Effect.update(model,phase,clock)
+ if character and (model~=character or phase~="GameOver") then clear() end
+ if not started then return end
+ for part in pairs(hidden) do if part.Parent then part.LocalTransparencyModifier=1 end end
+ local elapsed=clock-started
+ for i=#shards,1,-1 do
+  local entry=shards[i]
+  if elapsed&gt;=1.15 then entry.part:Destroy() table.remove(shards,i)
+  else
+   local position=entry.origin.Position+entry.velocity*elapsed+Vector3.new(0,-20*elapsed*elapsed,0)
+   position=Vector3.new(position.X,math.max(0.3,position.Y),position.Z)
+   local spin=entry.spin*elapsed*4
+   entry.part.CFrame=CFrame.new(position)*entry.origin.Rotation*CFrame.Angles(spin.X,spin.Y,spin.Z)
+   entry.part.Transparency=entry.alpha+(1-entry.alpha)*math.clamp((elapsed-0.65)/0.5,0,1)
+  end
+ end
+end
+function Effect.clear() clear() end
+return Effect
+</ProtectedString>
+        </Properties>
+      </Item>
     </Item>
   </Item>
-  <Item class="Lighting" referent="RBX174">
+  <Item class="Lighting" referent="RBX176">
     <Properties>
       <string name="Name">Lighting</string>
       <float name="ClockTime">13</float>

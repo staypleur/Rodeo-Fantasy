@@ -22,6 +22,8 @@ expected = {
     "CaptureClient": "src/client/CaptureClient.client.luau",
     "RideAnimator": "src/client/RideAnimator.luau",
     "RiderPresentation": "src/client/RiderPresentation.luau",
+    "TamingGauge": "src/client/TamingGauge.luau",
+    "CrashEffect": "src/client/CrashEffect.luau",
 }
 assert set(scripts) == set(expected)
 for name, source in expected.items():

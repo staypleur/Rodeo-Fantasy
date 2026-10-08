@@ -5,6 +5,13 @@ function Rules.jumpHeight(elapsed, duration, height)
 	return math.sin(math.clamp(elapsed / duration, 0, 1) * math.pi) * height
 end
 
+-- One ground-to-ground hop. Shared only for synchronized presentation and server motion.
+function Rules.buck(elapsed,cycle,height)
+ local phase=(math.max(elapsed,0)%cycle)/cycle
+ local direction=math.floor(math.max(elapsed,0)/cycle)%2==0 and 1 or -1
+ return math.sin(math.pi*phase)*height, math.sin(math.pi*phase)*direction, math.sin(math.pi*phase*2)*0.28
+end
+
 function Rules.progress(elapsed, duration)
 	return math.clamp(elapsed / duration, 0, 1)
 end
