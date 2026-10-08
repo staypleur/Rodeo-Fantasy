@@ -7,7 +7,7 @@ S.join(player)
 local initial=S.snapshot(player,true) assert(initial.level==1 and initial.xp==0)
 local gui=head.ExplorerNameplate local canvas=gui.PlaqueCanvas
 assert(canvas.PlayerName.Text=='ExplorerTest' and canvas.Level.Text=='1')
-assert(gui.Size.X.Offset<220 and canvas.CompactPlaqueScale.Scale==.6 and gui.Size.Y.Offset==35 and gui:GetAttribute("NameplateRevision")==2,"nameplate fits its text instead of a fixed long panel")
+assert(gui.Size.X.Offset<220 and canvas.CompactPlaqueScale.Scale==.6 and gui.Size.Y.Offset==35 and gui:GetAttribute("NameplateRevision")==3,"nameplate fits its text instead of a fixed long panel")
 assert(gui.AlwaysOnTop and gui.SizeOffset.Y==2 and gui.StudsOffset.Y==1.5,"avatar must not cover the nameplate")
 S.caught(player,'MeadowMouse',1) S.caught(player,'MeadowMouse',1)
 local progress=S.snapshot(player,true)
@@ -33,3 +33,28 @@ assert(short.Size.X.Offset<long.Size.X.Offset,"shorter names must use a shorter 
 assert(long.PlaqueCanvas.PlayerName.Position.X.Offset+long.PlaqueCanvas.PlayerName.Size.X.Offset<long.PlaqueCanvas.Inset.Position.X.Offset+long.PlaqueCanvas.Inset.Size.X.Offset,"full account name fits inside frame")
 short:Destroy() long:Destroy()
 print("LEVEL_PLAQUE_PASS: all 11 themes and exact 99/100/199/200/999/1000 boundaries, name inside frame")
+
+-- Real Camera projection: top-down and oblique views, with a large hat/body box.
+local isolation=require(game.StarterPlayer.StarterPlayerScripts.HuntIsolation)
+local camera=Instance.new("Camera") camera.FieldOfView=70
+for _,offset in ipairs({Vector3.new(0,15,15),Vector3.new(0,25,1),Vector3.new(15,10,15)}) do
+ camera.CFrame=CFrame.lookAt(offset,Vector3.zero)
+ -- Unparented cameras can have a zero viewport in Studio; use a deterministic
+ -- projection mock for screen geometry independent of the machine's resolution.
+ local mock={ViewportSize=Vector2.new(800,600)}
+ function mock:WorldToViewportPoint(world)
+  local v=camera.CFrame:PointToObjectSpace(world)
+  local depth=-v.Z
+  return Vector3.new(400+v.X*400/depth,300-v.Y*400/depth,depth),depth>0
+ end
+ local frame,size=CFrame.new(),Vector3.new(5,9,5)
+ local pos=isolation.screenPosition(mock,frame,size,150,35)
+ assert(pos,"normal avatar bounds fit viewport")
+ for x=-1,1,2 do for y=-1,1,2 do for z=-1,1,2 do
+  local point=mock:WorldToViewportPoint(Vector3.new(x*2.5,y*4.5,z*2.5))
+  assert(pos.Y<=point.Y-10,"plaque bottom stays above entire avatar at every camera angle")
+ end end end
+ assert(not isolation.screenPosition(mock,frame,size,900,35),"hide when plaque cannot fit screen")
+end
+camera:Destroy()
+print("NAMEPLATE_PROJECTION_PASS: oblique and overhead avatar separation, viewport edges")

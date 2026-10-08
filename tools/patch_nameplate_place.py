@@ -9,6 +9,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SOURCES = {
     "LevelPlaque": ROOT / "src/server/LevelPlaque.luau",
     "ProgressService": ROOT / "src/server/ProgressService.luau",
+    "HuntIsolation": ROOT / "src/client/HuntIsolation.luau",
 }
 
 
@@ -51,13 +52,13 @@ def patch(source: Path, output: Path):
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_bytes(updated)
     mesh_count = sum(n.get("class") == "MeshPart" for n in after.iter("Item"))
-    print(f"PASS: patched two nameplate modules; preserved all saved properties and {mesh_count} MeshParts")
+    print(f"PASS: patched {len(replacements)} nameplate modules; preserved all saved properties and {mesh_count} MeshParts")
     print(output)
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=ROOT / "dist/RodeoFantasy-Capture.rbxlx")
-    parser.add_argument("--output", type=Path, default=ROOT / "dist/RodeoFantasy-NameplateFix.rbxlx")
+    parser.add_argument("--output", type=Path, default=ROOT / "dist/RodeoFantasy-NameplateV3.rbxlx")
     args = parser.parse_args()
     patch(args.source, args.output)

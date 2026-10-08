@@ -12,7 +12,7 @@ function P.update(gui,level,name)
  local nameWidth=math.ceil(TextService:GetTextSize(name,17,Enum.Font.GothamBold,Vector2.new(1000,100)).X)+4
  local nameX=31+levelWidth+10
  local width=math.max(140,nameX+nameWidth+30)
- gui:SetAttribute("NameplateRevision",2)
+ gui:SetAttribute("NameplateRevision",3)
  gui.Size=UDim2.fromOffset(math.ceil(width*.6),35)
  if gui:GetAttribute("ThemeTier")~=tier or gui:GetAttribute("LayoutWidth")~=width or gui:GetAttribute("LevelWidth")~=levelWidth then
   gui:ClearAllChildren() gui:SetAttribute("ThemeTier",tier) gui:SetAttribute("Theme",theme.name)
