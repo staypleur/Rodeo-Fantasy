@@ -112,6 +112,9 @@ spawn=named("LobbySpawn")[0].find("Properties/CoordinateFrame[@name='CFrame']")
 assert float(spawn.findtext("X"))==6000 and float(spawn.findtext("Z"))==0
 assert len(named("BasketFloor"))==1 and not named("Cabin")
 assert named("WalrusBody")[0].findtext("Properties/token[@name='shape']")=="0"
+assert len(named("SkyGarden_1"))==1 and len(named("SkyGarden_8"))==1
+assert len(named("SkyCanopy"))==24 and len(named("IslandWaterfall"))==48
+assert all(n.findtext("Properties/float[@name='Transparency']")=="1" for n in named("GardenWall"))
 def footprint(node):
  p=node.find("Properties");cf=p.find("CoordinateFrame[@name='CFrame']");size=p.find("Vector3[@name='size']")
  x,z=float(cf.findtext('X')),float(cf.findtext('Z'));sx,sz=float(size.findtext('X'))/2,float(size.findtext('Z'))/2
@@ -125,7 +128,7 @@ for model in furnishings:
   poly=footprint(node)
   for path in paths: assert not overlaps(poly,path), node.findtext("Properties/string[@name='Name']")+" blocks a ranch path"
   checked+=1
-print(f"PASS: center spawn, one ladder, smooth final airship/open basket, {checked} furnishings clear all eight paths")
+print(f"PASS: center spawn, one ladder, smooth final airship/open basket, floating isles and waterfalls, invisible safety bounds, {checked} furnishings clear all eight paths")
 
 assert not named("BrickStud"), "reference architecture uses masonry rather than plastic studs"
 assert len(named("RanchTower"))==32 and len(named("TowerRoofCourse"))==256

@@ -17,6 +17,7 @@
 - 로비/사냥 BGM과 효과음7개 native ContentProvider 로딩 성공/양의 길이.
 - concept5장(각3안×4단계)을 육안 확인. 꼬마쥐/바위코끼리는 초원 식물 방향 수정. 새 그림과 실제 Roblox 모델은 구분한다.
 - 진화 순수 규칙은 `tests/bag_rules.luau`에, 가방/진화 UI는 `tests/studio_collection_ui.luau`에, 이름표 테마/크기는 `tests/studio_progress.luau`에 포함. 이번 로컬 빌드에서는 Roblox Studio가 실행 중이지 않아 이 Luau 테스트는 실행하지 않았다.
+- 로비 구조 검사에서 경계 담장의 투명성, 공중 정원8곳, 물줄기48개, 8개 플레이 경로와 별도 배경 장식 간 분리를 확인했다.
 
 ## 미확인
 

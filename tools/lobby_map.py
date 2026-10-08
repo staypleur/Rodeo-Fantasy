@@ -307,8 +307,51 @@ def build_lobby(workspace, item, part, prop):
         for dx in (-3,3): block(lobby,"GardenRock",(x+dx,.7,z+3),(2,1.4,1.7),(141,148,146),(0,n*17,0))
     walls,_=item(lobby,"Folder","Boundary")
     for side in (-1,1):
-        block(walls,"GardenWall",(side*158,12,0),(4,24,320),(204,198,174))
-        block(walls,"GardenWall",(0,12,side*158),(320,24,4),(204,198,174))
-        block(walls,"WallTrim",(side*158,24.5,0),(5,1,321),cream)
-        block(walls,"WallTrim",(0,24.5,side*158),(321,1,5),cream)
+        # Invisible safety limits keep players on the island without boxing in the view.
+        for position,size in (((side*158,12,0),(4,24,320)),((0,12,side*158),(320,24,4))):
+            wall=block(walls,"GardenWall",position,size,(204,198,174))
+            prop(wall.find("Properties"),"float","Transparency",1)
+        for position,size in (((side*158,24.5,0),(5,1,321)),((0,24.5,side*158),(321,1,5))):
+            trim=block(walls,"WallTrim",position,size,cream,collide=False)
+            prop(trim.find("Properties"),"float","Transparency",1)
+    # Layered stone gives the square walkable plaza a readable floating-island edge.
+    strata=((124,132,132),(108,119,124),(91,104,112),(78,91,100))
+    for side in (-1,1):
+        for segment in range(8):
+            offset=-140+segment*40
+            for layer,color in enumerate(strata):
+                y=-3-layer*5.5
+                width=37+(segment*7+layer*3)%8
+                depth=5.5+((segment+layer)%3)*1.5
+                block(lobby,"IslandCliff",(side*(158+depth*.25),y,offset),(depth,7,width),color,(0,0,0),collide=False)
+                block(lobby,"IslandCliff",(offset,y,side*(158+depth*.25)),(width,7,depth),color,(0,90,0),collide=False)
+    # Several broad turquoise falls frame the town and remain outside the running paths.
+    for side in (-1,1):
+        for offset in (-105,-35,35,105):
+            for stripe in (-1,0,1):
+                width=2.2 if stripe==0 else 1.0
+                x=side*161+stripe*.7
+                ribbon=block(lobby,"IslandWaterfall",(x,-22,offset+stripe*1.6),(width,48,8 if stripe==0 else 5),(76,174,198) if stripe==0 else (127,209,219),collide=False)
+                prop(ribbon.find("Properties"),"float","Transparency",.12 if stripe==0 else .28)
+            block(lobby,"WaterfallFoam",(side*161,-46,offset),(4,.7,12),(198,235,230),collide=False)
+            x,z=offset,-161
+            for stripe in (-1,0,1):
+                width=2.2 if stripe==0 else 1.0
+                ribbon=block(lobby,"IslandWaterfall",(x+stripe*1.6,-22,side*161+stripe*.7),(8 if stripe==0 else 5,48,width),(76,174,198) if stripe==0 else (127,209,219),collide=False)
+                prop(ribbon.find("Properties"),"float","Transparency",.12 if stripe==0 else .28)
+            block(lobby,"WaterfallFoam",(offset,-46,side*161),(12,.7,4),(198,235,230),collide=False)
+    # A ring of distant garden isles adds depth behind the eight player courtyards.
+    for index in range(8):
+        angle=math.tau*index/8+math.pi/8
+        x,z=math.sin(angle)*222,math.cos(angle)*222
+        isle,_=item(lobby,"Model",f"SkyGarden_{index+1}")
+        tone=((145,151,143),(123,135,131),(103,118,119))[index%3]
+        block(isle,"FloatingStone",(x,35,z),(38,5,32),tone,(0,index*17,0),collide=False)
+        block(isle,"IslandSoil",(x,38.1,z),(33,1.5,27),(111,143,91),(0,index*17,0),collide=False)
+        for tier in range(3):
+            canopy=block(isle,"SkyCanopy",(x+(-5+5*tier),43+tier*3,z+(4-3*tier)),(19-tier*3,8,17-tier*3),((74,130,68),(94,153,75),(125,172,88))[tier],collide=False)
+            prop(canopy.find("Properties"),"token","shape",1)
+        block(isle,"SkyTrunk",(x-4,43,z+4),(2.2,10,2.2),(119,84,58),collide=False)
+        fall=block(isle,"Skyfall",(x+18,9,z),(1.1,49,3.8),(92,190,204),collide=False)
+        prop(fall.find("Properties"),"float","Transparency",.3)
     return lobby
