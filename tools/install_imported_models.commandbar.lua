@@ -19,9 +19,10 @@ for _, id in ipairs(species) do
 		local hasBody = false
 		for _, node in ipairs(source:GetDescendants()) do
 			if node:IsA("MeshPart") then
-				assert(node.Name:match("^.-__C%x%x%x%x%x%x$"), sourceName .. " mesh name lost its color code: " .. node.Name)
+				local encodedName = node.Name:gsub("_Node$", "")
+				assert(encodedName:match("^.-__C%x%x%x%x%x%x$"), sourceName .. " mesh name lost its color code: " .. node.Name)
 				table.insert(parts, node)
-				if node.Name:match("^Body__C%x%x%x%x%x%x$") then hasBody = true end
+				if encodedName:match("^Body__C%x%x%x%x%x%x$") then hasBody = true end
 			end
 		end
 		assert(#parts >= 10, sourceName .. " imported with too few MeshParts")
@@ -44,7 +45,8 @@ local function replaceGeometry(target, source, parts)
 	local sourcePivot = source:GetPivot()
 	for _, sourcePart in ipairs(parts) do
 		local mesh = sourcePart:Clone()
-		local groupName, rgb = sourcePart.Name:match("^(.-)__C(%x%x%x%x%x%x)$")
+		local encodedName = sourcePart.Name:gsub("_Node$", "")
+		local groupName, rgb = encodedName:match("^(.-)__C(%x%x%x%x%x%x)$")
 		assert(groupName and rgb, "Mesh node is missing its encoded color: " .. sourcePart.Name)
 		mesh.Name = groupName
 		mesh.Color = Color3.fromRGB(

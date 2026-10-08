@@ -7,7 +7,7 @@
 1. Roblox Studio에서 기존 시험을 중지하고 `Ctrl+O`를 누릅니다. 프로젝트의 `dist/RodeoFantasy-Capture.rbxlx`를 엽니다.
 2. Studio의 **File → Import**에서 `dist/CreatureModels` 폴더를 엽니다. 20개 `.glb` 파일을 모두 선택해 가져옵니다. 현재 배포본에서는 코드가 부품별 색을 복원하고 숨은 메시를 처리하므로 최신 GLB와 최신 설치 스크립트를 함께 사용합니다.
 3. 업로드 옵션을 켜고, 이 경험을 소유한 계정 또는 그룹을 Creator로 선택합니다. 실제 게임에서 메시를 보려면 모델이 경험에 업로드되어 있어야 합니다. 가져오기 미리보기에서 이름·색·경고를 확인하고 Import를 누릅니다.
-4. 가져온 20개 Model을 Workspace 아래 `ImportedCreatureModels`라는 Folder 하나에 모읍니다. 가져온 Model 이름은 파일명과 같아야 합니다. 예: `MeadowMouse_A_S1`. 메시 병합(Merge Meshes)은 끄고, Studio 기본값의 World Forward=Front, World Up=Top을 유지합니다.
+4. 가져온 20개 Model을 Workspace 아래 `ImportedCreatureModels`라는 Folder 하나에 모읍니다. 가져온 Model 이름은 파일명과 같아야 합니다. 예: `MeadowMouse_A_S1`. 메시 병합(Merge Meshes)은 끄고, Studio 기본값의 World Forward=Front, World Up=Top을 유지합니다. Studio가 개별 메시 이름 뒤에 `_Node`를 붙여도 설치 스크립트가 처리합니다.
 5. 저장소의 `tools/install_imported_models.commandbar.lua` 파일을 열어 전체 내용을 복사합니다. Studio에서 **View → Command Bar**를 열고 붙여 넣어 실행합니다. 성공하면 Output에 `Installed all 20 A-family models...`가 나옵니다. 이름 누락이나 MeshPart 이름 변경이 있으면 스크립트가 기존 모델을 건드리기 전에 멈춥니다.
 6. `Ctrl+S`로 장소를 저장하고 F5를 눌러 사냥터, 가방, 도감, 목장에 모델이 나오는지 확인합니다.
 7. 게시된 게임을 바꾸려면 확인 후 **File → Publish to Roblox**로 현재 경험에 게시합니다. 저장소의 파일을 커밋하거나 푸시하는 것만으로 이미 게시된 Roblox 게임이 바뀌지는 않습니다.
