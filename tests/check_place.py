@@ -14,6 +14,9 @@ scripts = {
     for item in place.iter("Item") if item.attrib["class"] in ("Script", "LocalScript", "ModuleScript")
 }
 expected = {
+    "Localization": "src/shared/Localization.luau",
+    "BagUI": "src/client/BagUI.luau",
+    "LocalizationController": "src/client/LocalizationController.luau",
     "Config": "src/shared/Config.luau",
     "HuntRules": "src/shared/HuntRules.luau",
     "HerdMotion": "src/shared/HerdMotion.luau",

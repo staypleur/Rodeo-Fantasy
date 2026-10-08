@@ -11,7 +11,7 @@ local Course=require(package.CourseGeometry)
 local remote=package.CaptureRemote
 local tuning=Config.Prototype
 local states,bags,limits,views={},{},{},{}
-local lastSync,lastCleanup=0,0
+local lastSync,lastCleanup,lastHerd=0,0,0
 World.init(workspace.RodeoPrototype,game:GetService("ServerStorage").RodeoMonsterTemplate,Config,Rules)
 World.ensure(0)
 local function now() return workspace:GetServerTimeNow() end
@@ -23,6 +23,15 @@ local function send(player,message)
  if not bag then return end
  BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
  remote:FireClient(player,"State",{phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
+end
+local function sendBag(player)
+ local bag=bags[player]
+ if not bag or states[player] then return end
+ local items={}
+ for _,item in ipairs(bag.monsters) do
+  table.insert(items,{monsterId=item.monsterId,stars=item.stars,incomeSeconds=Config.BagIncome.IncomeSeconds,incomeAmount=Config.BagIncome.IncomeAmount})
+ end
+ remote:FireClient(player,"Bag",items)
 end
 local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
@@ -77,7 +86,7 @@ local function start(player)
  local root=character and character:FindFirstChild("HumanoidRootPart")
  local humanoid=character and character:FindFirstChildOfClass("Humanoid")
  if not root or not humanoid or humanoid.Health<=0 then return end
- if not previous and not Lobby.canDepart(player) then send(player,"비행장에서 사냥터로 출발하세요.") return end
+ if not previous and not Lobby.canDepart(player) then send(player,"Approach the airship to start.") return end
  if previous then
   freeMount(previous)
   if previous.phase=="CourseEnd" and previous.root==root then
@@ -86,7 +95,11 @@ local function start(player)
   end
  end
  World.ensure(0)
- World.replenish(0,views[player] or 1)
+ local watchers={}
+ for other,run in pairs(states) do
+  if other~=player and run.phase~="GameOver" and run.phase~="CourseEnd" then table.insert(watchers,{z=run.root.Position.Z,aspect=views[other] or 1}) end
+ end
+ World.replenish(0,views[player] or 1,watchers,true)
  local model=World.spawn(Vector3.new(0,2,-8))
  model:SetAttribute("Occupied",true)
  model:SetAttribute("Angry",false)
@@ -123,7 +136,7 @@ end
 Lobby.connect(start)
 remote.OnServerEvent:Connect(function(player,action,value)
  if type(action)~="string" or not bags[player] then return end
- if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" then return end
+ if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
@@ -134,14 +147,15 @@ remote.OnServerEvent:Connect(function(player,action,value)
   if type(value)=="number" and value==value and value>=0.4 and value<=4 then views[player]=value end
   return
  end
- if action=="Sync" then send(player) return end
+ if action=="Bag" then sendBag(player) return end
+ if action=="Sync" then send(player) sendBag(player) return end
  if action=="Start" then start(player) return end
  if action=="ReturnLobby" then
   local state=states[player]
   if state and (state.phase=="GameOver" or state.phase=="CourseEnd") then
-   finish(player,"로비로 돌아왔어요.")
+   finish(player,"Welcome back to the lobby.")
    state.root.CFrame=Lobby.Spawn
-   states[player]=nil send(player)
+   states[player]=nil send(player) sendBag(player)
   end
   return
  end
@@ -158,12 +172,13 @@ RunService.Heartbeat:Connect(function(delta)
  local clock,dt=now(),math.min(delta,0.1)
  World.step(dt)
  local nearZ={0}
+ local watchers={}
  for player,state in pairs(states) do
   if (state.phase=="GameOver" or state.phase=="CourseEnd") then
    if state.root.Parent then table.insert(nearZ,state.root.Position.Z) end
    continue
   end
-  if not state.root.Parent or player.Character~=state.root.Parent or state.humanoid.Health<=0 then finish(player,"사냥 종료") continue end
+  if not state.root.Parent or player.Character~=state.root.Parent or state.humanoid.Health<=0 then finish(player,"Hunt ended") continue end
   local steer=state.phase=="Riding" and clock-state.steerAt<0.5 and state.steer or 0
   local buckHeight,buckDrift=0,0
   if state.phase=="Riding" and Config.Hunt.AngerEnabled and clock-state.started>=Config.Hunt.AngerSeconds then
@@ -187,7 +202,7 @@ RunService.Heartbeat:Connect(function(delta)
     state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
    end
    clearRope(state)
-   send(player,"다음 지역 준비 중")
+   send(player,"Next region coming soon")
    continue
   end
   state.distance+=speed*dt*tuning.MetersPerStud
@@ -196,17 +211,17 @@ RunService.Heartbeat:Connect(function(delta)
   if state.phase=="Airborne" then
    position=Vector3.new(position.X,state.launchY+Rules.jumpHeight(clock-state.started,tuning.FlightSeconds,tuning.JumpArcStuds),position.Z)
    state.root.CFrame=CFrame.new(position)
-   if World.hit(old,position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
-   if state.phase=="Airborne" and clock-state.started>=tuning.FlightSeconds then finish(player,"다음 몬스터를 잡지 못했어요.") end
+   if World.hit(old,position) then finish(player,"You hit an obstacle.","Obstacle") continue end
+   if state.phase=="Airborne" and clock-state.started>=tuning.FlightSeconds then finish(player,"You missed the next monster.") end
   elseif state.phase=="Lassoing" then
-   if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end
+   if not state.monster or not state.monster.Parent then finish(player,"You lost your mount.") continue end
    local p=state.monster.PrimaryPart.Position
    state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z-baseSpeed(state)*dt)
    local saddle=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
    local landingSeconds=state.landingSeconds or tuning.JumpSeconds
    local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
    state.root.CFrame=state.origin:Lerp(saddle,landingProgress)*CFrame.new(0,math.sin(math.pi*landingProgress)*tuning.JumpArcStuds*0.5,0)
-   if World.hit(p,state.monster.PrimaryPart.Position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
+   if World.hit(p,state.monster.PrimaryPart.Position) then finish(player,"You hit an obstacle.","Obstacle") continue end
    if clock-state.started>=landingSeconds then
     clearRope(state)
     state.phase,state.started,state.tamed="Riding",clock,state.monster:GetAttribute("Tamed_"..player.UserId)==true
@@ -221,18 +236,18 @@ RunService.Heartbeat:Connect(function(delta)
     -- Space presses during landing are not queued as a new jump.
    end
   elseif state.phase=="Riding" then
-   if not state.monster or not state.monster.Parent then finish(player,"몬스터를 놓쳤어요.") continue end
+   if not state.monster or not state.monster.Parent then finish(player,"You lost your mount.") continue end
    position=Vector3.new(position.X,2+buckHeight,position.Z)
    local before=state.monster.PrimaryPart.Position
    state.monster.PrimaryPart.CFrame=CFrame.new(position)
    state.monster:SetAttribute("Steering",steer)
    state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
-   if World.crateHit(before,position,state.monster,Config.Monster.SizeClass) then finish(player,"상자를 부술 수 없는 몬스터예요.","Obstacle") continue end
+   if World.crateHit(before,position,state.monster,Config.Monster.SizeClass) then finish(player,"This monster cannot break crates.","Obstacle") continue end
    local contact=World.mountedHit(before,position,state.monster)
-   if contact then finish(player,contact=="Wall" and "벽에 부딪혔어요." or "다른 몬스터에 부딪혔어요.",contact) continue end
-   if World.hit(before,position) then finish(player,"장애물에 부딪혔어요.","Obstacle") continue end
+   if contact then finish(player,contact=="Wall" and "You hit a wall." or "You hit another monster.",contact) continue end
+   if World.hit(before,position) then finish(player,"You hit an obstacle.","Obstacle") continue end
    if not state.tamed and clock-state.started>=Config.Hunt.TameSeconds then
-    state.tamed=true BagRules.grant(bags[player],Config.Monster.Id,clock) send(player,Config.Monster.Name.." 길들이기 성공! 가방에 추가됐어요.")
+    state.tamed=true BagRules.grant(bags[player],Config.Monster.Id,clock) send(player,"Lumidon tamed! Added to your bag.")
     state.monster:SetAttribute("Tamed_"..player.UserId,true)
    end
    if Config.Hunt.AngerEnabled and clock-state.started>=Config.Hunt.AngerSeconds then
@@ -243,21 +258,19 @@ RunService.Heartbeat:Connect(function(delta)
     -- Anger persists until the rider chooses to jump or a real collision ends the run.
    end
   end
-  if clock-(state.lastHerdRefresh or -math.huge)>=0.25 then
-   state.lastHerdRefresh=clock
-   World.replenish(state.root.Position.Z,views[player] or 1)
-  end
+  table.insert(watchers,{z=state.root.Position.Z,aspect=views[player] or 1})
  end
+ if clock-lastHerd>=0.25 then lastHerd=clock World.maintain(watchers) end
  if clock-lastSync>=0.25 then lastSync=clock for _,player in ipairs(Players:GetPlayers()) do send(player) end end
  if clock-lastCleanup>=3 then lastCleanup=clock World.cleanup(nearZ) end
 end)
 local function added(player)
- if not Lobby.assign(player) then player:Kick("이 서버는 8명까지 입장할 수 있어요.") return end
+ if not Lobby.assign(player) then player:Kick("This server holds up to 8 players.") return end
  player.CanLoadCharacterAppearance=true
  if player.UserId>0 then player.CharacterAppearanceId=player.UserId end
  bags[player]=BagRules.new()
- player.CharacterRemoving:Connect(function() finish(player,"사냥 종료") states[player]=nil end)
+ player.CharacterRemoving:Connect(function() finish(player,"Hunt ended") states[player]=nil end)
 end
 Players.PlayerAdded:Connect(added)
-Players.PlayerRemoving:Connect(function(player) Lobby.release(player) finish(player,"사냥 종료") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil end)
+Players.PlayerRemoving:Connect(function(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil end)
 for _,player in ipairs(Players:GetPlayers()) do added(player) end

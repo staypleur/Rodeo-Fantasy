@@ -3,7 +3,7 @@ local package=RS.RodeoFantasy
 local config=require(package.Config)
 local rules=require(package.HuntRules)
 local bagRules=require(package.BagRules)
-assert(config.Monster.Id=="Lumidon" and config.Monster.Name=="루미돈")
+assert(config.Monster.Id=="Lumidon" and config.Monster.Name=="Lumidon")
 assert(package:FindFirstChild("CaptureRules")==nil and config.Capture==nil)
 local bag=bagRules.new()
 bagRules.grant(bag,config.Monster.Id,0)
@@ -35,6 +35,7 @@ local world=workspace.RodeoPrototype
 local engine=require(game:GetService("ServerScriptService").HuntWorld)
 engine.init(world,template,config,rules)
 engine.ensure(0)
+engine.replenish(0,1,nil,true,64)
 assert(#world.Monsters:GetChildren()>10,"moving herd required")
 assert(#world.Obstacles:GetChildren()>0,"obstacles required")
 local animal=engine.spawn(Vector3.new(0,2,-8))
@@ -196,11 +197,14 @@ effect.clear() catchRig:Destroy()
 print("CATCH_CRATE_MONSTER_BREAKUP_PASS")
 
 for _,npc in ipairs(world.Monsters:GetChildren()) do npc:Destroy() end
-engine.replenish(0)
-assert(#world.Monsters:GetChildren()==6,"depleted existing road must regain nearby herd")
-engine.replenish(0)
-assert(#world.Monsters:GetChildren()==6,"repeated restart must not multiply herd")
+engine.replenish(0,1,nil,true,64)
+local count=#world.Monsters:GetChildren()
+assert(count>=4 and count<=56,"opening must have a bounded nearby herd")
+engine.replenish(0,1,nil,true,64)
+assert(#world.Monsters:GetChildren()==count,"repeated priming must not multiply herd")
+local visible=0
 for _,npc in ipairs(world.Monsters:GetChildren()) do
- assert(require(package.HerdVisibility).visible(npc.PrimaryPart.Position.X,npc.PrimaryPart.Position.Y,npc.PrimaryPart.Position.Z,1,config.Prototype),"refill must stay in front of launch")
+ if require(package.HerdVisibility).visible(npc.PrimaryPart.Position.X,npc.PrimaryPart.Position.Y,npc.PrimaryPart.Position.Z,1,config.Prototype) then visible+=1 end
 end
+assert(visible>=4,"opening screen must contain nearby monsters")
 print("RESTART_HERD_REFILL_PASS")

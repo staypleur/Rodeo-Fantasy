@@ -15,7 +15,7 @@ Config.Audio = {
 
 Config.Monster = {
 	Id = "Lumidon",
-	Name = "루미돈",
+	Name = "Lumidon",
  RunSpeed = 64, -- species-specific riding speed
  SizeClass = "Medium", -- temporary crate-breaking test classification
 }

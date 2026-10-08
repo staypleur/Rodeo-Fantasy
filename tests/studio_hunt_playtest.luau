@@ -33,6 +33,14 @@ driver.OnServerInvoke=function(player,action,value)
    for _,node in ipairs(folder:GetChildren()) do if node:GetAttribute("TestKeep") then node:Destroy() end end
   end
   return true
+ elseif action=="LateBody" then
+  for _,model in ipairs(workspace.RodeoPrototype.Monsters:GetChildren()) do
+   if model:GetAttribute("Occupied") then
+    local part=model.Body:Clone() model.Body:Destroy()
+    task.delay(.25,function() if model.Parent then part.Parent=model end end)
+    return true
+   end
+  end
  elseif action=="Target" then
   local root=player.Character.HumanoidRootPart
   local target=world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-3))
@@ -179,6 +187,9 @@ local success,problem=pcall(function()
  waitFor(function() return workspace:FindFirstChild("LocalDashWind")~=nil end,"switch dash wind must render")
  check(workspace:FindFirstChild("LocalDashWind")~=nil,"switch dash must surround rider with wind")
  check(state.protectedUntil==nil,"landing protection must be removed")
+ driver:InvokeServer("LateBody")
+ waitFor(function() return target:FindFirstChild("Body")~=nil end,"delayed body must replicate")
+ task.wait(.15)
  local worstOffset=0
  local samples=0
  runService:BindToRenderStep("CheckMountAlignment",Enum.RenderPriority.Last.Value,function()
@@ -258,6 +269,13 @@ local success,problem=pcall(function()
  remote:FireServer("ReturnLobby")
  waitFor(function() return state.area=="Lobby" and state.phase=="Idle" end,"return to lobby must restore lobby state")
  check(state.count>0,"lobby return must retain bag")
+ local gui=player.PlayerGui.RodeoCaptureUI
+ waitFor(function() return #gui.BagWindow.BagCards:GetChildren()>1 end,"bag inventory snapshot missing")
+ local card=gui.BagWindow.BagCards:FindFirstChild("MonsterCard")
+ check(card~=nil and card.MonsterImage.CurrentCamera~=nil and #card.MonsterImage.WorldModel:GetChildren()==1,"bag must show complete monster image")
+ check(card.Income.Text~="","bag must show production amount")
+ check(not gui.HuntHelp.Visible,"lobby must hide travel instructions")
+ check(workspace.RodeoLobby.Plots["Plot_"..player:GetAttribute("LobbySlot")].OwnerBoard.SignFace5.Text.Text==player.Name,"ranch board must show only username")
  waitFor(function() return player.PlayerGui.RodeoCaptureUI.LobbyStats.Visible and not player.PlayerGui.RodeoCaptureUI.DistanceCounter.Visible end,"lobby must show bag and hide meters")
 end)
 driver:InvokeServer("Finish",success and ("PASS: "..checks.." hunting Play checks") or ("FAIL: "..tostring(problem)))

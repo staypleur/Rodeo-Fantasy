@@ -33,6 +33,10 @@ local gui=make("ScreenGui",{Name="RodeoCaptureUI",ResetOnSpawn=false,DisplayOrde
 local function text(parent,value,pos,size,font)
  return make("TextLabel",{Text=value,Position=pos,Size=size,TextSize=font or 18,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(255,245,219),BackgroundTransparency=1,TextWrapped=true},parent)
 end
+local bagUI=require(script.Parent:WaitForChild("BagUI")).new(gui,remote)
+local locale=require(script.Parent:WaitForChild("LocalizationController"))
+locale.watch(gui) locale.watch(workspace.RodeoLobby)
+local function T(value) return locale.text(value) end
 local distance=text(gui,"0m",UDim2.new(0.5,-80,0,12),UDim2.fromOffset(160,48),32)
 distance.Name="DistanceCounter"
 distance.TextColor3=Color3.fromRGB(255,232,151)
@@ -41,17 +45,17 @@ distance.BackgroundColor3=Color3.fromRGB(31,55,42) distance.BackgroundTransparen
 make("UICorner",{CornerRadius=UDim.new(0,14)},distance)
 make("UIStroke",{Color=Color3.fromRGB(113,148,95),Thickness=2},distance)
 local lastAspect=nil
-local bag=text(gui,"가방: 0마리 · 모인 돈: 0원",UDim2.fromOffset(16,16),UDim2.fromOffset(320,42),16)
+local bag=text(gui,"Bag: 0 · Uncollected coins: 0",UDim2.fromOffset(16,16),UDim2.fromOffset(320,42),16)
 bag.Name="LobbyStats" bag.BackgroundColor3=Color3.fromRGB(40,65,56) bag.BackgroundTransparency=0.1
 make("UICorner",{CornerRadius=UDim.new(0,12)},bag)
 local panel=make("Frame",{Name="HuntHelp",AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,94),BackgroundColor3=Color3.fromRGB(43,67,49),BackgroundTransparency=0.22,BorderSizePixel=0},gui)
 make("UISizeConstraint",{MaxSize=Vector2.new(510,94)},panel)
 make("UICorner",{CornerRadius=UDim.new(0,14)},panel)
-local status=text(panel,"로데오 스트릿 · 루미돈 사냥",UDim2.fromOffset(12,4),UDim2.new(1,-24,0,28),18)
-local instruction=text(panel,"A·D 좌우 이동 → 스페이스바 점프 → 다시 눌러 줄",UDim2.fromOffset(12,34),UDim2.new(1,-24,0,28),13)
-local startButton=make("TextButton",{Name="StartHunt",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.52),Size=UDim2.fromOffset(230,64),Text="사냥 시작",TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(219,103,41)},gui)
+local status=text(panel,"Rodeo Fantasy",UDim2.fromOffset(12,4),UDim2.new(1,-24,0,28),18)
+local instruction=text(panel,"A/D to steer · Space to jump / again to lasso",UDim2.fromOffset(12,34),UDim2.new(1,-24,0,28),13)
+local startButton=make("TextButton",{Name="StartHunt",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.52),Size=UDim2.fromOffset(230,64),Text="Start hunt",TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(219,103,41)},gui)
 make("UICorner",{CornerRadius=UDim.new(0,16)},startButton)
-local returnButton=make("TextButton",{Name="ReturnLobby",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.64),Size=UDim2.fromOffset(230,48),Text="로비로 돌아가기",TextSize=18,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(78,132,114),Visible=false},gui)
+local returnButton=make("TextButton",{Name="ReturnLobby",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.64),Size=UDim2.fromOffset(230,48),Text="Return to lobby",TextSize=18,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(78,132,114),Visible=false},gui)
 make("UICorner",{CornerRadius=UDim.new(0,14)},returnButton)
 returnButton.Activated:Connect(function() remote:FireServer("ReturnLobby") end)
 local highlight=make("Highlight",{Enabled=false,FillTransparency=0.82,OutlineColor=Color3.fromRGB(255,222,91)},gui)
@@ -100,7 +104,7 @@ local function cameraMode(enabled)
   savedType,savedSubject,savedFieldOfView=camera.CameraType,camera.CameraSubject,camera.FieldOfView
   CAS:BindActionAtPriority("RodeoSteer",keyAction,false,Enum.ContextActionPriority.High.Value+1,Enum.KeyCode.A,Enum.KeyCode.D,Enum.KeyCode.W,Enum.KeyCode.S)
   CAS:BindActionAtPriority("RodeoJump",jumpAction,true,Enum.ContextActionPriority.High.Value+2,Enum.KeyCode.Space)
-  CAS:SetTitle("RodeoJump","점프 / 줄")
+  CAS:SetTitle("RodeoJump","Jump / Lasso")
   CAS:SetPosition("RodeoJump",UDim2.new(1,-95,1,-160))
   camera.CameraType=Enum.CameraType.Scriptable
   camera.FieldOfView=Config.Prototype.CameraFieldOfView
@@ -134,16 +138,18 @@ UIS.WindowFocusReleased:Connect(function()
  held,left,right=false,false,false
 end)
 remote.OnClientEvent:Connect(function(kind,data)
+ if kind=="Bag" then bagUI.snapshot(data) return end
  if kind~="State" then return end
  if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow(),data.monsterCrashFrame) end
  if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
+ bagUI.state(data)
  if data.message then notice,noticeUntil=data.message,os.clock()+3 end
  startButton.Visible=state.phase~="Idle" and not active()
  returnButton.Visible=state.phase=="GameOver" or state.phase=="CourseEnd"
- startButton.Text=state.phase=="GameOver" and "다시 사냥하기" or "사냥 시작"
+ startButton.Text=state.phase=="GameOver" and "Hunt again" or "Start hunt"
  cameraMode(active() or state.phase=="CourseEnd")
- bag.Text=string.format("가방: %d마리 · 모인 돈: %d원",state.count,state.pending)
+ bag.Text=require(package.Localization).stats(state.count,state.pending,player.LocaleId)
 end)
 player.CharacterAdded:Connect(function() state.phase="Idle" cameraMode(false) remote:FireServer("Sync") end)
 RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Camera.Value+1, function(dt)
@@ -188,7 +194,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  bag.Visible=state.area=="Lobby" or state.phase=="Idle"
  distance.Text=string.format("%dm",math.floor(displayDistance))
  highlight.Enabled=false
- panel.Visible=not active()
+ panel.Visible=state.phase=="GameOver" or state.phase=="CourseEnd"
  gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),state.tamed,workspace.CurrentCamera)
  for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
  if (active() or state.phase=="CourseEnd") and root then
@@ -205,7 +211,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   ring.Position=Vector3.new(visualFrame.Position.X,0.15,visualFrame.Position.Z)
   local nearest,best=nil,Config.Prototype.LassoRangeStuds^2
   for _,model in ipairs(monsters:GetChildren()) do
-   if model.PrimaryPart and model~=state.previousMonster and not model:GetAttribute("Occupied") then
+   if model.PrimaryPart and model~=state.previousMonster and not model:GetAttribute("Occupied") and not model:GetAttribute("Emerging") then
     local d=model.PrimaryPart.Position-root.Position
     if d.X*d.X+d.Z*d.Z<best then nearest,best=model,d.X*d.X+d.Z*d.Z end
    end
@@ -213,16 +219,16 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   if nearest then highlight.Adornee,highlight.Enabled=nearest,true end
  end
  if state.phase=="Riding" then
-  status.Text=state.angerAt and "화났어요! 스페이스바로 점프하세요!" or state.tamed and "길들이기 성공 · 계속 타고 달리세요" or "루미돈 길들이는 중 ♥"
-  instruction.Text="A·D로 좌우 이동 · 스페이스바로 점프 / 공중에서 다시 누르면 줄"
+  status.Text=state.angerAt and "Angry! Press Space to jump!" or state.tamed and "Tamed · Keep riding" or "Taming Lumidon ♥"
+  instruction.Text="A/D to steer · Space to jump / again to lasso"
 
  elseif state.phase=="Airborne" then
-  status.Text="스페이스바로 다음 몬스터를 잡으세요!"
-  instruction.Text="노란 원 안에 몬스터가 들어오면 줄이 연결됩니다"
- elseif state.phase=="Lassoing" then status.Text="날아가서 탑승하는 중…" instruction.Text="탑승 후 계속 타고 달릴 수 있어요"
- elseif state.phase=="CourseEnd" then status.Text="1,000m · 다음 지역 준비 중" instruction.Text="초원 시험 구간이 끝났어요 · 사냥 시작으로 다시 달릴 수 있어요"
- elseif state.phase=="GameOver" then status.Text="사냥 종료" instruction.Text="다시 사냥하기로 재도전 · 가방 수익은 유지"
- else status.Text="로데오 판타지 · 파스텔 로비" instruction.Text="비행장으로 걸어가 E를 누르면 사냥터로 출발해요" end
+  status.Text="Press Space to catch the next monster!"
+  instruction.Text="Lasso a monster inside the yellow ring"
+ elseif state.phase=="Lassoing" then status.Text="Flying to your next mount…" instruction.Text="Keep riding after landing"
+ elseif state.phase=="CourseEnd" then status.Text="1,000m · Next region coming soon" instruction.Text="Meadow complete · Start again or return"
+ elseif state.phase=="GameOver" then status.Text="Hunt ended" instruction.Text="Try again · Your bag income is kept"
+ else status.Text="" instruction.Text="" end
  if os.clock()<noticeUntil and not state.angerAt then status.Text=notice end
 end)
 remote:FireServer("Sync")

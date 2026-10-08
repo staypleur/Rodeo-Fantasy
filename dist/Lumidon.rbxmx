@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <roblox version="4">
-  <Item class="Model" referent="RBX1693">
+  <Item class="Model" referent="RBX1756">
     <Properties>
       <string name="Name">Lumidon</string>
-      <Ref name="PrimaryPart">RBX1694</Ref>
+      <Ref name="PrimaryPart">RBX1757</Ref>
     </Properties>
-    <Item class="Part" referent="RBX1694">
+    <Item class="Part" referent="RBX1757">
       <Properties>
         <string name="Name">MountRoot</string>
         <bool name="Anchored">true</bool>
@@ -36,7 +36,7 @@
         <bool name="CanQuery">false</bool>
         <bool name="CanTouch">false</bool>
       </Properties>
-      <Item class="BillboardGui" referent="RBX1742">
+      <Item class="BillboardGui" referent="RBX1805">
         <Properties>
           <string name="Name">Nameplate</string>
           <UDim2 name="Size">
@@ -52,7 +52,7 @@
           </Vector3>
           <bool name="AlwaysOnTop">true</bool>
         </Properties>
-        <Item class="TextLabel" referent="RBX1743">
+        <Item class="TextLabel" referent="RBX1806">
           <Properties>
             <string name="Name">Label</string>
             <UDim2 name="Size">
@@ -62,7 +62,7 @@
               <YO>0</YO>
             </UDim2>
             <float name="BackgroundTransparency">1</float>
-            <string name="Text">루미돈</string>
+            <string name="Text">Lumidon</string>
             <float name="TextSize">18</float>
             <Color3 name="TextColor3">
               <R>1</R>
@@ -74,7 +74,7 @@
         </Item>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX1695">
+    <Item class="Part" referent="RBX1758">
       <Properties>
         <string name="Name">Body</string>
         <bool name="Anchored">true</bool>
@@ -109,7 +109,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1696">
+    <Item class="Part" referent="RBX1759">
       <Properties>
         <string name="Name">Back</string>
         <bool name="Anchored">true</bool>
@@ -144,7 +144,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1697">
+    <Item class="Part" referent="RBX1760">
       <Properties>
         <string name="Name">Belly</string>
         <bool name="Anchored">true</bool>
@@ -179,7 +179,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1698">
+    <Item class="Part" referent="RBX1761">
       <Properties>
         <string name="Name">Head</string>
         <bool name="Anchored">true</bool>
@@ -214,7 +214,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1699">
+    <Item class="Part" referent="RBX1762">
       <Properties>
         <string name="Name">HeadCrown</string>
         <bool name="Anchored">true</bool>
@@ -249,7 +249,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1700">
+    <Item class="Part" referent="RBX1763">
       <Properties>
         <string name="Name">Snout</string>
         <bool name="Anchored">true</bool>
@@ -284,7 +284,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1701">
+    <Item class="Part" referent="RBX1764">
       <Properties>
         <string name="Name">NoseTop</string>
         <bool name="Anchored">true</bool>
@@ -319,7 +319,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1702">
+    <Item class="Part" referent="RBX1765">
       <Properties>
         <string name="Name">Smile</string>
         <bool name="Anchored">true</bool>
@@ -350,7 +350,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1703">
+    <Item class="Part" referent="RBX1766">
       <Properties>
         <string name="Name">LeftEar</string>
         <bool name="Anchored">true</bool>
@@ -385,7 +385,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1704">
+    <Item class="Part" referent="RBX1767">
       <Properties>
         <string name="Name">LeftEarInner</string>
         <bool name="Anchored">true</bool>
@@ -416,7 +416,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1705">
+    <Item class="Part" referent="RBX1768">
       <Properties>
         <string name="Name">LeftEyeWhite</string>
         <bool name="Anchored">true</bool>
@@ -447,7 +447,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1706">
+    <Item class="Part" referent="RBX1769">
       <Properties>
         <string name="Name">LeftPupil</string>
         <bool name="Anchored">true</bool>
@@ -478,7 +478,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1707">
+    <Item class="Part" referent="RBX1770">
       <Properties>
         <string name="Name">LeftShine</string>
         <bool name="Anchored">true</bool>
@@ -509,7 +509,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1708">
+    <Item class="Part" referent="RBX1771">
       <Properties>
         <string name="Name">LeftNostril</string>
         <bool name="Anchored">true</bool>
@@ -540,7 +540,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1709">
+    <Item class="Part" referent="RBX1772">
       <Properties>
         <string name="Name">LeftCheek</string>
         <bool name="Anchored">true</bool>
@@ -571,7 +571,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1710">
+    <Item class="Part" referent="RBX1773">
       <Properties>
         <string name="Name">LeftFrontLeg</string>
         <bool name="Anchored">true</bool>
@@ -606,7 +606,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1711">
+    <Item class="Part" referent="RBX1774">
       <Properties>
         <string name="Name">LeftFrontPaw</string>
         <bool name="Anchored">true</bool>
@@ -641,7 +641,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1712">
+    <Item class="Part" referent="RBX1775">
       <Properties>
         <string name="Name">LeftFrontHoofLine</string>
         <bool name="Anchored">true</bool>
@@ -672,7 +672,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1713">
+    <Item class="Part" referent="RBX1776">
       <Properties>
         <string name="Name">LeftBackLeg</string>
         <bool name="Anchored">true</bool>
@@ -707,7 +707,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1714">
+    <Item class="Part" referent="RBX1777">
       <Properties>
         <string name="Name">LeftBackPaw</string>
         <bool name="Anchored">true</bool>
@@ -742,7 +742,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1715">
+    <Item class="Part" referent="RBX1778">
       <Properties>
         <string name="Name">LeftBackHoofLine</string>
         <bool name="Anchored">true</bool>
@@ -773,7 +773,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1716">
+    <Item class="Part" referent="RBX1779">
       <Properties>
         <string name="Name">RightEar</string>
         <bool name="Anchored">true</bool>
@@ -808,7 +808,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1717">
+    <Item class="Part" referent="RBX1780">
       <Properties>
         <string name="Name">RightEarInner</string>
         <bool name="Anchored">true</bool>
@@ -839,7 +839,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1718">
+    <Item class="Part" referent="RBX1781">
       <Properties>
         <string name="Name">RightEyeWhite</string>
         <bool name="Anchored">true</bool>
@@ -870,7 +870,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1719">
+    <Item class="Part" referent="RBX1782">
       <Properties>
         <string name="Name">RightPupil</string>
         <bool name="Anchored">true</bool>
@@ -901,7 +901,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1720">
+    <Item class="Part" referent="RBX1783">
       <Properties>
         <string name="Name">RightShine</string>
         <bool name="Anchored">true</bool>
@@ -932,7 +932,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1721">
+    <Item class="Part" referent="RBX1784">
       <Properties>
         <string name="Name">RightNostril</string>
         <bool name="Anchored">true</bool>
@@ -963,7 +963,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1722">
+    <Item class="Part" referent="RBX1785">
       <Properties>
         <string name="Name">RightCheek</string>
         <bool name="Anchored">true</bool>
@@ -994,7 +994,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1723">
+    <Item class="Part" referent="RBX1786">
       <Properties>
         <string name="Name">RightFrontLeg</string>
         <bool name="Anchored">true</bool>
@@ -1029,7 +1029,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1724">
+    <Item class="Part" referent="RBX1787">
       <Properties>
         <string name="Name">RightFrontPaw</string>
         <bool name="Anchored">true</bool>
@@ -1064,7 +1064,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1725">
+    <Item class="Part" referent="RBX1788">
       <Properties>
         <string name="Name">RightFrontHoofLine</string>
         <bool name="Anchored">true</bool>
@@ -1095,7 +1095,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1726">
+    <Item class="Part" referent="RBX1789">
       <Properties>
         <string name="Name">RightBackLeg</string>
         <bool name="Anchored">true</bool>
@@ -1130,7 +1130,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1727">
+    <Item class="Part" referent="RBX1790">
       <Properties>
         <string name="Name">RightBackPaw</string>
         <bool name="Anchored">true</bool>
@@ -1165,7 +1165,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1728">
+    <Item class="Part" referent="RBX1791">
       <Properties>
         <string name="Name">RightBackHoofLine</string>
         <bool name="Anchored">true</bool>
@@ -1196,7 +1196,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1729">
+    <Item class="Part" referent="RBX1792">
       <Properties>
         <string name="Name">TailBase</string>
         <bool name="Anchored">true</bool>
@@ -1231,7 +1231,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1730">
+    <Item class="Part" referent="RBX1793">
       <Properties>
         <string name="Name">TailCurl</string>
         <bool name="Anchored">true</bool>
@@ -1266,7 +1266,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1731">
+    <Item class="Part" referent="RBX1794">
       <Properties>
         <string name="Name">TailTip</string>
         <bool name="Anchored">true</bool>
@@ -1301,7 +1301,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1732">
+    <Item class="Part" referent="RBX1795">
       <Properties>
         <string name="Name">LanternSaddle</string>
         <bool name="Anchored">true</bool>
@@ -1336,7 +1336,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1733">
+    <Item class="Part" referent="RBX1796">
       <Properties>
         <string name="Name">LanternBase</string>
         <bool name="Anchored">true</bool>
@@ -1371,7 +1371,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1734">
+    <Item class="Part" referent="RBX1797">
       <Properties>
         <string name="Name">LanternGlow</string>
         <bool name="Anchored">true</bool>
@@ -1401,7 +1401,7 @@
         <bool name="CanTouch">false</bool>
         <token name="Material">288</token>
       </Properties>
-      <Item class="PointLight" referent="RBX1735">
+      <Item class="PointLight" referent="RBX1798">
         <Properties>
           <string name="Name">LanternLight</string>
           <Color3 name="Color">
@@ -1414,7 +1414,7 @@
         </Properties>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX1736">
+    <Item class="Part" referent="RBX1799">
       <Properties>
         <string name="Name">LanternPost-0.360.38</string>
         <bool name="Anchored">true</bool>
@@ -1445,7 +1445,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1737">
+    <Item class="Part" referent="RBX1800">
       <Properties>
         <string name="Name">LanternPost-0.361.1</string>
         <bool name="Anchored">true</bool>
@@ -1476,7 +1476,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1738">
+    <Item class="Part" referent="RBX1801">
       <Properties>
         <string name="Name">LanternPost0.360.38</string>
         <bool name="Anchored">true</bool>
@@ -1507,7 +1507,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1739">
+    <Item class="Part" referent="RBX1802">
       <Properties>
         <string name="Name">LanternPost0.361.1</string>
         <bool name="Anchored">true</bool>
@@ -1538,7 +1538,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1740">
+    <Item class="Part" referent="RBX1803">
       <Properties>
         <string name="Name">LanternRoof</string>
         <bool name="Anchored">true</bool>
@@ -1573,7 +1573,7 @@
         <token name="RightSurface">3</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX1741">
+    <Item class="Part" referent="RBX1804">
       <Properties>
         <string name="Name">LanternCap</string>
         <bool name="Anchored">true</bool>

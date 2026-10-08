@@ -1,9 +1,11 @@
 -- Procedural visual motion for the native part model. Never changes its mount root.
 local RideAnimator = {}
 local poses = {}
+local visibility={}
 local warnings = {}
 local package = game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy")
 local template = package:WaitForChild("VisualTemplate")
+local templateRoot=template:WaitForChild("MountRoot")
 local tuning = require(package:WaitForChild("Config")).Prototype
 local Rules = require(package:WaitForChild("HuntRules"))
 local restFrames = {}
@@ -20,22 +22,34 @@ local function clearHerdPath(from,to,root)
  return true
 end
 for _, part in ipairs(template:GetDescendants()) do
- if part:IsA("BasePart") and part ~= template.PrimaryPart then
-  restFrames[part.Name] = template.PrimaryPart.CFrame:ToObjectSpace(part.CFrame)
+ if part:IsA("BasePart") and part ~= templateRoot then
+  restFrames[part.Name] = templateRoot.CFrame:ToObjectSpace(part.CFrame)
  end
 end
 
-local function remember(model)
+local function remember(model, existing)
 	local root = model.PrimaryPart
 	if not root then return nil end
-	local pose = {frame = root.CFrame, sample = root.CFrame, received = nil}
+	local pose = existing or {frame = root.CFrame, sample = root.CFrame, received = nil, tracked={}}
+ if existing and not pose.dirty then return pose end
+ if not pose.watch then pose.watch=model.DescendantAdded:Connect(function(part) if part:IsA("BasePart") then pose.dirty=true end end) end
+ pose.dirty=false
 	for _, part in ipairs(model:GetDescendants()) do
-		if part:IsA("BasePart") and part ~= root then
+		if part:IsA("BasePart") and part ~= root and not pose.tracked[part] then
+   if not restFrames[part.Name] then
+    local reference=template:FindFirstChild(part.Name,true)
+    if not reference or not reference:IsA("BasePart") then
+     part.LocalTransparencyModifier=1 pose.dirty=true continue
+    end
+    restFrames[part.Name]=templateRoot.CFrame:ToObjectSpace(reference.CFrame)
+   end
+   part.LocalTransparencyModifier=0
 			local side = string.sub(part.Name,1,4)=="Left" and "Left" or string.sub(part.Name,1,5)=="Right" and "Right" or nil
 			local movingLeg = side and (string.find(part.Name,"Leg",1,true) or string.find(part.Name,"Paw",1,true) or string.find(part.Name,"HoofLine",1,true))
 			local leg = movingLeg and (string.find(part.Name,"Front",1,true) and "Front" or "Back") or nil
 			if not leg then side=nil end
-			table.insert(pose, { part = part, rest = restFrames[part.Name] or root.CFrame:ToObjectSpace(part.CFrame), side = side, leg = leg })
+			pose.tracked[part]=true
+			table.insert(pose, { part = part, rest = restFrames[part.Name], side = side, leg = leg })
 		end
 	end
 	poses[model] = pose
@@ -50,6 +64,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
   else puff.part.Transparency=0.45+age/0.6*0.55 puff.part.Size=Vector3.one*(0.75+age*1.5) puff.part.Position+=Vector3.new(0,dt*0.7,0) end
  end
  local displayed = {}
+ for model in pairs(visibility) do if model.Parent~=monsters then visibility[model]=nil end end
 	for model, pose in pairs(poses) do
 		if model.Parent ~= monsters then poses[model] = nil end
 	end
@@ -63,15 +78,25 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
   if nameplate then nameplate.Enabled = model:GetAttribute("Running") ~= true end
 		if cameraPosition then
    local hidden=(root.Position-cameraPosition).Magnitude>220
-   for _,part in ipairs(model:GetChildren()) do
-    if part:IsA("BasePart") and part~=root then part.LocalTransparencyModifier=hidden and 1 or 0 end
+   local record=visibility[model]
+   if not record then
+    record={} visibility[model]=record
+    record.connection=model.DescendantAdded:Connect(function(part)
+     if part:IsA("BasePart") and part~=root then part.LocalTransparencyModifier=record.hidden and 1 or 0 end
+    end)
+   end
+   if record.hidden~=hidden then
+    record.hidden=hidden
+    for _,part in ipairs(model:GetChildren()) do
+     if part:IsA("BasePart") and part~=root then part.LocalTransparencyModifier=hidden and 1 or 0 end
+    end
    end
    if hidden then continue end
   end
 		local running = model:GetAttribute("Running") == true
 		local pose = poses[model]
 		if not pose and not running then continue end
-		pose = pose or remember(model)
+		pose = remember(model,pose) -- Include late replicated body parts on every frame.
   if pose.sample ~= root.CFrame or not pose.received then
    pose.sample, pose.received = root.CFrame, clock
   end
