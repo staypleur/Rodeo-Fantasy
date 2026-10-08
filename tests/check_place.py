@@ -46,15 +46,17 @@ assert place.find("Item[@class='ServerScriptService']/Item[@class='Script']") is
 assert place.find("Item[@class='StarterPlayer']/Item[@class='StarterPlayerScripts']/Item[@class='LocalScript']") is not None
 print(f"PASS: XML structure, unique references, script placement and all {len(expected)} embedded sources")
 
-standalone = ET.parse(root / "dist/Lumidon.rbxmx").getroot()
-model = standalone.find("Item[@class='Model']")
-assert model is not None and model.find("Properties/string[@name='Name']").text == "Lumidon"
-model_refs = {node.attrib["referent"] for node in model.iter("Item")}
-for ref in model.iter("Ref"):
-    assert ref.text in model_refs, "standalone model must not depend on the place"
-assert not any(node.attrib["class"] in ("Script", "LocalScript", "ModuleScript", "MeshPart") for node in model.iter("Item"))
-assert len(list(model.iter("Item"))) > 30
-print("PASS: standalone model has complete local references and no scripts or uploaded meshes")
+for species in ("MeadowMouse","GrassBoar","TreeWolf","RockElephant","Weedcrow"):
+ for stage in (1,3,6,9):
+  model=ET.parse(root/f"dist/{species}_S{stage}.rbxmx").getroot().find("Item[@class='Model']")
+  assert model.find("Properties/string[@name='Name']").text==f"{species}_S{stage}"
+  refs={n.attrib['referent'] for n in model.iter('Item')}
+  assert all(n.text in refs for n in model.iter('Ref'))
+  names=[n.findtext("Properties/string[@name='Name']") for n in model.findall('Item')]
+  assert len(names)==len(set(names)), (species,stage,'duplicate pose names')
+  assert len(names)>30
+  assert not any(n.attrib['class'] in ('Script','LocalScript','ModuleScript','MeshPart') for n in model.iter('Item'))
+print('PASS: all 20 approved A models have unique pose names and self-contained references')
 
 assert place.find("Item[@class='StarterPlayer']/Properties/bool[@name='LoadCharacterAppearance']").text == "true"
 assert not any(node.find("Properties/string[@name='Name']").text == "StarterCharacter" for node in place.iter("Item"))
@@ -94,6 +96,8 @@ all_nodes=list(lobby.iter("Item"))
 def named(name): return [n for n in all_nodes if n.findtext("Properties/string[@name='Name']")==name]
 assert not named("FountainPool") and not named("FountainColumn") and not named("BoardingPlatform") and not named("BoardingStep")
 assert len(named("BoardingLadder"))==1 and named("BoardingLadder")[0].get("class")=="TrussPart"
+assert named("BoardingLadder")[0].findtext("Properties/float[@name='Transparency']")=="1"
+assert len(named("LadderRail"))==2 and len(named("LadderRung"))==14
 spawn=named("LobbySpawn")[0].find("Properties/CoordinateFrame[@name='CFrame']")
 assert float(spawn.findtext("X"))==6000 and float(spawn.findtext("Z"))==0
 assert len(named("BasketFloor"))==1 and not named("Cabin")

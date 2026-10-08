@@ -245,10 +245,10 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  if active() and root then
   local mount=state.monster and frames[state.monster]
   if (state.phase=="Riding" or state.phase=="CourseEnd") and mount then
-   visualFrame=mount*CFrame.new(0,t.RideHeightStuds,t.RideForwardStuds)
+   visualFrame=mount*CFrame.new(0,state.monster:GetAttribute("SaddleHeight") or t.RideHeightStuds,t.RideForwardStuds)
   elseif state.phase=="Lassoing" and mount and state.origin then
    local p=math.clamp((clock-state.started)/(state.landingSeconds or t.JumpSeconds),0,1)
-   visualFrame=state.origin:Lerp(mount*CFrame.new(0,t.RideHeightStuds,t.RideForwardStuds),p)*CFrame.new(0,math.sin(math.pi*p)*t.JumpArcStuds*0.5,0)
+   visualFrame=state.origin:Lerp(mount*CFrame.new(0,state.monster:GetAttribute("SaddleHeight") or t.RideHeightStuds,t.RideForwardStuds),p)*CFrame.new(0,math.sin(math.pi*p)*t.JumpArcStuds*0.5,0)
   elseif state.phase=="Airborne" and state.position and state.launchY then
    local elapsed=math.clamp(clock-(state.sampleTime or clock),0,0.3)
    local pos=state.position+Vector3.new(0,0,-t.AirStudsPerSecond)*elapsed
@@ -275,7 +275,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  distance.Text=string.format("%dm",math.floor(displayDistance))
  highlight.Enabled=false
  panel.Visible=state.phase=="CourseEnd"
- gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),state.tamed,workspace.CurrentCamera)
+ gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,state.tameSeconds or Config.Hunt.TameSeconds),state.tamed,workspace.CurrentCamera)
  for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
  if (active() or state.phase=="CourseEnd") and root then
   -- Follow horizontal movement; jumping should not lift the whole view.
@@ -299,7 +299,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   if nearest then highlight.Adornee,highlight.Enabled=nearest,true end
  end
  if state.phase=="Riding" then
-  status.Text=state.angerAt and "Angry! Press Space to jump!" or state.tamed and "Tamed · Keep riding" or "Taming Lumidon ♥"
+  status.Text=state.angerAt and "Angry! Press Space to jump!" or state.tamed and "Tamed · Keep riding" or "Taming ♥"
   instruction.Text="A/D to steer · Space to jump / again to lasso"
 
  elseif state.phase=="Airborne" then

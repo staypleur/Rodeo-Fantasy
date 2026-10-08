@@ -38,7 +38,7 @@ function Effect.start(model,clock,monsterFrame,monsterId)
  end
  if monsterFrame then
   local package=game.ReplicatedStorage.RodeoFantasy
-  local species=require(package.MonsterCatalog)[monsterId or "Lumidon"]
+  local species=require(package.MonsterCatalog)[monsterId or "MeadowMouse"]
   local template=package[species.Visual]
   for _,original in ipairs(template:GetChildren()) do
    if not original:IsA("BasePart") or original==template.PrimaryPart or original.Transparency>=1 then continue end

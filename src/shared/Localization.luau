@@ -1,5 +1,9 @@
 local L={}
 L.entries={
+ ["MeadowMouse"]={ko="꼬마쥐",ja="草原ネズミ"},
+ ["GrassBoar"]={ko="풀멧돼지",ja="草イノシシ"},
+ ["TreeWolf"]={ko="나무늑대강아지",ja="木オオカミの子"},
+ ["RockElephant"]={ko="바위코끼리",ja="岩ゾウ"},
  ["Farthest run"]={ko="최장 거리 랭킹",ja="最長距離ランキング"},
  ["Total produced"]={ko="누적 생산액 랭킹",ja="累計生産ランキング"},
  ["Loading records..."]={ko="기록 불러오는 중…",ja="記録を読み込み中…"},

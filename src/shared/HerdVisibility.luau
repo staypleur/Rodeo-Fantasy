@@ -37,6 +37,15 @@ function View.select(candidates,z,aspect,t,limit,previous)
  for _,candidate in ipairs(visible) do
   if not selected[candidate.key] and count<(limit or 6) then selected[candidate.key]=true count+=1 end
  end
+ -- Faster/flying herds can leave the inner window together. Fill the minimum
+ -- from animals already inside the full camera, without replacing stable IDs.
+ if count<4 then
+  for _,candidate in ipairs(candidates) do
+   if not selected[candidate.key] and not candidate.emerging and count<4 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,.98) then
+    selected[candidate.key]=true count+=1
+   end
+  end
+ end
  return selected
 end
 return View

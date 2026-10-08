@@ -78,21 +78,25 @@ function World.init(world, modelTemplate, config, rules)
 	if floor then floor:Destroy() end
 end
 
-function World.spawn(position,speciesId)
+function World.spawn(position,speciesId,stars)
+ stars=stars or 1
  local species=Catalog[speciesId or monsterId]
  local id=speciesId or monsterId
- local source=id==monsterId and template or game.ServerStorage[species.Template]
+ local source=game.ServerStorage[Catalog.template(id,stars)]
 	local model = source:Clone()
 	model.Name = id
 	model:SetAttribute("MonsterId", id)
+ model:SetAttribute("Stars",stars)
+ model:SetAttribute("SaddleHeight",species.SaddleHeight*Catalog.Scales[Catalog.stage(stars)])
 	model:SetAttribute("Occupied", false)
 	model:SetAttribute("Running", true)
  model:SetAttribute("RideSpeed",species.RunSpeed)
  model:SetAttribute("HerdSpeed",species.HerdSpeed)
  model:SetAttribute("SizeClass",species.SizeClass)
  model:SetAttribute("Flying",species.Flying)
- model:SetAttribute("RootHeight",species.RootHeight)
- position=Vector3.new(position.X,species.RootHeight,position.Z)
+ local height=species.Flying and species.RootHeight or species.RootHeight*Catalog.Scales[Catalog.stage(stars)]
+ model:SetAttribute("RootHeight",height)
+ position=Vector3.new(position.X,height,position.Z)
 	model:SetAttribute("RunStarted", workspace:GetServerTimeNow() - (math.abs(position.X*0.17+position.Z*0.023)%1))
 	model:SetAttribute("Steering", 0)
 	model:PivotTo(CFrame.new(position))
@@ -215,8 +219,8 @@ function World.step(dt)
 		if not model:GetAttribute("Occupied") then
 			-- Only the authoritative root moves. Clients own all visual body poses.
    local p,half=model.PrimaryPart.Position,model.PrimaryPart.Size/2
-   local movement=tuning
-   if model:GetAttribute("Flying") then movement=table.clone(tuning) movement.HerdStudsPerSecond=model:GetAttribute("HerdSpeed") end
+   local movement=table.clone(tuning)
+   movement.HerdStudsPerSecond=model:GetAttribute("HerdSpeed") or tuning.HerdStudsPerSecond
    local nearby={}
    for key=math.floor((p.Z-110)/64),math.floor((p.Z+12)/64) do
     for _,rock in ipairs(buckets[key] or {}) do if not model:GetAttribute("Flying") then table.insert(nearby,rock) end end
@@ -296,7 +300,7 @@ function World.replenish(z,aspect,watchers,prime,budget)
    for _,range in ipairs(Course.ranges(targetZ,3)) do
     local jitter=math.sin(spawnSerial*2.399+offset)*1.1
     local x=math.clamp(range[1]+(range[2]-range[1])*i/7+jitter,range[1],range[2])
-    local speciesId=(prime and offset<100) and "Lumidon" or (spawnSerial%3==0 and "Weedcrow" or "Lumidon")
+    local speciesId=Catalog.pick(math.max(0,-z*tuning.MetersPerStud),spawnSerial)
     local onScreen=Visibility.visible(x,Catalog[speciesId].RootHeight,targetZ-z,aspect,tuning)
     local safe=not onScreen or visible<targetVisible
     if prime and offset<100 and math.abs(x)<6 then safe=false end
@@ -354,7 +358,7 @@ function World.maintain(watchers)
 end
 
 -- Contact while riding: include moving herds and the visible inner canyon face.
-function World.mountedHit(from,to,mount,selected)
+function World.mountedHit(from,to,mount,selected,dashing)
  local half=mount.PrimaryPart.Size/2
  for i=0,4 do
   local p=from:Lerp(to,i/4)
@@ -366,16 +370,39 @@ function World.mountedHit(from,to,mount,selected)
   local current=other.PrimaryPart.Position
   local a,b=from-old,to-current
   local size=other.PrimaryPart.Size+mount.PrimaryPart.Size
-  if Rules.sweptBox(a.X,a.Y,a.Z,b.X,b.Y,b.Z,0,0,0,size.X,size.Y,size.Z,0) then return "Monster" end
+  if Rules.sweptBox(a.X,a.Y,a.Z,b.X,b.Y,b.Z,0,0,0,size.X,size.Y,size.Z,0) then
+   if not other:GetAttribute("Occupied") and Rules.canKnock(mount:GetAttribute("SizeClass"),other:GetAttribute("SizeClass"),dashing) then
+    animals[other]=nil previousPositions[other]=nil
+    other:SetAttribute("Running",false) other:SetAttribute("KnockedAway",true)
+    local direction=other.PrimaryPart.Position.X>=mount.PrimaryPart.Position.X and 1 or -1
+    game:GetService("TweenService"):Create(other.PrimaryPart,TweenInfo.new(.6),{CFrame=other.PrimaryPart.CFrame*CFrame.new(direction*12,14,-8)*CFrame.Angles(1.2,0,direction*1.2)}):Play()
+    game:GetService("Debris"):AddItem(other,.65)
+   else return "Monster" end
+  end
  end
  return nil
 end
 
-function World.hit(from, to, flying)
+local function breakObstacle(rock,respawn)
+ local appearance={}
+ for _,piece in ipairs(rock:GetDescendants()) do
+  if piece:IsA("BasePart") then appearance[piece]=piece.Transparency piece.Transparency=1 piece.CanQuery=false end
+ end
+ rock:SetAttribute("Broken",true) rock:SetAttribute("BrokenAt",workspace:GetServerTimeNow()) rock.CanQuery=false
+ if respawn then task.delay(5,function()
+  if not rock.Parent then return end
+  for piece,transparency in pairs(appearance) do if piece.Parent then piece.Transparency=transparency end end
+  rock:SetAttribute("Broken",false) rock.CanQuery=true
+ end) end
+end
+function World.hit(from, to, flying,mount)
 	for _, rock in ipairs(obstacles:GetChildren()) do
 		if rock:GetAttribute("Broken") or (flying and rock:GetAttribute("ObstacleSize")~="Large") then continue end
 		local p,s = rock.Position,rock.Size
-		if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,1) then return true end
+		if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,1) then
+   if mount and mount:GetAttribute("SizeClass")=="Large" and rock:GetAttribute("Scale")==1 then breakObstacle(rock,true)
+   else return true end
+  end
 	end
 	return false
 end

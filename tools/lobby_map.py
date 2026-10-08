@@ -5,7 +5,7 @@ def build_lobby(workspace, item, part, prop):
     cream, mint, pink = (255, 244, 220), (158, 211, 181), (244, 184, 192)
     def block(parent, name, pos, size, color, rotation=(0, 0, 0), collide=True):
         node, properties = part(parent, name, (6000 + pos[0], pos[1], pos[2]), size, color, rotation=rotation)
-        prop(properties, "token", "Material", 1280 if name in ("MeadowIsland","PenGrass") else 816 if name in ("GardenPath","MiddleWalk","CentralPlaza","PavingStone") else 512 if name in ("BenchSeat","BenchBack","BoardingStep","BoardingDeck","Counter","CounterPlank","CounterTop","TreeTrunk","SignPost","BoardPost") else 272)
+        prop(properties, "token", "Material", 1280 if name in ("MeadowIsland","PenGrass") else 816 if name in ("GardenPath","MiddleWalk","CentralPlaza","PavingStone") else 512 if name in ("BenchSeat","BenchBack","BoardingStep","BoardingDeck","LadderRail","LadderRung","Counter","CounterPlank","CounterTop","TreeTrunk","SignPost","BoardPost") else 272)
         prop(properties, "bool", "CanCollide", collide)
         prop(properties, "bool", "CanTouch", False)
         return node
@@ -156,9 +156,18 @@ def build_lobby(workspace, item, part, prop):
     # A single climbable ladder leads to the open basket, away from the center spawn.
     ladder,lp=item(airport,"TrussPart","BoardingLadder")
     prop(lp,"bool","Anchored",True); prop(lp,"bool","CanCollide",True)
+    prop(lp,"float","Transparency",1)  # Invisible native climb surface; visible wooden ladder below.
     prop(lp,"Vector3","size",dict(X=2,Y=14,Z=2))
     prop(lp,"CoordinateFrame","CFrame",dict(X=6000,Y=7,Z=7.5,R00=1,R01=0,R02=0,R10=0,R11=1,R12=0,R20=0,R21=0,R22=1))
     prop(lp,"Color3uint8","Color3uint8",(142<<16)|(110<<8)|79)
+    for side in (-1,1):
+        block(airport,"LadderRail",(side*1.25,7.2,7.5),(.28,14.4,.45),(140,100,67),collide=False)
+        block(airport,"LadderFoot",(side*1.25,.25,7.5),(.35,.5,.5),(62,69,65),collide=False)
+    for rung in range(14):
+        y=.65+rung*.9
+        block(airport,"LadderRung",(0,y,7.75),(2.65,.24,.42),(190,146,98),collide=False)
+        for side in (-1,1):
+            block(airport,"LadderBolt",(side*1.25,y,8.0),(.09,.09,.05),(71,78,77),collide=False)
     block(airport,"BoardingDeck",(0,13,4.5),(6,.5,5),(183,151,116))
     departure=block(airport,"Departure",(0,14.5,3),(2,2,2),mint,collide=False)
     prop(departure.find("Properties"),"float","Transparency",1)

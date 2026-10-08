@@ -73,7 +73,7 @@ function UI.new(gui,remote)
    local preview=make("ViewportFrame",{Name="MonsterImage",BackgroundTransparency=1,Size=UDim2.new(1,0,0,140),ZIndex=23,Ambient=Color3.fromRGB(195,195,195),LightColor=Color3.new(1,1,1)},card)
    local world=Instance.new("WorldModel") world.Parent=preview
    local species=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)[item.monsterId]
-   local model=game.ReplicatedStorage.RodeoFantasy[species.Visual]:Clone() model.Parent=world model:PivotTo(CFrame.new())
+   local model=game.ReplicatedStorage.RodeoFantasy[require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog).visual(item.monsterId,item.stars)]:Clone() model.Parent=world model:PivotTo(CFrame.new())
    for _,node in ipairs(model:GetDescendants()) do if node:IsA("BillboardGui") then node:Destroy() end end
    local frame,size=model:GetBoundingBox()
    local camera=Instance.new("Camera") camera.FieldOfView=32

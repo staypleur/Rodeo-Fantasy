@@ -10,10 +10,21 @@ function Rules.jumpHeight(elapsed, duration, height)
 end
 
 -- One ground-to-ground hop. Shared only for synchronized presentation and server motion.
-function Rules.buck(elapsed,cycle,height)
+function Rules.buck(elapsed,cycle,height,triple)
+ if triple then
+  local burst=cycle*2
+  local t=math.max(elapsed,0)%burst
+  if t>=cycle*1.35 then return 0,0,0 end
+  cycle=cycle*.45
+  elapsed=t
+ end
  local phase=(math.max(elapsed,0)%cycle)/cycle
  local direction=math.floor(math.max(elapsed,0)/cycle)%2==0 and 1 or -1
  return math.sin(math.pi*phase)*height, math.sin(math.pi*phase)*direction, math.sin(math.pi*phase*2)*0.28
+end
+
+function Rules.canKnock(size,target,dashing)
+ return target~="Large" and (size=="Large" or (size=="Medium" and dashing==true))
 end
 
 function Rules.progress(elapsed, duration)

@@ -7,7 +7,7 @@ local root=Instance.new("Part") root.Name="HumanoidRootPart" root.Parent=charact
 local player={Name="PenTest",UserId=910101,Character=character,SetAttribute=function() end}
 assert(Lobby.assign(player)==1)
 local bag=rules.new()
-for _,id in ipairs({"Lumidon","Weedcrow","Lumidon"}) do
+for _,id in ipairs({"MeadowMouse","Weedcrow","MeadowMouse"}) do
  local species=Catalog[id] rules.grant(bag,id,0,species.IncomeSeconds,species.IncomeAmount)
 end
 local pen=Lobby.getPen(player,1)
@@ -20,7 +20,7 @@ local dustBefore=#workspace:GetChildren()
 local lobbyAnimator=require(game.StarterPlayer.StarterPlayerScripts.RideAnimator)
 lobbyAnimator.update(workspace.RodeoLobby,1,Vector3.new(6000,4,108),1/60)
 for _,part in ipairs(workspace:GetChildren()) do assert(part.Name~="LocalHerdDust","ranch roaming must not emit dust") end
-assert(pen.DisplayMonsters.Pet_1.LanternGlow and pen.DisplayMonsters.Pet_2.LeftWing)
+assert(pen.DisplayMonsters.Pet_1.CrownSprout and pen.DisplayMonsters.Pet_2.LeftWing)
 root.Position=Vector3.new(6000,4,0) assert(not Lobby.canUsePen(player,1))
 assert(rules.remove(bag,2,1)) Lobby.display(player,1,bag.monsters)
 assert(#pen.DisplayMonsters:GetChildren()==1 and #bag.monsters==3)

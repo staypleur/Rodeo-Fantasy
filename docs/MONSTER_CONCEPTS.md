@@ -1,6 +1,6 @@
 # 초원 몬스터 디자인 선택 시안
 
-2026-10-08 · built-in image_gen / imagegen 스킬 사용. 아래는 **선택용 그림이며 Roblox에서 구동되는 3D 모델이나 최종 확정 외형이 아니다.** 5종마다 A/B/C 세 계열, 각 계열의1·3·6·9성, 총60개 모습을 비교한다.
+2026-10-08 · built-in image_gen / imagegen 스킬 사용. 아래는 **비교용 그림이며 Roblox에서 구동되는 3D 모델 자체는 아니다. A안 전체가 선택됐고 이를 바탕으로 native 부품 모델20개를 제작했다.** 5종마다 A/B/C 세 계열, 각 계열의1·3·6·9성, 총60개 모습을 비교한다.
 
 새싹·풀·들꽃·이끼 등 초원 자연 요소를 우선했다. 꼬마쥐 C안과 바위코끼리 전체는 광물/수정 표현을 줄이고 초원 방향으로 수정했다. 초기 생성문과 최종 수정문은 [prompts.json](../assets/concepts/meadow/prompts.json)에 보관한다. 이 프롬프트에 제안된 장식은 새 능력/게임 규칙이 아니다.
 
@@ -19,3 +19,5 @@
 ![나무늑대강아지](../assets/concepts/meadow/tree-wolf-pup-evolutions.png)
 ![바위코끼리](../assets/concepts/meadow/rock-elephant-evolutions.png)
 ![잡초까마귀](../assets/concepts/meadow/weedcrow-evolutions.png)
+
+실제 부품 설계의 오프라인 미리보기: [A계열20모델](../assets/previews/meadow-approved-a-models.png). 이 렌더는 Studio 스크린샷이 아니며 기본 부품을 근사 투영한 것이다. B/C는 실제 모델로 제작하지 않고 후보 그림/프롬프트로 보관한다.

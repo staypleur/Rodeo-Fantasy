@@ -65,15 +65,21 @@ function Lobby.display(player,index,items)
   if item.assignedPen==index then
    slot+=1
    local species=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)[item.monsterId]
-   local model=game.ServerStorage[species.Template]:Clone()
+   local model=game.ServerStorage[require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog).template(item.monsterId,item.stars)]:Clone()
    model.Name="Pet_"..item.id model:SetAttribute("BagItemId",item.id)
    model:SetAttribute("Running",true)
-   model:SetAttribute("MonsterId",item.monsterId) model:SetAttribute("Flying",species.Flying)
+   model:SetAttribute("MonsterId",item.monsterId) model:SetAttribute("Stars",item.stars) model:SetAttribute("Flying",species.Flying)
    model:SetAttribute("RunStarted",workspace:GetServerTimeNow())
    for _,node in ipairs(model:GetDescendants()) do if node:IsA("BillboardGui") then node:Destroy() end end
-   model:PivotTo(pen.PenGrass.CFrame*CFrame.new(slot==1 and -3 or 3,2,0))
+   local scale=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog).Scales[require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog).stage(item.stars)]
+   local height=species.Flying and 3*scale or species.RootHeight*scale
+   local boxFrame,boxSize=model:GetBoundingBox()
+   local offset=model.PrimaryPart.CFrame:ToObjectSpace(boxFrame).Position
+   local margin=boxSize/2+Vector3.new(math.abs(offset.X)+.2,0,math.abs(offset.Z)+.2)
+   local startX=math.clamp(slot==1 and -3 or 3,-math.max(0,pen.PenGrass.Size.X/2-margin.X),math.max(0,pen.PenGrass.Size.X/2-margin.X))
+   model:PivotTo(pen.PenGrass.CFrame*CFrame.new(startX,height,0))
    model.Parent=folder
-   roaming[model]={pen=pen,position=Vector3.new(slot==1 and -4 or 4,2,0),goal=Vector3.new(slot==1 and -4 or 4,2,0),pause=0,seed=Random.new(item.id+player.UserId)}
+   roaming[model]={pen=pen,height=height,margin=margin,position=Vector3.new(startX,height,0),goal=Vector3.new(startX,height,0),pause=0,seed=Random.new(item.id+player.UserId)}
   end
  end
 end
@@ -99,7 +105,8 @@ game:GetService("RunService").Heartbeat:Connect(function(dt)
    model:SetAttribute("Running",false) motion.pause-=step
    if motion.pause<=0 then
     local size=motion.pen.PenGrass.Size
-    motion.goal=Vector3.new(motion.seed:NextNumber(-size.X/2+3,size.X/2-3),2,motion.seed:NextNumber(-size.Z/2+4,size.Z/2-4))
+    local x=math.max(.1,size.X/2-motion.margin.X) local z=math.max(.1,size.Z/2-motion.margin.Z)
+    motion.goal=Vector3.new(motion.seed:NextNumber(-x,x),motion.height,motion.seed:NextNumber(-z,z))
     motion.pause=motion.seed:NextNumber(.8,2.2)
    end
   else

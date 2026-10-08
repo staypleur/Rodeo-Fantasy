@@ -308,6 +308,6 @@ driver:InvokeServer("Finish",success and ("PASS: "..checks.." hunting Play check
 client.Parent=game:GetService("StarterPlayer").StarterPlayerScripts
 -- Let the CLI document finish opening before entering Play.
 task.wait(2)
-local result=game:GetService("StudioTestService"):ExecutePlayModeAsync("LumidonHunt")
+local result=game:GetService("StudioTestService"):ExecutePlayModeAsync("MeadowMouseHunt")
 assert(type(result)=="string" and string.sub(result,1,5)=="PASS:","Play did not pass: "..tostring(result))
 print("HUNT_PLAY_RESULT: "..result)

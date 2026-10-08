@@ -74,12 +74,16 @@ end
 function Effects.crates(obstacles,position,clock,dt)
  if obstacles and position then
   for _,box in ipairs(obstacles:GetChildren()) do
+   if not box:GetAttribute("Broken") then broken[box]=nil end
    if box:GetAttribute("Broken") and not broken[box] then
     broken[box]=true
     if clock-(box:GetAttribute("BrokenAt") or 0)<0.8 and (box.Position-position).Magnitude<160 then
      for i=1,12 do
       local shard=anchor("LocalCrateShard") shard.Transparency=0 shard.Material=Enum.Material.Wood
-      shard.Color=Color3.fromRGB(203,148,87) shard.Size=Vector3.new(1.8,0.35,0.55)
+      local stone=box:GetAttribute("Style")=="MossyRock"
+      shard.Material=stone and Enum.Material.Slate or Enum.Material.Wood
+      shard.Color=stone and Color3.fromRGB(177,157,123) or Color3.fromRGB(203,148,87)
+      shard.Size=stone and Vector3.one*.7 or Vector3.new(1.8,0.35,0.55)
       local angle=i/12*math.pi*2
       shard.CFrame=CFrame.new(box.Position+Vector3.new(math.cos(angle),i%3-1,math.sin(angle)))
       table.insert(debris,{part=shard,origin=shard.CFrame,started=clock,velocity=Vector3.new(math.cos(angle)*12,6+i%4,math.sin(angle)*12)})

@@ -25,11 +25,12 @@ local function clearHerdPath(from,to,root)
 end
 local function remember(model, existing)
 	local root = model.PrimaryPart
- local speciesId=model:GetAttribute("MonsterId") or "Lumidon"
- local referenceTemplate=package:WaitForChild(Catalog[speciesId].Visual)
+ local speciesId=model:GetAttribute("MonsterId") or "MeadowMouse"
+ local referenceTemplate=package:WaitForChild(Catalog.visual(speciesId,model:GetAttribute("Stars") or 1))
  local referenceRoot=referenceTemplate:WaitForChild("MountRoot")
- restFrames[speciesId]=restFrames[speciesId] or {}
- local rest=restFrames[speciesId]
+ local key=speciesId.."_"..Catalog.stage(model:GetAttribute("Stars") or 1)
+ restFrames[key]=restFrames[key] or {}
+ local rest=restFrames[key]
 	if not root then return nil end
 	local pose = existing or {frame = root.CFrame, sample = root.CFrame, received = nil, tracked={}}
  if existing and not pose.dirty then return pose end
@@ -46,7 +47,7 @@ local function remember(model, existing)
    end
    part.LocalTransparencyModifier=0
 			local side = string.sub(part.Name,1,4)=="Left" and "Left" or string.sub(part.Name,1,5)=="Right" and "Right" or nil
-			local movingLeg = side and (string.find(part.Name,"Leg",1,true) or string.find(part.Name,"Paw",1,true) or string.find(part.Name,"HoofLine",1,true))
+			local movingLeg = side and (string.find(part.Name,"Leg",1,true) or string.find(part.Name,"Paw",1,true) or string.find(part.Name,"Claw",1,true) or string.find(part.Name,"HoofLine",1,true))
 			local leg = movingLeg and (string.find(part.Name,"Front",1,true) and "Front" or "Back") or nil
 			if not leg then side=nil end
 			pose.tracked[part]=true
@@ -120,6 +121,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
    pose.frame = blended
   end
 
+		local scale=Catalog.Scales[Catalog.stage(model:GetAttribute("Stars") or 1)]
 		local phase = (clock - (model:GetAttribute("RunStarted") or clock)) * math.pi * 7
 		local angry = model:GetAttribute("Angry") == true
 		local warningActive = model:GetAttribute("AngerWarning") == true or angry
@@ -140,7 +142,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
    local label=warning:FindFirstChildWhichIsA("TextLabel")
    if label then label.TextTransparency=0.15+math.max(0,math.sin(clock*12))*0.45 end
   end
-		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds)
+		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds,Catalog[model:GetAttribute("MonsterId") or "MeadowMouse"].TripleHop)
 		local lean = running and (model:GetAttribute("Steering") or 0) * -0.18 or 0
   local moving=running and velocity.Magnitude>1
   local flying=model:GetAttribute("Flying")==true
@@ -161,20 +163,22 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
 			local localFrame = entry.rest
 			if moving and flying and entry.part.Name:find("Wing",1,true) then
     local side=entry.part.Name:find("Left",1,true) and -1 or 1
-    local pivot=CFrame.new(side*.8,.3,.15)
+    local pivot=CFrame.new(side*.8*scale,.3*scale,.15*scale)
     localFrame=pivot*CFrame.Angles(0,0,side*math.sin(phase*.7)*(angry and .85 or .55))*pivot:Inverse()*localFrame
    elseif moving and entry.side then
 				local opposite = (entry.side == "Left") ~= (entry.leg == "Front")
 				local swing = math.sin(phase + (opposite and math.pi or 0)) * 0.85
-				local joint = CFrame.new(entry.side == "Left" and -0.88 or 0.88, -0.87, entry.leg == "Front" and -0.91 or 1.17)
+				local legPart=model:FindFirstChild(entry.side..entry.leg.."Leg")
+    local legRest=legPart and pose.tracked[legPart] and restFrames[(model:GetAttribute("MonsterId") or "MeadowMouse").."_"..Catalog.stage(model:GetAttribute("Stars") or 1)][legPart.Name]
+    local joint=CFrame.new(legRest and (legRest.Position+Vector3.new(0,legPart.Size.Y*.5,0)) or entry.rest.Position)
 				localFrame = CFrame.new(0,math.max(0,math.sin(phase + (opposite and math.pi or 0)))*0.22,0) * joint * CFrame.Angles(swing, 0, 0) * joint:Inverse() * entry.rest
 			end
    if running and entry.part.Name:find("Ear") then
     local sign=entry.part.Name:find("Left") and -1 or 1
-    local pivot=CFrame.new(sign*0.87,1.3,-1.21)
+    local pivot=CFrame.new(sign*0.87*scale,1.3*scale,-1.21*scale)
     localFrame=pivot*CFrame.Angles(math.sin(phase)*0.12,0,sign*math.sin(phase)*0.1)*pivot:Inverse()*localFrame
    elseif running and entry.part.Name:find("Tail") then
-    local pivot=CFrame.new(0,-0.1,1.7)
+    local pivot=CFrame.new(0,-0.1*scale,1.7*scale)
     localFrame=pivot*CFrame.Angles(0,math.sin(phase*0.65)*0.3,0)*pivot:Inverse()*localFrame
    end
 			entry.part.CFrame = frame * localFrame

@@ -15,10 +15,10 @@ Config.Audio = {
 }
 
 Config.Monster = {
-	Id = "Lumidon",
-	Name = "Lumidon",
+	Id = "MeadowMouse",
+	Name = "MeadowMouse",
  RunSpeed = 64, -- species-specific riding speed
- SizeClass = "Medium", -- temporary crate-breaking test classification
+ SizeClass = "Small", -- meadow mouse
 }
 
 -- Merging/evolution remain pending.
@@ -29,7 +29,7 @@ Config.Growth = {
 }
 
 Config.BagIncome = {
-	IncomeSeconds = 2,
+	IncomeSeconds = 3,
 	IncomeAmount = 1,
 }
 

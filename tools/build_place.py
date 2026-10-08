@@ -3,8 +3,7 @@ from pathlib import Path
 import copy
 import math
 import xml.etree.ElementTree as ET
-from lumidon_model import components
-from weedcrow_model import components as crow_components
+from meadow_models import components, SPECIES, STAGES, SCALES, BOUNDS
 from lobby_map import build_lobby
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -63,10 +62,10 @@ def script(parent, kind, name, path):
     return node
 
 
-def monster(parent, name, position, species="Lumidon"):
-    visual_components = crow_components() if species=="Weedcrow" else components()
+def monster(parent, name, position, species="MeadowMouse", stars=1):
+    visual_components = components(species,stars)
     node, properties = item(parent, "Model", name)
-    root, root_props = part(node, "MountRoot", position, (2.5, 2, 4.6), (175, 77, 36))
+    root, root_props = part(node, "MountRoot", position, tuple(v*SCALES[stars] for v in BOUNDS[species]), (175, 77, 36))
     prop(root_props, "float", "Transparency", 1)
     prop(root_props, "bool", "CanCollide", False)
     prop(root_props, "bool", "CanQuery", False)
@@ -88,6 +87,8 @@ def monster(parent, name, position, species="Lumidon"):
                     existing.text = "3"
                 else:
                     prop(body_props, "token", surface, 3)  # Visual studs; no automatic joints.
+        if shape == "Ball":
+            prop(body_props, "token", "shape", 0)
         if shape == "Sphere":
             mesh, mesh_props = item(body, "SpecialMesh", "Shape")
             prop(mesh_props, "token", "MeshType", 3)  # Enum.MeshType.Sphere
@@ -137,11 +138,15 @@ script(package, "ModuleScript", "HerdVisibility", "src/shared/HerdVisibility.lua
 script(package, "ModuleScript", "Localization", "src/shared/Localization.luau")
 script(package, "ModuleScript", "BagRules", "src/shared/BagRules.luau")
 item(package, "RemoteEvent", "CaptureRemote")
-monster(package, "VisualTemplate", (0, 0, 0))
-monster(package, "WeedcrowVisualTemplate", (0, 0, 0), "Weedcrow")
 server_storage, _ = item(document, "ServerStorage", "ServerStorage")
-model_template = monster(server_storage, "RodeoMonsterTemplate", (0, 0, 0))
-crow_template = monster(server_storage, "WeedcrowTemplate", (0, 0, 0), "Weedcrow")
+model_templates={}
+for species in SPECIES:
+    visual="VisualTemplate" if species=="MeadowMouse" else species+"VisualTemplate"
+    source="RodeoMonsterTemplate" if species=="MeadowMouse" else species+"Template"
+    for stars in STAGES:
+        suffix="" if stars==1 else "_S"+str(stars)
+        monster(package,visual+suffix,(0,0,0),species,stars)
+        model_templates[(species,stars)]=monster(server_storage,source+suffix,(0,0,0),species,stars)
 server_scripts, _ = item(document, "ServerScriptService", "ServerScriptService")
 script(server_scripts, "Script", "CaptureServer", "src/server/CaptureServer.server.luau")
 script(server_scripts, "ModuleScript", "HuntWorld", "src/server/HuntWorld.luau")
@@ -174,22 +179,15 @@ output.parent.mkdir(exist_ok=True)
 ET.ElementTree(document).write(output, encoding="utf-8", xml_declaration=True)
 print(f"Built {output.name} ({output.stat().st_size:,} bytes)")
 
-# A standalone, editable model is included for reuse.
-model_document = ET.Element("roblox", version="4")
-model_copy = copy.deepcopy(model_template)
-model_copy.find("Properties/string[@name='Name']").text = "Lumidon"
-model_document.append(model_copy)
-ET.indent(model_document, space="  ")
-model_output = output.parent / "Lumidon.rbxmx"
-ET.ElementTree(model_document).write(model_output, encoding="utf-8", xml_declaration=True)
-print(f"Built {model_output.name} ({len(components())} visual parts)")
-
-crow_document=ET.Element("roblox",version="4")
-crow_copy=copy.deepcopy(crow_template)
-crow_copy.find("Properties/string[@name='Name']").text="Weedcrow"
-crow_document.append(crow_copy)
-ET.indent(crow_document,space="  ")
-ET.ElementTree(crow_document).write(output.parent/"Weedcrow.rbxmx",encoding="utf-8",xml_declaration=True)
+# Approved A models: all five species, each growth stage, self-contained local references.
+for (species,stars),model in model_templates.items():
+    model_document=ET.Element("roblox",version="4")
+    model_copy=copy.deepcopy(model)
+    model_copy.find("Properties/string[@name='Name']").text=species+"_S"+str(stars)
+    model_document.append(model_copy)
+    ET.indent(model_document,space="  ")
+    ET.ElementTree(model_document).write(output.parent/(species+"_S"+str(stars)+".rbxmx"),encoding="utf-8",xml_declaration=True)
+print("Built 20 approved A evolution models")
 
 ship_document=ET.Element("roblox",version="4")
 ship=next(n for n in lobby.iter("Item") if n.findtext("Properties/string[@name='Name']")=="Airship")
