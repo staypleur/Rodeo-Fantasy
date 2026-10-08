@@ -21,6 +21,7 @@ local state={phase="Idle",started=0,count=0,pending=0,distance=0}
 local held,left,right=false,false,false
 local pointerOrigin,pointerX,lastSteer=nil,nil,0
 local notice,noticeUntil="",0
+local menuBound=false local returnHeld=nil local suppressJumpUntilRelease=false
 local flightFrame=nil
 local savedType,savedSubject,savedFieldOfView=nil,nil,nil
 local function make(kind,props,parent)
@@ -36,6 +37,38 @@ end
 local bagUI=require(script.Parent:WaitForChild("BagUI")).new(gui,remote)
 local locale=require(script.Parent:WaitForChild("LocalizationController"))
 locale.watch(gui) locale.watch(workspace.RodeoLobby)
+-- Only the owner sees a ranch interaction. The server separately checks ownership/distance.
+for _,plot in ipairs(workspace.RodeoLobby.Plots:GetChildren()) do
+ local function updatePrompts()
+  for _,node in ipairs(plot:GetDescendants()) do
+   if node:IsA("ProximityPrompt") and node.Name=="ManageRanch" then node.Enabled=plot:GetAttribute("OwnerUserId")==player.UserId end
+  end
+ end
+ plot:GetAttributeChangedSignal("OwnerUserId"):Connect(updatePrompts)
+ plot.DescendantAdded:Connect(function(node) if node:IsA("ProximityPrompt") then updatePrompts() end end)
+ updatePrompts()
+end
+local airship=workspace.RodeoLobby.Airport.Airship
+local shipAnchor=CFrame.new(6000,24,-5)
+local shipParts={}
+local function rememberShip(node)
+ if node:IsA("BasePart") then shipParts[node]=shipAnchor:ToObjectSpace(node.CFrame) end
+end
+for _,node in ipairs(airship:GetDescendants()) do rememberShip(node) end
+airship.DescendantAdded:Connect(rememberShip)
+local function animateShip(clock)
+ local sway=shipAnchor*CFrame.new(math.sin(clock*.7)*.35,math.sin(clock*.9)*.25,0)*CFrame.Angles(0,0,math.sin(clock*.7)*.018)
+ for node,rest in pairs(shipParts) do
+  if not node.Parent then shipParts[node]=nil continue end
+  local pose=rest
+  if node.Name=="SeaWingRoot" or node.Name=="SeaWingFeather" then
+   local sign=rest.X<0 and -1 or 1
+   local pivot=CFrame.new(sign*18,23,-4)
+   pose=pivot*CFrame.Angles(0,0,sign*math.sin(clock*1.1)*.18)*pivot:Inverse()*rest
+  end
+  node.CFrame=sway*pose
+ end
+end
 local function T(value) return locale.text(value) end
 local distance=text(gui,"0m",UDim2.new(0.5,-80,0,12),UDim2.fromOffset(160,48),32)
 distance.Name="DistanceCounter"
@@ -45,9 +78,20 @@ distance.BackgroundColor3=Color3.fromRGB(31,55,42) distance.BackgroundTransparen
 make("UICorner",{CornerRadius=UDim.new(0,14)},distance)
 make("UIStroke",{Color=Color3.fromRGB(113,148,95),Thickness=2},distance)
 local lastAspect=nil
-local bag=text(gui,"Bag: 0 · Uncollected coins: 0",UDim2.fromOffset(16,16),UDim2.fromOffset(320,42),16)
-bag.Name="LobbyStats" bag.BackgroundColor3=Color3.fromRGB(40,65,56) bag.BackgroundTransparency=0.1
+local bag=make("Frame",{Name="LobbyStats",Position=UDim2.fromOffset(16,66),Size=UDim2.fromOffset(240,48),BackgroundColor3=Color3.fromRGB(40,65,56),BackgroundTransparency=.1},gui)
 make("UICorner",{CornerRadius=UDim.new(0,12)},bag)
+local function iconBlock(name,pos,size,color,parent,round)
+ local frame=make("Frame",{Name=name,Position=pos,Size=size,BackgroundColor3=color,BorderSizePixel=0},parent)
+ make("UICorner",{CornerRadius=UDim.new(0,round or 5)},frame) return frame
+end
+local bagIcon=iconBlock("BagIcon",UDim2.fromOffset(12,14),UDim2.fromOffset(24,26),Color3.fromRGB(178,126,84),bag)
+iconBlock("Handle",UDim2.fromOffset(5,-7),UDim2.fromOffset(14,10),Color3.fromRGB(178,126,84),bagIcon)
+iconBlock("Pocket",UDim2.fromOffset(4,12),UDim2.fromOffset(16,9),Color3.fromRGB(133,88,58),bagIcon)
+local coinIcon=iconBlock("CoinIcon",UDim2.fromOffset(115,10),UDim2.fromOffset(28,28),Color3.fromRGB(249,198,83),bag,50)
+make("UIStroke",{Color=Color3.fromRGB(220,159,45),Thickness=2},coinIcon)
+iconBlock("CoinShine",UDim2.fromOffset(11,5),UDim2.fromOffset(5,18),Color3.fromRGB(255,228,138),coinIcon)
+local bagCount=text(bag,"0",UDim2.fromOffset(43,4),UDim2.fromOffset(62,40),20) bagCount.Name="BagCount"
+local moneyCount=text(bag,"0",UDim2.fromOffset(151,4),UDim2.fromOffset(80,40),20) moneyCount.Name="MoneyCount"
 local panel=make("Frame",{Name="HuntHelp",AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,94),BackgroundColor3=Color3.fromRGB(43,67,49),BackgroundTransparency=0.22,BorderSizePixel=0},gui)
 make("UISizeConstraint",{MaxSize=Vector2.new(510,94)},panel)
 make("UICorner",{CornerRadius=UDim.new(0,14)},panel)
@@ -95,6 +139,10 @@ local function keyAction(_,inputState,input)
 end
 local function jumpAction(_,inputState)
  if UIS:GetFocusedTextBox() or not active() then return Enum.ContextActionResult.Pass end
+ if suppressJumpUntilRelease then
+  if inputState==Enum.UserInputState.End or inputState==Enum.UserInputState.Cancel then suppressJumpUntilRelease=false end
+  return Enum.ContextActionResult.Sink
+ end
  if inputState==Enum.UserInputState.Begin then remote:FireServer("Jump") end
  return Enum.ContextActionResult.Sink
 end
@@ -118,6 +166,20 @@ local function cameraMode(enabled)
   held,left,right=false,false,false
  end
 end
+local function menuMode(enabled)
+ if enabled==menuBound then return end menuBound=enabled returnHeld=nil
+ if not enabled then CAS:UnbindAction("RodeoRetry") CAS:UnbindAction("RodeoReturn") return end
+ CAS:BindActionAtPriority("RodeoRetry",function(_,inputState)
+  if inputState==Enum.UserInputState.Begin and not UIS:GetFocusedTextBox() then suppressJumpUntilRelease=true remote:FireServer("Start")
+  elseif inputState==Enum.UserInputState.End then suppressJumpUntilRelease=false end
+  return Enum.ContextActionResult.Sink
+ end,false,Enum.ContextActionPriority.High.Value+3,Enum.KeyCode.Space)
+ CAS:BindActionAtPriority("RodeoReturn",function(_,inputState)
+  if inputState==Enum.UserInputState.Begin and not UIS:GetFocusedTextBox() then returnHeld=os.clock()
+  elseif inputState==Enum.UserInputState.End or inputState==Enum.UserInputState.Cancel then returnHeld=nil end
+  return Enum.ContextActionResult.Sink
+ end,false,Enum.ContextActionPriority.High.Value+3,Enum.KeyCode.E)
+end
 startButton.Activated:Connect(function() remote:FireServer("Start") end)
 UIS.InputBegan:Connect(function(input,processed)
  if processed or not active() then return end
@@ -135,12 +197,14 @@ UIS.InputEnded:Connect(function(input)
  end
 end)
 UIS.WindowFocusReleased:Connect(function()
- held,left,right=false,false,false
+ held,left,right=false,false,false returnHeld=nil
 end)
 remote.OnClientEvent:Connect(function(kind,data)
+ if kind=="RanchMenu" then bagUI.openRanchMenu() return end
+ if kind=="Pen" then bagUI.openPen(data) return end
  if kind=="Bag" then bagUI.snapshot(data) return end
  if kind~="State" then return end
- if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow(),data.monsterCrashFrame) end
+ if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow(),data.monsterCrashFrame,data.monsterCrashId) end
  if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
  bagUI.state(data)
@@ -149,16 +213,32 @@ remote.OnClientEvent:Connect(function(kind,data)
  returnButton.Visible=state.phase=="GameOver" or state.phase=="CourseEnd"
  startButton.Text=state.phase=="GameOver" and "Hunt again" or "Start hunt"
  cameraMode(active() or state.phase=="CourseEnd")
- bag.Text=require(package.Localization).stats(state.count,state.pending,player.LocaleId)
+ menuMode(state.phase=="GameOver")
+ bagCount.Text=tostring(state.count or 0) moneyCount.Text=tostring(state.pending or 0)
 end)
 player.CharacterAdded:Connect(function() state.phase="Idle" cameraMode(false) remote:FireServer("Sync") end)
 RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Camera.Value+1, function(dt)
+ if returnHeld and state.phase=="GameOver" and os.clock()-returnHeld>=1 then returnHeld=nil remote:FireServer("ReturnLobby") end
  local clock=workspace:GetServerTimeNow()
+ if state.area=="Lobby" or state.area==nil then animateShip(clock) end
  local size=workspace.CurrentCamera.ViewportSize
  local aspect=size.Y>0 and math.clamp(size.X/size.Y,0.4,4) or 1
  if not lastAspect or math.abs(aspect-lastAspect)>0.05 then remote:FireServer("View",aspect) lastAspect=aspect end
  local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
- local frames=animator.update(monsters,clock,root and root.Position,dt)
+ local candidates={}
+ for _,model in ipairs(monsters:GetChildren()) do
+  if model.PrimaryPart and not model:GetAttribute("Occupied") then
+   local p=model.PrimaryPart.Position table.insert(candidates,{key=model,x=p.X,y=p.Y,z=p.Z,serial=model:GetAttribute("SpawnSerial") or 0,emerging=model:GetAttribute("Emerging")})
+  end
+ end
+ local selected={}
+ local ids={}
+ for _,id in ipairs(state.wildIds or {}) do ids[id]=true end
+ for _,candidate in ipairs(candidates) do
+  if ids[candidate.serial] then selected[candidate.key]=true end
+ end
+ local frames=animator.update(monsters,clock,root and root.Position,dt,selected)
+ if state.area=="Lobby" then animator.update(workspace.RodeoLobby,clock,root and root.Position,dt) end
  local t=Config.Prototype
  local visualFrame=root and root.CFrame
  if state.phase~="Airborne" then flightFrame=nil end
@@ -182,7 +262,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  dash.update(state.phase,visualFrame,clock,state.dashUntil,t.SwitchDashSeconds)
  crashEffect.update(player.Character,state.phase,clock)
  catch.crates(workspace.RodeoPrototype:FindFirstChild("Obstacles"),root and root.Position,clock,dt)
- audio.update(state,monsters,root and root.Position,clock)
+ audio.update(state,monsters,root and root.Position,clock,selected)
  local displayDistance=state.distance or 0
  if active() then
   local speed=state.phase=="Airborne" and t.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,(state.baseSpeed or t.ForwardStudsPerSecond),t.SwitchDashMultiplier)
@@ -194,7 +274,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  bag.Visible=state.area=="Lobby" or state.phase=="Idle"
  distance.Text=string.format("%dm",math.floor(displayDistance))
  highlight.Enabled=false
- panel.Visible=state.phase=="GameOver" or state.phase=="CourseEnd"
+ panel.Visible=state.phase=="CourseEnd"
  gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,Config.Hunt.TameSeconds),state.tamed,workspace.CurrentCamera)
  for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
  if (active() or state.phase=="CourseEnd") and root then
@@ -211,7 +291,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   ring.Position=Vector3.new(visualFrame.Position.X,0.15,visualFrame.Position.Z)
   local nearest,best=nil,Config.Prototype.LassoRangeStuds^2
   for _,model in ipairs(monsters:GetChildren()) do
-   if model.PrimaryPart and model~=state.previousMonster and not model:GetAttribute("Occupied") and not model:GetAttribute("Emerging") then
+   if model.PrimaryPart and model~=state.previousMonster and not model:GetAttribute("Occupied") and not model:GetAttribute("Emerging") and selected[model] then
     local d=model.PrimaryPart.Position-root.Position
     if d.X*d.X+d.Z*d.Z<best then nearest,best=model,d.X*d.X+d.Z*d.Z end
    end

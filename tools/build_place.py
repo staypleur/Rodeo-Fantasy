@@ -4,6 +4,7 @@ import copy
 import math
 import xml.etree.ElementTree as ET
 from lumidon_model import components
+from weedcrow_model import components as crow_components
 from lobby_map import build_lobby
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -62,7 +63,8 @@ def script(parent, kind, name, path):
     return node
 
 
-def monster(parent, name, position):
+def monster(parent, name, position, species="Lumidon"):
+    visual_components = crow_components() if species=="Weedcrow" else components()
     node, properties = item(parent, "Model", name)
     root, root_props = part(node, "MountRoot", position, (2.5, 2, 4.6), (175, 77, 36))
     prop(root_props, "float", "Transparency", 1)
@@ -70,7 +72,7 @@ def monster(parent, name, position):
     prop(root_props, "bool", "CanQuery", False)
     prop(root_props, "bool", "CanTouch", False)
     prop(properties, "Ref", "PrimaryPart", root.attrib["referent"])
-    for component in components():
+    for component in visual_components:
         component_position = tuple(position[i] + component["position"][i] for i in range(3))
         shape = component["shape"]
         body, body_props = part(node, component["name"], component_position,
@@ -102,7 +104,7 @@ def monster(parent, name, position):
     label, label_props = item(billboard, "TextLabel", "Label")
     prop(label_props, "UDim2", "Size", dict(XS=1, XO=0, YS=1, YO=0))
     prop(label_props, "float", "BackgroundTransparency", 1)
-    prop(label_props, "string", "Text", "Lumidon")
+    prop(label_props, "string", "Text", species)
     prop(label_props, "float", "TextSize", 18)
     prop(label_props, "Color3", "TextColor3", dict(R=1, G=1, B=1))
     prop(label_props, "float", "TextStrokeTransparency", 0.3)
@@ -116,7 +118,7 @@ item(world, "Folder", "Monsters")
 floor, floor_props = part(world, "PreviewGround", (0, -1, 0), (100, 2, 256), (178, 211, 117))
 prop(floor_props, "token", "Material", 272)  # SmoothPlastic
 lobby = build_lobby(workspace, item, part, prop)
-spawn, spawn_props = part(lobby, "LobbySpawn", (6000, 0.1, 120), (5, 0.2, 5), (178, 211, 117), "SpawnLocation")
+spawn, spawn_props = part(lobby, "LobbySpawn", (6000, 0.3, 0), (5, 0.2, 5), (178, 211, 117), "SpawnLocation")
 prop(spawn_props, "bool", "Neutral", True)
 prop(spawn_props, "bool", "CanCollide", False)
 prop(spawn_props, "float", "Transparency", 1)
@@ -125,6 +127,8 @@ monster(world, "PreviewMonster", (0, 2, -8))
 
 replicated, _ = item(document, "ReplicatedStorage", "ReplicatedStorage")
 package, _ = item(replicated, "Folder", "RodeoFantasy")
+script(package, "ModuleScript", "MonsterCatalog", "src/shared/MonsterCatalog.luau")
+script(package, "ModuleScript", "RecordRules", "src/shared/RecordRules.luau")
 script(package, "ModuleScript", "Config", "src/shared/Config.luau")
 script(package, "ModuleScript", "HuntRules", "src/shared/HuntRules.luau")
 script(package, "ModuleScript", "HerdMotion", "src/shared/HerdMotion.luau")
@@ -134,12 +138,15 @@ script(package, "ModuleScript", "Localization", "src/shared/Localization.luau")
 script(package, "ModuleScript", "BagRules", "src/shared/BagRules.luau")
 item(package, "RemoteEvent", "CaptureRemote")
 monster(package, "VisualTemplate", (0, 0, 0))
+monster(package, "WeedcrowVisualTemplate", (0, 0, 0), "Weedcrow")
 server_storage, _ = item(document, "ServerStorage", "ServerStorage")
 model_template = monster(server_storage, "RodeoMonsterTemplate", (0, 0, 0))
+crow_template = monster(server_storage, "WeedcrowTemplate", (0, 0, 0), "Weedcrow")
 server_scripts, _ = item(document, "ServerScriptService", "ServerScriptService")
 script(server_scripts, "Script", "CaptureServer", "src/server/CaptureServer.server.luau")
 script(server_scripts, "ModuleScript", "HuntWorld", "src/server/HuntWorld.luau")
 script(server_scripts, "ModuleScript", "LobbyWorld", "src/server/LobbyWorld.luau")
+script(server_scripts, "ModuleScript", "RecordService", "src/server/RecordService.luau")
 starter, starter_props = item(document, "StarterPlayer", "StarterPlayer")
 prop(starter_props, "bool", "LoadCharacterAppearance", True)
 prop(starter_props, "float", "CameraMaxZoomDistance", 40)
@@ -176,3 +183,18 @@ ET.indent(model_document, space="  ")
 model_output = output.parent / "Lumidon.rbxmx"
 ET.ElementTree(model_document).write(model_output, encoding="utf-8", xml_declaration=True)
 print(f"Built {model_output.name} ({len(components())} visual parts)")
+
+crow_document=ET.Element("roblox",version="4")
+crow_copy=copy.deepcopy(crow_template)
+crow_copy.find("Properties/string[@name='Name']").text="Weedcrow"
+crow_document.append(crow_copy)
+ET.indent(crow_document,space="  ")
+ET.ElementTree(crow_document).write(output.parent/"Weedcrow.rbxmx",encoding="utf-8",xml_declaration=True)
+
+ship_document=ET.Element("roblox",version="4")
+ship=next(n for n in lobby.iter("Item") if n.findtext("Properties/string[@name='Name']")=="Airship")
+ship_copy=copy.deepcopy(ship)
+ship_copy.find("Properties/string[@name='Name']").text="BlueSeaElephantAirship"
+ship_document.append(ship_copy)
+ET.indent(ship_document,space="  ")
+ET.ElementTree(ship_document).write(output.parent/"BlueSeaElephantAirship.rbxmx",encoding="utf-8",xml_declaration=True)

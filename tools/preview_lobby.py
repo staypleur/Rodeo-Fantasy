@@ -13,7 +13,7 @@ draw = ImageDraw.Draw(image)
 font = ImageFont.truetype('C:/Windows/Fonts/malgun.ttf', 26)
 small = ImageFont.truetype('C:/Windows/Fonts/malgun.ttf', 19)
 draw.text((40, 24), '파스텔 로비 · 실제 맵 부품의 위쪽 배치도', font=font, fill=(44, 72, 61))
-draw.text((40, 64), 'Studio 화면 아님 · 개인 구역 8개 / 목장 64개 / 목장당 2마리', font=small, fill=(74, 94, 84))
+draw.text((40, 64), 'Studio 화면 아님 · 개인 구역 8개 / 목장 32개 / 목장당 2마리', font=small, fill=(74, 94, 84))
 scale = 2.7
 def project(x, z):
     return (600 + (x - 6000)*scale, 720 + z*scale)
@@ -58,8 +58,8 @@ for n in next(p for p in lobby.findall("Item") if p.findtext("Properties/string[
     cf=board.find("Properties/CoordinateFrame[@name='CFrame']")
     x,z=project(float(cf.findtext('X')),float(cf.findtext('Z')))
     draw.text((x,z+9), f'개인 구역 {idx}',font=small,fill=(40,67,55),anchor='mt')
-draw.text((600,940),'중앙 비행선',font=small,fill=(40,67,55),anchor='mt')
-draw.text((600,1080),'중앙 광장',font=small,fill=(40,67,55),anchor='mt')
+draw.text((600,790),'중앙 비행선',font=small,fill=(40,67,55),anchor='mt')
+draw.text((600,625),'중앙 광장',font=small,fill=(40,67,55),anchor='mt')
 out=ROOT/'assets/maps/lobby-layout-preview.png'
 out.parent.mkdir(parents=True,exist_ok=True)
 image.save(out)

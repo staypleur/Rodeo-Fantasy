@@ -6,6 +6,7 @@ local monsterId,rideSpeed
 local Motion=require(game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy"):WaitForChild("HerdMotion"))
 local Course=require(game:GetService("ReplicatedStorage").RodeoFantasy.CourseGeometry)
 local Visibility=require(game.ReplicatedStorage.RodeoFantasy.HerdVisibility)
+local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
 local spawnSerial=0
 local crateRows={}
 local dens={}
@@ -77,18 +78,26 @@ function World.init(world, modelTemplate, config, rules)
 	if floor then floor:Destroy() end
 end
 
-function World.spawn(position)
-	local model = template:Clone()
-	model.Name = monsterId
-	model:SetAttribute("MonsterId", monsterId)
+function World.spawn(position,speciesId)
+ local species=Catalog[speciesId or monsterId]
+ local id=speciesId or monsterId
+ local source=id==monsterId and template or game.ServerStorage[species.Template]
+	local model = source:Clone()
+	model.Name = id
+	model:SetAttribute("MonsterId", id)
 	model:SetAttribute("Occupied", false)
 	model:SetAttribute("Running", true)
- model:SetAttribute("RideSpeed",rideSpeed)
+ model:SetAttribute("RideSpeed",species.RunSpeed)
+ model:SetAttribute("HerdSpeed",species.HerdSpeed)
+ model:SetAttribute("SizeClass",species.SizeClass)
+ model:SetAttribute("Flying",species.Flying)
+ model:SetAttribute("RootHeight",species.RootHeight)
+ position=Vector3.new(position.X,species.RootHeight,position.Z)
 	model:SetAttribute("RunStarted", workspace:GetServerTimeNow() - (math.abs(position.X*0.17+position.Z*0.023)%1))
 	model:SetAttribute("Steering", 0)
 	model:PivotTo(CFrame.new(position))
 	model.Parent = monsters
-	spawnSerial+=1
+	spawnSerial+=1 model:SetAttribute("SpawnSerial",spawnSerial)
 	animals[model] = Motion.new(position.X,spawnSerial)
 	return model
 end
@@ -123,7 +132,7 @@ function World.ensure(z)
     end
    end
    for _, side in ipairs({-1,1}) do
-    local height=8+random:NextInteger(0,3)
+    local height=25+random:NextInteger(0,4)
     decoration(chunk,"CanyonBase",Vector3.new(side*(edge+5),2,rowZ),Vector3.new(10,4,32),Color3.fromRGB(220,151,97))
     decoration(chunk,"CanyonStratum",Vector3.new(side*(edge+7),4.5,rowZ),Vector3.new(10,1,32),Color3.fromRGB(249,191,128))
     decoration(chunk,"CanyonUpper",Vector3.new(side*(edge+9),5+height/2,rowZ),Vector3.new(12,height,32),Color3.fromRGB(201,126,80))
@@ -206,9 +215,11 @@ function World.step(dt)
 		if not model:GetAttribute("Occupied") then
 			-- Only the authoritative root moves. Clients own all visual body poses.
    local p,half=model.PrimaryPart.Position,model.PrimaryPart.Size/2
+   local movement=tuning
+   if model:GetAttribute("Flying") then movement=table.clone(tuning) movement.HerdStudsPerSecond=model:GetAttribute("HerdSpeed") end
    local nearby={}
    for key=math.floor((p.Z-110)/64),math.floor((p.Z+12)/64) do
-    for _,rock in ipairs(buckets[key] or {}) do table.insert(nearby,rock) end
+    for _,rock in ipairs(buckets[key] or {}) do if not model:GetAttribute("Flying") then table.insert(nearby,rock) end end
    end
    if motion.wasOccupied then motion.home,motion.vx,motion.wasOccupied=p.X,0,false end
    local x,z,vx
@@ -216,11 +227,11 @@ function World.step(dt)
     motion.entry.age+=dt
     local a=math.min(motion.entry.age/1.25,1)
     x=motion.entry.from+(motion.entry.to-motion.entry.from)*a
-    z=p.Z-dt*tuning.HerdStudsPerSecond*0.3
+    z=p.Z-dt*movement.HerdStudsPerSecond*0.3
     vx=(motion.entry.to-motion.entry.from)/1.25
     if a>=1 then motion.home=motion.entry.home motion.entry=nil model:SetAttribute("Emerging",nil) end
-   else x,z,vx=Motion.step(motion,p.X,p.Z,dt,nearby,tuning,half.X,half.Z,Rules,Course) end
-   model.PrimaryPart.CFrame=CFrame.new(x,p.Y,z)*CFrame.Angles(0,-math.atan2(vx,tuning.HerdStudsPerSecond),0)
+   else x,z,vx=Motion.step(motion,p.X,p.Z,dt,nearby,movement,half.X,half.Z,Rules,Course) end
+   model.PrimaryPart.CFrame=CFrame.new(x,p.Y,z)*CFrame.Angles(0,-math.atan2(vx,movement.HerdStudsPerSecond),0)
    model:SetAttribute("Steering",vx/tuning.SidewaysStudsPerSecond)
 		 model:SetAttribute("HerdVelocity",Vector3.new(vx,0,(z-p.Z)/math.max(dt,0.000001)))
 		else motion.wasOccupied=true
@@ -228,10 +239,24 @@ function World.step(dt)
 	end
 end
 
-function World.nearest(position, excluded)
+local displayed=setmetatable({},{__mode="k"})
+function World.resetVisibility(viewer) displayed[viewer]=nil end
+function World.visibleSet(z,aspect,viewer)
+ local candidates={}
+ for model in pairs(animals) do
+  if model.Parent and not model:GetAttribute("Occupied") then
+   local p=model.PrimaryPart.Position
+   table.insert(candidates,{key=model,x=p.X,y=p.Y,z=p.Z,serial=model:GetAttribute("SpawnSerial") or 0,emerging=model:GetAttribute("Emerging")})
+  end
+ end
+ local result=Visibility.select(candidates,z,aspect or 1,tuning,6,viewer and displayed[viewer])
+ if viewer then displayed[viewer]=result end
+ return result
+end
+function World.nearest(position, excluded, selected)
 	local best, bestDistance = nil, tuning.LassoRangeStuds * tuning.LassoRangeStuds
 	for model in pairs(animals) do
-		if not model.Parent or model==excluded or model:GetAttribute("Occupied") or model:GetAttribute("Emerging") then continue end
+		if not model.Parent or model==excluded or model:GetAttribute("Occupied") or model:GetAttribute("Emerging") or (selected and not selected[model]) then continue end
 		local delta = model.PrimaryPart.Position-position
 		local distance = delta.X*delta.X+delta.Z*delta.Z
 		if distance <= bestDistance then best, bestDistance = model, distance end
@@ -249,23 +274,32 @@ function World.replenish(z,aspect,watchers,prime,budget)
  for model in pairs(animals) do
   if model.Parent and not model:GetAttribute("Occupied") then
    local p=model.PrimaryPart.Position
-   if p.Z<z+12 and p.Z>z-340 then ahead+=1 end
-   if Visibility.visible(p.X,p.Y,p.Z-z,aspect,tuning) then visible+=1 end
+   if p.Z<z+12 and p.Z>=z-340 then ahead+=1 end
+   if not model:GetAttribute("Emerging") and Visibility.visible(p.X,p.Y,p.Z-z,aspect,tuning) then visible+=1 end
   end
  end
+ local obstacleCount=0
+ for _,rock in ipairs(obstacles:GetChildren()) do
+  if not rock:GetAttribute("Broken") and Visibility.visible(rock.Position.X,2,rock.Position.Z-z,aspect,tuning) then obstacleCount+=1 end
+ end
+ -- A small buffer covers cave emergence and moving camera; visible density follows obstacles.
+ local targetVisible=math.max(aspect<.8 and 16 or 12,obstacleCount+1)
  local created=0
- for offset=20,340,10 do
-  if ahead>=56 or (ahead>=40 and visible>=12) then break end
+ for offset=(prime and 20 or 100),340,10 do
+  if ahead>=72 or (ahead>=40 and visible>=targetVisible) then break end
   if created>=budget then break end
   local targetZ=z-offset
   if targetZ < -Course.LengthStuds-340 then continue end
   local row=0
-  for _,i in ipairs({3,4,2,5,1,6}) do
+  local orders={{1,6,2,5,3,4},{2,5,1,6,3,4},{3,4,2,5,1,6}}
+  for _,i in ipairs(orders[math.floor(offset/10)%3+1]) do
    for _,range in ipairs(Course.ranges(targetZ,3)) do
     local jitter=math.sin(spawnSerial*2.399+offset)*1.1
     local x=math.clamp(range[1]+(range[2]-range[1])*i/7+jitter,range[1],range[2])
-    local onScreen=Visibility.visible(x,2,targetZ-z,aspect,tuning)
-    local safe=not onScreen or visible<12
+    local speciesId=(prime and offset<100) and "Lumidon" or (spawnSerial%3==0 and "Weedcrow" or "Lumidon")
+    local onScreen=Visibility.visible(x,Catalog[speciesId].RootHeight,targetZ-z,aspect,tuning)
+    local safe=not onScreen or visible<targetVisible
+    if prime and offset<100 and math.abs(x)<6 then safe=false end
     -- Visible mouths are allowed: animals physically walk out, never appear mid-road.
     if safe and prime then
      for _,rock in ipairs(obstacles:GetChildren()) do
@@ -278,7 +312,7 @@ function World.replenish(z,aspect,watchers,prime,budget)
      end
     end
     if safe then
-     if prime then World.spawn(Vector3.new(x,2,targetZ))
+     if prime then World.spawn(Vector3.new(x,2,targetZ),speciesId)
      else
       local best=nil local distance=math.huge
       for _,den in ipairs(dens) do
@@ -295,9 +329,9 @@ function World.replenish(z,aspect,watchers,prime,budget)
        if other.Parent and math.abs(other.PrimaryPart.Position.Z-best.z)<9 and other.PrimaryPart.Position.X*best.side>0 then clear=false break end
       end
       if not clear then continue end
-      local model=World.spawn(Vector3.new(mouth,2,best.z))
+      local model=World.spawn(Vector3.new(mouth,2,best.z),speciesId)
       model:SetAttribute("Emerging",true)
-      animals[model].entry={from=mouth,to=exit,home=best.side*math.max(Course.median(best.z-66)+5,Course.width(best.z)*.4),age=0}
+      animals[model].entry={from=mouth,to=exit,home=best.side*math.max(Course.median(best.z-66)+5,Course.width(best.z)*.2),age=0}
      end
      ahead+=1 created+=1 row+=1
      if prime and onScreen then visible+=1 end
@@ -314,20 +348,20 @@ function World.maintain(watchers)
  table.sort(watchers,function(a,b) return a.z<b.z end)
  local budget=32
  for _,watch in ipairs(watchers) do
-  budget-=World.replenish(watch.z,watch.aspect,watchers,false,math.min(4,budget))
+  budget-=World.replenish(watch.z,watch.aspect,watchers,false,math.min(6,budget))
   if budget<=0 then break end
  end
 end
 
 -- Contact while riding: include moving herds and the visible inner canyon face.
-function World.mountedHit(from,to,mount)
+function World.mountedHit(from,to,mount,selected)
  local half=mount.PrimaryPart.Size/2
  for i=0,4 do
   local p=from:Lerp(to,i/4)
   if not Course.contains(p.X,p.Z-half.Z,half.X) or not Course.contains(p.X,p.Z+half.Z,half.X) then return "Wall" end
  end
  for other in pairs(animals) do
-  if other==mount or not other.Parent then continue end
+  if other==mount or not other.Parent or other:GetAttribute("Flying")~=mount:GetAttribute("Flying") or (selected and not other:GetAttribute("Occupied") and not selected[other]) then continue end
   local old=previousPositions[other] or other.PrimaryPart.Position
   local current=other.PrimaryPart.Position
   local a,b=from-old,to-current
@@ -337,9 +371,9 @@ function World.mountedHit(from,to,mount)
  return nil
 end
 
-function World.hit(from, to)
+function World.hit(from, to, flying)
 	for _, rock in ipairs(obstacles:GetChildren()) do
-		if rock:GetAttribute("Broken") then continue end
+		if rock:GetAttribute("Broken") or (flying and rock:GetAttribute("ObstacleSize")~="Large") then continue end
 		local p,s = rock.Position,rock.Size
 		if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,1) then return true end
 	end
@@ -347,6 +381,7 @@ function World.hit(from, to)
 end
 
 function World.crateHit(from,to,mount,sizeClass)
+ if mount:GetAttribute("Flying") then return false end
  for _,box in ipairs(obstacles:GetChildren()) do
   if not box:GetAttribute("BreakableCrate") or box:GetAttribute("Broken") then continue end
   local p,s=box.Position,box.Size+mount.PrimaryPart.Size

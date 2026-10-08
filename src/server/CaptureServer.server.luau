@@ -3,10 +3,12 @@ local RS=game:GetService("ReplicatedStorage")
 local RunService=game:GetService("RunService")
 local package=RS:WaitForChild("RodeoFantasy")
 local Config=require(package.Config)
+local Catalog=require(package.MonsterCatalog)
 local Rules=require(package.HuntRules)
 local BagRules=require(package.BagRules)
 local World=require(script.Parent.HuntWorld)
 local Lobby=require(script.Parent.LobbyWorld)
+local Records=require(script.Parent.RecordService)
 local Course=require(package.CourseGeometry)
 local remote=package.CaptureRemote
 local tuning=Config.Prototype
@@ -22,14 +24,17 @@ local function send(player,message)
  local state,bag=states[player],bags[player]
  if not bag then return end
  BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
- remote:FireClient(player,"State",{phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
+ Records.sample(player,bag.totalProduced or 0,state and state.distance or 0)
+ local wildIds={}
+ if state then for model in pairs(World.visibleSet(state.root.Position.Z,views[player],player)) do table.insert(wildIds,model:GetAttribute("SpawnSerial")) end end
+ remote:FireClient(player,"State",{wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
 end
 local function sendBag(player)
  local bag=bags[player]
  if not bag or states[player] then return end
  local items={}
  for _,item in ipairs(bag.monsters) do
-  table.insert(items,{monsterId=item.monsterId,stars=item.stars,incomeSeconds=Config.BagIncome.IncomeSeconds,incomeAmount=Config.BagIncome.IncomeAmount})
+  table.insert(items,{id=item.id,assignedPen=item.assignedPen,monsterId=item.monsterId,stars=item.stars,incomeSeconds=item.incomeSeconds or Config.BagIncome.IncomeSeconds,incomeAmount=item.incomeAmount or Config.BagIncome.IncomeAmount})
  end
  remote:FireClient(player,"Bag",items)
 end
@@ -57,7 +62,7 @@ local function freeMount(state)
   state.monster:SetAttribute("AngerWarning",false)
   state.monster:SetAttribute("AngerStarted",nil)
   local p=state.monster.PrimaryPart.Position
-  state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z)
+  state.monster.PrimaryPart.CFrame=CFrame.new(p.X,state.monster:GetAttribute("RootHeight") or 2,p.Z)
  end
  state.previousMonster,state.monster=state.monster,nil
  clearRope(state)
@@ -68,7 +73,7 @@ local function finish(player,reason,crashKind)
  state.crash=crashKind~=nil
  state.endReason=crashKind
  local brokenMount=(crashKind=="Wall" or crashKind=="Obstacle") and state.monster
- if brokenMount and brokenMount.Parent then state.monsterCrashFrame=brokenMount.PrimaryPart.CFrame end
+ if brokenMount and brokenMount.Parent then state.monsterCrashFrame=brokenMount.PrimaryPart.CFrame state.monsterCrashId=brokenMount:GetAttribute("MonsterId") end
  freeMount(state)
  if brokenMount and brokenMount.Parent then brokenMount:Destroy() end
  state.phase="GameOver"
@@ -94,6 +99,7 @@ local function start(player)
    humanoid.AutoRotate,humanoid.PlatformStand=previous.autoRotate,previous.platformStand
   end
  end
+ World.resetVisibility(player)
  World.ensure(0)
  local watchers={}
  for other,run in pairs(states) do
@@ -119,7 +125,7 @@ local function launch(player,state)
  send(player)
 end
 local function lasso(player,state)
- local model=World.nearest(state.root.Position,state.previousMonster)
+ local model=World.nearest(state.root.Position,state.previousMonster,World.visibleSet(state.root.Position.Z,views[player],player))
  if not model then return end
  local params=RaycastParams.new()
  params.FilterType=Enum.RaycastFilterType.Exclude
@@ -134,9 +140,12 @@ local function lasso(player,state)
  send(player)
 end
 Lobby.connect(start)
+Lobby.connectPens(function(player)
+ if not states[player] then sendBag(player) remote:FireClient(player,"RanchMenu") end
+end)
 remote.OnServerEvent:Connect(function(player,action,value)
  if type(action)~="string" or not bags[player] then return end
- if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" then return end
+ if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
@@ -145,6 +154,16 @@ remote.OnServerEvent:Connect(function(player,action,value)
  stamps[action]=now()
  if action=="View" then
   if type(value)=="number" and value==value and value>=0.4 and value<=4 then views[player]=value end
+  return
+ end
+ if action=="Manage" then
+  if not states[player] and Lobby.canUsePen(player,value) then sendBag(player) remote:FireClient(player,"Pen",value) end
+  return
+ end
+ if action=="Place" or action=="Remove" then
+  if states[player] or type(value)~="table" or not Lobby.canUsePen(player,value.pen) then return end
+  local changed=action=="Place" and BagRules.place(bags[player],value.id,value.pen) or action=="Remove" and BagRules.remove(bags[player],value.id,value.pen)
+  if changed then Lobby.display(player,value.pen,bags[player].monsters) sendBag(player) end
   return
  end
  if action=="Bag" then sendBag(player) return end
@@ -198,7 +217,7 @@ RunService.Heartbeat:Connect(function(delta)
    if state.monster then state.monster:SetAttribute("Running",false) state.monster:SetAttribute("DashUntil",nil) state.monster:SetAttribute("Angry",false) state.monster:SetAttribute("AngerWarning",false) end
    if state.monster then
     local p=state.monster.PrimaryPart.Position
-    state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z)
+    state.monster.PrimaryPart.CFrame=CFrame.new(p.X,state.monster:GetAttribute("RootHeight") or 2,p.Z)
     state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
    end
    clearRope(state)
@@ -216,12 +235,12 @@ RunService.Heartbeat:Connect(function(delta)
   elseif state.phase=="Lassoing" then
    if not state.monster or not state.monster.Parent then finish(player,"You lost your mount.") continue end
    local p=state.monster.PrimaryPart.Position
-   state.monster.PrimaryPart.CFrame=CFrame.new(p.X,2,p.Z-baseSpeed(state)*dt)
+   state.monster.PrimaryPart.CFrame=CFrame.new(p.X,state.monster:GetAttribute("RootHeight") or 2,p.Z-baseSpeed(state)*dt)
    local saddle=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
    local landingSeconds=state.landingSeconds or tuning.JumpSeconds
    local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
    state.root.CFrame=state.origin:Lerp(saddle,landingProgress)*CFrame.new(0,math.sin(math.pi*landingProgress)*tuning.JumpArcStuds*0.5,0)
-   if World.hit(p,state.monster.PrimaryPart.Position) then finish(player,"You hit an obstacle.","Obstacle") continue end
+   if World.hit(p,state.monster.PrimaryPart.Position,state.monster:GetAttribute("Flying")) then finish(player,"You hit an obstacle.","Obstacle") continue end
    if clock-state.started>=landingSeconds then
     clearRope(state)
     state.phase,state.started,state.tamed="Riding",clock,state.monster:GetAttribute("Tamed_"..player.UserId)==true
@@ -237,17 +256,19 @@ RunService.Heartbeat:Connect(function(delta)
    end
   elseif state.phase=="Riding" then
    if not state.monster or not state.monster.Parent then finish(player,"You lost your mount.") continue end
-   position=Vector3.new(position.X,2+buckHeight,position.Z)
+   position=Vector3.new(position.X,(state.monster:GetAttribute("RootHeight") or 2)+buckHeight,position.Z)
    local before=state.monster.PrimaryPart.Position
    state.monster.PrimaryPart.CFrame=CFrame.new(position)
    state.monster:SetAttribute("Steering",steer)
    state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,tuning.RideHeightStuds,tuning.RideForwardStuds)
-   if World.crateHit(before,position,state.monster,Config.Monster.SizeClass) then finish(player,"This monster cannot break crates.","Obstacle") continue end
-   local contact=World.mountedHit(before,position,state.monster)
+   if World.crateHit(before,position,state.monster,state.monster:GetAttribute("SizeClass") or Config.Monster.SizeClass) then finish(player,"This monster cannot break crates.","Obstacle") continue end
+   local contact=World.mountedHit(before,position,state.monster,World.visibleSet(position.Z,views[player],player))
    if contact then finish(player,contact=="Wall" and "You hit a wall." or "You hit another monster.",contact) continue end
-   if World.hit(before,position) then finish(player,"You hit an obstacle.","Obstacle") continue end
+   if World.hit(before,position,state.monster:GetAttribute("Flying")) then finish(player,"You hit an obstacle.","Obstacle") continue end
    if not state.tamed and clock-state.started>=Config.Hunt.TameSeconds then
-    state.tamed=true BagRules.grant(bags[player],Config.Monster.Id,clock) send(player,"Lumidon tamed! Added to your bag.")
+    local id=state.monster:GetAttribute("MonsterId") or Config.Monster.Id
+    local species=Catalog[id]
+    state.tamed=true BagRules.grant(bags[player],id,clock,species.IncomeSeconds,species.IncomeAmount) send(player,"Monster tamed! Added to your bag.")
     state.monster:SetAttribute("Tamed_"..player.UserId,true)
    end
    if Config.Hunt.AngerEnabled and clock-state.started>=Config.Hunt.AngerSeconds then
@@ -272,5 +293,7 @@ local function added(player)
  player.CharacterRemoving:Connect(function() finish(player,"Hunt ended") states[player]=nil end)
 end
 Players.PlayerAdded:Connect(added)
-Players.PlayerRemoving:Connect(function(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil end)
+Players.PlayerRemoving:Connect(function(player) send(player) World.resetVisibility(player) Records.leave(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil end)
 for _,player in ipairs(Players:GetPlayers()) do added(player) end
+
+if RunService:IsRunning() then Records.start() end

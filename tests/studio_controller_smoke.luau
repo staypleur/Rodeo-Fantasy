@@ -17,9 +17,9 @@ humanoid.Parent=character
 local player={SetAttribute=function() end,DisplayName="NativeTest",Character=character,UserId=991001,CharacterRemoving=signal(function() end)}
 local players={PlayerAdded=signal(function() end),PlayerRemoving=signal(function() end),GetPlayers=function() return {player} end}
 local remote={OnServerEvent=signal(function(fn) event=fn end),FireClient=function(_,_,kind,data) if kind=="State" then latest=data end end}
-local package={Config=RS.RodeoFantasy.Config,HuntRules=RS.RodeoFantasy.HuntRules,BagRules=RS.RodeoFantasy.BagRules,CourseGeometry=RS.RodeoFantasy.CourseGeometry,CaptureRemote=remote}
+local package={MonsterCatalog=RS.RodeoFantasy.MonsterCatalog,Config=RS.RodeoFantasy.Config,HuntRules=RS.RodeoFantasy.HuntRules,BagRules=RS.RodeoFantasy.BagRules,CourseGeometry=RS.RodeoFantasy.CourseGeometry,CaptureRemote=remote}
 local fakeRS={WaitForChild=function() return package end}
-local fakeRun={Heartbeat=signal(function(fn) heartbeat=fn end)}
+local fakeRun={IsRunning=function() return false end,Heartbeat=signal(function(fn) heartbeat=fn end)}
 local fakeGame={GetService=function(_,name)
 	if name=="Players" then return players end
 	if name=="ReplicatedStorage" then return fakeRS end
@@ -168,6 +168,19 @@ for _=1,35 do
  if latest.phase=="GameOver" then break end
 end
 check(latest.phase=="GameOver" and latest.endReason=="Wall" and latest.crash,"canyon contact must crash instead of clamping forever")
+-- A second species must retain its own speed, capture ID and income.
+root.CFrame=workspace.RodeoLobby.Airport.Departure.CFrame+Vector3.new(0,0,4)
+event(player,"Start") advance(config.Prototype.IntroSeconds+.2)
+event(player,"Jump")
+local crow=world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-3),"Weedcrow")
+advance(.1,false,true) event(player,"Jump") advance(config.Prototype.JumpSeconds+.2)
+check(latest.phase=="Riding" and latest.monster==crow,"crow must be caught and ridden")
+check(math.abs(latest.baseSpeed-76.8)<.001 and crow:GetAttribute("SizeClass")=="Small","crow has 1.2x speed and small class")
+local priorCount=latest.count
+advance(config.Hunt.TameSeconds+.2)
+check(latest.tamed and latest.count==priorCount+1,"crow uses same tame time and grants once")
+local pending=latest.pending advance(2.1)
+check(latest.pending>=pending+2,"crow must produce two coins per interval")
 module:Destroy()
 character:Destroy()
 print("HUNT_CONTROLLER_SMOKE_PASS: "..checks.." actual controller checks with native world and controlled clock")

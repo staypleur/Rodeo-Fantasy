@@ -9,7 +9,9 @@ local templateRoot=template:WaitForChild("MountRoot")
 local tuning = require(package:WaitForChild("Config")).Prototype
 local Rules = require(package:WaitForChild("HuntRules"))
 local restFrames = {}
+local Catalog=require(package.MonsterCatalog)
 local dust={}
+local contexts=setmetatable({},{__mode="k"})
 local function clearHerdPath(from,to,root)
  local world=workspace:FindFirstChild("RodeoPrototype")
  local obstacles=world and world:FindFirstChild("Obstacles")
@@ -21,14 +23,13 @@ local function clearHerdPath(from,to,root)
  end
  return true
 end
-for _, part in ipairs(template:GetDescendants()) do
- if part:IsA("BasePart") and part ~= templateRoot then
-  restFrames[part.Name] = templateRoot.CFrame:ToObjectSpace(part.CFrame)
- end
-end
-
 local function remember(model, existing)
 	local root = model.PrimaryPart
+ local speciesId=model:GetAttribute("MonsterId") or "Lumidon"
+ local referenceTemplate=package:WaitForChild(Catalog[speciesId].Visual)
+ local referenceRoot=referenceTemplate:WaitForChild("MountRoot")
+ restFrames[speciesId]=restFrames[speciesId] or {}
+ local rest=restFrames[speciesId]
 	if not root then return nil end
 	local pose = existing or {frame = root.CFrame, sample = root.CFrame, received = nil, tracked={}}
  if existing and not pose.dirty then return pose end
@@ -36,12 +37,12 @@ local function remember(model, existing)
  pose.dirty=false
 	for _, part in ipairs(model:GetDescendants()) do
 		if part:IsA("BasePart") and part ~= root and not pose.tracked[part] then
-   if not restFrames[part.Name] then
-    local reference=template:FindFirstChild(part.Name,true)
+   if not rest[part.Name] then
+    local reference=referenceTemplate:FindFirstChild(part.Name,true)
     if not reference or not reference:IsA("BasePart") then
      part.LocalTransparencyModifier=1 pose.dirty=true continue
     end
-    restFrames[part.Name]=templateRoot.CFrame:ToObjectSpace(reference.CFrame)
+    rest[part.Name]=referenceRoot.CFrame:ToObjectSpace(reference.CFrame)
    end
    part.LocalTransparencyModifier=0
 			local side = string.sub(part.Name,1,4)=="Left" and "Left" or string.sub(part.Name,1,5)=="Right" and "Right" or nil
@@ -49,14 +50,17 @@ local function remember(model, existing)
 			local leg = movingLeg and (string.find(part.Name,"Front",1,true) and "Front" or "Back") or nil
 			if not leg then side=nil end
 			pose.tracked[part]=true
-			table.insert(pose, { part = part, rest = restFrames[part.Name], side = side, leg = leg })
+			table.insert(pose, { part = part, rest = rest[part.Name], side = side, leg = leg })
 		end
 	end
 	poses[model] = pose
 	return pose
 end
 
-function RideAnimator.update(monsters, clock, cameraPosition, dt)
+function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
+ local context=contexts[monsters]
+ if not context then context={poses={},visibility={},warnings={},dust={}} contexts[monsters]=context end
+ poses,visibility,warnings,dust=context.poses,context.visibility,context.warnings,context.dust
  dt = dt or 1/60
  for i=#dust,1,-1 do
   local puff=dust[i] local age=clock-puff.started
@@ -64,20 +68,21 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
   else puff.part.Transparency=0.45+age/0.6*0.55 puff.part.Size=Vector3.one*(0.75+age*1.5) puff.part.Position+=Vector3.new(0,dt*0.7,0) end
  end
  local displayed = {}
- for model in pairs(visibility) do if model.Parent~=monsters then visibility[model]=nil end end
+ for model in pairs(visibility) do if not model:IsDescendantOf(monsters) then visibility[model]=nil end end
 	for model, pose in pairs(poses) do
-		if model.Parent ~= monsters then poses[model] = nil end
+		if not model:IsDescendantOf(monsters) then poses[model] = nil end
 	end
 	for model, warning in pairs(warnings) do
-		if model.Parent ~= monsters then warning:Destroy() warnings[model] = nil end
+		if not model:IsDescendantOf(monsters) then warning:Destroy() warnings[model] = nil end
 	end
-	for _, model in ipairs(monsters:GetChildren()) do
+	for _, model in ipairs(monsters.Name=="RodeoLobby" and monsters:GetDescendants() or monsters:GetChildren()) do
+  if not model:IsA("Model") then continue end
 		local root = model.PrimaryPart
 		if not root then continue end
   local nameplate = root:FindFirstChild("Nameplate")
   if nameplate then nameplate.Enabled = model:GetAttribute("Running") ~= true end
 		if cameraPosition then
-   local hidden=(root.Position-cameraPosition).Magnitude>220
+   local hidden=(root.Position-cameraPosition).Magnitude>220 or (selected and not model:GetAttribute("Occupied") and not selected[model])
    local record=visibility[model]
    if not record then
     record={} visibility[model]=record
@@ -95,13 +100,13 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
   end
 		local running = model:GetAttribute("Running") == true
 		local pose = poses[model]
-		if not pose and not running then continue end
+		if not pose and not running and not model:GetAttribute("BagItemId") then continue end
 		pose = remember(model,pose) -- Include late replicated body parts on every frame.
   if pose.sample ~= root.CFrame or not pose.received then
    pose.sample, pose.received = root.CFrame, clock
   end
   local elapsed = math.clamp(clock-pose.received,0,0.08)
-  local speed = model:GetAttribute("Occupied") and Rules.rideSpeed(clock,model:GetAttribute("DashUntil"),(model:GetAttribute("RideSpeed") or tuning.ForwardStudsPerSecond),tuning.SwitchDashMultiplier) or tuning.HerdStudsPerSecond
+  local speed = model:GetAttribute("Occupied") and Rules.rideSpeed(clock,model:GetAttribute("DashUntil"),(model:GetAttribute("RideSpeed") or tuning.ForwardStudsPerSecond),tuning.SwitchDashMultiplier) or (model:GetAttribute("HerdSpeed") or tuning.HerdStudsPerSecond)
   local steer = model:GetAttribute("Steering") or 0
   local velocity=Vector3.new(steer*tuning.SidewaysStudsPerSecond,0,-speed)
   if not model:GetAttribute("Occupied") then velocity=model:GetAttribute("HerdVelocity") or velocity end
@@ -138,10 +143,11 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
 		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds)
 		local lean = running and (model:GetAttribute("Steering") or 0) * -0.18 or 0
   local moving=running and velocity.Magnitude>1
-  local bounce=moving and (1-math.cos(phase))*0.22 or 0
+  local flying=model:GetAttribute("Flying")==true
+  local bounce=moving and (flying and (.55+math.sin(phase*.5)*.22) or (1-math.cos(phase))*.22) or 0
   local gallopPitch=moving and math.sin(phase)*0.085 or 0
-		local frame = pose.frame * CFrame.new(0,bounce,0)*CFrame.Angles(angry and pitch or gallopPitch, 0, lean)
-  if moving and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)>0.18 and #dust<80 then
+		local frame = pose.frame * CFrame.new(0,bounce,0)*CFrame.Angles(angry and not flying and pitch or gallopPitch, 0, lean)
+  if monsters.Name~="RodeoLobby" and moving and not flying and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)>0.18 and #dust<80 then
    pose.lastDust=clock
    local puff=Instance.new("Part") puff.Name="LocalHerdDust" puff.Anchored=true
    puff.CanCollide,puff.CanTouch,puff.CanQuery=false,false,false
@@ -153,7 +159,11 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
 		for _, entry in ipairs(pose) do
 			if not entry.part.Parent then continue end
 			local localFrame = entry.rest
-			if moving and entry.side then
+			if moving and flying and entry.part.Name:find("Wing",1,true) then
+    local side=entry.part.Name:find("Left",1,true) and -1 or 1
+    local pivot=CFrame.new(side*.8,.3,.15)
+    localFrame=pivot*CFrame.Angles(0,0,side*math.sin(phase*.7)*(angry and .85 or .55))*pivot:Inverse()*localFrame
+   elseif moving and entry.side then
 				local opposite = (entry.side == "Left") ~= (entry.leg == "Front")
 				local swing = math.sin(phase + (opposite and math.pi or 0)) * 0.85
 				local joint = CFrame.new(entry.side == "Left" and -0.88 or 0.88, -0.87, entry.leg == "Front" and -0.91 or 1.17)
@@ -169,7 +179,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt)
    end
 			entry.part.CFrame = frame * localFrame
 		end
-		if not running then poses[model] = nil end
+		-- Keep cached canonical poses while resting; late parts still align.
 	end
  return displayed
 end

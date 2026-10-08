@@ -2,13 +2,19 @@ local Lobby=require(game.ServerScriptService.LobbyWorld)
 local plots=workspace.RodeoLobby.Plots
 local pens=0
 for _,plot in ipairs(plots:GetChildren()) do
- assert(#plot.Pens:GetChildren()==8)
+ assert(#plot.Pens:GetChildren()==4)
  assert(plot.OwnerBoard.Position.Y==10,"owner name must be on a high ranch sign")
- assert(math.abs(plot.GardenPad.Position.X-6000)>16 and plot.GardenPad.Position.Z<0,"plots must flank the road above the plaza")
+ assert(math.abs((plot.GardenPad.Position-Vector3.new(6000,.12,0)).Magnitude-108)<.01,"eight private regions must surround the central plaza")
+ local left,right=0,0
+ for _,pen in ipairs(plot.Pens:GetChildren()) do
+  local x=plot.GardenPad.CFrame:PointToObjectSpace(pen.PenGrass.Position).X
+  if x<0 then left+=1 else right+=1 end
+ end
+ assert(left==2 and right==2,"each private path has two pens per side")
  for _,pen in ipairs(plot.Pens:GetChildren()) do assert(pen:GetAttribute("Capacity")==2) pens+=1 end
 end
-assert(#plots:GetChildren()==8 and pens==64)
-assert(workspace.RodeoLobby.Airport.Airship.Balloon.Shape==Enum.PartType.Block)
+assert(#plots:GetChildren()==8 and pens==32)
+assert(workspace.RodeoLobby.Airport.Airship.WalrusBody.Shape==Enum.PartType.Ball)
 assert(#workspace.RodeoLobby.Boundary:GetChildren()==8)
 local people={}
 for i=1,9 do
@@ -19,7 +25,7 @@ end
 Lobby.release(people[3])
 assert(Lobby.assign(people[9])==3,"leaving player must free the plot")
 for _,person in ipairs(people) do Lobby.release(person) end
-print("LOBBY_MAP_SLOTS_PASS: 8 plots, 64 pens, rounded buildings and capacity/release")
+print("LOBBY_MAP_SLOTS_PASS: 8 plots, 32 pens, rounded buildings and capacity/release")
 
 local World=require(game.ServerScriptService.HuntWorld)
 local cfg=require(game.ReplicatedStorage.RodeoFantasy.Config)
@@ -29,7 +35,7 @@ World.init(workspace.RodeoPrototype,game.ServerStorage.RodeoMonsterTemplate,cfg,
 for _,aspect in ipairs({0.5625,1,16/9}) do
  workspace.RodeoPrototype.Monsters:ClearAllChildren()
  for tick=1,750 do
-  if tick%10==0 then task.wait() end
+
   local z=-tick*6.4
   World.ensure(z)
   if tick==1 then World.replenish(z,aspect,nil,true) end
@@ -39,7 +45,7 @@ for _,aspect in ipairs({0.5625,1,16/9}) do
    local p=model.PrimaryPart.Position
    if View.visible(p.X,p.Y,p.Z-z,aspect,cfg.Prototype) then count+=1 end
   end
-  assert(count>=4,"running/restarting camera window must retain four visible animals")
+  assert(count>=4,"visible herd aspect="..aspect.." tick="..tick.." z="..z.." count="..count)
   World.cleanup({z})
  end
 end

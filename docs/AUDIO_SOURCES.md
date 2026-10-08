@@ -4,7 +4,8 @@
 
 | 용도 | 자산 | 제작자 / 제목 |
 |---|---|---|
-| BGM | 1839048285 | APMOfficial / Happy Adventure |
+| 로비 BGM | 9044539308 | APMOfficial / Fashion Lobby |
+| 사냥 BGM | 1839048285 | APMOfficial / Happy Adventure |
 | 발굽 | 118636555040923 | Phanaerian / Horse Gallop Loopable |
 | 줄 | 9120718279 | ProSoundEffects / Whoosh Fast Swish By 1 |
 | 점프 | rbxasset://sounds/action_jump.mp3 | Roblox 내장 |
@@ -12,3 +13,5 @@
 | 포획 성공 | rbxasset://sounds/volume_slider.ogg | Roblox 내장, 빠르게 재생 |
 
 2026-10-08: 여섯 자산 모두 Studio에서 로딩 성공과 0보다 큰 재생 길이를 확인했다. BGM은 SoundService에서 반복하며, 발굽은 가까운 움직이는 몬스터 최대 여섯 마리에서 거리 감쇠로 재생한다. 실제 귀로 감상한 평가나 배포 서버 검사를 완료했다는 뜻은 아니다. 현 음원은 교체 가능한 시험 선택이다.
+
+2026-10-08 추가: [Fashion Lobby 자산](https://create.roblox.com/store/asset/9044539308)을 로비 시험곡으로 연결. 별도 native Studio 로딩 검사에서7개 모두 성공/양의 재생 길이 확인. 실제 귀로 감상하거나 공개 서버 재생을 확인한 결과는 아님.

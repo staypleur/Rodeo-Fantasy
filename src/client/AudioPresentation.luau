@@ -9,17 +9,21 @@ local function sound(name,id,parent,volume,looped)
 end
 local function initialize()
  if sounds.BGM then return end
- for _,kind in ipairs({"BGM","Jump","Rope","Land","Success"}) do
-  sounds[kind]=sound("Rodeo"..kind,config.Audio[kind],service,kind=="BGM" and config.Audio.MusicVolume or config.Audio.EffectsVolume,kind=="BGM")
+ for _,kind in ipairs({"BGM","LobbyBGM","Jump","Rope","Land","Success"}) do
+  sounds[kind]=sound("Rodeo"..kind,config.Audio[kind],service,(kind=="BGM" or kind=="LobbyBGM") and config.Audio.MusicVolume or config.Audio.EffectsVolume,kind=="BGM" or kind=="LobbyBGM")
  end
  sounds.Rope.Volume=0.18 sounds.Success.PlaybackSpeed=1.4
- sounds.BGM:Play()
+
 end
 local function play(kind)
  local s=sounds[kind] s:Stop() s.TimePosition=0 s:Play()
 end
-function Audio.update(state,monsters,position,clock)
+function Audio.update(state,monsters,position,clock,selected)
  initialize()
+ local music=state.area=="Lobby" and "LobbyBGM" or "BGM"
+ if sounds[music].Playing~=true then
+  sounds[music=="BGM" and "LobbyBGM" or "BGM"]:Stop() sounds[music]:Play()
+ end
  local active=state.phase~="Idle" and state.phase~="GameOver" and state.phase~="CourseEnd"
  if previousPhase and previousPhase~=state.phase then
   if state.phase=="Airborne" then play("Jump")
@@ -34,7 +38,7 @@ function Audio.update(state,monsters,position,clock)
    local root=model.PrimaryPart
    local velocity=model:GetAttribute("HerdVelocity")
    local moving=model:GetAttribute("Occupied") or not velocity or velocity.Magnitude>1
-   if root and model:GetAttribute("Running") and moving then
+   if root and model:GetAttribute("Running") and moving and not model:GetAttribute("Flying") and (model:GetAttribute("Occupied") or not selected or selected[model]) then
     local distance=(root.Position-position).Magnitude
     if distance<70 then table.insert(candidates,{model=model,distance=distance}) end
    end

@@ -14,6 +14,9 @@ scripts = {
     for item in place.iter("Item") if item.attrib["class"] in ("Script", "LocalScript", "ModuleScript")
 }
 expected = {
+    "RecordService": "src/server/RecordService.luau",
+    "RecordRules": "src/shared/RecordRules.luau",
+    "MonsterCatalog": "src/shared/MonsterCatalog.luau",
     "Localization": "src/shared/Localization.luau",
     "BagUI": "src/client/BagUI.luau",
     "LocalizationController": "src/client/LocalizationController.luau",
@@ -62,5 +65,50 @@ plots=next(n for n in lobby if n.tag=="Item" and n.find("Properties/string[@name
 assert len(plots.findall("Item"))==8
 for plot in plots.findall("Item"):
     pens=next(n for n in plot.findall("Item") if n.find("Properties/string[@name='Name']").text=="Pens")
-    assert len(pens.findall("Item"))==8
-print("PASS: lobby contains eight private plots and 64 editable native pens")
+    assert len(pens.findall("Item"))==4
+print("PASS: lobby contains eight private plots and 32 editable native pens")
+
+# SAT tests all pairs of rotated plot pads: separated interiors prevent z-fighting.
+import math
+pads=[]
+for plot in plots.findall("Item"):
+    pad=next(n for n in plot.findall("Item") if n.findtext("Properties/string[@name='Name']")=="GardenPad")
+    cf=pad.find("Properties/CoordinateFrame[@name='CFrame']")
+    size=pad.find("Properties/Vector3[@name='size']")
+    x,z=float(cf.findtext('X')),float(cf.findtext('Z'))
+    sx,sz=float(size.findtext('X'))/2,float(size.findtext('Z'))/2
+    pads.append([(x+dx*float(cf.findtext('R00'))+dz*float(cf.findtext('R02')),z+dx*float(cf.findtext('R20'))+dz*float(cf.findtext('R22'))) for dx,dz in [(-sx,-sz),(sx,-sz),(sx,sz),(-sx,sz)]])
+def overlaps(a,b):
+    for poly in (a,b):
+        for i,p in enumerate(poly):
+            q=poly[(i+1)%4]; axis=(p[1]-q[1],q[0]-p[0])
+            va=[x*axis[0]+z*axis[1] for x,z in a]; vb=[x*axis[0]+z*axis[1] for x,z in b]
+            if max(va)<=min(vb) or max(vb)<=min(va): return False
+    return True
+for i in range(8):
+    for j in range(i+1,8): assert not overlaps(pads[i],pads[j]), f"overlapping plots {i+1}/{j+1}"
+assert not any(n.findtext("Properties/string[@name='Name']") in ('Welcome','DepartureSign') for n in lobby.iter('Item'))
+print("PASS: all 28 plot pairs separated; removed welcome/hunt signs")
+
+all_nodes=list(lobby.iter("Item"))
+def named(name): return [n for n in all_nodes if n.findtext("Properties/string[@name='Name']")==name]
+assert not named("FountainPool") and not named("FountainColumn") and not named("BoardingPlatform") and not named("BoardingStep")
+assert len(named("BoardingLadder"))==1 and named("BoardingLadder")[0].get("class")=="TrussPart"
+spawn=named("LobbySpawn")[0].find("Properties/CoordinateFrame[@name='CFrame']")
+assert float(spawn.findtext("X"))==6000 and float(spawn.findtext("Z"))==0
+assert len(named("BasketFloor"))==1 and not named("Cabin")
+assert named("WalrusBody")[0].findtext("Properties/token[@name='shape']")=="0"
+def footprint(node):
+ p=node.find("Properties");cf=p.find("CoordinateFrame[@name='CFrame']");size=p.find("Vector3[@name='size']")
+ x,z=float(cf.findtext('X')),float(cf.findtext('Z'));sx,sz=float(size.findtext('X'))/2,float(size.findtext('Z'))/2
+ return [(x+dx*float(cf.findtext('R00'))+dz*float(cf.findtext('R02')),z+dx*float(cf.findtext('R20'))+dz*float(cf.findtext('R22'))) for dx,dz in [(-sx,-sz),(sx,-sz),(sx,sz),(-sx,sz)]]
+paths=[footprint(n) for n in named("GardenPath")]
+furnishings=[n for n in all_nodes if n.findtext("Properties/string[@name='Name']",'').startswith('GardenCorner_') or n.findtext("Properties/string[@name='Name']") in ('Shops','Leaderboards')]
+checked=0
+for model in furnishings:
+ for node in model.iter('Item'):
+  if node.get('class')!='Part': continue
+  poly=footprint(node)
+  for path in paths: assert not overlaps(poly,path), node.findtext("Properties/string[@name='Name']")+" blocks a ranch path"
+  checked+=1
+print(f"PASS: center spawn, one ladder, smooth final airship/open basket, {checked} furnishings clear all eight paths")

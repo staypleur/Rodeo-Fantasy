@@ -8,7 +8,7 @@ local function clear()
  shards,hidden={},{}
  character,started=nil,nil
 end
-function Effect.start(model,clock,monsterFrame)
+function Effect.start(model,clock,monsterFrame,monsterId)
  clear()
  if not model then return end
  character,started=model,clock
@@ -37,7 +37,9 @@ function Effect.start(model,clock,monsterFrame)
   table.insert(shards,{part=shard,origin=shard.CFrame,velocity=velocity,alpha=original.Transparency,spin=Vector3.new(index%3+1,1,index%2+1)})
  end
  if monsterFrame then
-  local template=game.ReplicatedStorage.RodeoFantasy.VisualTemplate
+  local package=game.ReplicatedStorage.RodeoFantasy
+  local species=require(package.MonsterCatalog)[monsterId or "Lumidon"]
+  local template=package[species.Visual]
   for _,original in ipairs(template:GetChildren()) do
    if not original:IsA("BasePart") or original==template.PrimaryPart or original.Transparency>=1 then continue end
    index+=1

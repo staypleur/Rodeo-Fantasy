@@ -20,6 +20,9 @@ driver.OnServerInvoke=function(player,action,value)
  if action=="Airport" then
   player.Character.HumanoidRootPart.CFrame=workspace.RodeoLobby.Airport.Departure.CFrame+Vector3.new(0,0,4)
   return true
+ elseif action=="Pen" then
+  local pen=require(game.ServerScriptService.LobbyWorld).getPen(player,value)
+  player.Character.HumanoidRootPart.CFrame=workspace.RodeoLobby.Plots["Plot_"..player:GetAttribute("LobbySlot")].ManagePoint.CFrame+Vector3.new(0,0,3) return pen
  elseif action=="HerdFixture" then
   player.Character.HumanoidRootPart.CFrame=CFrame.new(0,4,0)
   local z=player.Character.HumanoidRootPart.Position.Z
@@ -43,7 +46,7 @@ driver.OnServerInvoke=function(player,action,value)
   end
  elseif action=="Target" then
   local root=player.Character.HumanoidRootPart
-  local target=world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-3))
+  local target=world.spawn(Vector3.new(root.Position.X,2,root.Position.Z-3),value)
   target:SetAttribute("TestKeep",true)
   return target
  elseif action=="Collision" then
@@ -68,7 +71,7 @@ driver.OnServerInvoke=function(player,action,value)
   return true
  end
 end
-task.delay(45,function() service:EndTest("FAIL: timeout") end)
+task.delay(65,function() service:EndTest("FAIL: timeout") end)
 ]==]
 server.Parent=game:GetService("ServerScriptService")
 local client=Instance.new("LocalScript")
@@ -117,6 +120,8 @@ local success,problem=pcall(function()
  local originalFov=workspace.CurrentCamera.FieldOfView
  check(player:GetAttribute("LobbySlot")~=nil,"lobby must assign a personal plot")
  driver:InvokeServer("Airport")
+ task.wait(.6) check(state.phase=="Idle","approaching airship must not start automatically")
+ check(workspace.RodeoLobby.Airport.Departure.FlyToHunt.HoldDuration==1,"airport requires held E")
  remote:FireServer("Start")
  waitFor(function() return state.phase=="Lassoing" end,"opening flight missing")
  waitFor(function() return state.phase=="Riding" end,"opening landing failed")
@@ -277,6 +282,26 @@ local success,problem=pcall(function()
  check(not gui.HuntHelp.Visible,"lobby must hide travel instructions")
  check(workspace.RodeoLobby.Plots["Plot_"..player:GetAttribute("LobbySlot")].OwnerBoard.SignFace5.Text.Text==player.Name,"ranch board must show only username")
  waitFor(function() return player.PlayerGui.RodeoCaptureUI.LobbyStats.Visible and not player.PlayerGui.RodeoCaptureUI.DistanceCounter.Visible end,"lobby must show bag and hide meters")
+ local lobbyMusic=game.SoundService:WaitForChild("RodeoLobbyBGM")
+ waitFor(function() return lobbyMusic.IsLoaded and lobbyMusic.IsPlaying end,"lobby BGM must play on return")
+ check(not music.IsPlaying,"hunt music must stop in lobby")
+ check(gui.LobbyStats.BagIcon and gui.LobbyStats.CoinIcon,"HUD must use graphical icons")
+ local bagSnapshot={}
+ remote.OnClientEvent:Connect(function(kind,data) if kind=="Bag" then bagSnapshot=data end end)
+ remote:FireServer("Bag") waitFor(function() return #bagSnapshot>=2 end,"placement needs captured bag entries")
+ local pen=driver:InvokeServer("Pen",1)
+ check(workspace.RodeoLobby.Plots["Plot_"..player:GetAttribute("LobbySlot")].ManagePoint.ManageRanch.HoldDuration==1,"pen requires held E")
+ remote:FireServer("Place",{id=bagSnapshot[1].id,pen=1})
+ waitFor(function() return pen:FindFirstChild("DisplayMonsters") and #pen.DisplayMonsters:GetChildren()==1 end,"owned monster must display in pen")
+ task.wait(.3) remote:FireServer("Place",{id=bagSnapshot[2].id,pen=1})
+ waitFor(function() return #pen.DisplayMonsters:GetChildren()==2 end,"second monster must fit in pen")
+ if #bagSnapshot>=3 then
+  task.wait(.3) remote:FireServer("Place",{id=bagSnapshot[3].id,pen=1}) task.wait(.3)
+  check(#pen.DisplayMonsters:GetChildren()==2,"third monster must be rejected")
+ end
+ remote:FireServer("Remove",{id=bagSnapshot[1].id,pen=1})
+ waitFor(function() return #pen.DisplayMonsters:GetChildren()==1 end,"remove must return display to bag")
+ check(state.count>=2,"display/remove must preserve ownership")
 end)
 driver:InvokeServer("Finish",success and ("PASS: "..checks.." hunting Play checks") or ("FAIL: "..tostring(problem)))
 ]==]

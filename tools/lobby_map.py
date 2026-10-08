@@ -1,23 +1,18 @@
 """Editable native Roblox geometry for the agreed pastel resort lobby."""
 import math
-
-
 def build_lobby(workspace, item, part, prop):
     lobby, _ = item(workspace, "Folder", "RodeoLobby")
     cream, mint, pink = (255, 244, 220), (158, 211, 181), (244, 184, 192)
-
     def block(parent, name, pos, size, color, rotation=(0, 0, 0), collide=True):
         node, properties = part(parent, name, (6000 + pos[0], pos[1], pos[2]), size, color, rotation=rotation)
-        prop(properties, "token", "Material", 272)
+        prop(properties, "token", "Material", 1280 if name in ("MeadowIsland","PenGrass") else 816 if name in ("GardenPath","MiddleWalk","CentralPlaza","PavingStone") else 512 if name in ("BenchSeat","BenchBack","BoardingStep","BoardingDeck","Counter","CounterPlank","CounterTop","TreeTrunk","SignPost","BoardPost") else 272)
         prop(properties, "bool", "CanCollide", collide)
         prop(properties, "bool", "CanTouch", False)
         return node
-
     def circle(parent, name, pos, radius, height, color):
         node = block(parent, name, pos, (height, radius*2, radius*2), color, (0, 0, 90))
         prop(node.find("Properties"), "token", "shape", 2)
         return node
-
     def sign(parent, name, pos, words, color=cream, rotation=(0, 0, 0), width=12):
         board = block(parent, name, pos, (width, 4, .4), color, rotation)
         for face in (5, 2):  # Front and Back; readable from both sides.
@@ -31,99 +26,218 @@ def build_lobby(workspace, item, part, prop):
             prop(lp, "string", "Text", words)
             prop(lp, "Color3", "TextColor3", dict(R=.19, G=.33, B=.29))
         return board
-
-    block(lobby, "MeadowIsland", (0, -3, 0), (360, 6, 360), (162, 202, 153))
-    circle(lobby, "CentralPlaza", (0, .08, 95), 32, .16, cream)
-    circle(lobby, "FountainPool", (0, .5, 95), 11, 1, (161, 210, 219))
-    circle(lobby, "FountainBowl", (0, 1.5, 95), 6, 1, cream)
-    block(lobby, "FountainColumn", (0, 3, 95), (2, 3, 2), (186, 222, 218))
-    sign(lobby, "Welcome", (0, 6, 125), "Rodeo Fantasy", width=24)
+    block(lobby, "MeadowIsland", (0, -3, 0), (316, 6, 316), (147, 173, 150))
+    circle(lobby, "CentralPlaza", (0, .08, 0), 32, .16, cream)
     plots, _ = item(lobby, "Folder", "Plots")
-    colors = [mint, pink, (180, 192, 225), (237, 218, 167)]
+    colors = [(233,140,143),(243,178,111),(247,225,129),(147,204,154),(137,189,230),(111,132,186),(188,154,220),(245,244,236)]
     for index in range(8):
-        angle, yaw = 0, 0
-        cx = (-124,-50,50,124)[index%4]
-        cz = -35-(index//4)*62
+        angle=math.radians(index*45)
+        yaw=math.degrees(angle)
+        cx,cz=math.sin(angle)*108,math.cos(angle)*108
         plot, _ = item(plots, "Model", f"Plot_{index+1}")
-
         def point(x, y, z):
             return (cx + x*math.cos(angle) + z*math.sin(angle), y,
                     cz - x*math.sin(angle) + z*math.cos(angle))
-
-        block(plot, "GardenPad", point(0, .12, 0), (66, .24, 48), colors[index % 4], (0, yaw, 0))
-        block(plot, "MiddleWalk", point(0, .27, 0), (63, .1, 6), cream, (0, yaw, 0))
-        block(lobby,"GardenPath",(cx/2,.09,cz),(abs(cx),.18,6),cream)
-        sign(plot, "OwnerBoard", point(0, 10, -25), " ", rotation=(0, yaw, 0), width=20)
+        marker=block(plot,"ManagePoint",point(0,2.2,-33),(2,2,2),cream,collide=False)
+        prop(marker.find("Properties"),"float","Transparency",1)
+        block(plot, "GardenPad", point(0, .12, 0), (58, .24, 64), colors[index], (0, yaw, 0))
+        block(plot, "MiddleWalk", point(0, .27, 0), (7, .1, 64), cream, (0, yaw, 0))
+        block(lobby,"GardenPath",(math.sin(angle)*61,.09,math.cos(angle)*61),(7,.18,65),cream,(0,yaw,0))
+        sign(plot, "OwnerBoard", point(0, 10, -33), " ", color=colors[index], rotation=(0, yaw, 0), width=20)
         for x in (-10,10):
-            block(plot,"SignPost",point(x,5,-25),(.9,10,.9),(173,130,91))
+            block(plot,"SignPost",point(x,5,-33),(.9,10,.9),(173,130,91))
+        accent=colors[index]
         pens, _ = item(plot, "Folder", "Pens")
         for row in range(2):
-            for col in range(4):
-                number=row*4+col+1
+            for col in range(2):
+                number=row*2+col+1
                 pen, _ = item(pens, "Model", f"Pen_{number}")
-                px, pz = (col-1.5)*15, (-1 if row == 0 else 1)*13
-                block(pen, "PenGrass", point(px, .3, pz), (13, .12, 15), (185, 216, 163), (0, yaw, 0))
-                for dx in (-6.5, 6.5):
-                    for dz in (-7.5, 7.5):
-                        block(pen, "FencePost", point(px+dx, 1.55, pz+dz), (.65, 2.6, .65), cream, (0, yaw, 0))
-                    for h in (.95, 1.9):
-                        block(pen, "FenceRail", point(px+dx, h, pz), (.35, .3, 15), cream, (0, yaw, 0))
-                outer_z = pz + (-7.5 if row == 0 else 7.5)
-                inner_z = pz + (7.5 if row == 0 else -7.5)
-                for h in (.95, 1.9):
-                    block(pen, "BackRail", point(px, h, outer_z), (13, .3, .35), cream, (0, yaw, 0))
-                    for side in (-1, 1):
-                        block(pen, "GateRail", point(px+side*4.8, h, inner_z), (3.5, .3, .35), cream, (0, yaw, 0))
-                sign(pen, "CapacitySign", point(px+4.8, 2.2, inner_z), str(number), rotation=(0, yaw, 0), width=4)
+                px, pz = (-16,16)[col], (-1 if row == 0 else 1)*15
+                block(pen, "PenGrass", point(px, .3, pz), (22, .12, 24), (166, 189, 155), (0, yaw, 0))
+                side=-1 if px<0 else 1
+                inner_x=px-side*11
+                outer_x=px+side*11
+                for dx in (-11,11):
+                    for dz in (-12,12):
+                        block(pen,"FencePost",point(px+dx,1.55,pz+dz),(.65,2.6,.65),accent,(0,yaw,0))
+                for h in (.95,1.9):
+                    for dz in (-12,12):
+                        block(pen,"FenceRail",point(px,h,pz+dz),(22,.3,.35),accent,(0,yaw,0))
+                    block(pen,"BackRail",point(outer_x,h,pz),(.35,.3,24),accent,(0,yaw,0))
+                    for dz in (-8.5,8.5):
+                        block(pen,"GateRail",point(inner_x,h,pz+dz),(.35,.3,7),accent,(0,yaw,0))
+                sign(pen,"CapacitySign",point(inner_x,2.2,pz+4.5),str(number),rotation=(0,yaw+90,0),width=4)
         for side in (-1, 1):
             for n in range(5):
-                p = point(side*32, .6, -17+n*8.5)
+                p = point(side*28, .6, -24+n*12)
                 circle(plot, "Flower", p, .7, .4, pink if n%2 else cream)
-
-    block(lobby,"MainWalk",(0,.1,-28),(16,.2,210),cream)
-    shops, _ = item(lobby, "Folder", "Shops")
-    for i, x in enumerate((-43,43),1):
-        shop, _ = item(shops, "Model", f"Shop_{i}")
-        block(shop, "Counter", (x,1.6,0), (10,3.2,5), (179,136,99))
-        for dx in (-5,5):
-            for dz in (-2.5,2.5):
-                block(shop,"Post",(x+dx,3.5,dz),(.5,7,.5),cream)
+    def radial_point(angle,radius,x,y,z):
+        return (math.sin(angle)*radius+x*math.cos(angle)+z*math.sin(angle),y,math.cos(angle)*radius-x*math.sin(angle)+z*math.cos(angle))
+    shops,_=item(lobby,"Folder","Shops")
+    for i,deg in enumerate((22.5,202.5),1):
+        a=math.radians(deg)
+        shop,_=item(shops,"Model",f"Shop_{i}")
+        def sb(name,pos,size,color,rx=0):
+            return block(shop,name,radial_point(a,49,*pos),size,color,(rx,deg,0))
+        sb("Counter",(0,1.5,0),(10,3,5),(159,115,78))
+        sb("CounterTop",(0,3.1,0),(10.6,.35,5.5),(199,156,104))
+        for x in range(-4,5): sb("CounterPlank",(x,1.55,-2.6),(.9,2.7,.2),(170+x*2,124+x*2,83))
+        for x in (-5,5):
+            for z in (-2.5,2.5): sb("Post",(x,4,z),(.4,8,.4),(108,89,71))
         for stripe in range(8):
-            block(shop,"Awning",(x-4.4+stripe*1.25,7,0),(1.25,.45,7),cream if stripe%2 else mint,rotation=(0,0,0))
-        sign(shop,"ShopSign",(x,8,0),"Shop · Coming soon",width=12)
-
+            for j in range(4):
+                sb("Awning",(-4.4+stripe*1.25,8.3-abs(j-1.5)*.25,-2.4+j*1.6),(1.25,.16,1.7),cream if stripe%2 else ((119,165,168) if i==1 else (194,142,158)),rx=(-9 if j<2 else 9))
+            sb("AwningFringe",(-4.4+stripe*1.25,7.7,-3.4),(1.25,.5,.15),cream if stripe%2 else mint)
+        for x in (-3,0,3):
+            sb("DisplayTray",(x,3.4,0),(2.3,.2,2),(124,94,65))
+            sb("DisplayParcel",(x,3.8,0),(1.2,.7,1),((194,155,122),(148,169,186),(178,156,185))[int((x+3)/3)])
+        sign(shop,"ShopSign",radial_point(a,49,0,9,0),"Shop",width=10,rotation=(0,deg,0))
     airport, _ = item(lobby, "Model", "Airport")
-    circle(airport,"BoardingPlatform",(0,.4,-8),15,.8,(173,205,210))
     ship,_ = item(airport,"Model","Airship")
-    # Stepped block hull inspired by the reference's broad airship silhouette.
-    for slice_id in range(11):
-        z=-23+slice_id*3
-        radius=math.sqrt(max(.12,1-((slice_id-5)/5.5)**2))
-        for layer in range(3):
-            width=(18 if layer==1 else 14)*radius
-            block(ship,"Balloon",(0,12+layer*3,z),(width,3,3.1),mint if slice_id%3 else cream,collide=False)
-    for x in (-9,9):
-        block(ship,"SideEngine",(x,11,-8),(3,3,5),cream,collide=False)
-        block(ship,"EngineFace",(x,11,-10.6),(2.2,2.2,.3),(81,117,114),collide=False)
-    block(ship,"TailWings",(0,16,7),(22,.6,8),pink,collide=False)
-    block(ship,"Cabin",(0,6.5,-8),(7,3,11),cream)
-    block(ship,"Glass",(0,7,-13.6),(5,1.5,.25),(112,180,195),collide=False)
-    for x in (-3,3):
-        for z in (-12,-4):
-            block(ship,"Cable",(x,10,z),(.2,5,.2),(147,119,89),collide=False)
-    block(ship,"TailFin",(0,16,7),(.6,7,7),pink,collide=False)
-    for x in (-9,9):
-        block(ship,"Propeller",(x,11,-8),(.4,4,.4),pink,collide=False)
-    block(airport,"Departure",(0,1.4,8),(8,2.8,2),mint,collide=False)
-    sign(airport,"DepartureSign",(0,5,8),"Hunting grounds",width=16)
-    for parent in (airport,shops):
-        for node in parent.iter("Item"):
-            cf=node.find("Properties/CoordinateFrame[@name='CFrame']")
-            if cf is not None: cf.find("Z").text=str(float(cf.find("Z").text)+95)
+    # Ninth-star final evolution: smooth sculpted volumes, swept wings and long trunk.
+    blue, light_blue, dark_blue=(45,108,163),(91,162,205),(27,62,105)
+    def smooth(name,pos,size,color,rotation=(0,0,0)):
+        node=block(ship,name,pos,size,color,rotation,collide=False)
+        prop(node.find("Properties"),"token","shape",0)  # native ellipsoid, no uploaded mesh
+        return node
+    smooth("WalrusBody",(0,48,-5),(38,28,70),blue)
+    smooth("BackMantle",(0,57,-6),(33,12,61),light_blue)
+    smooth("Chest",(0,43,-29),(31,25,30),blue)
+    smooth("WalrusHead",(0,52,-42),(30,27,30),light_blue)
+    smooth("Forehead",(0,59,-45),(24,12,20),blue)
+    smooth("Muzzle",(0,44,-51),(20,12,17),(112,178,207))
+    # Overlapping tapered ellipsoids follow a curved trunk instead of a block staircase.
+    for n in range(15):
+        t=n/14
+        z=-54-t*37
+        y=46-10*math.sin(t*math.pi*.8)+5*t*t
+        radius=7.5*(1-t)+2.5*t
+        smooth("TrunkSegment",(0,y,z),(radius,radius,6.8),blue if n<9 else light_blue,(-12+30*t,0,0))
+    smooth("TrunkTip",(0,43,-91),(3.7,4.5,6),light_blue,(-28,0,0))
+    for side in (-1,1):
+        smooth("GreatEar",(side*17,54,-35),(5,23,21),dark_blue,(0,side*22,side*12))
+        smooth("EarInner",(side*19,54,-37),(2,18,15),blue,(0,side*22,side*12))
+        smooth("EyeSocket",(side*10.7,54.5,-53),(7,3.6,2.8),dark_blue,(0,side*24,side*-9))
+        smooth("Eye",(side*11,54.7,-54.4),(4.5,1.5,.8),(131,224,244),(0,side*24,side*-9))
+        smooth("BrowArmor",(side*10.8,57,-53),(8,1.6,3),dark_blue,(0,side*20,side*-14))
+        for n in range(6):
+            t=n/5
+            smooth("Tusk",(side*(7.5+2*t),40-14*t,-53-5*t),(2.7-2*t,4,2.7-2*t),(242,235,207),(12,0,side*-10))
+        # Each feather belongs to the same wing pivot for a coherent slow wing beat.
+        smooth("SeaWingRoot",(side*22,47,-9),(21,4,35),dark_blue,(0,side*18,side*8))
+        for n in range(9):
+            x=side*(30+n*4.2)
+            z=-10+n*2.3
+            length=30-n*1.7
+            smooth("SeaWingFeather",(x,46+n*.8,z),(12-n*.6,2.7,length),light_blue if n%3==0 else blue,(0,side*(20+n*2),side*(8+n*1.5)))
+        for n in range(4):
+            smooth("TailFin",(side*(5+n*4),48,30+n*2),(11,2,19-n*2),blue,(0,side*(-22-n*8),0))
+        for n in range(5):
+            smooth("SideArmor",(side*16.5,51,-25+n*10),(4,8,8),dark_blue,(0,0,side*12))
+    for n in range(7):
+        smooth("DorsalCrest",(0,62-n*.45,-27+n*8),(6,6,10),dark_blue,(0,0,0))
+        smooth("CrestGlow",(0,65-n*.45,-27+n*8),(2.5,2.2,6),(153,213,229))
+    # Open hot-air-balloon basket: no house, roof or window box.
+    basket=(154,108,69)
+    floor=block(ship,"BasketFloor",(0,13.1,-5),(12,.5,16),basket,collide=False)
+    for side in (-1,1):
+        block(ship,"BasketSide",(side*5.8,14.8,-5),(.7,3,16),basket,collide=False)
+        block(ship,"BasketFront",(side*3,14.8,-12.7),(6,3,.7),basket,collide=False)
+        block(ship,"BasketBack",(side*4.7,14.8,2.7),(2.6,3,.7),basket,collide=False)
+        for n in range(12):
+            block(ship,"BasketWeave",(side*6.2,14.8,-12+n*1.3),(.12,2.8,.15),(202,163,112),collide=False)
+        for z in (-11,1):
+            block(ship,"BasketCable",(side*5,25,z),(.24,21,.24),(215,198,156),collide=False)
+        block(ship,"BasketRim",(side*5.9,16.4,-5),(1,.55,16.5),(115,79,52),collide=False)
+    for y in (13.7,14.4,15.1,15.8):
+        for side in (-1,1):
+            block(ship,"BasketWeave",(side*6.2,y,-5),(.12,.12,16),(202,163,112),collide=False)
+    block(ship,"BasketInnerDeck",(0,13.2,-5),(11,.25,15),(186,141,91),collide=False)
+    # A single climbable ladder leads to the open basket, away from the center spawn.
+    ladder,lp=item(airport,"TrussPart","BoardingLadder")
+    prop(lp,"bool","Anchored",True); prop(lp,"bool","CanCollide",True)
+    prop(lp,"Vector3","size",dict(X=2,Y=14,Z=2))
+    prop(lp,"CoordinateFrame","CFrame",dict(X=6000,Y=7,Z=7.5,R00=1,R01=0,R02=0,R10=0,R11=1,R12=0,R20=0,R21=0,R22=1))
+    prop(lp,"Color3uint8","Color3uint8",(142<<16)|(110<<8)|79)
+    block(airport,"BoardingDeck",(0,13,4.5),(6,.5,5),(183,151,116))
+    departure=block(airport,"Departure",(0,14.5,3),(2,2,2),mint,collide=False)
+    prop(departure.find("Properties"),"float","Transparency",1)
+    # Human-scale furnishing, varied paving and landscaping around the plaza.
+    for ring in (24,29):
+        for n in range(48):
+            angle=math.tau*n/48
+            x,z=math.sin(angle)*ring,math.cos(angle)*ring
+            if abs(x)<6 and z>5: continue  # keep the staircase approach clear
+            block(lobby,"PavingStone",(x,.21,z),(2.5,.12,2.4),((206,192,171),(187,191,185),(221,208,192))[n%3],(0,n*7.5,0))
+    for deg in (67.5,157.5,247.5,337.5):
+        a=math.radians(deg)
+        furniture,_=item(lobby,"Model",f"GardenCorner_{deg}")
+        def fb(name,x,y,z,size,color):
+            return block(furniture,name,radial_point(a,43,x,y,z),size,color,(0,deg,0))
+        for z in (-.6,0,.6): fb("BenchSeat",0,1.3,z,(8,.23,.45),(166,118,83))
+        for y in (1.8,2.3,2.8): fb("BenchBack",0,y,.9,(8,.3,.25),(166,118,83))
+        for x in (-3.7,3.7):
+            fb("BenchLeg",x,.65,0,(.3,1.3,1.8),(60,74,78))
+            fb("BenchArm",x,1.95,0,(.25,.25,1.7),(60,74,78))
+            fb("BenchArmPost",x,1.5,-.6,(.25,.7,.25),(60,74,78))
+        fb("Planter",0,.6,6,(8,1.2,4),(134,102,80))
+        fb("Soil",0,1.22,6,(7.5,.15,3.5),(91,74,60))
+        for j in range(7):
+            x=-3+j
+            fb("FlowerStem",x,1.8,6,(.12,1.1,.12),(81,128,83))
+            for petal in range(5):
+                q=math.tau*petal/5
+                node=fb("FlowerPetal",x+math.sin(q)*.28,2.3,6+math.cos(q)*.28,(.5,.18,.5),((218,143,163),(225,192,100),(157,150,195))[j%3])
+                prop(node.find("Properties"),"token","shape",0)
+            node=fb("FlowerCenter",x,2.38,6,(.23,.16,.23),(235,204,104));prop(node.find("Properties"),"token","shape",0)
+            fb("FlowerLeaf",x+.2,1.8,6,(.5,.1,.25),(100,151,98))
+    for n in range(8):
+        a=math.radians(22.5+n*45)
+        x,z=math.sin(a)*35,math.cos(a)*35
+        block(lobby,"LampPost",(x,4,z),(.35,8,.35),(62,78,88))
+        lamp=block(lobby,"Lantern",(x,8,z),(1.2,1.6,1.2),(255,222,165),collide=False)
+        prop(lamp.find("Properties"),"token","Material",288)
+        light,lp=item(lamp,"PointLight","WarmLight")
+        prop(lp,"float","Brightness",.7);prop(lp,"float","Range",15)
+        block(lobby,"LampCap",(x,9,z),(1.6,.3,1.6),dark_blue)
+    boards,_=item(lobby,"Folder","Leaderboards")
+    for key,deg,color in (("Distance",112.5,(86,128,154)),("Income",292.5,(159,127,76))):
+        a=math.radians(deg)
+        x,z=math.sin(a)*49,math.cos(a)*49
+        board=block(boards,key,(x,8,z),(15,12,.8),color,(0,deg,0))
+        for dx in (-6,6): block(boards,"BoardPost",radial_point(a,49,dx,4,0),(.8,8,.8),(123,92,71),(0,deg,0))
+        gui,gp=item(board,"SurfaceGui","Ranking")
+        prop(gp,"token","Face",5); prop(gp,"Vector2","CanvasSize",dict(X=750,Y=600))
+        label,lp=item(gui,"TextLabel","Entries")
+        prop(lp,"UDim2","Size",dict(XS=1,XO=0,YS=0,YO=490)); prop(lp,"UDim2","Position",dict(XS=0,XO=0,YS=0,YO=100)); prop(lp,"float","BackgroundTransparency",1)
+        prop(lp,"int","TextSize",32); prop(lp,"bool","TextWrapped",True)
+        prop(lp,"Color3","TextColor3",dict(R=.98,G=.95,B=.87))
+        prop(lp,"string","Text","Loading records...")
+        header,hp=item(gui,"TextLabel","Heading")
+        prop(hp,"UDim2","Size",dict(XS=1,XO=0,YS=0,YO=90)); prop(hp,"float","BackgroundTransparency",1)
+        prop(hp,"int","TextSize",38); prop(hp,"Color3","TextColor3",dict(R=1,G=.93,B=.7))
+        prop(hp,"string","Text","Farthest run" if key=="Distance" else "Total produced")
+    for n in range(32):
+        angle=math.tau*n/32
+        x,z=math.sin(angle)*145,math.cos(angle)*145
+        clear=True
+        for i in range(8):
+            a=math.tau*i/8
+            dx,dz=x-math.sin(a)*108,z-math.cos(a)*108
+            lx,lz=dx*math.cos(a)-dz*math.sin(a),dx*math.sin(a)+dz*math.cos(a)
+            if abs(lx)<33 and abs(lz)<37: clear=False
+        if not clear: continue
+        trunk=block(lobby,"TreeTrunk",(x,3,z),(6,1.5,1.5),(121,89,64),(0,0,90))
+        prop(trunk.find("Properties"),"token","shape",2)
+        for tier in range(3):
+            width=9-tier*2
+            canopy=block(lobby,"TreeCanopy",(x,6+tier*2,z),(width,4.5,width),((86,139,103),(103,158,117),(128,175,134))[tier])
+            prop(canopy.find("Properties"),"token","shape",0)
+        for dx in (-3,3): block(lobby,"GardenRock",(x+dx,.7,z+3),(2,1.4,1.7),(141,148,146),(0,n*17,0))
     walls,_=item(lobby,"Folder","Boundary")
     for side in (-1,1):
-        block(walls,"GardenWall",(side*180,12,0),(4,24,364),(181,207,187))
-        block(walls,"GardenWall",(0,12,side*180),(364,24,4),(181,207,187))
-        block(walls,"WallTrim",(side*180,24.5,0),(5,1,365),cream)
-        block(walls,"WallTrim",(0,24.5,side*180),(365,1,5),cream)
+        block(walls,"GardenWall",(side*158,12,0),(4,24,320),(181,207,187))
+        block(walls,"GardenWall",(0,12,side*158),(320,24,4),(181,207,187))
+        block(walls,"WallTrim",(side*158,24.5,0),(5,1,321),cream)
+        block(walls,"WallTrim",(0,24.5,side*158),(321,1,5),cream)
     return lobby

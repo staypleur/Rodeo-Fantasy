@@ -3,6 +3,7 @@ local Config = {}
 
 -- Creator Store music/hoof recording plus Roblox bundled action sounds.
 Config.Audio = {
+ LobbyBGM="rbxassetid://9044539308", -- APMOfficial Fashion Lobby, replaceable trial
  BGM="rbxassetid://1839048285",
  Hooves="rbxassetid://118636555040923",
  Jump="rbxasset://sounds/action_jump.mp3",

@@ -35,7 +35,7 @@ local world=workspace.RodeoPrototype
 local engine=require(game:GetService("ServerScriptService").HuntWorld)
 engine.init(world,template,config,rules)
 engine.ensure(0)
-engine.replenish(0,1,nil,true,64)
+engine.replenish(0,1,nil,true,128)
 assert(#world.Monsters:GetChildren()>10,"moving herd required")
 assert(#world.Obstacles:GetChildren()>0,"obstacles required")
 local animal=engine.spawn(Vector3.new(0,2,-8))
@@ -197,11 +197,14 @@ effect.clear() catchRig:Destroy()
 print("CATCH_CRATE_MONSTER_BREAKUP_PASS")
 
 for _,npc in ipairs(world.Monsters:GetChildren()) do npc:Destroy() end
-engine.replenish(0,1,nil,true,64)
+engine.replenish(0,1,nil,true,128)
 local count=#world.Monsters:GetChildren()
-assert(count>=4 and count<=56,"opening must have a bounded nearby herd")
-engine.replenish(0,1,nil,true,64)
-assert(#world.Monsters:GetChildren()==count,"repeated priming must not multiply herd")
+assert(count>=4 and count<=74,"opening must have a bounded nearby herd")
+engine.replenish(0,1,nil,true,128)
+for _=1,5 do engine.replenish(0,1,nil,true,128) end
+assert(#world.Monsters:GetChildren()<=74,"repeated priming must retain the bounded shared buffer")
+local displayed=0 for _ in pairs(engine.visibleSet(0,1)) do displayed+=1 end
+assert(displayed>=4 and displayed<=6,"opening display must have four to six wild animals")
 local visible=0
 for _,npc in ipairs(world.Monsters:GetChildren()) do
  if require(package.HerdVisibility).visible(npc.PrimaryPart.Position.X,npc.PrimaryPart.Position.Y,npc.PrimaryPart.Position.Z,1,config.Prototype) then visible+=1 end
