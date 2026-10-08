@@ -3,11 +3,12 @@ import math
 SPECIES=("MeadowMouse","GrassBoar","TreeWolf","RockElephant","Weedcrow")
 STAGES=(1,3,6,9)
 SCALES={1:1,3:1.4,6:1.9,9:2.5}
+BODY_SCALES={"MeadowMouse":1,"Weedcrow":1,"GrassBoar":1.25,"TreeWolf":1.25,"RockElephant":1.65}
 ROOT_HEIGHT={"MeadowMouse":2.05,"GrassBoar":2.45,"TreeWolf":2.35,"RockElephant":3.25,"Weedcrow":16}
 BOUNDS={"MeadowMouse":(2.3,2,3.8),"GrassBoar":(3,2.5,4.8),"TreeWolf":(2.8,2.4,4.9),"RockElephant":(4.7,3.5,6.5),"Weedcrow":(2.6,2,4)}
 
 def components(species="MeadowMouse",stars=1):
-    stage=STAGES.index(stars);scale=SCALES[stars];out=[];counts={}
+    stage=STAGES.index(stars);scale=SCALES[stars]*BODY_SCALES[species];out=[];counts={}
     cream=(244,232,206);brown=(163,111,76);pink=(227,157,164)
     greens=((89,133,65),(113,160,72),(145,181,97),(176,201,123))
     def add(name,p,size,color,shape="Ball",rotation=(0,0,0),studs=False):

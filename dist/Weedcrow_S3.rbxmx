@@ -1,11 +1,11 @@
 <?xml version='1.0' encoding='utf-8'?>
 <roblox version="4">
-  <Item class="Model" referent="RBX6654">
+  <Item class="Model" referent="RBX6656">
     <Properties>
       <string name="Name">Weedcrow_S3</string>
-      <Ref name="PrimaryPart">RBX6655</Ref>
+      <Ref name="PrimaryPart">RBX6657</Ref>
     </Properties>
-    <Item class="Part" referent="RBX6655">
+    <Item class="Part" referent="RBX6657">
       <Properties>
         <string name="Name">MountRoot</string>
         <bool name="Anchored">true</bool>
@@ -36,7 +36,7 @@
         <bool name="CanQuery">false</bool>
         <bool name="CanTouch">false</bool>
       </Properties>
-      <Item class="BillboardGui" referent="RBX6757">
+      <Item class="BillboardGui" referent="RBX6759">
         <Properties>
           <string name="Name">Nameplate</string>
           <UDim2 name="Size">
@@ -52,7 +52,7 @@
           </Vector3>
           <bool name="AlwaysOnTop">true</bool>
         </Properties>
-        <Item class="TextLabel" referent="RBX6758">
+        <Item class="TextLabel" referent="RBX6760">
           <Properties>
             <string name="Name">Label</string>
             <UDim2 name="Size">
@@ -74,7 +74,7 @@
         </Item>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX6656">
+    <Item class="Part" referent="RBX6658">
       <Properties>
         <string name="Name">Body</string>
         <bool name="Anchored">true</bool>
@@ -106,7 +106,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6657">
+    <Item class="Part" referent="RBX6659">
       <Properties>
         <string name="Name">Chest</string>
         <bool name="Anchored">true</bool>
@@ -138,7 +138,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6658">
+    <Item class="Part" referent="RBX6660">
       <Properties>
         <string name="Name">Head</string>
         <bool name="Anchored">true</bool>
@@ -170,7 +170,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6659">
+    <Item class="Part" referent="RBX6661">
       <Properties>
         <string name="Name">LeftEyeRim</string>
         <bool name="Anchored">true</bool>
@@ -202,7 +202,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6660">
+    <Item class="Part" referent="RBX6662">
       <Properties>
         <string name="Name">LeftEyeWhite</string>
         <bool name="Anchored">true</bool>
@@ -234,7 +234,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6661">
+    <Item class="Part" referent="RBX6663">
       <Properties>
         <string name="Name">LeftIris</string>
         <bool name="Anchored">true</bool>
@@ -266,7 +266,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6662">
+    <Item class="Part" referent="RBX6664">
       <Properties>
         <string name="Name">LeftPupil</string>
         <bool name="Anchored">true</bool>
@@ -298,7 +298,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6663">
+    <Item class="Part" referent="RBX6665">
       <Properties>
         <string name="Name">LeftShine</string>
         <bool name="Anchored">true</bool>
@@ -330,7 +330,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6664">
+    <Item class="Part" referent="RBX6666">
       <Properties>
         <string name="Name">RightEyeRim</string>
         <bool name="Anchored">true</bool>
@@ -362,7 +362,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6665">
+    <Item class="Part" referent="RBX6667">
       <Properties>
         <string name="Name">RightEyeWhite</string>
         <bool name="Anchored">true</bool>
@@ -394,7 +394,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6666">
+    <Item class="Part" referent="RBX6668">
       <Properties>
         <string name="Name">RightIris</string>
         <bool name="Anchored">true</bool>
@@ -426,7 +426,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6667">
+    <Item class="Part" referent="RBX6669">
       <Properties>
         <string name="Name">RightPupil</string>
         <bool name="Anchored">true</bool>
@@ -458,7 +458,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6668">
+    <Item class="Part" referent="RBX6670">
       <Properties>
         <string name="Name">RightShine</string>
         <bool name="Anchored">true</bool>
@@ -490,7 +490,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="WedgePart" referent="RBX6669">
+    <Item class="WedgePart" referent="RBX6671">
       <Properties>
         <string name="Name">Beak</string>
         <bool name="Anchored">true</bool>
@@ -521,7 +521,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6670">
+    <Item class="Part" referent="RBX6672">
       <Properties>
         <string name="Name">LeftBackLeg</string>
         <bool name="Anchored">true</bool>
@@ -553,7 +553,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6671">
+    <Item class="Part" referent="RBX6673">
       <Properties>
         <string name="Name">LeftBackPaw</string>
         <bool name="Anchored">true</bool>
@@ -585,7 +585,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6672">
+    <Item class="Part" referent="RBX6674">
       <Properties>
         <string name="Name">LeftWing</string>
         <bool name="Anchored">true</bool>
@@ -617,7 +617,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6673">
+    <Item class="Part" referent="RBX6675">
       <Properties>
         <string name="Name">LeftWingVein</string>
         <bool name="Anchored">true</bool>
@@ -648,7 +648,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6674">
+    <Item class="Part" referent="RBX6676">
       <Properties>
         <string name="Name">LeftWingLeaf</string>
         <bool name="Anchored">true</bool>
@@ -680,7 +680,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6675">
+    <Item class="Part" referent="RBX6677">
       <Properties>
         <string name="Name">LeftWingLeafVein</string>
         <bool name="Anchored">true</bool>
@@ -711,7 +711,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6676">
+    <Item class="Part" referent="RBX6678">
       <Properties>
         <string name="Name">LeftWingLeaf_1</string>
         <bool name="Anchored">true</bool>
@@ -743,7 +743,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6677">
+    <Item class="Part" referent="RBX6679">
       <Properties>
         <string name="Name">LeftWingLeafVein_1</string>
         <bool name="Anchored">true</bool>
@@ -774,7 +774,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6678">
+    <Item class="Part" referent="RBX6680">
       <Properties>
         <string name="Name">LeftWingLeaf_2</string>
         <bool name="Anchored">true</bool>
@@ -806,7 +806,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6679">
+    <Item class="Part" referent="RBX6681">
       <Properties>
         <string name="Name">LeftWingLeafVein_2</string>
         <bool name="Anchored">true</bool>
@@ -837,7 +837,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6680">
+    <Item class="Part" referent="RBX6682">
       <Properties>
         <string name="Name">LeftWingLeaf_3</string>
         <bool name="Anchored">true</bool>
@@ -869,7 +869,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6681">
+    <Item class="Part" referent="RBX6683">
       <Properties>
         <string name="Name">LeftWingLeafVein_3</string>
         <bool name="Anchored">true</bool>
@@ -900,7 +900,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6682">
+    <Item class="Part" referent="RBX6684">
       <Properties>
         <string name="Name">LeftWingLeaf_4</string>
         <bool name="Anchored">true</bool>
@@ -932,7 +932,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6683">
+    <Item class="Part" referent="RBX6685">
       <Properties>
         <string name="Name">LeftWingLeafVein_4</string>
         <bool name="Anchored">true</bool>
@@ -963,7 +963,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6684">
+    <Item class="Part" referent="RBX6686">
       <Properties>
         <string name="Name">LeftWingLeaf_5</string>
         <bool name="Anchored">true</bool>
@@ -995,7 +995,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6685">
+    <Item class="Part" referent="RBX6687">
       <Properties>
         <string name="Name">LeftWingLeafVein_5</string>
         <bool name="Anchored">true</bool>
@@ -1026,7 +1026,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6686">
+    <Item class="Part" referent="RBX6688">
       <Properties>
         <string name="Name">LeftWingLeaf_6</string>
         <bool name="Anchored">true</bool>
@@ -1058,7 +1058,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6687">
+    <Item class="Part" referent="RBX6689">
       <Properties>
         <string name="Name">LeftWingLeafVein_6</string>
         <bool name="Anchored">true</bool>
@@ -1089,7 +1089,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6688">
+    <Item class="Part" referent="RBX6690">
       <Properties>
         <string name="Name">LeftWingLeaf_7</string>
         <bool name="Anchored">true</bool>
@@ -1121,7 +1121,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6689">
+    <Item class="Part" referent="RBX6691">
       <Properties>
         <string name="Name">LeftWingLeafVein_7</string>
         <bool name="Anchored">true</bool>
@@ -1152,7 +1152,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6690">
+    <Item class="Part" referent="RBX6692">
       <Properties>
         <string name="Name">LeftWingLeaf_8</string>
         <bool name="Anchored">true</bool>
@@ -1184,7 +1184,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6691">
+    <Item class="Part" referent="RBX6693">
       <Properties>
         <string name="Name">LeftWingLeafVein_8</string>
         <bool name="Anchored">true</bool>
@@ -1215,7 +1215,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6692">
+    <Item class="Part" referent="RBX6694">
       <Properties>
         <string name="Name">LeftWingLeaf_9</string>
         <bool name="Anchored">true</bool>
@@ -1247,7 +1247,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6693">
+    <Item class="Part" referent="RBX6695">
       <Properties>
         <string name="Name">LeftWingLeafVein_9</string>
         <bool name="Anchored">true</bool>
@@ -1278,7 +1278,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6694">
+    <Item class="Part" referent="RBX6696">
       <Properties>
         <string name="Name">LeftWingLeaf_10</string>
         <bool name="Anchored">true</bool>
@@ -1310,7 +1310,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6695">
+    <Item class="Part" referent="RBX6697">
       <Properties>
         <string name="Name">LeftWingLeafVein_10</string>
         <bool name="Anchored">true</bool>
@@ -1341,7 +1341,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6696">
+    <Item class="Part" referent="RBX6698">
       <Properties>
         <string name="Name">LeftWingLeaf_11</string>
         <bool name="Anchored">true</bool>
@@ -1373,7 +1373,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6697">
+    <Item class="Part" referent="RBX6699">
       <Properties>
         <string name="Name">LeftWingLeafVein_11</string>
         <bool name="Anchored">true</bool>
@@ -1404,7 +1404,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6698">
+    <Item class="Part" referent="RBX6700">
       <Properties>
         <string name="Name">LeftWingLeaf_12</string>
         <bool name="Anchored">true</bool>
@@ -1436,7 +1436,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6699">
+    <Item class="Part" referent="RBX6701">
       <Properties>
         <string name="Name">LeftWingLeafVein_12</string>
         <bool name="Anchored">true</bool>
@@ -1467,7 +1467,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6700">
+    <Item class="Part" referent="RBX6702">
       <Properties>
         <string name="Name">LeftWingLeaf_13</string>
         <bool name="Anchored">true</bool>
@@ -1499,7 +1499,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6701">
+    <Item class="Part" referent="RBX6703">
       <Properties>
         <string name="Name">LeftWingLeafVein_13</string>
         <bool name="Anchored">true</bool>
@@ -1530,7 +1530,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6702">
+    <Item class="Part" referent="RBX6704">
       <Properties>
         <string name="Name">RightBackLeg</string>
         <bool name="Anchored">true</bool>
@@ -1562,7 +1562,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6703">
+    <Item class="Part" referent="RBX6705">
       <Properties>
         <string name="Name">RightBackPaw</string>
         <bool name="Anchored">true</bool>
@@ -1594,7 +1594,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6704">
+    <Item class="Part" referent="RBX6706">
       <Properties>
         <string name="Name">RightWing</string>
         <bool name="Anchored">true</bool>
@@ -1626,7 +1626,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6705">
+    <Item class="Part" referent="RBX6707">
       <Properties>
         <string name="Name">RightWingVein</string>
         <bool name="Anchored">true</bool>
@@ -1657,7 +1657,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6706">
+    <Item class="Part" referent="RBX6708">
       <Properties>
         <string name="Name">RightWingLeaf</string>
         <bool name="Anchored">true</bool>
@@ -1689,7 +1689,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6707">
+    <Item class="Part" referent="RBX6709">
       <Properties>
         <string name="Name">RightWingLeafVein</string>
         <bool name="Anchored">true</bool>
@@ -1720,7 +1720,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6708">
+    <Item class="Part" referent="RBX6710">
       <Properties>
         <string name="Name">RightWingLeaf_1</string>
         <bool name="Anchored">true</bool>
@@ -1752,7 +1752,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6709">
+    <Item class="Part" referent="RBX6711">
       <Properties>
         <string name="Name">RightWingLeafVein_1</string>
         <bool name="Anchored">true</bool>
@@ -1783,7 +1783,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6710">
+    <Item class="Part" referent="RBX6712">
       <Properties>
         <string name="Name">RightWingLeaf_2</string>
         <bool name="Anchored">true</bool>
@@ -1815,7 +1815,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6711">
+    <Item class="Part" referent="RBX6713">
       <Properties>
         <string name="Name">RightWingLeafVein_2</string>
         <bool name="Anchored">true</bool>
@@ -1846,7 +1846,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6712">
+    <Item class="Part" referent="RBX6714">
       <Properties>
         <string name="Name">RightWingLeaf_3</string>
         <bool name="Anchored">true</bool>
@@ -1878,7 +1878,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6713">
+    <Item class="Part" referent="RBX6715">
       <Properties>
         <string name="Name">RightWingLeafVein_3</string>
         <bool name="Anchored">true</bool>
@@ -1909,7 +1909,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6714">
+    <Item class="Part" referent="RBX6716">
       <Properties>
         <string name="Name">RightWingLeaf_4</string>
         <bool name="Anchored">true</bool>
@@ -1941,7 +1941,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6715">
+    <Item class="Part" referent="RBX6717">
       <Properties>
         <string name="Name">RightWingLeafVein_4</string>
         <bool name="Anchored">true</bool>
@@ -1972,7 +1972,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6716">
+    <Item class="Part" referent="RBX6718">
       <Properties>
         <string name="Name">RightWingLeaf_5</string>
         <bool name="Anchored">true</bool>
@@ -2004,7 +2004,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6717">
+    <Item class="Part" referent="RBX6719">
       <Properties>
         <string name="Name">RightWingLeafVein_5</string>
         <bool name="Anchored">true</bool>
@@ -2035,7 +2035,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6718">
+    <Item class="Part" referent="RBX6720">
       <Properties>
         <string name="Name">RightWingLeaf_6</string>
         <bool name="Anchored">true</bool>
@@ -2067,7 +2067,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6719">
+    <Item class="Part" referent="RBX6721">
       <Properties>
         <string name="Name">RightWingLeafVein_6</string>
         <bool name="Anchored">true</bool>
@@ -2098,7 +2098,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6720">
+    <Item class="Part" referent="RBX6722">
       <Properties>
         <string name="Name">RightWingLeaf_7</string>
         <bool name="Anchored">true</bool>
@@ -2130,7 +2130,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6721">
+    <Item class="Part" referent="RBX6723">
       <Properties>
         <string name="Name">RightWingLeafVein_7</string>
         <bool name="Anchored">true</bool>
@@ -2161,7 +2161,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6722">
+    <Item class="Part" referent="RBX6724">
       <Properties>
         <string name="Name">RightWingLeaf_8</string>
         <bool name="Anchored">true</bool>
@@ -2193,7 +2193,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6723">
+    <Item class="Part" referent="RBX6725">
       <Properties>
         <string name="Name">RightWingLeafVein_8</string>
         <bool name="Anchored">true</bool>
@@ -2224,7 +2224,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6724">
+    <Item class="Part" referent="RBX6726">
       <Properties>
         <string name="Name">RightWingLeaf_9</string>
         <bool name="Anchored">true</bool>
@@ -2256,7 +2256,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6725">
+    <Item class="Part" referent="RBX6727">
       <Properties>
         <string name="Name">RightWingLeafVein_9</string>
         <bool name="Anchored">true</bool>
@@ -2287,7 +2287,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6726">
+    <Item class="Part" referent="RBX6728">
       <Properties>
         <string name="Name">RightWingLeaf_10</string>
         <bool name="Anchored">true</bool>
@@ -2319,7 +2319,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6727">
+    <Item class="Part" referent="RBX6729">
       <Properties>
         <string name="Name">RightWingLeafVein_10</string>
         <bool name="Anchored">true</bool>
@@ -2350,7 +2350,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6728">
+    <Item class="Part" referent="RBX6730">
       <Properties>
         <string name="Name">RightWingLeaf_11</string>
         <bool name="Anchored">true</bool>
@@ -2382,7 +2382,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6729">
+    <Item class="Part" referent="RBX6731">
       <Properties>
         <string name="Name">RightWingLeafVein_11</string>
         <bool name="Anchored">true</bool>
@@ -2413,7 +2413,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6730">
+    <Item class="Part" referent="RBX6732">
       <Properties>
         <string name="Name">RightWingLeaf_12</string>
         <bool name="Anchored">true</bool>
@@ -2445,7 +2445,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6731">
+    <Item class="Part" referent="RBX6733">
       <Properties>
         <string name="Name">RightWingLeafVein_12</string>
         <bool name="Anchored">true</bool>
@@ -2476,7 +2476,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6732">
+    <Item class="Part" referent="RBX6734">
       <Properties>
         <string name="Name">RightWingLeaf_13</string>
         <bool name="Anchored">true</bool>
@@ -2508,7 +2508,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6733">
+    <Item class="Part" referent="RBX6735">
       <Properties>
         <string name="Name">RightWingLeafVein_13</string>
         <bool name="Anchored">true</bool>
@@ -2539,7 +2539,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6734">
+    <Item class="Part" referent="RBX6736">
       <Properties>
         <string name="Name">TailLeaf</string>
         <bool name="Anchored">true</bool>
@@ -2571,7 +2571,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6735">
+    <Item class="Part" referent="RBX6737">
       <Properties>
         <string name="Name">TailLeafVein</string>
         <bool name="Anchored">true</bool>
@@ -2602,7 +2602,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6736">
+    <Item class="Part" referent="RBX6738">
       <Properties>
         <string name="Name">TailLeaf_1</string>
         <bool name="Anchored">true</bool>
@@ -2634,7 +2634,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6737">
+    <Item class="Part" referent="RBX6739">
       <Properties>
         <string name="Name">TailLeafVein_1</string>
         <bool name="Anchored">true</bool>
@@ -2665,7 +2665,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6738">
+    <Item class="Part" referent="RBX6740">
       <Properties>
         <string name="Name">TailLeaf_2</string>
         <bool name="Anchored">true</bool>
@@ -2697,7 +2697,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6739">
+    <Item class="Part" referent="RBX6741">
       <Properties>
         <string name="Name">TailLeafVein_2</string>
         <bool name="Anchored">true</bool>
@@ -2728,7 +2728,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6740">
+    <Item class="Part" referent="RBX6742">
       <Properties>
         <string name="Name">TailLeaf_3</string>
         <bool name="Anchored">true</bool>
@@ -2760,7 +2760,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6741">
+    <Item class="Part" referent="RBX6743">
       <Properties>
         <string name="Name">TailLeafVein_3</string>
         <bool name="Anchored">true</bool>
@@ -2791,7 +2791,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6742">
+    <Item class="Part" referent="RBX6744">
       <Properties>
         <string name="Name">TailLeaf_4</string>
         <bool name="Anchored">true</bool>
@@ -2823,7 +2823,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6743">
+    <Item class="Part" referent="RBX6745">
       <Properties>
         <string name="Name">TailLeafVein_4</string>
         <bool name="Anchored">true</bool>
@@ -2854,7 +2854,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6744">
+    <Item class="Part" referent="RBX6746">
       <Properties>
         <string name="Name">BudPetal</string>
         <bool name="Anchored">true</bool>
@@ -2886,7 +2886,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6745">
+    <Item class="Part" referent="RBX6747">
       <Properties>
         <string name="Name">BudPetal_1</string>
         <bool name="Anchored">true</bool>
@@ -2918,7 +2918,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6746">
+    <Item class="Part" referent="RBX6748">
       <Properties>
         <string name="Name">BudPetal_2</string>
         <bool name="Anchored">true</bool>
@@ -2950,7 +2950,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6747">
+    <Item class="Part" referent="RBX6749">
       <Properties>
         <string name="Name">BudPetal_3</string>
         <bool name="Anchored">true</bool>
@@ -2982,7 +2982,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6748">
+    <Item class="Part" referent="RBX6750">
       <Properties>
         <string name="Name">BudPetal_4</string>
         <bool name="Anchored">true</bool>
@@ -3014,7 +3014,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6749">
+    <Item class="Part" referent="RBX6751">
       <Properties>
         <string name="Name">BudLeaf</string>
         <bool name="Anchored">true</bool>
@@ -3046,7 +3046,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6750">
+    <Item class="Part" referent="RBX6752">
       <Properties>
         <string name="Name">BudLeafVein</string>
         <bool name="Anchored">true</bool>
@@ -3077,7 +3077,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6751">
+    <Item class="Part" referent="RBX6753">
       <Properties>
         <string name="Name">BudLeaf_1</string>
         <bool name="Anchored">true</bool>
@@ -3109,7 +3109,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6752">
+    <Item class="Part" referent="RBX6754">
       <Properties>
         <string name="Name">BudLeafVein_1</string>
         <bool name="Anchored">true</bool>
@@ -3140,7 +3140,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6753">
+    <Item class="Part" referent="RBX6755">
       <Properties>
         <string name="Name">BudLeaf_2</string>
         <bool name="Anchored">true</bool>
@@ -3172,7 +3172,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6754">
+    <Item class="Part" referent="RBX6756">
       <Properties>
         <string name="Name">BudLeafVein_2</string>
         <bool name="Anchored">true</bool>
@@ -3203,7 +3203,7 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6755">
+    <Item class="Part" referent="RBX6757">
       <Properties>
         <string name="Name">BudLeaf_3</string>
         <bool name="Anchored">true</bool>
@@ -3235,7 +3235,7 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX6756">
+    <Item class="Part" referent="RBX6758">
       <Properties>
         <string name="Name">BudLeafVein_3</string>
         <bool name="Anchored">true</bool>

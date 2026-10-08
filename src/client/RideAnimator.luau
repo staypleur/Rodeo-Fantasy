@@ -76,6 +76,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
 	for model, warning in pairs(warnings) do
 		if not model:IsDescendantOf(monsters) then warning:Destroy() warnings[model] = nil end
 	end
+	local outlineCount=0
 	for _, model in ipairs(monsters.Name=="RodeoLobby" and monsters:GetDescendants() or monsters:GetChildren()) do
   if not model:IsA("Model") then continue end
 		local root = model.PrimaryPart
@@ -93,13 +94,26 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
    end
    if record.hidden~=hidden then
     record.hidden=hidden
+    if not hidden then record.revealed=clock end
     for _,part in ipairs(model:GetChildren()) do
      if part:IsA("BasePart") and part~=root then part.LocalTransparencyModifier=hidden and 1 or 0 end
     end
    end
-   if hidden then continue end
+   if hidden then
+    local outline=model:FindFirstChild("LocalCreatureOutline") if outline then outline:Destroy() end
+    continue
+   end
   end
-		local running = model:GetAttribute("Running") == true
+		local outline=model:FindFirstChild("LocalCreatureOutline")
+  if outlineCount<20 then
+   if not outline then
+    outline=Instance.new("Highlight") outline.Name="LocalCreatureOutline" outline.Adornee=model
+    outline.FillTransparency=1 outline.OutlineTransparency=.05
+    outline.OutlineColor=Color3.fromRGB(35,49,68) outline.DepthMode=Enum.HighlightDepthMode.Occluded outline.Parent=model
+   end
+   outline.Enabled=true outlineCount+=1
+  elseif outline then outline:Destroy() end
+  local running = model:GetAttribute("Running") == true
 		local pose = poses[model]
 		if not pose and not running and not model:GetAttribute("BagItemId") then continue end
 		pose = remember(model,pose) -- Include late replicated body parts on every frame.
@@ -182,6 +196,8 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
     localFrame=pivot*CFrame.Angles(0,math.sin(phase*0.65)*0.3,0)*pivot:Inverse()*localFrame
    end
 			entry.part.CFrame = frame * localFrame
+   local shown=visibility[model]
+   if shown and not shown.hidden then entry.part.LocalTransparencyModifier=math.clamp(1-(clock-(shown.revealed or clock-.3))/.25,0,1) end
 		end
 		-- Keep cached canonical poses while resting; late parts still align.
 	end

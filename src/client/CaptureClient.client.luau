@@ -34,7 +34,10 @@ local gui=make("ScreenGui",{Name="RodeoCaptureUI",ResetOnSpawn=false,DisplayOrde
 local function text(parent,value,pos,size,font)
  return make("TextLabel",{Text=value,Position=pos,Size=size,TextSize=font or 18,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(255,245,219),BackgroundTransparency=1,TextWrapped=true},parent)
 end
+local incomeFX=require(script.Parent:WaitForChild("IncomeEffects"))
 local bagUI=require(script.Parent:WaitForChild("BagUI")).new(gui,remote)
+local journalUI=require(script.Parent:WaitForChild("JournalUI")).new(gui,remote)
+bagUI.onOpen=journalUI.close journalUI.onOpen=bagUI.close
 local locale=require(script.Parent:WaitForChild("LocalizationController"))
 locale.watch(gui) locale.watch(workspace.RodeoLobby)
 -- Only the owner sees a ranch interaction. The server separately checks ownership/distance.
@@ -104,16 +107,18 @@ make("UICorner",{CornerRadius=UDim.new(0,14)},returnButton)
 returnButton.Activated:Connect(function() remote:FireServer("ReturnLobby") end)
 local highlight=make("Highlight",{Enabled=false,FillTransparency=0.82,OutlineColor=Color3.fromRGB(255,222,91)},gui)
 local ring=make("Part",{Name="LocalLassoRange",Anchored=true,CanCollide=false,CanTouch=false,CanQuery=false,Transparency=1,Size=Vector3.new(1,1,1)},workspace)
-local ringPoints={}
+local ringPoints={} local shadowPoints={}
 for i=1,32 do
  local a=make("Attachment",{},ring)
  local angle=(i-1)/32*math.pi*2
- a.Position=Vector3.new(math.cos(angle)*Config.Prototype.LassoRangeStuds,0,math.sin(angle)*Config.Prototype.LassoRangeStuds)
+ a.Position=Vector3.new(math.cos(angle)*Config.Prototype.LassoRangeStuds,.08,math.sin(angle)*Config.Prototype.LassoRangeStuds)
+ local shadow=make("Attachment",{},ring) shadow.Position=a.Position-Vector3.new(0,.08,0) shadowPoints[i]=shadow
  ringPoints[i]=a
 end
 local beams={}
 for i=1,32 do
- beams[i]=make("Beam",{Attachment0=ringPoints[i],Attachment1=ringPoints[i%32+1],Width0=0.12,Width1=0.12,FaceCamera=true,Color=ColorSequence.new(Color3.fromRGB(255,224,83)),Enabled=false},ring)
+ beams[i]=make("Beam",{Attachment0=ringPoints[i],Attachment1=ringPoints[i%32+1],Width0=0.12,Width1=0.12,FaceCamera=true,Color=ColorSequence.new(Color3.fromRGB(94,248,255)),Enabled=false},ring)
+ beams[32+i]=make("Beam",{Name="RangeOutline",Attachment0=shadowPoints[i],Attachment1=shadowPoints[i%32+1],Width0=.32,Width1=.32,FaceCamera=true,Color=ColorSequence.new(Color3.fromRGB(24,40,58)),Enabled=false},ring)
 end
 local function active() return state.phase~="Idle" and state.phase~="GameOver" and state.phase~="CourseEnd" end
 local function steering()
@@ -202,12 +207,23 @@ end)
 remote.OnClientEvent:Connect(function(kind,data)
  if kind=="RanchMenu" then bagUI.openRanchMenu() return end
  if kind=="Pen" then bagUI.openPen(data) return end
+ if kind=="Journal" then journalUI.snapshot(data) return end
  if kind=="Bag" then bagUI.snapshot(data) return end
  if kind~="State" then return end
  if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow(),data.monsterCrashFrame,data.monsterCrashId) end
  if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
- bagUI.state(data)
+ bagUI.state(data) journalUI.state(data)
+ if data.area=="Lobby" then
+  bagUI.income(data.income)
+  local slot=player:GetAttribute("LobbySlot")
+  local plot=slot and workspace.RodeoLobby.Plots:FindFirstChild("Plot_"..slot)
+  if plot and data.income and #data.income>0 then
+   local pets={}
+   for _,model in ipairs(plot.Pens:GetDescendants()) do if model:IsA("Model") and model:GetAttribute("BagItemId") then pets[model:GetAttribute("BagItemId")]=model end end
+   for _,gain in ipairs(data.income) do if pets[gain.id] then incomeFX.pet(pets[gain.id],gain.amount) end end
+  end
+ else incomeFX.clear() end
  if data.message then notice,noticeUntil=data.message,os.clock()+3 end
  startButton.Visible=state.phase~="Idle" and not active()
  returnButton.Visible=state.phase=="GameOver" or state.phase=="CourseEnd"

@@ -17,11 +17,14 @@ end
 function View.select(candidates,z,aspect,t,limit,previous)
  local visible={}
  local selected={} local count=0
+ local function entry(candidate)
+  return not previous or candidate.emerging or not View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,.62)
+ end
  for _,candidate in ipairs(candidates) do
   if previous and previous[candidate.key] and count<(limit or 6) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,.95) then
    selected[candidate.key]=true count+=1
   end
-  if View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t) then
+  if entry(candidate) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t) then
    candidate.score=(candidate.z-z+15)^2+candidate.x*candidate.x*.2
    table.insert(visible,candidate)
   end
@@ -41,7 +44,7 @@ function View.select(candidates,z,aspect,t,limit,previous)
  -- from animals already inside the full camera, without replacing stable IDs.
  if count<4 then
   for _,candidate in ipairs(candidates) do
-   if not selected[candidate.key] and not candidate.emerging and count<4 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,.98) then
+   if not selected[candidate.key] and entry(candidate) and not candidate.emerging and count<4 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,.98) then
     selected[candidate.key]=true count+=1
    end
   end

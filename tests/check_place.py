@@ -14,6 +14,12 @@ scripts = {
     for item in place.iter("Item") if item.attrib["class"] in ("Script", "LocalScript", "ModuleScript")
 }
 expected = {
+    "IncomeEffects": "src/client/IncomeEffects.luau",
+    "ProgressRules": "src/shared/ProgressRules.luau",
+    "CollectionQuery": "src/shared/CollectionQuery.luau",
+    "ProgressService": "src/server/ProgressService.luau",
+    "JournalUI": "src/client/JournalUI.luau",
+    "MonsterPortrait": "src/client/MonsterPortrait.luau",
     "RecordService": "src/server/RecordService.luau",
     "RecordRules": "src/shared/RecordRules.luau",
     "MonsterCatalog": "src/shared/MonsterCatalog.luau",

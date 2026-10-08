@@ -29,5 +29,12 @@ for key in pairs(first) do assert(stable[key],"nearer arrivals must not flicker 
 assert(not stable[99],"full visible set stays stable until an animal leaves")
 for _,candidate in ipairs(items) do if first[candidate.key] then candidate.z=-600 end end
 local replaced=View.select(items,0,1,t,6,stable)
-assert(replaced[99],"off-screen animals free their display slot")
+assert(not replaced[99],"hidden central runners must not suddenly appear when a slot opens")
+local edge
+for dz=-20,-200,-1 do
+ if View.visible(0,2,dz,1,t,.98) and not View.visible(0,2,dz,1,t,.62) then edge={key=100,x=0,y=2,z=dz,serial=100} break end
+end
+assert(edge) table.insert(items,edge)
+local arrivals=View.select(items,0,1,t,6,stable)
+assert(arrivals[100],"new runners enter from the camera boundary")
 print("PASS: stable herd identities and replacement after leaving the camera")

@@ -1,18 +1,18 @@
 <?xml version='1.0' encoding='utf-8'?>
 <roblox version="4">
-  <Item class="Model" referent="RBX4355">
+  <Item class="Model" referent="RBX4357">
     <Properties>
       <string name="Name">TreeWolf_S3</string>
-      <Ref name="PrimaryPart">RBX4356</Ref>
+      <Ref name="PrimaryPart">RBX4358</Ref>
     </Properties>
-    <Item class="Part" referent="RBX4356">
+    <Item class="Part" referent="RBX4358">
       <Properties>
         <string name="Name">MountRoot</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>3.9199999999999995</X>
-          <Y>3.36</Y>
-          <Z>6.86</Z>
+          <X>4.8999999999999995</X>
+          <Y>4.2</Y>
+          <Z>8.575000000000001</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
           <X>0</X>
@@ -36,7 +36,7 @@
         <bool name="CanQuery">false</bool>
         <bool name="CanTouch">false</bool>
       </Properties>
-      <Item class="BillboardGui" referent="RBX4473">
+      <Item class="BillboardGui" referent="RBX4475">
         <Properties>
           <string name="Name">Nameplate</string>
           <UDim2 name="Size">
@@ -52,7 +52,7 @@
           </Vector3>
           <bool name="AlwaysOnTop">true</bool>
         </Properties>
-        <Item class="TextLabel" referent="RBX4474">
+        <Item class="TextLabel" referent="RBX4476">
           <Properties>
             <string name="Name">Label</string>
             <UDim2 name="Size">
@@ -74,83 +74,19 @@
         </Item>
       </Item>
     </Item>
-    <Item class="Part" referent="RBX4357">
+    <Item class="Part" referent="RBX4359">
       <Properties>
         <string name="Name">Body</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>3.15</X>
-          <Y>3.01</Y>
-          <Z>5.319999999999999</Z>
+          <X>3.9375</X>
+          <Y>3.7624999999999997</Y>
+          <Z>6.6499999999999995</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
           <X>0.0</X>
-          <Y>-0.06999999999999999</Y>
-          <Z>0.48999999999999994</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">11718061</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4358">
-      <Properties>
-        <string name="Name">Belly</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>3.08</X>
-          <Y>1.9599999999999997</Y>
-          <Z>4.06</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>0.0</X>
-          <Y>-0.6719999999999999</Y>
-          <Z>0.27999999999999997</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">16050382</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4359">
-      <Properties>
-        <string name="Name">Head</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>2.968</X>
-          <Y>2.6599999999999997</Y>
-          <Z>2.52</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>0.0</X>
-          <Y>0.5319999999999999</Y>
-          <Z>-2.142</Z>
+          <Y>-0.08750000000000001</Y>
+          <Z>0.6124999999999999</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -172,17 +108,17 @@
     </Item>
     <Item class="Part" referent="RBX4360">
       <Properties>
-        <string name="Name">Muzzle</string>
+        <string name="Name">Belly</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>1.8479999999999999</X>
-          <Y>1.26</Y>
-          <Z>1.4</Z>
+          <X>3.8500000000000005</X>
+          <Y>2.4499999999999997</Y>
+          <Z>5.075</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
           <X>0.0</X>
-          <Y>-0.06999999999999999</Y>
-          <Z>-3.43</Z>
+          <Y>-0.84</Y>
+          <Z>0.35000000000000003</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -204,17 +140,17 @@
     </Item>
     <Item class="Part" referent="RBX4361">
       <Properties>
-        <string name="Name">Nose</string>
+        <string name="Name">Head</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.602</X>
-          <Y>0.40599999999999997</Y>
-          <Z>0.26599999999999996</Z>
+          <X>3.71</X>
+          <Y>3.3249999999999997</Y>
+          <Z>3.15</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
           <X>0.0</X>
-          <Y>0.35</Y>
-          <Z>-4.186</Z>
+          <Y>0.665</Y>
+          <Z>-2.6775</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -225,7 +161,7 @@
           <R21>0.0</R21>
           <R22>1.0</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">3159855</Color3uint8>
+        <Color3uint8 name="Color3uint8">11718061</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -236,497 +172,17 @@
     </Item>
     <Item class="Part" referent="RBX4362">
       <Properties>
-        <string name="Name">LeftEyeRim</string>
+        <string name="Name">Muzzle</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.9239999999999999</X>
-          <Y>1.0919999999999999</Y>
-          <Z>0.252</Z>
+          <X>2.31</X>
+          <Y>1.575</Y>
+          <Z>1.75</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.9200799999999999</X>
-          <Y>1.008</Y>
-          <Z>-3.1849999999999996</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">10513729</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4363">
-      <Properties>
-        <string name="Name">LeftEyeWhite</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.7979999999999999</X>
-          <Y>0.9799999999999999</Y>
-          <Z>0.22399999999999998</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-0.9200799999999999</X>
-          <Y>1.008</Y>
-          <Z>-3.317999999999999</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">16775393</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4364">
-      <Properties>
-        <string name="Name">LeftIris</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.5459999999999999</X>
-          <Y>0.8119999999999999</Y>
-          <Z>0.182</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-0.8850799999999999</X>
-          <Y>1.008</Y>
-          <Z>-3.444</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">7752227</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4365">
-      <Properties>
-        <string name="Name">LeftPupil</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.33599999999999997</X>
-          <Y>0.616</Y>
-          <Z>0.11199999999999999</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-0.8780799999999999</X>
-          <Y>1.008</Y>
-          <Z>-3.5209999999999995</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">2368550</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4366">
-      <Properties>
-        <string name="Name">LeftShine</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.16799999999999998</X>
-          <Y>0.22399999999999998</Y>
-          <Z>0.063</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-0.78008</X>
-          <Y>1.246</Y>
-          <Z>-3.588199999999999</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">16777208</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4367">
-      <Properties>
-        <string name="Name">RightEyeRim</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.9239999999999999</X>
-          <Y>1.0919999999999999</Y>
-          <Z>0.252</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>0.9200799999999999</X>
-          <Y>1.008</Y>
-          <Z>-3.1849999999999996</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">10513729</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4368">
-      <Properties>
-        <string name="Name">RightEyeWhite</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.7979999999999999</X>
-          <Y>0.9799999999999999</Y>
-          <Z>0.22399999999999998</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>0.9200799999999999</X>
-          <Y>1.008</Y>
-          <Z>-3.317999999999999</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">16775393</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4369">
-      <Properties>
-        <string name="Name">RightIris</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.5459999999999999</X>
-          <Y>0.8119999999999999</Y>
-          <Z>0.182</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>0.8850799999999999</X>
-          <Y>1.008</Y>
-          <Z>-3.444</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">7752227</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4370">
-      <Properties>
-        <string name="Name">RightPupil</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.33599999999999997</X>
-          <Y>0.616</Y>
-          <Z>0.11199999999999999</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>0.8780799999999999</X>
-          <Y>1.008</Y>
-          <Z>-3.5209999999999995</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">2368550</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4371">
-      <Properties>
-        <string name="Name">RightShine</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.16799999999999998</X>
-          <Y>0.22399999999999998</Y>
-          <Z>0.063</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>0.78008</X>
-          <Y>1.246</Y>
-          <Z>-3.588199999999999</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">16777208</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4372">
-      <Properties>
-        <string name="Name">LeftEar</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>1.19</X>
-          <Y>1.47</Y>
-          <Z>0.7</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-1.3299999999999998</X>
-          <Y>2.03</Y>
-          <Z>-1.68</Z>
-          <R00>0.9191580824489982</R00>
-          <R01>-0.3345461825966352</R01>
-          <R02>-0.20791169081775934</R02>
-          <R10>0.3420201433256687</R10>
-          <R11>0.9396926207859084</R11>
-          <R12>-0.0</R12>
-          <R20>0.19537308163656977</R20>
-          <R21>-0.07110998629257217</R21>
-          <R22>0.9781476007338057</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">11718061</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4373">
-      <Properties>
-        <string name="Name">LeftEarInner</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.9239999999999999</Y>
-          <Z>0.16799999999999998</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-1.3299999999999998</X>
-          <Y>2.0999999999999996</Y>
-          <Z>-2.086</Z>
-          <R00>0.9191580824489982</R00>
-          <R01>-0.3345461825966352</R01>
-          <R02>-0.20791169081775934</R02>
-          <R10>0.3420201433256687</R10>
-          <R11>0.9396926207859084</R11>
-          <R12>-0.0</R12>
-          <R20>0.19537308163656977</R20>
-          <R21>-0.07110998629257217</R21>
-          <R22>0.9781476007338057</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">14395285</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4374">
-      <Properties>
-        <string name="Name">RightEar</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>1.19</X>
-          <Y>1.47</Y>
-          <Z>0.7</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>1.3299999999999998</X>
-          <Y>2.03</Y>
-          <Z>-1.68</Z>
-          <R00>0.9191580824489982</R00>
-          <R01>0.3345461825966352</R01>
-          <R02>0.20791169081775934</R02>
-          <R10>-0.3420201433256687</R10>
-          <R11>0.9396926207859084</R11>
-          <R12>-0.0</R12>
-          <R20>-0.19537308163656977</R20>
-          <R21>-0.07110998629257217</R21>
-          <R22>0.9781476007338057</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">11718061</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4375">
-      <Properties>
-        <string name="Name">RightEarInner</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.9239999999999999</Y>
-          <Z>0.16799999999999998</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>1.3299999999999998</X>
-          <Y>2.0999999999999996</Y>
-          <Z>-2.086</Z>
-          <R00>0.9191580824489982</R00>
-          <R01>0.3345461825966352</R01>
-          <R02>0.20791169081775934</R02>
-          <R10>-0.3420201433256687</R10>
-          <R11>0.9396926207859084</R11>
-          <R12>-0.0</R12>
-          <R20>-0.19537308163656977</R20>
-          <R21>-0.07110998629257217</R21>
-          <R22>0.9781476007338057</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">14395285</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4376">
-      <Properties>
-        <string name="Name">LeftFrontLeg</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.9099999999999999</X>
-          <Y>2.6879999999999997</Y>
-          <Z>1.008</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-1.148</X>
-          <Y>-1.6127999999999998</Y>
-          <Z>-1.47</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">11718061</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4377">
-      <Properties>
-        <string name="Name">LeftFrontPaw</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>1.148</X>
-          <Y>0.5319999999999999</Y>
-          <Z>1.3719999999999999</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-1.148</X>
-          <Y>-2.856</Y>
-          <Z>-1.638</Z>
+          <X>0.0</X>
+          <Y>-0.08750000000000001</Y>
+          <Z>-4.2875000000000005</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -746,19 +202,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4378">
+    <Item class="Part" referent="RBX4363">
       <Properties>
-        <string name="Name">LeftFrontClaw</string>
+        <string name="Name">Nose</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.196</X>
-          <Y>0.21</Y>
-          <Z>0.252</Z>
+          <X>0.7525</X>
+          <Y>0.5075</Y>
+          <Z>0.3325</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.428</X>
-          <Y>-2.8</Y>
-          <Z>-2.268</Z>
+          <X>0.0</X>
+          <Y>0.4375</Y>
+          <Z>-5.2325</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -769,7 +225,487 @@
           <R21>0.0</R21>
           <R22>1.0</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
+        <Color3uint8 name="Color3uint8">3159855</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4364">
+      <Properties>
+        <string name="Name">LeftEyeRim</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>1.155</X>
+          <Y>1.365</Y>
+          <Z>0.315</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.1501000000000001</X>
+          <Y>1.26</Y>
+          <Z>-3.9812499999999997</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">10513729</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4365">
+      <Properties>
+        <string name="Name">LeftEyeWhite</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.9974999999999999</X>
+          <Y>1.2249999999999999</Y>
+          <Z>0.28</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.1501000000000001</X>
+          <Y>1.26</Y>
+          <Z>-4.147499999999999</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">16775393</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4366">
+      <Properties>
+        <string name="Name">LeftIris</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.6825</X>
+          <Y>1.015</Y>
+          <Z>0.2275</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.10635</X>
+          <Y>1.26</Y>
+          <Z>-4.305</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">7752227</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4367">
+      <Properties>
+        <string name="Name">LeftPupil</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.42</X>
+          <Y>0.77</Y>
+          <Z>0.14</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.0976</X>
+          <Y>1.26</Y>
+          <Z>-4.401249999999999</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">2368550</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4368">
+      <Properties>
+        <string name="Name">LeftShine</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.21</X>
+          <Y>0.28</Y>
+          <Z>0.07875</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-0.9751000000000001</X>
+          <Y>1.5575</Y>
+          <Z>-4.48525</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">16777208</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4369">
+      <Properties>
+        <string name="Name">RightEyeRim</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>1.155</X>
+          <Y>1.365</Y>
+          <Z>0.315</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>1.1501000000000001</X>
+          <Y>1.26</Y>
+          <Z>-3.9812499999999997</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">10513729</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4370">
+      <Properties>
+        <string name="Name">RightEyeWhite</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.9974999999999999</X>
+          <Y>1.2249999999999999</Y>
+          <Z>0.28</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>1.1501000000000001</X>
+          <Y>1.26</Y>
+          <Z>-4.147499999999999</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">16775393</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4371">
+      <Properties>
+        <string name="Name">RightIris</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.6825</X>
+          <Y>1.015</Y>
+          <Z>0.2275</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>1.10635</X>
+          <Y>1.26</Y>
+          <Z>-4.305</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">7752227</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4372">
+      <Properties>
+        <string name="Name">RightPupil</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.42</X>
+          <Y>0.77</Y>
+          <Z>0.14</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>1.0976</X>
+          <Y>1.26</Y>
+          <Z>-4.401249999999999</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">2368550</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4373">
+      <Properties>
+        <string name="Name">RightShine</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.21</X>
+          <Y>0.28</Y>
+          <Z>0.07875</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>0.9751000000000001</X>
+          <Y>1.5575</Y>
+          <Z>-4.48525</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">16777208</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4374">
+      <Properties>
+        <string name="Name">LeftEar</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>1.4875</X>
+          <Y>1.8375000000000001</Y>
+          <Z>0.875</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.6624999999999999</X>
+          <Y>2.5375</Y>
+          <Z>-2.1</Z>
+          <R00>0.9191580824489982</R00>
+          <R01>-0.3345461825966352</R01>
+          <R02>-0.20791169081775934</R02>
+          <R10>0.3420201433256687</R10>
+          <R11>0.9396926207859084</R11>
+          <R12>-0.0</R12>
+          <R20>0.19537308163656977</R20>
+          <R21>-0.07110998629257217</R21>
+          <R22>0.9781476007338057</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">11718061</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4375">
+      <Properties>
+        <string name="Name">LeftEarInner</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.805</X>
+          <Y>1.155</Y>
+          <Z>0.21</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.6624999999999999</X>
+          <Y>2.625</Y>
+          <Z>-2.6075</Z>
+          <R00>0.9191580824489982</R00>
+          <R01>-0.3345461825966352</R01>
+          <R02>-0.20791169081775934</R02>
+          <R10>0.3420201433256687</R10>
+          <R11>0.9396926207859084</R11>
+          <R12>-0.0</R12>
+          <R20>0.19537308163656977</R20>
+          <R21>-0.07110998629257217</R21>
+          <R22>0.9781476007338057</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">14395285</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4376">
+      <Properties>
+        <string name="Name">RightEar</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>1.4875</X>
+          <Y>1.8375000000000001</Y>
+          <Z>0.875</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>1.6624999999999999</X>
+          <Y>2.5375</Y>
+          <Z>-2.1</Z>
+          <R00>0.9191580824489982</R00>
+          <R01>0.3345461825966352</R01>
+          <R02>0.20791169081775934</R02>
+          <R10>-0.3420201433256687</R10>
+          <R11>0.9396926207859084</R11>
+          <R12>-0.0</R12>
+          <R20>-0.19537308163656977</R20>
+          <R21>-0.07110998629257217</R21>
+          <R22>0.9781476007338057</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">11718061</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4377">
+      <Properties>
+        <string name="Name">RightEarInner</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.805</X>
+          <Y>1.155</Y>
+          <Z>0.21</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>1.6624999999999999</X>
+          <Y>2.625</Y>
+          <Z>-2.6075</Z>
+          <R00>0.9191580824489982</R00>
+          <R01>0.3345461825966352</R01>
+          <R02>0.20791169081775934</R02>
+          <R10>-0.3420201433256687</R10>
+          <R11>0.9396926207859084</R11>
+          <R12>-0.0</R12>
+          <R20>-0.19537308163656977</R20>
+          <R21>-0.07110998629257217</R21>
+          <R22>0.9781476007338057</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">14395285</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4378">
+      <Properties>
+        <string name="Name">LeftFrontLeg</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>1.1375</X>
+          <Y>3.36</Y>
+          <Z>1.26</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.4349999999999998</X>
+          <Y>-2.016</Y>
+          <Z>-1.8375000000000001</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">11718061</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -780,17 +716,17 @@
     </Item>
     <Item class="Part" referent="RBX4379">
       <Properties>
-        <string name="Name">LeftFrontClaw_1</string>
+        <string name="Name">LeftFrontPaw</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.196</X>
-          <Y>0.21</Y>
-          <Z>0.252</Z>
+          <X>1.4349999999999998</X>
+          <Y>0.665</Y>
+          <Z>1.7149999999999999</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.148</X>
-          <Y>-2.8</Y>
-          <Z>-2.268</Z>
+          <X>-1.4349999999999998</X>
+          <Y>-3.5700000000000003</Y>
+          <Z>-2.0475</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -801,7 +737,7 @@
           <R21>0.0</R21>
           <R22>1.0</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
+        <Color3uint8 name="Color3uint8">16050382</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -812,17 +748,17 @@
     </Item>
     <Item class="Part" referent="RBX4380">
       <Properties>
-        <string name="Name">LeftFrontClaw_2</string>
+        <string name="Name">LeftFrontClaw</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.196</X>
-          <Y>0.21</Y>
-          <Z>0.252</Z>
+          <X>0.24500000000000002</X>
+          <Y>0.2625</Y>
+          <Z>0.315</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.8679999999999998</X>
-          <Y>-2.8</Y>
-          <Z>-2.268</Z>
+          <X>-1.7850000000000001</X>
+          <Y>-3.5</Y>
+          <Z>-2.835</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -844,17 +780,81 @@
     </Item>
     <Item class="Part" referent="RBX4381">
       <Properties>
+        <string name="Name">LeftFrontClaw_1</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.24500000000000002</X>
+          <Y>0.2625</Y>
+          <Z>0.315</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.4349999999999998</X>
+          <Y>-3.5</Y>
+          <Z>-2.835</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4382">
+      <Properties>
+        <string name="Name">LeftFrontClaw_2</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.24500000000000002</X>
+          <Y>0.2625</Y>
+          <Z>0.315</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.0849999999999997</X>
+          <Y>-3.5</Y>
+          <Z>-2.835</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4383">
+      <Properties>
         <string name="Name">LeftBackLeg</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.9099999999999999</X>
-          <Y>2.6879999999999997</Y>
-          <Z>1.008</Z>
+          <X>1.1375</X>
+          <Y>3.36</Y>
+          <Z>1.26</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.148</X>
-          <Y>-1.6127999999999998</Y>
-          <Z>2.0999999999999996</Z>
+          <X>-1.4349999999999998</X>
+          <Y>-2.016</Y>
+          <Z>2.625</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -874,19 +874,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4382">
+    <Item class="Part" referent="RBX4384">
       <Properties>
         <string name="Name">LeftBackPaw</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>1.148</X>
-          <Y>0.5319999999999999</Y>
-          <Z>1.3719999999999999</Z>
+          <X>1.4349999999999998</X>
+          <Y>0.665</Y>
+          <Z>1.7149999999999999</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.148</X>
-          <Y>-2.856</Y>
-          <Z>1.9319999999999997</Z>
+          <X>-1.4349999999999998</X>
+          <Y>-3.5700000000000003</Y>
+          <Z>2.415</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -906,83 +906,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4383">
+    <Item class="Part" referent="RBX4385">
       <Properties>
         <string name="Name">LeftBackClaw</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.196</X>
-          <Y>0.21</Y>
-          <Z>0.252</Z>
+          <X>0.24500000000000002</X>
+          <Y>0.2625</Y>
+          <Z>0.315</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.428</X>
-          <Y>-2.8</Y>
-          <Z>1.302</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4384">
-      <Properties>
-        <string name="Name">LeftBackClaw_1</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.196</X>
-          <Y>0.21</Y>
-          <Z>0.252</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-1.148</X>
-          <Y>-2.8</Y>
-          <Z>1.302</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4385">
-      <Properties>
-        <string name="Name">LeftBackClaw_2</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.196</X>
-          <Y>0.21</Y>
-          <Z>0.252</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-0.8679999999999998</X>
-          <Y>-2.8</Y>
-          <Z>1.302</Z>
+          <X>-1.7850000000000001</X>
+          <Y>-3.5</Y>
+          <Z>1.6275000000000002</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -1004,17 +940,81 @@
     </Item>
     <Item class="Part" referent="RBX4386">
       <Properties>
+        <string name="Name">LeftBackClaw_1</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.24500000000000002</X>
+          <Y>0.2625</Y>
+          <Z>0.315</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.4349999999999998</X>
+          <Y>-3.5</Y>
+          <Z>1.6275000000000002</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4387">
+      <Properties>
+        <string name="Name">LeftBackClaw_2</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.24500000000000002</X>
+          <Y>0.2625</Y>
+          <Z>0.315</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.0849999999999997</X>
+          <Y>-3.5</Y>
+          <Z>1.6275000000000002</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4388">
+      <Properties>
         <string name="Name">RightFrontLeg</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.9099999999999999</X>
-          <Y>2.6879999999999997</Y>
-          <Z>1.008</Z>
+          <X>1.1375</X>
+          <Y>3.36</Y>
+          <Z>1.26</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.148</X>
-          <Y>-1.6127999999999998</Y>
-          <Z>-1.47</Z>
+          <X>1.4349999999999998</X>
+          <Y>-2.016</Y>
+          <Z>-1.8375000000000001</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -1034,19 +1034,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4387">
+    <Item class="Part" referent="RBX4389">
       <Properties>
         <string name="Name">RightFrontPaw</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>1.148</X>
-          <Y>0.5319999999999999</Y>
-          <Z>1.3719999999999999</Z>
+          <X>1.4349999999999998</X>
+          <Y>0.665</Y>
+          <Z>1.7149999999999999</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.148</X>
-          <Y>-2.856</Y>
-          <Z>-1.638</Z>
+          <X>1.4349999999999998</X>
+          <Y>-3.5700000000000003</Y>
+          <Z>-2.0475</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -1066,83 +1066,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4388">
+    <Item class="Part" referent="RBX4390">
       <Properties>
         <string name="Name">RightFrontClaw</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.196</X>
-          <Y>0.21</Y>
-          <Z>0.252</Z>
+          <X>0.24500000000000002</X>
+          <Y>0.2625</Y>
+          <Z>0.315</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.8679999999999998</X>
-          <Y>-2.8</Y>
-          <Z>-2.268</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4389">
-      <Properties>
-        <string name="Name">RightFrontClaw_1</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.196</X>
-          <Y>0.21</Y>
-          <Z>0.252</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>1.148</X>
-          <Y>-2.8</Y>
-          <Z>-2.268</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4390">
-      <Properties>
-        <string name="Name">RightFrontClaw_2</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.196</X>
-          <Y>0.21</Y>
-          <Z>0.252</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>1.428</X>
-          <Y>-2.8</Y>
-          <Z>-2.268</Z>
+          <X>1.0849999999999997</X>
+          <Y>-3.5</Y>
+          <Z>-2.835</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -1164,17 +1100,81 @@
     </Item>
     <Item class="Part" referent="RBX4391">
       <Properties>
+        <string name="Name">RightFrontClaw_1</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.24500000000000002</X>
+          <Y>0.2625</Y>
+          <Z>0.315</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>1.4349999999999998</X>
+          <Y>-3.5</Y>
+          <Z>-2.835</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4392">
+      <Properties>
+        <string name="Name">RightFrontClaw_2</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.24500000000000002</X>
+          <Y>0.2625</Y>
+          <Z>0.315</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>1.7850000000000001</X>
+          <Y>-3.5</Y>
+          <Z>-2.835</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4393">
+      <Properties>
         <string name="Name">RightBackLeg</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.9099999999999999</X>
-          <Y>2.6879999999999997</Y>
-          <Z>1.008</Z>
+          <X>1.1375</X>
+          <Y>3.36</Y>
+          <Z>1.26</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.148</X>
-          <Y>-1.6127999999999998</Y>
-          <Z>2.0999999999999996</Z>
+          <X>1.4349999999999998</X>
+          <Y>-2.016</Y>
+          <Z>2.625</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -1194,19 +1194,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4392">
+    <Item class="Part" referent="RBX4394">
       <Properties>
         <string name="Name">RightBackPaw</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>1.148</X>
-          <Y>0.5319999999999999</Y>
-          <Z>1.3719999999999999</Z>
+          <X>1.4349999999999998</X>
+          <Y>0.665</Y>
+          <Z>1.7149999999999999</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.148</X>
-          <Y>-2.856</Y>
-          <Z>1.9319999999999997</Z>
+          <X>1.4349999999999998</X>
+          <Y>-3.5700000000000003</Y>
+          <Z>2.415</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -1226,83 +1226,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4393">
+    <Item class="Part" referent="RBX4395">
       <Properties>
         <string name="Name">RightBackClaw</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.196</X>
-          <Y>0.21</Y>
-          <Z>0.252</Z>
+          <X>0.24500000000000002</X>
+          <Y>0.2625</Y>
+          <Z>0.315</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.8679999999999998</X>
-          <Y>-2.8</Y>
-          <Z>1.302</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4394">
-      <Properties>
-        <string name="Name">RightBackClaw_1</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.196</X>
-          <Y>0.21</Y>
-          <Z>0.252</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>1.148</X>
-          <Y>-2.8</Y>
-          <Z>1.302</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>1.0</R11>
-          <R12>-0.0</R12>
-          <R20>0.0</R20>
-          <R21>0.0</R21>
-          <R22>1.0</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4395">
-      <Properties>
-        <string name="Name">RightBackClaw_2</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.196</X>
-          <Y>0.21</Y>
-          <Z>0.252</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>1.428</X>
-          <Y>-2.8</Y>
-          <Z>1.302</Z>
+          <X>1.0849999999999997</X>
+          <Y>-3.5</Y>
+          <Z>1.6275000000000002</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -1324,17 +1260,81 @@
     </Item>
     <Item class="Part" referent="RBX4396">
       <Properties>
+        <string name="Name">RightBackClaw_1</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.24500000000000002</X>
+          <Y>0.2625</Y>
+          <Z>0.315</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>1.4349999999999998</X>
+          <Y>-3.5</Y>
+          <Z>1.6275000000000002</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4397">
+      <Properties>
+        <string name="Name">RightBackClaw_2</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.24500000000000002</X>
+          <Y>0.2625</Y>
+          <Z>0.315</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>1.7850000000000001</X>
+          <Y>-3.5</Y>
+          <Z>1.6275000000000002</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>1.0</R11>
+          <R12>-0.0</R12>
+          <R20>0.0</R20>
+          <R21>0.0</R21>
+          <R22>1.0</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">12361844</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4398">
+      <Properties>
         <string name="Name">ManeLeaf</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
           <X>0.0</X>
-          <Y>1.54</Y>
-          <Z>-1.26</Z>
+          <Y>1.9250000000000003</Y>
+          <Z>-1.575</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -1354,19 +1354,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4397">
+    <Item class="Part" referent="RBX4399">
       <Properties>
         <string name="Name">ManeLeafVein</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
           <X>0.0</X>
-          <Y>1.631</Y>
-          <Z>-1.26</Z>
+          <Y>2.0387500000000003</Y>
+          <Z>-1.575</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -1376,69 +1376,6 @@
           <R20>0.0</R20>
           <R21>0.573576436351046</R21>
           <R22>0.8191520442889918</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12176776</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4398">
-      <Properties>
-        <string name="Name">ManeLeaf_1</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>0.917900706632378</X>
-          <Y>1.4253617771282991</Y>
-          <Z>-1.26</Z>
-          <R00>0.8186868718121789</R00>
-          <R01>-0.025253465755967874</R01>
-          <R02>0.5736846419329185</R02>
-          <R10>0.34150797517769</R10>
-          <R11>0.8245722465157728</R11>
-          <R12>-0.45105754972726697</R12>
-          <R20>-0.461653667604215</R20>
-          <R21>0.5651927748505317</R21>
-          <R22>0.6836907330396786</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4399">
-      <Properties>
-        <string name="Name">ManeLeafVein_1</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>0.917900706632378</X>
-          <Y>1.5163617771282991</Y>
-          <Z>-1.26</Z>
-          <R00>0.8186868718121789</R00>
-          <R01>-0.025253465755967874</R01>
-          <R02>0.5736846419329185</R02>
-          <R10>0.34150797517769</R10>
-          <R11>0.8245722465157728</R11>
-          <R12>-0.45105754972726697</R12>
-          <R20>-0.461653667604215</R20>
-          <R21>0.5651927748505317</R21>
-          <R22>0.6836907330396786</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -1450,28 +1387,28 @@
     </Item>
     <Item class="Part" referent="RBX4400">
       <Properties>
-        <string name="Name">ManeLeaf_2</string>
+        <string name="Name">ManeLeaf_1</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.4063054713014331</X>
-          <Y>1.1350876070567957</Y>
-          <Z>-1.26</Z>
-          <R00>0.20217308307927212</R00>
-          <R01>-0.012313208431629571</R01>
-          <R02>0.9792723979446888</R02>
-          <R10>0.5627687138994804</R10>
-          <R11>0.8198057536803417</R11>
-          <R12>-0.10587681941072714</R12>
-          <R20>-0.8015094629099189</R20>
-          <R21>0.5725093109554866</R21>
-          <R22>0.17267214522072546</R22>
+          <X>1.1473758832904726</X>
+          <Y>1.7817022214103742</Y>
+          <Z>-1.575</Z>
+          <R00>0.8186868718121789</R00>
+          <R01>-0.025253465755967874</R01>
+          <R02>0.5736846419329185</R02>
+          <R10>0.34150797517769</R10>
+          <R11>0.8245722465157728</R11>
+          <R12>-0.45105754972726697</R12>
+          <R20>-0.461653667604215</R20>
+          <R21>0.5651927748505317</R21>
+          <R22>0.6836907330396786</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
+        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -1482,26 +1419,26 @@
     </Item>
     <Item class="Part" referent="RBX4401">
       <Properties>
-        <string name="Name">ManeLeafVein_2</string>
+        <string name="Name">ManeLeafVein_1</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.4063054713014331</X>
-          <Y>1.2260876070567959</Y>
-          <Z>-1.26</Z>
-          <R00>0.20217308307927212</R00>
-          <R01>-0.012313208431629571</R01>
-          <R02>0.9792723979446888</R02>
-          <R10>0.5627687138994804</R10>
-          <R11>0.8198057536803417</R11>
-          <R12>-0.10587681941072714</R12>
-          <R20>-0.8015094629099189</R20>
-          <R21>0.5725093109554866</R21>
-          <R22>0.17267214522072546</R22>
+          <X>1.1473758832904726</X>
+          <Y>1.895452221410374</Y>
+          <Z>-1.575</Z>
+          <R00>0.8186868718121789</R00>
+          <R01>-0.025253465755967874</R01>
+          <R02>0.5736846419329185</R02>
+          <R10>0.34150797517769</R10>
+          <R11>0.8245722465157728</R11>
+          <R12>-0.45105754972726697</R12>
+          <R20>-0.461653667604215</R20>
+          <R21>0.5651927748505317</R21>
+          <R22>0.6836907330396786</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -1513,28 +1450,28 @@
     </Item>
     <Item class="Part" referent="RBX4402">
       <Properties>
-        <string name="Name">ManeLeaf_3</string>
+        <string name="Name">ManeLeaf_2</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.2366842766041783</X>
-          <Y>0.805</Y>
-          <Z>-1.26</Z>
-          <R00>-0.5630810634150252</R00>
-          <R01>0.027526340385751025</R01>
-          <R02>0.8259431073677969</R02>
-          <R10>0.4813330330783166</R10>
-          <R11>0.8233435087569004</R11>
-          <R12>0.300705799504273</R12>
-          <R20>-0.6717575658606552</R20>
-          <R21>0.5668754423794028</R21>
-          <R22>-0.47685847537411324</R22>
+          <X>1.7578818391267914</X>
+          <Y>1.4188595088209948</Y>
+          <Z>-1.575</Z>
+          <R00>0.20217308307927212</R00>
+          <R01>-0.012313208431629571</R01>
+          <R02>0.9792723979446888</R02>
+          <R10>0.5627687138994804</R10>
+          <R11>0.8198057536803417</R11>
+          <R12>-0.10587681941072714</R12>
+          <R20>-0.8015094629099189</R20>
+          <R21>0.5725093109554866</R21>
+          <R22>0.17267214522072546</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
+        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -1545,26 +1482,26 @@
     </Item>
     <Item class="Part" referent="RBX4403">
       <Properties>
-        <string name="Name">ManeLeafVein_3</string>
+        <string name="Name">ManeLeafVein_2</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.2366842766041783</X>
-          <Y>0.8960000000000001</Y>
-          <Z>-1.26</Z>
-          <R00>-0.5630810634150252</R00>
-          <R01>0.027526340385751025</R01>
-          <R02>0.8259431073677969</R02>
-          <R10>0.4813330330783166</R10>
-          <R11>0.8233435087569004</R11>
-          <R12>0.300705799504273</R12>
-          <R20>-0.6717575658606552</R20>
-          <R21>0.5668754423794028</R21>
-          <R22>-0.47685847537411324</R22>
+          <X>1.7578818391267914</X>
+          <Y>1.532609508820995</Y>
+          <Z>-1.575</Z>
+          <R00>0.20217308307927212</R00>
+          <R01>-0.012313208431629571</R01>
+          <R02>0.9792723979446888</R02>
+          <R10>0.5627687138994804</R10>
+          <R11>0.8198057536803417</R11>
+          <R12>-0.10587681941072714</R12>
+          <R20>-0.8015094629099189</R20>
+          <R21>0.5725093109554866</R21>
+          <R22>0.17267214522072546</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -1576,28 +1513,28 @@
     </Item>
     <Item class="Part" referent="RBX4404">
       <Properties>
-        <string name="Name">ManeLeaf_4</string>
+        <string name="Name">ManeLeaf_3</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.48840476466905514</X>
-          <Y>0.5895506158149049</Y>
-          <Z>-1.26</Z>
-          <R00>-0.9577788828261982</R00>
-          <R01>0.01321918361075028</R01>
-          <R02>0.287201784111563</R02>
-          <R10>0.17416800233508264</R10>
-          <R11>0.8214610616074592</R11>
-          <R12>0.5430167872408297</R12>
-          <R20>-0.22874684385758465</R20>
-          <R21>0.5701113728451759</R21>
-          <R22>-0.7890804166736002</R22>
+          <X>1.545855345755223</X>
+          <Y>1.00625</Y>
+          <Z>-1.575</Z>
+          <R00>-0.5630810634150252</R00>
+          <R01>0.027526340385751025</R01>
+          <R02>0.8259431073677969</R02>
+          <R10>0.4813330330783166</R10>
+          <R11>0.8233435087569004</R11>
+          <R12>0.300705799504273</R12>
+          <R20>-0.6717575658606552</R20>
+          <R21>0.5668754423794028</R21>
+          <R22>-0.47685847537411324</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
+        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -1608,26 +1545,26 @@
     </Item>
     <Item class="Part" referent="RBX4405">
       <Properties>
-        <string name="Name">ManeLeafVein_4</string>
+        <string name="Name">ManeLeafVein_3</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.48840476466905514</X>
-          <Y>0.680550615814905</Y>
-          <Z>-1.26</Z>
-          <R00>-0.9577788828261982</R00>
-          <R01>0.01321918361075028</R01>
-          <R02>0.287201784111563</R02>
-          <R10>0.17416800233508264</R10>
-          <R11>0.8214610616074592</R11>
-          <R12>0.5430167872408297</R12>
-          <R20>-0.22874684385758465</R20>
-          <R21>0.5701113728451759</R21>
-          <R22>-0.7890804166736002</R22>
+          <X>1.545855345755223</X>
+          <Y>1.12</Y>
+          <Z>-1.575</Z>
+          <R00>-0.5630810634150252</R00>
+          <R01>0.027526340385751025</R01>
+          <R02>0.8259431073677969</R02>
+          <R10>0.4813330330783166</R10>
+          <R11>0.8233435087569004</R11>
+          <R12>0.300705799504273</R12>
+          <R20>-0.6717575658606552</R20>
+          <R21>0.5668754423794028</R21>
+          <R22>-0.47685847537411324</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -1639,28 +1576,28 @@
     </Item>
     <Item class="Part" referent="RBX4406">
       <Properties>
-        <string name="Name">ManeLeaf_5</string>
+        <string name="Name">ManeLeaf_4</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.4884047646690548</X>
-          <Y>0.5895506158149049</Y>
-          <Z>-1.26</Z>
-          <R00>-0.9577788828261984</R00>
-          <R01>-0.013219183610750307</R01>
-          <R02>-0.28720178411156283</R02>
-          <R10>-0.17416800233508256</R10>
-          <R11>0.8214610616074594</R11>
+          <X>0.610505955836319</X>
+          <Y>0.7369382697686312</Y>
+          <Z>-1.575</Z>
+          <R00>-0.9577788828261982</R00>
+          <R01>0.01321918361075028</R01>
+          <R02>0.287201784111563</R02>
+          <R10>0.17416800233508264</R10>
+          <R11>0.8214610616074592</R11>
           <R12>0.5430167872408297</R12>
-          <R20>0.22874684385758454</R20>
-          <R21>0.5701113728451758</R21>
-          <R22>-0.7890804166736003</R22>
+          <R20>-0.22874684385758465</R20>
+          <R21>0.5701113728451759</R21>
+          <R22>-0.7890804166736002</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
+        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -1671,26 +1608,26 @@
     </Item>
     <Item class="Part" referent="RBX4407">
       <Properties>
-        <string name="Name">ManeLeafVein_5</string>
+        <string name="Name">ManeLeafVein_4</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.4884047646690548</X>
-          <Y>0.680550615814905</Y>
-          <Z>-1.26</Z>
-          <R00>-0.9577788828261984</R00>
-          <R01>-0.013219183610750307</R01>
-          <R02>-0.28720178411156283</R02>
-          <R10>-0.17416800233508256</R10>
-          <R11>0.8214610616074594</R11>
+          <X>0.610505955836319</X>
+          <Y>0.8506882697686312</Y>
+          <Z>-1.575</Z>
+          <R00>-0.9577788828261982</R00>
+          <R01>0.01321918361075028</R01>
+          <R02>0.287201784111563</R02>
+          <R10>0.17416800233508264</R10>
+          <R11>0.8214610616074592</R11>
           <R12>0.5430167872408297</R12>
-          <R20>0.22874684385758454</R20>
-          <R21>0.5701113728451758</R21>
-          <R22>-0.7890804166736003</R22>
+          <R20>-0.22874684385758465</R20>
+          <R21>0.5701113728451759</R21>
+          <R22>-0.7890804166736002</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -1702,28 +1639,28 @@
     </Item>
     <Item class="Part" referent="RBX4408">
       <Properties>
-        <string name="Name">ManeLeaf_6</string>
+        <string name="Name">ManeLeaf_5</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.2366842766041781</X>
-          <Y>0.8049999999999997</Y>
-          <Z>-1.26</Z>
-          <R00>-0.5630810634150258</R00>
-          <R01>-0.027526340385751108</R01>
-          <R02>-0.8259431073677965</R02>
-          <R10>-0.4813330330783165</R10>
-          <R11>0.8233435087569003</R11>
-          <R12>0.30070579950427334</R12>
-          <R20>0.6717575658606548</R20>
-          <R21>0.5668754423794029</R21>
-          <R22>-0.47685847537411385</R22>
+          <X>-0.6105059558363186</X>
+          <Y>0.7369382697686312</Y>
+          <Z>-1.575</Z>
+          <R00>-0.9577788828261984</R00>
+          <R01>-0.013219183610750307</R01>
+          <R02>-0.28720178411156283</R02>
+          <R10>-0.17416800233508256</R10>
+          <R11>0.8214610616074594</R11>
+          <R12>0.5430167872408297</R12>
+          <R20>0.22874684385758454</R20>
+          <R21>0.5701113728451758</R21>
+          <R22>-0.7890804166736003</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
+        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -1734,26 +1671,26 @@
     </Item>
     <Item class="Part" referent="RBX4409">
       <Properties>
-        <string name="Name">ManeLeafVein_6</string>
+        <string name="Name">ManeLeafVein_5</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.2366842766041781</X>
-          <Y>0.8959999999999998</Y>
-          <Z>-1.26</Z>
-          <R00>-0.5630810634150258</R00>
-          <R01>-0.027526340385751108</R01>
-          <R02>-0.8259431073677965</R02>
-          <R10>-0.4813330330783165</R10>
-          <R11>0.8233435087569003</R11>
-          <R12>0.30070579950427334</R12>
-          <R20>0.6717575658606548</R20>
-          <R21>0.5668754423794029</R21>
-          <R22>-0.47685847537411385</R22>
+          <X>-0.6105059558363186</X>
+          <Y>0.8506882697686312</Y>
+          <Z>-1.575</Z>
+          <R00>-0.9577788828261984</R00>
+          <R01>-0.013219183610750307</R01>
+          <R02>-0.28720178411156283</R02>
+          <R10>-0.17416800233508256</R10>
+          <R11>0.8214610616074594</R11>
+          <R12>0.5430167872408297</R12>
+          <R20>0.22874684385758454</R20>
+          <R21>0.5701113728451758</R21>
+          <R22>-0.7890804166736003</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -1765,28 +1702,28 @@
     </Item>
     <Item class="Part" referent="RBX4410">
       <Properties>
-        <string name="Name">ManeLeaf_7</string>
+        <string name="Name">ManeLeaf_6</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.4063054713014331</X>
-          <Y>1.1350876070567957</Y>
-          <Z>-1.26</Z>
-          <R00>0.20217308307927165</R00>
-          <R01>0.012313208431629516</R01>
-          <R02>-0.9792723979446889</R02>
-          <R10>-0.5627687138994804</R10>
-          <R11>0.8198057536803417</R11>
-          <R12>-0.1058768194107269</R12>
-          <R20>0.801509462909919</R20>
-          <R21>0.5725093109554866</R21>
-          <R22>0.17267214522072502</R22>
+          <X>-1.5458553457552227</X>
+          <Y>1.0062499999999996</Y>
+          <Z>-1.575</Z>
+          <R00>-0.5630810634150258</R00>
+          <R01>-0.027526340385751108</R01>
+          <R02>-0.8259431073677965</R02>
+          <R10>-0.4813330330783165</R10>
+          <R11>0.8233435087569003</R11>
+          <R12>0.30070579950427334</R12>
+          <R20>0.6717575658606548</R20>
+          <R21>0.5668754423794029</R21>
+          <R22>-0.47685847537411385</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
+        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -1797,26 +1734,26 @@
     </Item>
     <Item class="Part" referent="RBX4411">
       <Properties>
-        <string name="Name">ManeLeafVein_7</string>
+        <string name="Name">ManeLeafVein_6</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.4063054713014331</X>
-          <Y>1.2260876070567954</Y>
-          <Z>-1.26</Z>
-          <R00>0.20217308307927165</R00>
-          <R01>0.012313208431629516</R01>
-          <R02>-0.9792723979446889</R02>
-          <R10>-0.5627687138994804</R10>
-          <R11>0.8198057536803417</R11>
-          <R12>-0.1058768194107269</R12>
-          <R20>0.801509462909919</R20>
-          <R21>0.5725093109554866</R21>
-          <R22>0.17267214522072502</R22>
+          <X>-1.5458553457552227</X>
+          <Y>1.1199999999999999</Y>
+          <Z>-1.575</Z>
+          <R00>-0.5630810634150258</R00>
+          <R01>-0.027526340385751108</R01>
+          <R02>-0.8259431073677965</R02>
+          <R10>-0.4813330330783165</R10>
+          <R11>0.8233435087569003</R11>
+          <R12>0.30070579950427334</R12>
+          <R20>0.6717575658606548</R20>
+          <R21>0.5668754423794029</R21>
+          <R22>-0.47685847537411385</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -1828,28 +1765,28 @@
     </Item>
     <Item class="Part" referent="RBX4412">
       <Properties>
-        <string name="Name">ManeLeaf_8</string>
+        <string name="Name">ManeLeaf_7</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.9179007066323784</X>
-          <Y>1.4253617771282991</Y>
-          <Z>-1.26</Z>
-          <R00>0.8186868718121787</R00>
-          <R01>0.025253465755967763</R01>
-          <R02>-0.5736846419329188</R02>
-          <R10>-0.3415079751776901</R10>
-          <R11>0.8245722465157729</R11>
-          <R12>-0.45105754972726686</R12>
-          <R20>0.46165366760421533</R20>
-          <R21>0.5651927748505317</R21>
-          <R22>0.6836907330396785</R22>
+          <X>-1.7578818391267914</X>
+          <Y>1.4188595088209945</Y>
+          <Z>-1.575</Z>
+          <R00>0.20217308307927165</R00>
+          <R01>0.012313208431629516</R01>
+          <R02>-0.9792723979446889</R02>
+          <R10>-0.5627687138994804</R10>
+          <R11>0.8198057536803417</R11>
+          <R12>-0.1058768194107269</R12>
+          <R20>0.801509462909919</R20>
+          <R21>0.5725093109554866</R21>
+          <R22>0.17267214522072502</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
+        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -1860,26 +1797,26 @@
     </Item>
     <Item class="Part" referent="RBX4413">
       <Properties>
-        <string name="Name">ManeLeafVein_8</string>
+        <string name="Name">ManeLeafVein_7</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.9179007066323784</X>
-          <Y>1.5163617771282991</Y>
-          <Z>-1.26</Z>
-          <R00>0.8186868718121787</R00>
-          <R01>0.025253465755967763</R01>
-          <R02>-0.5736846419329188</R02>
-          <R10>-0.3415079751776901</R10>
-          <R11>0.8245722465157729</R11>
-          <R12>-0.45105754972726686</R12>
-          <R20>0.46165366760421533</R20>
-          <R21>0.5651927748505317</R21>
-          <R22>0.6836907330396785</R22>
+          <X>-1.7578818391267914</X>
+          <Y>1.5326095088209946</Y>
+          <Z>-1.575</Z>
+          <R00>0.20217308307927165</R00>
+          <R01>0.012313208431629516</R01>
+          <R02>-0.9792723979446889</R02>
+          <R10>-0.5627687138994804</R10>
+          <R11>0.8198057536803417</R11>
+          <R12>-0.1058768194107269</R12>
+          <R20>0.801509462909919</R20>
+          <R21>0.5725093109554866</R21>
+          <R22>0.17267214522072502</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -1891,28 +1828,28 @@
     </Item>
     <Item class="Part" referent="RBX4414">
       <Properties>
-        <string name="Name">ManeLeaf_9</string>
+        <string name="Name">ManeLeaf_8</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.0</X>
-          <Y>1.26</Y>
-          <Z>-0.63</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>0.8191520442889918</R11>
-          <R12>-0.573576436351046</R12>
-          <R20>0.0</R20>
-          <R21>0.573576436351046</R21>
-          <R22>0.8191520442889918</R22>
+          <X>-1.1473758832904732</X>
+          <Y>1.7817022214103742</Y>
+          <Z>-1.575</Z>
+          <R00>0.8186868718121787</R00>
+          <R01>0.025253465755967763</R01>
+          <R02>-0.5736846419329188</R02>
+          <R10>-0.3415079751776901</R10>
+          <R11>0.8245722465157729</R11>
+          <R12>-0.45105754972726686</R12>
+          <R20>0.46165366760421533</R20>
+          <R21>0.5651927748505317</R21>
+          <R22>0.6836907330396785</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
+        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -1923,26 +1860,26 @@
     </Item>
     <Item class="Part" referent="RBX4415">
       <Properties>
-        <string name="Name">ManeLeafVein_9</string>
+        <string name="Name">ManeLeafVein_8</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.0</X>
-          <Y>1.351</Y>
-          <Z>-0.63</Z>
-          <R00>1.0</R00>
-          <R01>0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>0.8191520442889918</R11>
-          <R12>-0.573576436351046</R12>
-          <R20>0.0</R20>
-          <R21>0.573576436351046</R21>
-          <R22>0.8191520442889918</R22>
+          <X>-1.1473758832904732</X>
+          <Y>1.895452221410374</Y>
+          <Z>-1.575</Z>
+          <R00>0.8186868718121787</R00>
+          <R01>0.025253465755967763</R01>
+          <R02>-0.5736846419329188</R02>
+          <R10>-0.3415079751776901</R10>
+          <R11>0.8245722465157729</R11>
+          <R12>-0.45105754972726686</R12>
+          <R20>0.46165366760421533</R20>
+          <R21>0.5651927748505317</R21>
+          <R22>0.6836907330396785</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -1954,28 +1891,28 @@
     </Item>
     <Item class="Part" referent="RBX4416">
       <Properties>
-        <string name="Name">ManeLeaf_10</string>
+        <string name="Name">ManeLeaf_9</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.917900706632378</X>
-          <Y>1.1453617771282991</Y>
-          <Z>-0.63</Z>
-          <R00>0.8186868718121789</R00>
-          <R01>-0.025253465755967874</R01>
-          <R02>0.5736846419329185</R02>
-          <R10>0.34150797517769</R10>
-          <R11>0.8245722465157728</R11>
-          <R12>-0.45105754972726697</R12>
-          <R20>-0.461653667604215</R20>
-          <R21>0.5651927748505317</R21>
-          <R22>0.6836907330396786</R22>
+          <X>0.0</X>
+          <Y>1.5750000000000002</Y>
+          <Z>-0.7875</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>0.8191520442889918</R11>
+          <R12>-0.573576436351046</R12>
+          <R20>0.0</R20>
+          <R21>0.573576436351046</R21>
+          <R22>0.8191520442889918</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
+        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -1986,26 +1923,26 @@
     </Item>
     <Item class="Part" referent="RBX4417">
       <Properties>
-        <string name="Name">ManeLeafVein_10</string>
+        <string name="Name">ManeLeafVein_9</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.917900706632378</X>
-          <Y>1.236361777128299</Y>
-          <Z>-0.63</Z>
-          <R00>0.8186868718121789</R00>
-          <R01>-0.025253465755967874</R01>
-          <R02>0.5736846419329185</R02>
-          <R10>0.34150797517769</R10>
-          <R11>0.8245722465157728</R11>
-          <R12>-0.45105754972726697</R12>
-          <R20>-0.461653667604215</R20>
-          <R21>0.5651927748505317</R21>
-          <R22>0.6836907330396786</R22>
+          <X>0.0</X>
+          <Y>1.6887500000000002</Y>
+          <Z>-0.7875</Z>
+          <R00>1.0</R00>
+          <R01>0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>0.8191520442889918</R11>
+          <R12>-0.573576436351046</R12>
+          <R20>0.0</R20>
+          <R21>0.573576436351046</R21>
+          <R22>0.8191520442889918</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -2017,28 +1954,28 @@
     </Item>
     <Item class="Part" referent="RBX4418">
       <Properties>
-        <string name="Name">ManeLeaf_11</string>
+        <string name="Name">ManeLeaf_10</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.4063054713014331</X>
-          <Y>0.8550876070567957</Y>
-          <Z>-0.63</Z>
-          <R00>0.20217308307927212</R00>
-          <R01>-0.012313208431629571</R01>
-          <R02>0.9792723979446888</R02>
-          <R10>0.5627687138994804</R10>
-          <R11>0.8198057536803417</R11>
-          <R12>-0.10587681941072714</R12>
-          <R20>-0.8015094629099189</R20>
-          <R21>0.5725093109554866</R21>
-          <R22>0.17267214522072546</R22>
+          <X>1.1473758832904726</X>
+          <Y>1.431702221410374</Y>
+          <Z>-0.7875</Z>
+          <R00>0.8186868718121789</R00>
+          <R01>-0.025253465755967874</R01>
+          <R02>0.5736846419329185</R02>
+          <R10>0.34150797517769</R10>
+          <R11>0.8245722465157728</R11>
+          <R12>-0.45105754972726697</R12>
+          <R20>-0.461653667604215</R20>
+          <R21>0.5651927748505317</R21>
+          <R22>0.6836907330396786</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
+        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -2049,26 +1986,26 @@
     </Item>
     <Item class="Part" referent="RBX4419">
       <Properties>
-        <string name="Name">ManeLeafVein_11</string>
+        <string name="Name">ManeLeafVein_10</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.4063054713014331</X>
-          <Y>0.9460876070567956</Y>
-          <Z>-0.63</Z>
-          <R00>0.20217308307927212</R00>
-          <R01>-0.012313208431629571</R01>
-          <R02>0.9792723979446888</R02>
-          <R10>0.5627687138994804</R10>
-          <R11>0.8198057536803417</R11>
-          <R12>-0.10587681941072714</R12>
-          <R20>-0.8015094629099189</R20>
-          <R21>0.5725093109554866</R21>
-          <R22>0.17267214522072546</R22>
+          <X>1.1473758832904726</X>
+          <Y>1.545452221410374</Y>
+          <Z>-0.7875</Z>
+          <R00>0.8186868718121789</R00>
+          <R01>-0.025253465755967874</R01>
+          <R02>0.5736846419329185</R02>
+          <R10>0.34150797517769</R10>
+          <R11>0.8245722465157728</R11>
+          <R12>-0.45105754972726697</R12>
+          <R20>-0.461653667604215</R20>
+          <R21>0.5651927748505317</R21>
+          <R22>0.6836907330396786</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -2080,28 +2017,28 @@
     </Item>
     <Item class="Part" referent="RBX4420">
       <Properties>
-        <string name="Name">ManeLeaf_12</string>
+        <string name="Name">ManeLeaf_11</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.2366842766041783</X>
-          <Y>0.525</Y>
-          <Z>-0.63</Z>
-          <R00>-0.5630810634150252</R00>
-          <R01>0.027526340385751025</R01>
-          <R02>0.8259431073677969</R02>
-          <R10>0.4813330330783166</R10>
-          <R11>0.8233435087569004</R11>
-          <R12>0.300705799504273</R12>
-          <R20>-0.6717575658606552</R20>
-          <R21>0.5668754423794028</R21>
-          <R22>-0.47685847537411324</R22>
+          <X>1.7578818391267914</X>
+          <Y>1.0688595088209947</Y>
+          <Z>-0.7875</Z>
+          <R00>0.20217308307927212</R00>
+          <R01>-0.012313208431629571</R01>
+          <R02>0.9792723979446888</R02>
+          <R10>0.5627687138994804</R10>
+          <R11>0.8198057536803417</R11>
+          <R12>-0.10587681941072714</R12>
+          <R20>-0.8015094629099189</R20>
+          <R21>0.5725093109554866</R21>
+          <R22>0.17267214522072546</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
+        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -2112,26 +2049,26 @@
     </Item>
     <Item class="Part" referent="RBX4421">
       <Properties>
-        <string name="Name">ManeLeafVein_12</string>
+        <string name="Name">ManeLeafVein_11</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.2366842766041783</X>
-          <Y>0.616</Y>
-          <Z>-0.63</Z>
-          <R00>-0.5630810634150252</R00>
-          <R01>0.027526340385751025</R01>
-          <R02>0.8259431073677969</R02>
-          <R10>0.4813330330783166</R10>
-          <R11>0.8233435087569004</R11>
-          <R12>0.300705799504273</R12>
-          <R20>-0.6717575658606552</R20>
-          <R21>0.5668754423794028</R21>
-          <R22>-0.47685847537411324</R22>
+          <X>1.7578818391267914</X>
+          <Y>1.1826095088209945</Y>
+          <Z>-0.7875</Z>
+          <R00>0.20217308307927212</R00>
+          <R01>-0.012313208431629571</R01>
+          <R02>0.9792723979446888</R02>
+          <R10>0.5627687138994804</R10>
+          <R11>0.8198057536803417</R11>
+          <R12>-0.10587681941072714</R12>
+          <R20>-0.8015094629099189</R20>
+          <R21>0.5725093109554866</R21>
+          <R22>0.17267214522072546</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -2143,28 +2080,28 @@
     </Item>
     <Item class="Part" referent="RBX4422">
       <Properties>
-        <string name="Name">ManeLeaf_13</string>
+        <string name="Name">ManeLeaf_12</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.48840476466905514</X>
-          <Y>0.3095506158149049</Y>
-          <Z>-0.63</Z>
-          <R00>-0.9577788828261982</R00>
-          <R01>0.01321918361075028</R01>
-          <R02>0.287201784111563</R02>
-          <R10>0.17416800233508264</R10>
-          <R11>0.8214610616074592</R11>
-          <R12>0.5430167872408297</R12>
-          <R20>-0.22874684385758465</R20>
-          <R21>0.5701113728451759</R21>
-          <R22>-0.7890804166736002</R22>
+          <X>1.545855345755223</X>
+          <Y>0.6562500000000001</Y>
+          <Z>-0.7875</Z>
+          <R00>-0.5630810634150252</R00>
+          <R01>0.027526340385751025</R01>
+          <R02>0.8259431073677969</R02>
+          <R10>0.4813330330783166</R10>
+          <R11>0.8233435087569004</R11>
+          <R12>0.300705799504273</R12>
+          <R20>-0.6717575658606552</R20>
+          <R21>0.5668754423794028</R21>
+          <R22>-0.47685847537411324</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
+        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -2175,26 +2112,26 @@
     </Item>
     <Item class="Part" referent="RBX4423">
       <Properties>
-        <string name="Name">ManeLeafVein_13</string>
+        <string name="Name">ManeLeafVein_12</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.48840476466905514</X>
-          <Y>0.4005506158149049</Y>
-          <Z>-0.63</Z>
-          <R00>-0.9577788828261982</R00>
-          <R01>0.01321918361075028</R01>
-          <R02>0.287201784111563</R02>
-          <R10>0.17416800233508264</R10>
-          <R11>0.8214610616074592</R11>
-          <R12>0.5430167872408297</R12>
-          <R20>-0.22874684385758465</R20>
-          <R21>0.5701113728451759</R21>
-          <R22>-0.7890804166736002</R22>
+          <X>1.545855345755223</X>
+          <Y>0.7700000000000001</Y>
+          <Z>-0.7875</Z>
+          <R00>-0.5630810634150252</R00>
+          <R01>0.027526340385751025</R01>
+          <R02>0.8259431073677969</R02>
+          <R10>0.4813330330783166</R10>
+          <R11>0.8233435087569004</R11>
+          <R12>0.300705799504273</R12>
+          <R20>-0.6717575658606552</R20>
+          <R21>0.5668754423794028</R21>
+          <R22>-0.47685847537411324</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -2206,28 +2143,28 @@
     </Item>
     <Item class="Part" referent="RBX4424">
       <Properties>
-        <string name="Name">ManeLeaf_14</string>
+        <string name="Name">ManeLeaf_13</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.4884047646690548</X>
-          <Y>0.3095506158149049</Y>
-          <Z>-0.63</Z>
-          <R00>-0.9577788828261984</R00>
-          <R01>-0.013219183610750307</R01>
-          <R02>-0.28720178411156283</R02>
-          <R10>-0.17416800233508256</R10>
-          <R11>0.8214610616074594</R11>
+          <X>0.610505955836319</X>
+          <Y>0.38693826976863116</Y>
+          <Z>-0.7875</Z>
+          <R00>-0.9577788828261982</R00>
+          <R01>0.01321918361075028</R01>
+          <R02>0.287201784111563</R02>
+          <R10>0.17416800233508264</R10>
+          <R11>0.8214610616074592</R11>
           <R12>0.5430167872408297</R12>
-          <R20>0.22874684385758454</R20>
-          <R21>0.5701113728451758</R21>
-          <R22>-0.7890804166736003</R22>
+          <R20>-0.22874684385758465</R20>
+          <R21>0.5701113728451759</R21>
+          <R22>-0.7890804166736002</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
+        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -2238,26 +2175,26 @@
     </Item>
     <Item class="Part" referent="RBX4425">
       <Properties>
-        <string name="Name">ManeLeafVein_14</string>
+        <string name="Name">ManeLeafVein_13</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.4884047646690548</X>
-          <Y>0.4005506158149049</Y>
-          <Z>-0.63</Z>
-          <R00>-0.9577788828261984</R00>
-          <R01>-0.013219183610750307</R01>
-          <R02>-0.28720178411156283</R02>
-          <R10>-0.17416800233508256</R10>
-          <R11>0.8214610616074594</R11>
+          <X>0.610505955836319</X>
+          <Y>0.5006882697686311</Y>
+          <Z>-0.7875</Z>
+          <R00>-0.9577788828261982</R00>
+          <R01>0.01321918361075028</R01>
+          <R02>0.287201784111563</R02>
+          <R10>0.17416800233508264</R10>
+          <R11>0.8214610616074592</R11>
           <R12>0.5430167872408297</R12>
-          <R20>0.22874684385758454</R20>
-          <R21>0.5701113728451758</R21>
-          <R22>-0.7890804166736003</R22>
+          <R20>-0.22874684385758465</R20>
+          <R21>0.5701113728451759</R21>
+          <R22>-0.7890804166736002</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -2269,28 +2206,28 @@
     </Item>
     <Item class="Part" referent="RBX4426">
       <Properties>
-        <string name="Name">ManeLeaf_15</string>
+        <string name="Name">ManeLeaf_14</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.2366842766041781</X>
-          <Y>0.5249999999999997</Y>
-          <Z>-0.63</Z>
-          <R00>-0.5630810634150258</R00>
-          <R01>-0.027526340385751108</R01>
-          <R02>-0.8259431073677965</R02>
-          <R10>-0.4813330330783165</R10>
-          <R11>0.8233435087569003</R11>
-          <R12>0.30070579950427334</R12>
-          <R20>0.6717575658606548</R20>
-          <R21>0.5668754423794029</R21>
-          <R22>-0.47685847537411385</R22>
+          <X>-0.6105059558363186</X>
+          <Y>0.38693826976863116</Y>
+          <Z>-0.7875</Z>
+          <R00>-0.9577788828261984</R00>
+          <R01>-0.013219183610750307</R01>
+          <R02>-0.28720178411156283</R02>
+          <R10>-0.17416800233508256</R10>
+          <R11>0.8214610616074594</R11>
+          <R12>0.5430167872408297</R12>
+          <R20>0.22874684385758454</R20>
+          <R21>0.5701113728451758</R21>
+          <R22>-0.7890804166736003</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
+        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -2301,26 +2238,26 @@
     </Item>
     <Item class="Part" referent="RBX4427">
       <Properties>
-        <string name="Name">ManeLeafVein_15</string>
+        <string name="Name">ManeLeafVein_14</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.2366842766041781</X>
-          <Y>0.6159999999999998</Y>
-          <Z>-0.63</Z>
-          <R00>-0.5630810634150258</R00>
-          <R01>-0.027526340385751108</R01>
-          <R02>-0.8259431073677965</R02>
-          <R10>-0.4813330330783165</R10>
-          <R11>0.8233435087569003</R11>
-          <R12>0.30070579950427334</R12>
-          <R20>0.6717575658606548</R20>
-          <R21>0.5668754423794029</R21>
-          <R22>-0.47685847537411385</R22>
+          <X>-0.6105059558363186</X>
+          <Y>0.5006882697686311</Y>
+          <Z>-0.7875</Z>
+          <R00>-0.9577788828261984</R00>
+          <R01>-0.013219183610750307</R01>
+          <R02>-0.28720178411156283</R02>
+          <R10>-0.17416800233508256</R10>
+          <R11>0.8214610616074594</R11>
+          <R12>0.5430167872408297</R12>
+          <R20>0.22874684385758454</R20>
+          <R21>0.5701113728451758</R21>
+          <R22>-0.7890804166736003</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -2332,28 +2269,28 @@
     </Item>
     <Item class="Part" referent="RBX4428">
       <Properties>
-        <string name="Name">ManeLeaf_16</string>
+        <string name="Name">ManeLeaf_15</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.4063054713014331</X>
-          <Y>0.8550876070567957</Y>
-          <Z>-0.63</Z>
-          <R00>0.20217308307927165</R00>
-          <R01>0.012313208431629516</R01>
-          <R02>-0.9792723979446889</R02>
-          <R10>-0.5627687138994804</R10>
-          <R11>0.8198057536803417</R11>
-          <R12>-0.1058768194107269</R12>
-          <R20>0.801509462909919</R20>
-          <R21>0.5725093109554866</R21>
-          <R22>0.17267214522072502</R22>
+          <X>-1.5458553457552227</X>
+          <Y>0.6562499999999997</Y>
+          <Z>-0.7875</Z>
+          <R00>-0.5630810634150258</R00>
+          <R01>-0.027526340385751108</R01>
+          <R02>-0.8259431073677965</R02>
+          <R10>-0.4813330330783165</R10>
+          <R11>0.8233435087569003</R11>
+          <R12>0.30070579950427334</R12>
+          <R20>0.6717575658606548</R20>
+          <R21>0.5668754423794029</R21>
+          <R22>-0.47685847537411385</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
+        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -2364,26 +2301,26 @@
     </Item>
     <Item class="Part" referent="RBX4429">
       <Properties>
-        <string name="Name">ManeLeafVein_16</string>
+        <string name="Name">ManeLeafVein_15</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.4063054713014331</X>
-          <Y>0.9460876070567956</Y>
-          <Z>-0.63</Z>
-          <R00>0.20217308307927165</R00>
-          <R01>0.012313208431629516</R01>
-          <R02>-0.9792723979446889</R02>
-          <R10>-0.5627687138994804</R10>
-          <R11>0.8198057536803417</R11>
-          <R12>-0.1058768194107269</R12>
-          <R20>0.801509462909919</R20>
-          <R21>0.5725093109554866</R21>
-          <R22>0.17267214522072502</R22>
+          <X>-1.5458553457552227</X>
+          <Y>0.7699999999999997</Y>
+          <Z>-0.7875</Z>
+          <R00>-0.5630810634150258</R00>
+          <R01>-0.027526340385751108</R01>
+          <R02>-0.8259431073677965</R02>
+          <R10>-0.4813330330783165</R10>
+          <R11>0.8233435087569003</R11>
+          <R12>0.30070579950427334</R12>
+          <R20>0.6717575658606548</R20>
+          <R21>0.5668754423794029</R21>
+          <R22>-0.47685847537411385</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -2395,17 +2332,80 @@
     </Item>
     <Item class="Part" referent="RBX4430">
       <Properties>
+        <string name="Name">ManeLeaf_16</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.7578818391267914</X>
+          <Y>1.0688595088209947</Y>
+          <Z>-0.7875</Z>
+          <R00>0.20217308307927165</R00>
+          <R01>0.012313208431629516</R01>
+          <R02>-0.9792723979446889</R02>
+          <R10>-0.5627687138994804</R10>
+          <R11>0.8198057536803417</R11>
+          <R12>-0.1058768194107269</R12>
+          <R20>0.801509462909919</R20>
+          <R21>0.5725093109554866</R21>
+          <R22>0.17267214522072502</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4431">
+      <Properties>
+        <string name="Name">ManeLeafVein_16</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.7578818391267914</X>
+          <Y>1.1826095088209945</Y>
+          <Z>-0.7875</Z>
+          <R00>0.20217308307927165</R00>
+          <R01>0.012313208431629516</R01>
+          <R02>-0.9792723979446889</R02>
+          <R10>-0.5627687138994804</R10>
+          <R11>0.8198057536803417</R11>
+          <R12>-0.1058768194107269</R12>
+          <R20>0.801509462909919</R20>
+          <R21>0.5725093109554866</R21>
+          <R22>0.17267214522072502</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">12176776</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4432">
+      <Properties>
         <string name="Name">ManeLeaf_17</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.644</X>
-          <Y>0.182</Y>
-          <Z>1.6239999999999999</Z>
+          <X>0.805</X>
+          <Y>0.2275</Y>
+          <Z>2.03</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.9179007066323784</X>
-          <Y>1.1453617771282991</Y>
-          <Z>-0.63</Z>
+          <X>-1.1473758832904732</X>
+          <Y>1.431702221410374</Y>
+          <Z>-0.7875</Z>
           <R00>0.8186868718121787</R00>
           <R01>0.025253465755967763</R01>
           <R02>-0.5736846419329188</R02>
@@ -2425,19 +2425,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4431">
+    <Item class="Part" referent="RBX4433">
       <Properties>
         <string name="Name">ManeLeafVein_17</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.1367999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.4209999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.9179007066323784</X>
-          <Y>1.236361777128299</Y>
-          <Z>-0.63</Z>
+          <X>-1.1473758832904732</X>
+          <Y>1.545452221410374</Y>
+          <Z>-0.7875</Z>
           <R00>0.8186868718121787</R00>
           <R01>0.025253465755967763</R01>
           <R02>-0.5736846419329188</R02>
@@ -2456,19 +2456,19 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4432">
+    <Item class="Part" referent="RBX4434">
       <Properties>
         <string name="Name">BackLeaf</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.9099999999999999</X>
-          <Y>0.182</Y>
-          <Z>1.54</Z>
+          <X>1.1375</X>
+          <Y>0.2275</Y>
+          <Z>1.9250000000000003</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.77</X>
-          <Y>1.47</Y>
-          <Z>-0.13999999999999999</Z>
+          <X>-0.9625000000000001</X>
+          <Y>1.8375000000000001</Y>
+          <Z>-0.17500000000000002</Z>
           <R00>0.8571575464476953</R00>
           <R01>0.21101039116094453</R01>
           <R02>-0.46984631039295416</R02>
@@ -2488,19 +2488,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4433">
+    <Item class="Part" referent="RBX4435">
       <Properties>
         <string name="Name">BackLeafVein</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.0779999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.3475000000000001</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.77</X>
-          <Y>1.561</Y>
-          <Z>-0.13999999999999999</Z>
+          <X>-0.9625000000000001</X>
+          <Y>1.95125</Y>
+          <Z>-0.17500000000000002</Z>
           <R00>0.8571575464476953</R00>
           <R01>0.21101039116094453</R01>
           <R02>-0.46984631039295416</R02>
@@ -2508,69 +2508,6 @@
           <R11>0.8516507396391465</R11>
           <R12>-0.3420201433256687</R12>
           <R20>0.32797515353481177</R20>
-          <R21>0.4797558050656603</R21>
-          <R22>0.8137976813493738</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12176776</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4434">
-      <Properties>
-        <string name="Name">BackLeaf_1</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.9099999999999999</X>
-          <Y>0.182</Y>
-          <Z>1.54</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>0.77</X>
-          <Y>1.47</Y>
-          <Z>-0.13999999999999999</Z>
-          <R00>0.8571575464476953</R00>
-          <R01>-0.21101039116094453</R01>
-          <R02>0.46984631039295416</R02>
-          <R10>0.39713126196710286</R10>
-          <R11>0.8516507396391465</R11>
-          <R12>-0.3420201433256687</R12>
-          <R20>-0.32797515353481177</R20>
-          <R21>0.4797558050656603</R21>
-          <R22>0.8137976813493738</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4435">
-      <Properties>
-        <string name="Name">BackLeafVein_1</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.0779999999999998</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>0.77</X>
-          <Y>1.561</Y>
-          <Z>-0.13999999999999999</Z>
-          <R00>0.8571575464476953</R00>
-          <R01>-0.21101039116094453</R01>
-          <R02>0.46984631039295416</R02>
-          <R10>0.39713126196710286</R10>
-          <R11>0.8516507396391465</R11>
-          <R12>-0.3420201433256687</R12>
-          <R20>-0.32797515353481177</R20>
           <R21>0.4797558050656603</R21>
           <R22>0.8137976813493738</R22>
         </CoordinateFrame>
@@ -2584,28 +2521,28 @@
     </Item>
     <Item class="Part" referent="RBX4436">
       <Properties>
-        <string name="Name">BackLeaf_2</string>
+        <string name="Name">BackLeaf_1</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.9099999999999999</X>
-          <Y>0.182</Y>
-          <Z>1.54</Z>
+          <X>1.1375</X>
+          <Y>0.2275</Y>
+          <Z>1.9250000000000003</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.77</X>
-          <Y>1.512</Y>
-          <Z>0.4619999999999999</Z>
+          <X>0.9625000000000001</X>
+          <Y>1.8375000000000001</Y>
+          <Z>-0.17500000000000002</Z>
           <R00>0.8571575464476953</R00>
-          <R01>0.21101039116094453</R01>
-          <R02>-0.46984631039295416</R02>
-          <R10>-0.39713126196710286</R10>
+          <R01>-0.21101039116094453</R01>
+          <R02>0.46984631039295416</R02>
+          <R10>0.39713126196710286</R10>
           <R11>0.8516507396391465</R11>
           <R12>-0.3420201433256687</R12>
-          <R20>0.32797515353481177</R20>
+          <R20>-0.32797515353481177</R20>
           <R21>0.4797558050656603</R21>
           <R22>0.8137976813493738</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
+        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -2616,24 +2553,24 @@
     </Item>
     <Item class="Part" referent="RBX4437">
       <Properties>
-        <string name="Name">BackLeafVein_2</string>
+        <string name="Name">BackLeafVein_1</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.0779999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.3475000000000001</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.77</X>
-          <Y>1.603</Y>
-          <Z>0.4619999999999999</Z>
+          <X>0.9625000000000001</X>
+          <Y>1.95125</Y>
+          <Z>-0.17500000000000002</Z>
           <R00>0.8571575464476953</R00>
-          <R01>0.21101039116094453</R01>
-          <R02>-0.46984631039295416</R02>
-          <R10>-0.39713126196710286</R10>
+          <R01>-0.21101039116094453</R01>
+          <R02>0.46984631039295416</R02>
+          <R10>0.39713126196710286</R10>
           <R11>0.8516507396391465</R11>
           <R12>-0.3420201433256687</R12>
-          <R20>0.32797515353481177</R20>
+          <R20>-0.32797515353481177</R20>
           <R21>0.4797558050656603</R21>
           <R22>0.8137976813493738</R22>
         </CoordinateFrame>
@@ -2647,28 +2584,28 @@
     </Item>
     <Item class="Part" referent="RBX4438">
       <Properties>
-        <string name="Name">BackLeaf_3</string>
+        <string name="Name">BackLeaf_2</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.9099999999999999</X>
-          <Y>0.182</Y>
-          <Z>1.54</Z>
+          <X>1.1375</X>
+          <Y>0.2275</Y>
+          <Z>1.9250000000000003</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.77</X>
-          <Y>1.512</Y>
-          <Z>0.4619999999999999</Z>
+          <X>-0.9625000000000001</X>
+          <Y>1.8900000000000001</Y>
+          <Z>0.5774999999999999</Z>
           <R00>0.8571575464476953</R00>
-          <R01>-0.21101039116094453</R01>
-          <R02>0.46984631039295416</R02>
-          <R10>0.39713126196710286</R10>
+          <R01>0.21101039116094453</R01>
+          <R02>-0.46984631039295416</R02>
+          <R10>-0.39713126196710286</R10>
           <R11>0.8516507396391465</R11>
           <R12>-0.3420201433256687</R12>
-          <R20>-0.32797515353481177</R20>
+          <R20>0.32797515353481177</R20>
           <R21>0.4797558050656603</R21>
           <R22>0.8137976813493738</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
+        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -2679,24 +2616,24 @@
     </Item>
     <Item class="Part" referent="RBX4439">
       <Properties>
-        <string name="Name">BackLeafVein_3</string>
+        <string name="Name">BackLeafVein_2</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.0779999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.3475000000000001</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.77</X>
-          <Y>1.603</Y>
-          <Z>0.4619999999999999</Z>
+          <X>-0.9625000000000001</X>
+          <Y>2.00375</Y>
+          <Z>0.5774999999999999</Z>
           <R00>0.8571575464476953</R00>
-          <R01>-0.21101039116094453</R01>
-          <R02>0.46984631039295416</R02>
-          <R10>0.39713126196710286</R10>
+          <R01>0.21101039116094453</R01>
+          <R02>-0.46984631039295416</R02>
+          <R10>-0.39713126196710286</R10>
           <R11>0.8516507396391465</R11>
           <R12>-0.3420201433256687</R12>
-          <R20>-0.32797515353481177</R20>
+          <R20>0.32797515353481177</R20>
           <R21>0.4797558050656603</R21>
           <R22>0.8137976813493738</R22>
         </CoordinateFrame>
@@ -2710,28 +2647,28 @@
     </Item>
     <Item class="Part" referent="RBX4440">
       <Properties>
-        <string name="Name">BackLeaf_4</string>
+        <string name="Name">BackLeaf_3</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.9099999999999999</X>
-          <Y>0.182</Y>
-          <Z>1.54</Z>
+          <X>1.1375</X>
+          <Y>0.2275</Y>
+          <Z>1.9250000000000003</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.77</X>
-          <Y>1.554</Y>
-          <Z>1.0639999999999998</Z>
+          <X>0.9625000000000001</X>
+          <Y>1.8900000000000001</Y>
+          <Z>0.5774999999999999</Z>
           <R00>0.8571575464476953</R00>
-          <R01>0.21101039116094453</R01>
-          <R02>-0.46984631039295416</R02>
-          <R10>-0.39713126196710286</R10>
+          <R01>-0.21101039116094453</R01>
+          <R02>0.46984631039295416</R02>
+          <R10>0.39713126196710286</R10>
           <R11>0.8516507396391465</R11>
           <R12>-0.3420201433256687</R12>
-          <R20>0.32797515353481177</R20>
+          <R20>-0.32797515353481177</R20>
           <R21>0.4797558050656603</R21>
           <R22>0.8137976813493738</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
+        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -2742,24 +2679,24 @@
     </Item>
     <Item class="Part" referent="RBX4441">
       <Properties>
-        <string name="Name">BackLeafVein_4</string>
+        <string name="Name">BackLeafVein_3</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.0779999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.3475000000000001</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.77</X>
-          <Y>1.645</Y>
-          <Z>1.0639999999999998</Z>
+          <X>0.9625000000000001</X>
+          <Y>2.00375</Y>
+          <Z>0.5774999999999999</Z>
           <R00>0.8571575464476953</R00>
-          <R01>0.21101039116094453</R01>
-          <R02>-0.46984631039295416</R02>
-          <R10>-0.39713126196710286</R10>
+          <R01>-0.21101039116094453</R01>
+          <R02>0.46984631039295416</R02>
+          <R10>0.39713126196710286</R10>
           <R11>0.8516507396391465</R11>
           <R12>-0.3420201433256687</R12>
-          <R20>0.32797515353481177</R20>
+          <R20>-0.32797515353481177</R20>
           <R21>0.4797558050656603</R21>
           <R22>0.8137976813493738</R22>
         </CoordinateFrame>
@@ -2773,80 +2710,17 @@
     </Item>
     <Item class="Part" referent="RBX4442">
       <Properties>
-        <string name="Name">BackLeaf_5</string>
+        <string name="Name">BackLeaf_4</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.9099999999999999</X>
-          <Y>0.182</Y>
-          <Z>1.54</Z>
+          <X>1.1375</X>
+          <Y>0.2275</Y>
+          <Z>1.9250000000000003</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.77</X>
-          <Y>1.554</Y>
-          <Z>1.0639999999999998</Z>
-          <R00>0.8571575464476953</R00>
-          <R01>-0.21101039116094453</R01>
-          <R02>0.46984631039295416</R02>
-          <R10>0.39713126196710286</R10>
-          <R11>0.8516507396391465</R11>
-          <R12>-0.3420201433256687</R12>
-          <R20>-0.32797515353481177</R20>
-          <R21>0.4797558050656603</R21>
-          <R22>0.8137976813493738</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4443">
-      <Properties>
-        <string name="Name">BackLeafVein_5</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.0779999999999998</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>0.77</X>
-          <Y>1.645</Y>
-          <Z>1.0639999999999998</Z>
-          <R00>0.8571575464476953</R00>
-          <R01>-0.21101039116094453</R01>
-          <R02>0.46984631039295416</R02>
-          <R10>0.39713126196710286</R10>
-          <R11>0.8516507396391465</R11>
-          <R12>-0.3420201433256687</R12>
-          <R20>-0.32797515353481177</R20>
-          <R21>0.4797558050656603</R21>
-          <R22>0.8137976813493738</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12176776</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4444">
-      <Properties>
-        <string name="Name">BackLeaf_6</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.9099999999999999</X>
-          <Y>0.182</Y>
-          <Z>1.54</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-0.77</X>
-          <Y>1.596</Y>
-          <Z>1.666</Z>
+          <X>-0.9625000000000001</X>
+          <Y>1.9425000000000001</Y>
+          <Z>1.33</Z>
           <R00>0.8571575464476953</R00>
           <R01>0.21101039116094453</R01>
           <R02>-0.46984631039295416</R02>
@@ -2866,19 +2740,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4445">
+    <Item class="Part" referent="RBX4443">
       <Properties>
-        <string name="Name">BackLeafVein_6</string>
+        <string name="Name">BackLeafVein_4</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.0779999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.3475000000000001</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.77</X>
-          <Y>1.687</Y>
-          <Z>1.666</Z>
+          <X>-0.9625000000000001</X>
+          <Y>2.05625</Y>
+          <Z>1.33</Z>
           <R00>0.8571575464476953</R00>
           <R01>0.21101039116094453</R01>
           <R02>-0.46984631039295416</R02>
@@ -2897,19 +2771,19 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4446">
+    <Item class="Part" referent="RBX4444">
       <Properties>
-        <string name="Name">BackLeaf_7</string>
+        <string name="Name">BackLeaf_5</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.9099999999999999</X>
-          <Y>0.182</Y>
-          <Z>1.54</Z>
+          <X>1.1375</X>
+          <Y>0.2275</Y>
+          <Z>1.9250000000000003</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.77</X>
-          <Y>1.596</Y>
-          <Z>1.666</Z>
+          <X>0.9625000000000001</X>
+          <Y>1.9425000000000001</Y>
+          <Z>1.33</Z>
           <R00>0.8571575464476953</R00>
           <R01>-0.21101039116094453</R01>
           <R02>0.46984631039295416</R02>
@@ -2929,19 +2803,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4447">
+    <Item class="Part" referent="RBX4445">
       <Properties>
-        <string name="Name">BackLeafVein_7</string>
+        <string name="Name">BackLeafVein_5</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>1.0779999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.3475000000000001</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.77</X>
-          <Y>1.687</Y>
-          <Z>1.666</Z>
+          <X>0.9625000000000001</X>
+          <Y>2.05625</Y>
+          <Z>1.33</Z>
           <R00>0.8571575464476953</R00>
           <R01>-0.21101039116094453</R01>
           <R02>0.46984631039295416</R02>
@@ -2960,30 +2834,93 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4448">
+    <Item class="Part" referent="RBX4446">
       <Properties>
-        <string name="Name">TailBranch</string>
+        <string name="Name">BackLeaf_6</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.476</X>
-          <Y>0.476</Y>
-          <Z>0.6719999999999999</Z>
+          <X>1.1375</X>
+          <Y>0.2275</Y>
+          <Z>1.9250000000000003</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.0</X>
-          <Y>0.5599999999999999</Y>
-          <Z>3.08</Z>
-          <R00>1.0</R00>
-          <R01>-0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>0.9063077870366499</R11>
-          <R12>0.42261826174069944</R12>
-          <R20>-0.0</R20>
-          <R21>-0.42261826174069944</R21>
-          <R22>0.9063077870366499</R22>
+          <X>-0.9625000000000001</X>
+          <Y>1.995</Y>
+          <Z>2.0825</Z>
+          <R00>0.8571575464476953</R00>
+          <R01>0.21101039116094453</R01>
+          <R02>-0.46984631039295416</R02>
+          <R10>-0.39713126196710286</R10>
+          <R11>0.8516507396391465</R11>
+          <R12>-0.3420201433256687</R12>
+          <R20>0.32797515353481177</R20>
+          <R21>0.4797558050656603</R21>
+          <R22>0.8137976813493738</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">10710860</Color3uint8>
+        <Color3uint8 name="Color3uint8">5866817</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4447">
+      <Properties>
+        <string name="Name">BackLeafVein_6</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.3475000000000001</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-0.9625000000000001</X>
+          <Y>2.10875</Y>
+          <Z>2.0825</Z>
+          <R00>0.8571575464476953</R00>
+          <R01>0.21101039116094453</R01>
+          <R02>-0.46984631039295416</R02>
+          <R10>-0.39713126196710286</R10>
+          <R11>0.8516507396391465</R11>
+          <R12>-0.3420201433256687</R12>
+          <R20>0.32797515353481177</R20>
+          <R21>0.4797558050656603</R21>
+          <R22>0.8137976813493738</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">12176776</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4448">
+      <Properties>
+        <string name="Name">BackLeaf_7</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>1.1375</X>
+          <Y>0.2275</Y>
+          <Z>1.9250000000000003</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>0.9625000000000001</X>
+          <Y>1.995</Y>
+          <Z>2.0825</Z>
+          <R00>0.8571575464476953</R00>
+          <R01>-0.21101039116094453</R01>
+          <R02>0.46984631039295416</R02>
+          <R10>0.39713126196710286</R10>
+          <R11>0.8516507396391465</R11>
+          <R12>-0.3420201433256687</R12>
+          <R20>-0.32797515353481177</R20>
+          <R21>0.4797558050656603</R21>
+          <R22>0.8137976813493738</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
@@ -2994,49 +2931,48 @@
     </Item>
     <Item class="Part" referent="RBX4449">
       <Properties>
-        <string name="Name">TailBranch_1</string>
+        <string name="Name">BackLeafVein_7</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.476</X>
-          <Y>0.476</Y>
-          <Z>0.6719999999999999</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.3475000000000001</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.13423915080917684</X>
-          <Y>0.7466666666666666</Y>
-          <Z>3.255</Z>
-          <R00>1.0</R00>
-          <R01>-0.0</R01>
-          <R02>0.0</R02>
-          <R10>0.0</R10>
-          <R11>0.9063077870366499</R11>
-          <R12>0.42261826174069944</R12>
-          <R20>-0.0</R20>
-          <R21>-0.42261826174069944</R21>
-          <R22>0.9063077870366499</R22>
+          <X>0.9625000000000001</X>
+          <Y>2.10875</Y>
+          <Z>2.0825</Z>
+          <R00>0.8571575464476953</R00>
+          <R01>-0.21101039116094453</R01>
+          <R02>0.46984631039295416</R02>
+          <R10>0.39713126196710286</R10>
+          <R11>0.8516507396391465</R11>
+          <R12>-0.3420201433256687</R12>
+          <R20>-0.32797515353481177</R20>
+          <R21>0.4797558050656603</R21>
+          <R22>0.8137976813493738</R22>
         </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">10710860</Color3uint8>
+        <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
         <token name="BottomSurface">0</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
         <token name="Material">272</token>
-        <token name="shape">0</token>
       </Properties>
     </Item>
     <Item class="Part" referent="RBX4450">
       <Properties>
-        <string name="Name">TailBranch_2</string>
+        <string name="Name">TailBranch</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.476</X>
-          <Y>0.476</Y>
-          <Z>0.6719999999999999</Z>
+          <X>0.5950000000000001</X>
+          <Y>0.5950000000000001</Y>
+          <Z>0.84</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.23561187574621104</X>
-          <Y>0.9333333333333333</Y>
-          <Z>3.43</Z>
+          <X>0.0</X>
+          <Y>0.7000000000000001</Y>
+          <Z>3.8500000000000005</Z>
           <R00>1.0</R00>
           <R01>-0.0</R01>
           <R02>0.0</R02>
@@ -3058,17 +2994,17 @@
     </Item>
     <Item class="Part" referent="RBX4451">
       <Properties>
-        <string name="Name">TailBranch_3</string>
+        <string name="Name">TailBranch_1</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.476</X>
-          <Y>0.476</Y>
-          <Z>0.6719999999999999</Z>
+          <X>0.5950000000000001</X>
+          <Y>0.5950000000000001</Y>
+          <Z>0.84</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.2792985962491352</X>
-          <Y>1.1199999999999999</Y>
-          <Z>3.605</Z>
+          <X>0.16779893851147107</X>
+          <Y>0.9333333333333333</Y>
+          <Z>4.0687500000000005</Z>
           <R00>1.0</R00>
           <R01>-0.0</R01>
           <R02>0.0</R02>
@@ -3090,17 +3026,17 @@
     </Item>
     <Item class="Part" referent="RBX4452">
       <Properties>
-        <string name="Name">TailBranch_4</string>
+        <string name="Name">TailBranch_2</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.476</X>
-          <Y>0.476</Y>
-          <Z>0.6719999999999999</Z>
+          <X>0.5950000000000001</X>
+          <Y>0.5950000000000001</Y>
+          <Z>0.84</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.2546032795111909</X>
-          <Y>1.3066666666666666</Y>
-          <Z>3.78</Z>
+          <X>0.2945148446827638</X>
+          <Y>1.1666666666666667</Y>
+          <Z>4.2875000000000005</Z>
           <R00>1.0</R00>
           <R01>-0.0</R01>
           <R02>0.0</R02>
@@ -3122,17 +3058,17 @@
     </Item>
     <Item class="Part" referent="RBX4453">
       <Properties>
-        <string name="Name">TailBranch_5</string>
+        <string name="Name">TailBranch_3</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.476</X>
-          <Y>0.476</Y>
-          <Z>0.6719999999999999</Z>
+          <X>0.5950000000000001</X>
+          <Y>0.5950000000000001</Y>
+          <Z>0.84</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.1675722003491078</X>
-          <Y>1.4933333333333336</Y>
-          <Z>3.955</Z>
+          <X>0.34912324531141903</X>
+          <Y>1.4000000000000001</Y>
+          <Z>4.5062500000000005</Z>
           <R00>1.0</R00>
           <R01>-0.0</R01>
           <R02>0.0</R02>
@@ -3154,17 +3090,17 @@
     </Item>
     <Item class="Part" referent="RBX4454">
       <Properties>
-        <string name="Name">TailBranch_6</string>
+        <string name="Name">TailBranch_4</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.476</X>
-          <Y>0.476</Y>
-          <Z>0.6719999999999999</Z>
+          <X>0.5950000000000001</X>
+          <Y>0.5950000000000001</Y>
+          <Z>0.84</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.039513602256762814</X>
-          <Y>1.6800000000000002</Y>
-          <Z>4.13</Z>
+          <X>0.31825409938898863</X>
+          <Y>1.6333333333333333</Y>
+          <Z>4.7250000000000005</Z>
           <R00>1.0</R00>
           <R01>-0.0</R01>
           <R02>0.0</R02>
@@ -3186,17 +3122,81 @@
     </Item>
     <Item class="Part" referent="RBX4455">
       <Properties>
+        <string name="Name">TailBranch_5</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.5950000000000001</X>
+          <Y>0.5950000000000001</Y>
+          <Z>0.84</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>0.20946525043638475</X>
+          <Y>1.8666666666666671</Y>
+          <Z>4.9437500000000005</Z>
+          <R00>1.0</R00>
+          <R01>-0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>0.9063077870366499</R11>
+          <R12>0.42261826174069944</R12>
+          <R20>-0.0</R20>
+          <R21>-0.42261826174069944</R21>
+          <R22>0.9063077870366499</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">10710860</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4456">
+      <Properties>
+        <string name="Name">TailBranch_6</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.5950000000000001</X>
+          <Y>0.5950000000000001</Y>
+          <Z>0.84</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>0.049392002820953525</X>
+          <Y>2.1000000000000005</Y>
+          <Z>5.1625000000000005</Z>
+          <R00>1.0</R00>
+          <R01>-0.0</R01>
+          <R02>0.0</R02>
+          <R10>0.0</R10>
+          <R11>0.9063077870366499</R11>
+          <R12>0.42261826174069944</R12>
+          <R20>-0.0</R20>
+          <R21>-0.42261826174069944</R21>
+          <R22>0.9063077870366499</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">10710860</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4457">
+      <Properties>
         <string name="Name">TailLeaf</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.5599999999999999</X>
-          <Y>0.182</Y>
-          <Z>0.9799999999999999</Z>
+          <X>0.7000000000000001</X>
+          <Y>0.2275</Y>
+          <Z>1.2249999999999999</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.5599999999999999</X>
-          <Y>1.1199999999999999</Y>
-          <Z>3.5</Z>
+          <X>0.7000000000000001</X>
+          <Y>1.4000000000000001</Y>
+          <Z>4.375</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -3216,19 +3216,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4456">
+    <Item class="Part" referent="RBX4458">
       <Properties>
         <string name="Name">TailLeafVein</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>0.6859999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>0.8574999999999999</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.5599999999999999</X>
-          <Y>1.2109999999999999</Y>
-          <Z>3.5</Z>
+          <X>0.7000000000000001</X>
+          <Y>1.51375</Y>
+          <Z>4.375</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -3238,69 +3238,6 @@
           <R20>0.0</R20>
           <R21>0.49999999999999994</R21>
           <R22>0.8660254037844387</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12176776</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4457">
-      <Properties>
-        <string name="Name">TailLeaf_1</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.5599999999999999</X>
-          <Y>0.182</Y>
-          <Z>0.9799999999999999</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-0.5599999999999999</X>
-          <Y>1.26</Y>
-          <Z>3.5</Z>
-          <R00>0.8191520442889918</R00>
-          <R01>0.28678821817552297</R01>
-          <R02>0.49673176489215404</R02>
-          <R10>0.0</R10>
-          <R11>0.8660254037844387</R11>
-          <R12>-0.49999999999999994</R12>
-          <R20>-0.573576436351046</R20>
-          <R21>0.40957602214449584</R21>
-          <R22>0.7094064799162225</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">7446600</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4458">
-      <Properties>
-        <string name="Name">TailLeafVein_1</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>0.6859999999999998</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-0.5599999999999999</X>
-          <Y>1.351</Y>
-          <Z>3.5</Z>
-          <R00>0.8191520442889918</R00>
-          <R01>0.28678821817552297</R01>
-          <R02>0.49673176489215404</R02>
-          <R10>0.0</R10>
-          <R11>0.8660254037844387</R11>
-          <R12>-0.49999999999999994</R12>
-          <R20>-0.573576436351046</R20>
-          <R21>0.40957602214449584</R21>
-          <R22>0.7094064799162225</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">12176776</Color3uint8>
         <token name="TopSurface">0</token>
@@ -3312,17 +3249,80 @@
     </Item>
     <Item class="Part" referent="RBX4459">
       <Properties>
+        <string name="Name">TailLeaf_1</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.7000000000000001</X>
+          <Y>0.2275</Y>
+          <Z>1.2249999999999999</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-0.7000000000000001</X>
+          <Y>1.575</Y>
+          <Z>4.375</Z>
+          <R00>0.8191520442889918</R00>
+          <R01>0.28678821817552297</R01>
+          <R02>0.49673176489215404</R02>
+          <R10>0.0</R10>
+          <R11>0.8660254037844387</R11>
+          <R12>-0.49999999999999994</R12>
+          <R20>-0.573576436351046</R20>
+          <R21>0.40957602214449584</R21>
+          <R22>0.7094064799162225</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">7446600</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4460">
+      <Properties>
+        <string name="Name">TailLeafVein_1</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>0.8574999999999999</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-0.7000000000000001</X>
+          <Y>1.6887500000000002</Y>
+          <Z>4.375</Z>
+          <R00>0.8191520442889918</R00>
+          <R01>0.28678821817552297</R01>
+          <R02>0.49673176489215404</R02>
+          <R10>0.0</R10>
+          <R11>0.8660254037844387</R11>
+          <R12>-0.49999999999999994</R12>
+          <R20>-0.573576436351046</R20>
+          <R21>0.40957602214449584</R21>
+          <R22>0.7094064799162225</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">12176776</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4461">
+      <Properties>
         <string name="Name">TailLeaf_2</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.5599999999999999</X>
-          <Y>0.182</Y>
-          <Z>0.9799999999999999</Z>
+          <X>0.7000000000000001</X>
+          <Y>0.2275</Y>
+          <Z>1.2249999999999999</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.5599999999999999</X>
-          <Y>1.4</Y>
-          <Z>3.5</Z>
+          <X>0.7000000000000001</X>
+          <Y>1.75</Y>
+          <Z>4.375</Z>
           <R00>0.3420201433256688</R00>
           <R01>0.4698463103929541</R01>
           <R02>0.8137976813493737</R02>
@@ -3342,19 +3342,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4460">
+    <Item class="Part" referent="RBX4462">
       <Properties>
         <string name="Name">TailLeafVein_2</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>0.6859999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>0.8574999999999999</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>0.5599999999999999</X>
-          <Y>1.4909999999999999</Y>
-          <Z>3.5</Z>
+          <X>0.7000000000000001</X>
+          <Y>1.86375</Y>
+          <Z>4.375</Z>
           <R00>0.3420201433256688</R00>
           <R01>0.4698463103929541</R01>
           <R02>0.8137976813493737</R02>
@@ -3373,19 +3373,19 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4461">
+    <Item class="Part" referent="RBX4463">
       <Properties>
         <string name="Name">TailLeaf_3</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.5599999999999999</X>
-          <Y>0.182</Y>
-          <Z>0.9799999999999999</Z>
+          <X>0.7000000000000001</X>
+          <Y>0.2275</Y>
+          <Z>1.2249999999999999</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.5599999999999999</X>
-          <Y>1.54</Y>
-          <Z>3.5</Z>
+          <X>-0.7000000000000001</X>
+          <Y>1.9250000000000003</Y>
+          <Z>4.375</Z>
           <R00>-0.25881904510252085</R00>
           <R01>0.4829629131445341</R01>
           <R02>0.8365163037378079</R02>
@@ -3405,19 +3405,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4462">
+    <Item class="Part" referent="RBX4464">
       <Properties>
         <string name="Name">TailLeafVein_3</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>0.6859999999999998</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>0.8574999999999999</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-0.5599999999999999</X>
-          <Y>1.631</Y>
-          <Z>3.5</Z>
+          <X>-0.7000000000000001</X>
+          <Y>2.0387500000000003</Y>
+          <Z>4.375</Z>
           <R00>-0.25881904510252085</R00>
           <R01>0.4829629131445341</R01>
           <R02>0.8365163037378079</R02>
@@ -3436,19 +3436,19 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4463">
+    <Item class="Part" referent="RBX4465">
       <Properties>
         <string name="Name">LeftEarLeaf</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.588</X>
-          <Y>0.182</Y>
-          <Z>1.148</Z>
+          <X>0.735</X>
+          <Y>0.2275</Y>
+          <Z>1.4349999999999998</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.26</X>
-          <Y>2.38</Y>
-          <Z>-1.68</Z>
+          <X>-1.575</X>
+          <Y>2.975</Y>
+          <Z>-2.1</Z>
           <R00>0.7198463103929542</R00>
           <R01>0.2620026302293849</R01>
           <R02>-0.6427876096865393</R02>
@@ -3456,69 +3456,6 @@
           <R11>0.9396926207859084</R11>
           <R12>-0.0</R12>
           <R20>0.6040227735550536</R20>
-          <R21>0.21984631039295416</R21>
-          <R22>0.766044443118978</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-        <token name="shape">0</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4464">
-      <Properties>
-        <string name="Name">LeftEarLeafVein</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>0.8035999999999999</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>-1.26</X>
-          <Y>2.4709999999999996</Y>
-          <Z>-1.68</Z>
-          <R00>0.7198463103929542</R00>
-          <R01>0.2620026302293849</R01>
-          <R02>-0.6427876096865393</R02>
-          <R10>-0.3420201433256687</R10>
-          <R11>0.9396926207859084</R11>
-          <R12>-0.0</R12>
-          <R20>0.6040227735550536</R20>
-          <R21>0.21984631039295416</R21>
-          <R22>0.766044443118978</R22>
-        </CoordinateFrame>
-        <Color3uint8 name="Color3uint8">12176776</Color3uint8>
-        <token name="TopSurface">0</token>
-        <token name="BottomSurface">0</token>
-        <bool name="CanCollide">false</bool>
-        <bool name="CanTouch">false</bool>
-        <token name="Material">272</token>
-      </Properties>
-    </Item>
-    <Item class="Part" referent="RBX4465">
-      <Properties>
-        <string name="Name">RightEarLeaf</string>
-        <bool name="Anchored">true</bool>
-        <Vector3 name="size">
-          <X>0.588</X>
-          <Y>0.182</Y>
-          <Z>1.148</Z>
-        </Vector3>
-        <CoordinateFrame name="CFrame">
-          <X>1.26</X>
-          <Y>2.38</Y>
-          <Z>-1.68</Z>
-          <R00>0.7198463103929542</R00>
-          <R01>-0.2620026302293849</R01>
-          <R02>0.6427876096865393</R02>
-          <R10>0.3420201433256687</R10>
-          <R11>0.9396926207859084</R11>
-          <R12>-0.0</R12>
-          <R20>-0.6040227735550536</R20>
           <R21>0.21984631039295416</R21>
           <R22>0.766044443118978</R22>
         </CoordinateFrame>
@@ -3533,17 +3470,80 @@
     </Item>
     <Item class="Part" referent="RBX4466">
       <Properties>
+        <string name="Name">LeftEarLeafVein</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.0045</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>-1.575</X>
+          <Y>3.0887499999999997</Y>
+          <Z>-2.1</Z>
+          <R00>0.7198463103929542</R00>
+          <R01>0.2620026302293849</R01>
+          <R02>-0.6427876096865393</R02>
+          <R10>-0.3420201433256687</R10>
+          <R11>0.9396926207859084</R11>
+          <R12>-0.0</R12>
+          <R20>0.6040227735550536</R20>
+          <R21>0.21984631039295416</R21>
+          <R22>0.766044443118978</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">12176776</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4467">
+      <Properties>
+        <string name="Name">RightEarLeaf</string>
+        <bool name="Anchored">true</bool>
+        <Vector3 name="size">
+          <X>0.735</X>
+          <Y>0.2275</Y>
+          <Z>1.4349999999999998</Z>
+        </Vector3>
+        <CoordinateFrame name="CFrame">
+          <X>1.575</X>
+          <Y>2.975</Y>
+          <Z>-2.1</Z>
+          <R00>0.7198463103929542</R00>
+          <R01>-0.2620026302293849</R01>
+          <R02>0.6427876096865393</R02>
+          <R10>0.3420201433256687</R10>
+          <R11>0.9396926207859084</R11>
+          <R12>-0.0</R12>
+          <R20>-0.6040227735550536</R20>
+          <R21>0.21984631039295416</R21>
+          <R22>0.766044443118978</R22>
+        </CoordinateFrame>
+        <Color3uint8 name="Color3uint8">9549153</Color3uint8>
+        <token name="TopSurface">0</token>
+        <token name="BottomSurface">0</token>
+        <bool name="CanCollide">false</bool>
+        <bool name="CanTouch">false</bool>
+        <token name="Material">272</token>
+        <token name="shape">0</token>
+      </Properties>
+    </Item>
+    <Item class="Part" referent="RBX4468">
+      <Properties>
         <string name="Name">RightEarLeafVein</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>0.8035999999999999</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>1.0045</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.26</X>
-          <Y>2.4709999999999996</Y>
-          <Z>-1.68</Z>
+          <X>1.575</X>
+          <Y>3.0887499999999997</Y>
+          <Z>-2.1</Z>
           <R00>0.7198463103929542</R00>
           <R01>-0.2620026302293849</R01>
           <R02>0.6427876096865393</R02>
@@ -3562,19 +3562,19 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4467">
+    <Item class="Part" referent="RBX4469">
       <Properties>
         <string name="Name">WoodAnkle</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>1.148</X>
-          <Y>0.6719999999999999</Y>
-          <Z>1.19</Z>
+          <X>1.4349999999999998</X>
+          <Y>0.84</Y>
+          <Z>1.4875</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.19</X>
-          <Y>-2.0999999999999996</Y>
-          <Z>-1.428</Z>
+          <X>-1.4875</X>
+          <Y>-2.625</Y>
+          <Z>-1.7850000000000001</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -3594,19 +3594,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4468">
+    <Item class="Part" referent="RBX4470">
       <Properties>
         <string name="Name">AnkleLeaf</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.5599999999999999</X>
-          <Y>0.182</Y>
-          <Z>1.1199999999999999</Z>
+          <X>0.7000000000000001</X>
+          <Y>0.2275</Y>
+          <Z>1.4000000000000001</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.204</X>
-          <Y>-1.666</Y>
-          <Z>-1.456</Z>
+          <X>-1.505</X>
+          <Y>-2.0825</Y>
+          <Z>-1.82</Z>
           <R00>0.7071067811865476</R00>
           <R01>-0.0</R01>
           <R02>-0.7071067811865476</R02>
@@ -3626,19 +3626,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4469">
+    <Item class="Part" referent="RBX4471">
       <Properties>
         <string name="Name">AnkleLeafVein</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>0.7839999999999999</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>0.9799999999999999</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>-1.204</X>
-          <Y>-1.575</Y>
-          <Z>-1.456</Z>
+          <X>-1.505</X>
+          <Y>-1.96875</Y>
+          <Z>-1.82</Z>
           <R00>0.7071067811865476</R00>
           <R01>-0.0</R01>
           <R02>-0.7071067811865476</R02>
@@ -3657,19 +3657,19 @@
         <token name="Material">272</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4470">
+    <Item class="Part" referent="RBX4472">
       <Properties>
         <string name="Name">WoodAnkle_1</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>1.148</X>
-          <Y>0.6719999999999999</Y>
-          <Z>1.19</Z>
+          <X>1.4349999999999998</X>
+          <Y>0.84</Y>
+          <Z>1.4875</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.19</X>
-          <Y>-2.0999999999999996</Y>
-          <Z>-1.428</Z>
+          <X>1.4875</X>
+          <Y>-2.625</Y>
+          <Z>-1.7850000000000001</Z>
           <R00>1.0</R00>
           <R01>0.0</R01>
           <R02>0.0</R02>
@@ -3689,19 +3689,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4471">
+    <Item class="Part" referent="RBX4473">
       <Properties>
         <string name="Name">AnkleLeaf_1</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.5599999999999999</X>
-          <Y>0.182</Y>
-          <Z>1.1199999999999999</Z>
+          <X>0.7000000000000001</X>
+          <Y>0.2275</Y>
+          <Z>1.4000000000000001</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.204</X>
-          <Y>-1.666</Y>
-          <Z>-1.456</Z>
+          <X>1.505</X>
+          <Y>-2.0825</Y>
+          <Z>-1.82</Z>
           <R00>0.7071067811865476</R00>
           <R01>0.0</R01>
           <R02>0.7071067811865476</R02>
@@ -3721,19 +3721,19 @@
         <token name="shape">0</token>
       </Properties>
     </Item>
-    <Item class="Part" referent="RBX4472">
+    <Item class="Part" referent="RBX4474">
       <Properties>
         <string name="Name">AnkleLeafVein_1</string>
         <bool name="Anchored">true</bool>
         <Vector3 name="size">
-          <X>0.063</X>
-          <Y>0.063</Y>
-          <Z>0.7839999999999999</Z>
+          <X>0.07875</X>
+          <Y>0.07875</Y>
+          <Z>0.9799999999999999</Z>
         </Vector3>
         <CoordinateFrame name="CFrame">
-          <X>1.204</X>
-          <Y>-1.575</Y>
-          <Z>-1.456</Z>
+          <X>1.505</X>
+          <Y>-1.96875</Y>
+          <Z>-1.82</Z>
           <R00>0.7071067811865476</R00>
           <R01>0.0</R01>
           <R02>0.7071067811865476</R02>

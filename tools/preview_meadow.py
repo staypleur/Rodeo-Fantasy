@@ -1,6 +1,6 @@
 """Offline native-part geometry preview; not a Roblox screenshot or concept-image edit."""
 from PIL import Image,ImageDraw,ImageFont
-from meadow_models import components,SPECIES,STAGES
+from meadow_models import components,SPECIES,STAGES,BODY_SCALES
 from pathlib import Path
 import math
 W,H=1920,1900
@@ -23,6 +23,7 @@ for row,id in enumerate(SPECIES):
   d.text((x0+24,y0+52),f'A / {star} STAR',fill=(102,118,93),font=small)
   parts=components(id,star);polys=[]
   unit=17 if id=='RockElephant' else 20 if id=='Weedcrow' else 26
+  unit/=BODY_SCALES[id] # overview fits the growth stages; gameplay sizes remain distinct
   center=222 if id in ('RockElephant','GrassBoar','TreeWolf') else 235
   for p in parts:
    sx,sy,sz=(a/2 for a in p['size'])

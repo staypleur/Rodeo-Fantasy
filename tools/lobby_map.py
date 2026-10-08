@@ -2,12 +2,19 @@
 import math
 def build_lobby(workspace, item, part, prop):
     lobby, _ = item(workspace, "Folder", "RodeoLobby")
-    cream, mint, pink = (255, 244, 220), (158, 211, 181), (244, 184, 192)
+    cream, mint, pink = (224, 207, 164), (113, 164, 92), (211, 160, 143)
     def block(parent, name, pos, size, color, rotation=(0, 0, 0), collide=True):
         node, properties = part(parent, name, (6000 + pos[0], pos[1], pos[2]), size, color, rotation=rotation)
         prop(properties, "token", "Material", 1280 if name in ("MeadowIsland","PenGrass") else 816 if name in ("GardenPath","MiddleWalk","CentralPlaza","PavingStone") else 512 if name in ("BenchSeat","BenchBack","BoardingStep","BoardingDeck","LadderRail","LadderRung","Counter","CounterPlank","CounterTop","TreeTrunk","SignPost","BoardPost") else 272)
         prop(properties, "bool", "CanCollide", collide)
         prop(properties, "bool", "CanTouch", False)
+        if not name.startswith(("Sea","Basket","Ladder","Departure")):
+            for surface in ("TopSurface","FrontSurface","BackSurface","LeftSurface","RightSurface"):
+                old=properties.find(f"token[@name='{surface}']")
+                if old is not None: old.text="3"
+                else: prop(properties,"token",surface,3)
+            mat=properties.find("token[@name='Material']")
+            if mat is not None: mat.text="272"
         return node
     def circle(parent, name, pos, radius, height, color):
         node = block(parent, name, pos, (height, radius*2, radius*2), color, (0, 0, 90))
@@ -26,7 +33,7 @@ def build_lobby(workspace, item, part, prop):
             prop(lp, "string", "Text", words)
             prop(lp, "Color3", "TextColor3", dict(R=.19, G=.33, B=.29))
         return board
-    block(lobby, "MeadowIsland", (0, -3, 0), (316, 6, 316), (147, 173, 150))
+    block(lobby, "MeadowIsland", (0, -3, 0), (316, 6, 316), (110, 153, 84))
     circle(lobby, "CentralPlaza", (0, .08, 0), 32, .16, cream)
     plots, _ = item(lobby, "Folder", "Plots")
     colors = [(233,140,143),(243,178,111),(247,225,129),(147,204,154),(137,189,230),(111,132,186),(188,154,220),(245,244,236)]
@@ -177,7 +184,7 @@ def build_lobby(workspace, item, part, prop):
             angle=math.tau*n/48
             x,z=math.sin(angle)*ring,math.cos(angle)*ring
             if abs(x)<6 and z>5: continue  # keep the staircase approach clear
-            block(lobby,"PavingStone",(x,.21,z),(2.5,.12,2.4),((206,192,171),(187,191,185),(221,208,192))[n%3],(0,n*7.5,0))
+            block(lobby,"PavingStone",(x,.21,z),(2.5,.12,2.4),((206,192,171),(187,191,185),(218,195,145))[n%3],(0,n*7.5,0))
     for deg in (67.5,157.5,247.5,337.5):
         a=math.radians(deg)
         furniture,_=item(lobby,"Model",f"GardenCorner_{deg}")
@@ -197,7 +204,7 @@ def build_lobby(workspace, item, part, prop):
             for petal in range(5):
                 q=math.tau*petal/5
                 node=fb("FlowerPetal",x+math.sin(q)*.28,2.3,6+math.cos(q)*.28,(.5,.18,.5),((218,143,163),(225,192,100),(157,150,195))[j%3])
-                prop(node.find("Properties"),"token","shape",0)
+                prop(node.find("Properties"),"token","shape",1)
             node=fb("FlowerCenter",x,2.38,6,(.23,.16,.23),(235,204,104));prop(node.find("Properties"),"token","shape",0)
             fb("FlowerLeaf",x+.2,1.8,6,(.5,.1,.25),(100,151,98))
     for n in range(8):
@@ -239,14 +246,14 @@ def build_lobby(workspace, item, part, prop):
         trunk=block(lobby,"TreeTrunk",(x,3,z),(6,1.5,1.5),(121,89,64),(0,0,90))
         prop(trunk.find("Properties"),"token","shape",2)
         for tier in range(3):
-            width=9-tier*2
-            canopy=block(lobby,"TreeCanopy",(x,6+tier*2,z),(width,4.5,width),((86,139,103),(103,158,117),(128,175,134))[tier])
-            prop(canopy.find("Properties"),"token","shape",0)
+            width=10-tier*2.5
+            canopy=block(lobby,"TreeCanopy",(x,6+tier*2,z),(width,4.5,width),((81,133,62),(105,159,77),(131,179,88))[tier])
+            prop(canopy.find("Properties"),"token","shape",1)
         for dx in (-3,3): block(lobby,"GardenRock",(x+dx,.7,z+3),(2,1.4,1.7),(141,148,146),(0,n*17,0))
     walls,_=item(lobby,"Folder","Boundary")
     for side in (-1,1):
-        block(walls,"GardenWall",(side*158,12,0),(4,24,320),(181,207,187))
-        block(walls,"GardenWall",(0,12,side*158),(320,24,4),(181,207,187))
+        block(walls,"GardenWall",(side*158,12,0),(4,24,320),(144,109,73))
+        block(walls,"GardenWall",(0,12,side*158),(320,24,4),(144,109,73))
         block(walls,"WallTrim",(side*158,24.5,0),(5,1,321),cream)
         block(walls,"WallTrim",(0,24.5,side*158),(321,1,5),cream)
     return lobby

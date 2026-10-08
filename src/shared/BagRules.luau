@@ -11,6 +11,7 @@ function BagRules.grant(session, monsterId, clock, incomeSeconds, incomeAmount)
 end
 
 function BagRules.accrue(session, clock, seconds, amount)
+ local gains={}
 	for _, monster in ipairs(session.monsters) do
 		local interval=monster.incomeSeconds or seconds
         local rate=monster.incomeAmount or amount
@@ -18,7 +19,9 @@ function BagRules.accrue(session, clock, seconds, amount)
 		session.pending += ticks * rate
         session.totalProduced = (session.totalProduced or 0) + ticks * rate
 		monster.lastIncome += ticks * interval
+  if ticks>0 then table.insert(gains,{id=monster.id,amount=ticks*rate}) end
 	end
+ return gains
 end
 
 function BagRules.find(session,id)

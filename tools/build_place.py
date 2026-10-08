@@ -3,7 +3,7 @@ from pathlib import Path
 import copy
 import math
 import xml.etree.ElementTree as ET
-from meadow_models import components, SPECIES, STAGES, SCALES, BOUNDS
+from meadow_models import components, SPECIES, STAGES, SCALES, BOUNDS, BODY_SCALES
 from lobby_map import build_lobby
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -65,7 +65,7 @@ def script(parent, kind, name, path):
 def monster(parent, name, position, species="MeadowMouse", stars=1):
     visual_components = components(species,stars)
     node, properties = item(parent, "Model", name)
-    root, root_props = part(node, "MountRoot", position, tuple(v*SCALES[stars] for v in BOUNDS[species]), (175, 77, 36))
+    root, root_props = part(node, "MountRoot", position, tuple(v*SCALES[stars]*BODY_SCALES[species] for v in BOUNDS[species]), (175, 77, 36))
     prop(root_props, "float", "Transparency", 1)
     prop(root_props, "bool", "CanCollide", False)
     prop(root_props, "bool", "CanQuery", False)
@@ -128,6 +128,8 @@ monster(world, "PreviewMonster", (0, 2, -8))
 
 replicated, _ = item(document, "ReplicatedStorage", "ReplicatedStorage")
 package, _ = item(replicated, "Folder", "RodeoFantasy")
+script(package, "ModuleScript", "ProgressRules", "src/shared/ProgressRules.luau")
+script(package, "ModuleScript", "CollectionQuery", "src/shared/CollectionQuery.luau")
 script(package, "ModuleScript", "MonsterCatalog", "src/shared/MonsterCatalog.luau")
 script(package, "ModuleScript", "RecordRules", "src/shared/RecordRules.luau")
 script(package, "ModuleScript", "Config", "src/shared/Config.luau")
@@ -151,12 +153,16 @@ server_scripts, _ = item(document, "ServerScriptService", "ServerScriptService")
 script(server_scripts, "Script", "CaptureServer", "src/server/CaptureServer.server.luau")
 script(server_scripts, "ModuleScript", "HuntWorld", "src/server/HuntWorld.luau")
 script(server_scripts, "ModuleScript", "LobbyWorld", "src/server/LobbyWorld.luau")
+script(server_scripts, "ModuleScript", "ProgressService", "src/server/ProgressService.luau")
 script(server_scripts, "ModuleScript", "RecordService", "src/server/RecordService.luau")
 starter, starter_props = item(document, "StarterPlayer", "StarterPlayer")
 prop(starter_props, "bool", "LoadCharacterAppearance", True)
 prop(starter_props, "float", "CameraMaxZoomDistance", 40)
 prop(starter_props, "float", "CameraMinZoomDistance", 8)
 starter_scripts, _ = item(starter, "StarterPlayerScripts", "StarterPlayerScripts")
+script(starter_scripts, "ModuleScript", "IncomeEffects", "src/client/IncomeEffects.luau")
+script(starter_scripts, "ModuleScript", "MonsterPortrait", "src/client/MonsterPortrait.luau")
+script(starter_scripts, "ModuleScript", "JournalUI", "src/client/JournalUI.luau")
 script(starter_scripts, "ModuleScript", "BagUI", "src/client/BagUI.luau")
 script(starter_scripts, "ModuleScript", "LocalizationController", "src/client/LocalizationController.luau")
 script(starter_scripts, "LocalScript", "CaptureClient", "src/client/CaptureClient.client.luau")

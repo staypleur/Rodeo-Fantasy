@@ -6,6 +6,7 @@ World.init(workspace.RodeoPrototype,game.ServerStorage.RodeoMonsterTemplate,cfg,
 local minimum=1000 local maximum=0 local checks=0 local monsterSum,obstacleSum=0,0
 local positions={}
 local viewers={} for i=1,8 do viewers[i]={} end
+local previous={}
 for i=1,8 do positions[i]=-(i-1)*42 World.ensure(positions[i]) World.replenish(positions[i],1,nil,true) end
 for tick=1,550 do
 
@@ -29,10 +30,16 @@ for tick=1,550 do
   for _,rock in ipairs(workspace.RodeoPrototype.Obstacles:GetChildren()) do
    if View.visible(rock.Position.X,2,rock.Position.Z-watch.z,watch.aspect,cfg.Prototype) then obstacleSum+=1 end
   end
-  local shown=0 for model in pairs(World.visibleSet(watch.z,watch.aspect,watch.viewer)) do
+  local selection=World.visibleSet(watch.z,watch.aspect,watch.viewer)
+  local shown=0 for model in pairs(selection) do
+   if previous[watch.viewer] and not previous[watch.viewer][model] then
+    local entry=model.PrimaryPart.Position
+    assert(model:GetAttribute("Emerging") or not View.visible(entry.X,entry.Y,entry.Z-watch.z,watch.aspect,cfg.Prototype,.62),"new animal must enter from cave or outer screen")
+   end
    shown+=1 local p=model.PrimaryPart.Position assert(View.visible(p.X,p.Y,p.Z-watch.z,watch.aspect,cfg.Prototype,1),"selected animal must remain inside full camera")
   end
   assert(shown>=4 and shown<=6,"displayed shared wild herd tick="..tick.." z="..watch.z.." shown="..shown.." raw="..count)
+  previous[watch.viewer]=selection
   minimum=math.min(minimum,count) checks+=1
   assert(count>=4,"SHARED_HERD_LOW tick="..tick.." z="..watch.z.." count="..count)
  end

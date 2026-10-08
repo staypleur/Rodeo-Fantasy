@@ -9,6 +9,7 @@ local BagRules=require(package.BagRules)
 local World=require(script.Parent.HuntWorld)
 local Lobby=require(script.Parent.LobbyWorld)
 local Records=require(script.Parent.RecordService)
+local Progress=require(script.Parent.ProgressService)
 local Course=require(package.CourseGeometry)
 local remote=package.CaptureRemote
 local tuning=Config.Prototype
@@ -23,11 +24,11 @@ end
 local function send(player,message)
  local state,bag=states[player],bags[player]
  if not bag then return end
- BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
+ local gains=BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
  Records.sample(player,bag.totalProduced or 0,state and state.distance or 0)
  local wildIds={}
  if state then for model in pairs(World.visibleSet(state.root.Position.Z,views[player],player)) do table.insert(wildIds,model:GetAttribute("SpawnSerial")) end end
- remote:FireClient(player,"State",{wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,tameSeconds=state and state.monster and Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds or 5,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
+ remote:FireClient(player,"State",{income=not state and gains or nil,progress=Progress.snapshot(player),wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,tameSeconds=state and state.monster and Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds or 5,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
 end
 local function sendBag(player)
  local bag=bags[player]
@@ -145,7 +146,7 @@ Lobby.connectPens(function(player)
 end)
 remote.OnServerEvent:Connect(function(player,action,value)
  if type(action)~="string" or not bags[player] then return end
- if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" then return end
+ if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Journal" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
@@ -166,6 +167,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
   if changed then Lobby.display(player,value.pen,bags[player].monsters) sendBag(player) end
   return
  end
+ if action=="Journal" then if not states[player] then remote:FireClient(player,"Journal",Progress.snapshot(player,true)) end return end
  if action=="Bag" then sendBag(player) return end
  if action=="Sync" then send(player) sendBag(player) return end
  if action=="Start" then start(player) return end
@@ -268,7 +270,7 @@ RunService.Heartbeat:Connect(function(delta)
    if not state.tamed and clock-state.started>=Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds then
     local id=state.monster:GetAttribute("MonsterId") or Config.Monster.Id
     local species=Catalog[id]
-    state.tamed=true BagRules.grant(bags[player],id,clock,species.IncomeSeconds,species.IncomeAmount) send(player,"Monster tamed! Added to your bag.")
+    state.tamed=true BagRules.grant(bags[player],id,clock,species.IncomeSeconds,species.IncomeAmount) Progress.caught(player,id,1) send(player,"Monster tamed! Added to your bag.")
     state.monster:SetAttribute("Tamed_"..player.UserId,true)
    end
    if Config.Hunt.AngerEnabled and clock-state.started>=Config.Hunt.AngerSeconds then
@@ -289,11 +291,11 @@ local function added(player)
  if not Lobby.assign(player) then player:Kick("This server holds up to 8 players.") return end
  player.CanLoadCharacterAppearance=true
  if player.UserId>0 then player.CharacterAppearanceId=player.UserId end
- bags[player]=BagRules.new()
+ bags[player]=BagRules.new() Progress.join(player)
  player.CharacterRemoving:Connect(function() finish(player,"Hunt ended") states[player]=nil end)
 end
 Players.PlayerAdded:Connect(added)
-Players.PlayerRemoving:Connect(function(player) send(player) World.resetVisibility(player) Records.leave(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil end)
+Players.PlayerRemoving:Connect(function(player) send(player) World.resetVisibility(player) Records.leave(player) Progress.leave(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil end)
 for _,player in ipairs(Players:GetPlayers()) do added(player) end
 
-if RunService:IsRunning() then Records.start() end
+if RunService:IsRunning() then Records.start() Progress.start() end

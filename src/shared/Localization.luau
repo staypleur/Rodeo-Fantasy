@@ -61,6 +61,22 @@ L.entries={
  ["Hunting grounds"]={ko="사냥터",ja="狩りエリア"},
  ["Airship"]={ko="비행선",ja="飛行船"},
  ["Fly to hunt"]={ko="사냥터로 출발",ja="狩りに出発"},
+ ["All"]={ko="전체",ja="すべて"},
+ ["Meadow"]={ko="초원",ja="草原"},
+ ["Breeding"]={ko="배합",ja="交配"},
+ ["Search monsters"]={ko="몬스터 검색",ja="モンスターを検索"},
+ ["No matching monsters"]={ko="검색 결과가 없어요",ja="該当するモンスターがいません"},
+ ["Field journal"]={ko="몬스터 도감",ja="モンスター図鑑"},
+ ["Explorer's field journal"]={ko="탐험가의 몬스터 도감",ja="探検家のモンスター図鑑"},
+ ["Discovered"]={ko="발견",ja="発見"},
+ ["Hover an entry for field notes"]={ko="몬스터에 커서를 올리면 획득 방법을 볼 수 있어요",ja="モンスターにカーソルを合わせると入手方法を表示"},
+ ["No entries here yet"]={ko="아직 등록된 몬스터가 없는 분류예요",ja="この分類にはまだ項目がありません"},
+ ["Breeding details not announced yet"]={ko="배합 방법은 아직 공개되지 않았어요",ja="交配方法はまだ公開されていません"},
+ ["Loading progress"]={ko="기록을 불러오는 중",ja="記録を読み込み中"},
+ ["Progress saved"]={ko="기록 저장됨",ja="記録を保存済み"},
+ ["Progress loaded"]={ko="기록 불러옴",ja="記録を読み込み済み"},
+ ["Session progress"]={ko="이번 접속의 기록",ja="今回の記録"},
+ ["Progress temporarily unavailable"]={ko="기록 저장 연결을 기다리는 중",ja="記録の接続待ち"},
 }
 function L.text(source,locale)
  local lang=string.lower(string.sub(locale or "en",1,2))
@@ -77,5 +93,20 @@ function L.income(amount,seconds,locale)
  local pattern=lang=="ko" and "%s초마다 %s코인" or lang=="ja" and "%s秒ごとに%sコイン" or (amount==1 and "%s coin every %ss" or "%s coins every %ss")
  if lang=="ko" or lang=="ja" then return string.format(pattern,tostring(seconds),tostring(amount)) end
  return string.format(pattern,tostring(amount),tostring(seconds))
+end
+function L.levelLabel(level,current,required,locale)
+ local lang=string.sub(locale or "en",1,2)
+ local name=lang=="ko" and "레벨" or lang=="ja" and "レベル" or "Lv."
+ return name.." "..level..(required==0 and " · MAX" or " · "..current.."/"..required.." XP")
+end
+function L.huntHint(meters,seconds,locale)
+ local lang=string.sub(locale or "en",1,2)
+ local pattern=lang=="ko" and "초원 %dm부터 등장. 점프 후 다시 Space로 줄을 던지고 %d초 동안 타세요." or lang=="ja" and "草原%dmから出現。ジャンプ後Spaceで投げ縄を使い、%d秒乗り続けよう。" or "Found in the meadow from %dm. Jump, press Space again to lasso, then ride for %ds."
+ return string.format(pattern,meters,seconds)
+end
+function L.evolutionHint(stars,locale)
+ local lang=string.sub(locale or "en",1,2)
+ local pattern=lang=="ko" and "같은 종류·같은 별의 몬스터 3마리를 합쳐 %d성까지 성장시키세요. 합성 기능은 준비 중이에요." or lang=="ja" and "同種・同じ星の3匹を合成し%d星まで育てよう。合成機能は準備中。" or "Merge three of the same species and star until %d stars. Merging is coming soon."
+ return string.format(pattern,stars)
 end
 return L

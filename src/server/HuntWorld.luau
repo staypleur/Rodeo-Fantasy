@@ -136,7 +136,7 @@ function World.ensure(z)
     end
    end
    for _, side in ipairs({-1,1}) do
-    local height=25+random:NextInteger(0,4)
+    local height=18+random:NextInteger(0,3) -- wall top remains above flying creatures
     decoration(chunk,"CanyonBase",Vector3.new(side*(edge+5),2,rowZ),Vector3.new(10,4,32),Color3.fromRGB(220,151,97))
     decoration(chunk,"CanyonStratum",Vector3.new(side*(edge+7),4.5,rowZ),Vector3.new(10,1,32),Color3.fromRGB(249,191,128))
     decoration(chunk,"CanyonUpper",Vector3.new(side*(edge+9),5+height/2,rowZ),Vector3.new(12,height,32),Color3.fromRGB(201,126,80))

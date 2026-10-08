@@ -2,6 +2,10 @@ local p=game.ReplicatedStorage.RodeoFantasy
 local C=require(p.MonsterCatalog)
 local animator=require(game.StarterPlayer.StarterPlayerScripts.RideAnimator)
 local folder=Instance.new('Folder') folder.Parent=workspace
+local small=game.ServerStorage[C.template('MeadowMouse',1)].PrimaryPart.Size
+local medium=game.ServerStorage[C.template('GrassBoar',1)].PrimaryPart.Size
+local large=game.ServerStorage[C.template('RockElephant',1)].PrimaryPart.Size
+assert(medium.X>small.X*1.5 and large.X>small.X*3 and large.Z>small.Z*2.5,'small/medium/large distinction must be visible at one star')
 local checks=0
 for _,id in ipairs(C.Order) do
  local last=0

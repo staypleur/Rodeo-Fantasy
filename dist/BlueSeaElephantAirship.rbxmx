@@ -28,11 +28,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -60,11 +64,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -92,11 +100,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -124,11 +136,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -156,11 +172,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -188,11 +208,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">7385807</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -220,11 +244,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -252,11 +280,15 @@
           <R22>0.9852376532240592</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -284,11 +316,15 @@
           <R22>0.9909497617679348</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -316,11 +352,15 @@
           <R22>0.9952759374651264</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -348,11 +388,15 @@
           <R22>0.9982101297677352</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -380,11 +424,15 @@
           <R22>0.9997482349425065</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -412,11 +460,15 @@
           <R22>0.9998881018102734</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -444,11 +496,15 @@
           <R22>0.9986295347545738</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -476,11 +532,15 @@
           <R22>0.9959742939952391</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -508,11 +568,15 @@
           <R22>0.9919260931265662</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -540,11 +604,15 @@
           <R22>0.9864905939235215</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -572,11 +640,15 @@
           <R22>0.9796753984232356</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -604,11 +676,15 @@
           <R22>0.9714900382928674</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -636,11 +712,15 @@
           <R22>0.9619459614987059</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -668,11 +748,15 @@
           <R22>0.9510565162951535</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -700,11 +784,15 @@
           <R22>0.882947592858927</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">6005453</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -732,11 +820,15 @@
           <R22>0.9271838545667874</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -764,11 +856,15 @@
           <R22>0.9271838545667874</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -796,11 +892,15 @@
           <R22>0.9135454576426009</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -828,11 +928,15 @@
           <R22>0.9135454576426009</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">8642804</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -860,11 +964,15 @@
           <R22>0.9396926207859084</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -892,11 +1000,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -924,11 +1036,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -956,11 +1072,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -988,11 +1108,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1020,11 +1144,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1052,11 +1180,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1404,11 +1536,15 @@
           <R22>0.9271838545667874</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1436,11 +1572,15 @@
           <R22>0.8660254037844387</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1468,11 +1608,15 @@
           <R22>0.7880107536067219</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1500,11 +1644,15 @@
           <R22>0.6946583704589973</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1532,11 +1680,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1564,11 +1716,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1596,11 +1752,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1628,11 +1788,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1660,11 +1824,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1692,11 +1860,15 @@
           <R22>0.9271838545667874</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1724,11 +1896,15 @@
           <R22>0.9271838545667874</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1756,11 +1932,15 @@
           <R22>0.9135454576426009</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1788,11 +1968,15 @@
           <R22>0.9135454576426009</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">8642804</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1820,11 +2004,15 @@
           <R22>0.9396926207859084</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1852,11 +2040,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1884,11 +2076,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1916,11 +2112,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1948,11 +2148,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -1980,11 +2184,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2012,11 +2220,15 @@
           <R22>0.9781476007338057</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">15920079</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2364,11 +2576,15 @@
           <R22>0.9271838545667874</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2396,11 +2612,15 @@
           <R22>0.8660254037844387</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2428,11 +2648,15 @@
           <R22>0.7880107536067219</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2460,11 +2684,15 @@
           <R22>0.6946583704589973</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">2976931</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2492,11 +2720,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2524,11 +2756,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2556,11 +2792,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2588,11 +2828,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2620,11 +2864,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2652,11 +2900,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2684,11 +2936,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2716,11 +2972,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2748,11 +3008,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2780,11 +3044,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2812,11 +3080,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2844,11 +3116,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2876,11 +3152,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2908,11 +3188,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2940,11 +3224,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -2972,11 +3260,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -3004,11 +3296,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -3036,11 +3332,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">1785449</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
@@ -3068,11 +3368,15 @@
           <R22>1.0</R22>
         </CoordinateFrame>
         <Color3uint8 name="Color3uint8">10081765</Color3uint8>
-        <token name="TopSurface">0</token>
+        <token name="TopSurface">3</token>
         <token name="BottomSurface">0</token>
         <token name="Material">272</token>
         <bool name="CanCollide">false</bool>
         <bool name="CanTouch">false</bool>
+        <token name="FrontSurface">3</token>
+        <token name="BackSurface">3</token>
+        <token name="LeftSurface">3</token>
+        <token name="RightSurface">3</token>
         <token name="shape">0</token>
       </Properties>
     </Item>
