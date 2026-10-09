@@ -56,6 +56,8 @@ animals[mounted]=ActualMotion.new(0,7)
 for i=1,6 do local m=animal(i,-30-i,false) animals[m]=ActualMotion.new(0,i) end
 world.testState(animals)
 local before=world.visibleSet(0,1,viewer) assert(not before[mounted])
+local beforeCount=0 for _ in pairs(before) do beforeCount+=1 end
+assert(beforeCount==5,'riding reserves one of the six total visible slots')
 local otherViewer={} assert(not world.visibleSet(0,1,otherViewer)[mounted])
 world.step(.05) assert(mounted.PrimaryPart.Position.Z==-30,'occupied mount is moved by riding, not herd')
 local state={monster=mounted,root={Position=Vector3.new(0,5,0)},rope={},tamed=true}
@@ -69,6 +71,7 @@ for i=1,4 do
  assert(mounted.PrimaryPart.Position.Z<previousZ,'former mount continues moving forward')
  previousZ=mounted.PrimaryPart.Position.Z
  local shown=world.visibleSet(0,1,viewer)
+ for runner in pairs(before) do assert(shown[runner],'launch cannot evict a wild runner still on screen') end
  assert(shown[mounted],'former mount must remain visible after launch')
  local count=0 for _ in pairs(shown) do count+=1 end assert(count<=6)
 end

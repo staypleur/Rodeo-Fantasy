@@ -11,7 +11,9 @@ end
 for _,a in ipairs({'Small','Medium','Large'}) do
  for _,b in ipairs({'Small','Medium','Large'}) do
   for _,dash in ipairs({false,true}) do
-   assert(R.canKnock(a,b,dash)==(b~='Large' and (a=='Large' or a=='Medium' and dash)))
+   local expected=a=='Large' and (b=='Small' or b=='Medium') or a=='Medium' and b=='Small' and dash
+   assert(R.canKnock(a,b,dash)==expected)
+   assert(R.canBreakObstacle(a,b,dash)==(a=='Large' and b=='Small' and dash))
   end
  end
 end

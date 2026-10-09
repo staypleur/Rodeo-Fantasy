@@ -252,7 +252,9 @@ end
 function World.atDen() return false end
 function World.visibleSet(z,aspect,viewer)
  local candidates={}
+ local riding=false
  for model in pairs(animals) do
+  if model.Parent and model:GetAttribute("Occupied") then riding=true end
   if model.Parent and not model:GetAttribute("Occupied") then
    local p=model.PrimaryPart.Position
    table.insert(candidates,{key=model,x=p.X,y=p.Y,z=p.Z,serial=model:GetAttribute("SpawnSerial") or 0})
@@ -265,7 +267,9 @@ function World.visibleSet(z,aspect,viewer)
    if not p or model:GetAttribute("Occupied") or not Visibility.visible(p.X,p.Y,p.Z-z,aspect or 1,tuning,1) then preferred[model]=nil end
   end
  end
- local result=Visibility.select(candidates,z,aspect or 1,tuning,6,viewer and displayed[viewer],preferred)
+ -- Reserve the occupied runner's slot before launch, so releasing it cannot
+ -- evict a different wild runner that is still in the middle of the screen.
+ local result=Visibility.select(candidates,z,aspect or 1,tuning,riding and 5 or 6,viewer and displayed[viewer],preferred)
  if viewer then displayed[viewer]=result end
  return result
 end
@@ -359,25 +363,26 @@ local function breakObstacle(rock,respawn)
   rock:SetAttribute("Broken",false) rock.CanQuery=true
  end) end
 end
-function World.hit(from, to, flying,mount)
+function World.hit(from, to, flying,mount,dashing)
 	for _, rock in ipairs(obstacles:GetChildren()) do
 		if rock:GetAttribute("Broken") or (flying and rock:GetAttribute("ObstacleSize")~="Large") then continue end
 		local p,s = rock.Position,rock.Size
 		if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,1) then
-   if mount and mount:GetAttribute("SizeClass")=="Large" and rock:GetAttribute("Scale")==1 then breakObstacle(rock,true)
+   local obstacleSize=rock:GetAttribute("ObstacleSize") or (rock:GetAttribute("Scale")==1 and "Small" or nil)
+   if mount and Rules.canBreakObstacle(mount:GetAttribute("SizeClass"),obstacleSize,dashing) then breakObstacle(rock,true)
    else return true end
   end
 	end
 	return false
 end
 
-function World.crateHit(from,to,mount,sizeClass)
+function World.crateHit(from,to,mount,sizeClass,dashing)
  if mount:GetAttribute("Flying") then return false end
  for _,box in ipairs(obstacles:GetChildren()) do
   if not box:GetAttribute("BreakableCrate") or box:GetAttribute("Broken") then continue end
   local p,s=box.Position,box.Size+mount.PrimaryPart.Size
   if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,0) then
-   if sizeClass~="Medium" and sizeClass~="Large" then return true end
+   if not Rules.canBreakObstacle(sizeClass,box:GetAttribute("ObstacleSize") or "Small",dashing) then return true end
    box.CanQuery=false box.CanTouch=false
    box:SetAttribute("Broken",true) box:SetAttribute("BrokenAt",workspace:GetServerTimeNow())
    for _,piece in ipairs(box:GetDescendants()) do if piece:IsA("BasePart") then piece.Transparency=1 piece.CanQuery=false end end

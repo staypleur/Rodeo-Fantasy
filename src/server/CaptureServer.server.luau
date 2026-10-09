@@ -331,10 +331,11 @@ RunService.Heartbeat:Connect(function(delta)
    state.monster.PrimaryPart.CFrame=CFrame.new(position)
    state.monster:SetAttribute("Steering",steer)
    state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,state.monster:GetAttribute("SaddleHeight") or tuning.RideHeightStuds,tuning.RideForwardStuds)
-   if World.crateHit(before,position,state.monster,state.monster:GetAttribute("SizeClass") or Config.Monster.SizeClass) then finish(player,"This monster cannot break crates.","Obstacle") continue end
-   local contact=World.mountedHit(before,position,state.monster,World.visibleSet(position.Z,views[player],player),state.dashUntil~=nil and clock<state.dashUntil)
+   local dashing=state.dashUntil~=nil and clock<state.dashUntil
+   if World.crateHit(before,position,state.monster,state.monster:GetAttribute("SizeClass") or Config.Monster.SizeClass,dashing) then finish(player,"This monster cannot break crates.","Obstacle") continue end
+   local contact=World.mountedHit(before,position,state.monster,World.visibleSet(position.Z,views[player],player),dashing)
    if contact then finish(player,contact=="Wall" and "You hit a wall." or "You hit another monster.",contact) continue end
-   if World.hit(before,position,state.monster:GetAttribute("Flying"),state.monster) then finish(player,"You hit an obstacle.","Obstacle") continue end
+   if World.hit(before,position,state.monster:GetAttribute("Flying"),state.monster,dashing) then finish(player,"You hit an obstacle.","Obstacle") continue end
    if not state.tamed and clock-state.started>=Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds then
     local id=state.monster:GetAttribute("MonsterId") or Config.Monster.Id
     local species=Catalog[id]

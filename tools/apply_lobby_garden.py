@@ -45,6 +45,8 @@ for index,old in enumerate(list(plots.findall('Item')),1):
  for serial,original in enumerate(native.findall('Item')):
   node=copy.deepcopy(original);node.set('referent',f'GardenNative{index}_{serial}')
   _,position,matrix=pose(node)
+  # Older saved review models have a coplanar stone lip at island height zero.
+  if name(node)=='Foundation':position[1]=-.57
   parent=plot
   if name(node).startswith('RanchGrass'):
    oldNumber=int(name(node).replace('RanchGrass',''));number={1:1,2:3,3:2,4:4}[oldNumber]

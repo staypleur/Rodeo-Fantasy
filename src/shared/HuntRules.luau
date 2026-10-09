@@ -24,7 +24,12 @@ function Rules.buck(elapsed,cycle,height,triple)
 end
 
 function Rules.canKnock(size,target,dashing)
- return target~="Large" and (size=="Large" or (size=="Medium" and dashing==true))
+ return (size=="Large" and (target=="Small" or target=="Medium"))
+  or (size=="Medium" and target=="Small" and dashing==true)
+end
+
+function Rules.canBreakObstacle(size,target,dashing)
+ return size=="Large" and target=="Small" and dashing==true
 end
 
 function Rules.progress(elapsed, duration)

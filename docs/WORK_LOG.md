@@ -596,3 +596,16 @@
 - tools/prepare_sky_whale_place.py는 dist/RodeoFantasy-LobbyBoardingFixed.rbxlx에서 CaptureClient Source 하나와 motion/installer/data 모듈3개만 추가한 dist/RodeoFantasy-SkyWhaleReady.rbxlx를 생성했다. 준비 파일에는 가져오기 전 기존 비행선이 남아 있다. 변경 스크립트를 제외한 전체 XML 정확한 동일성, 저장 파일 referent/UniqueId/Ref 검사 통과. 사용자 Capture와 이전 시험 파일은 덮어쓰지 않았다.
 - Luau 컴파일 통과. tests/check_sky_whale.py는 실제 motion 함수를20/30/60/120fps 간격으로 실행해 진폭/좌우 대칭/비지느러미 정지 및 잘못된 가져오기(누락/알 수 없는 메시/무색/중복)/시험 중 설치 거절과 기존 비행선 보존을 검사했다. 최초 테스트 실행은 Luau CLI의 한국어 절대 경로 처리 실패였으며 cwd 기준 상대 경로로 바꿔 통과했다. 이 테스트는 실제 기기 FPS 측정이나 실제 성공 설치/엔진 조작 검증이 아니다.
 - docs/SKY_WHALE_INSTALL.md에 정확한 파일 위치/파일→가져오기 옵션/모델 선택/한 줄 명령/저장·시험/성공 출력 확인을 기록했다. Roblox 공식 importer https://create.roblox.com/docs/studio/importer 의 지원GLTF/색재질/Forward·Up/Studs/메시 병합 옵션을 확인했다. 실제 가져오기/텍스처 업로드·권한/유영/등반/출발/모바일·PC 실기기 검증 및 이후 Roblox 게시는 남아 있다.
+
+
+## 2026-10-09 — 충돌 규칙 확정·바닥 겹침·점프 표시 안정화와 디자인 검토
+
+- 최신 사용자 규칙을 GAME_DESIGN에 기록했다. 소형은 파괴 없음, 중형은 대시 중 소형 몬스터만, 대형은 평소/대시 소형·중형 몬스터와 대시 중 소형 장애물만 파괴한다. HuntRules/World/CaptureServer에서 같은 대시 상태를 사용한다. 점유 몬스터/비행·지상 구분/5초 장애물 복원은 유지한다.
+- tests/check_collision_classes.py는 실제 HuntWorld와 Rules를 실행한72가지 접촉/점유/장애물 조합을 통과했다. 몬스터 종류 테스트도18가지 크기/대시 조합을 통과했다. 첫 meadow_species 직접 CLI 실행은 Roblox 모듈 경로 해석 실패였으며 실제 Source를 인라인한 임시 CLI harness로 재실행해 통과했다. Luau3개 Source 컴파일 통과. Studio smoke/복원 스크립트는 새 규칙에 수정했으나 실제 Studio 실행은 미실시다.
+- 실제 저장 파일에서 MeadowIsland top=0,8개 Foundation top=0을 확인했다. Foundation 중심Y를-.65→-.57로 올려 상단.08, CourtyardGround 상단.175 아래 여유.095를 둔다. 기존 자산/물리 경로는 유지하고 future garden generator/installer에도 반영했다.
+- visibleSet은 기승 중에도 야생6을 고르고 점프 직후 이전 몬스터를 우선 넣어 중앙의 기존 몬스터1마리를 탈락시킬 수 있었다. 기승 중 전체6에서 야생5자리만 사용해 점프 후 이전 몬스터와5마리를 유지한다. 실제 launch/freeMount/World.step/visibleSet 테스트에서 점프 전5,점프 후 이전5마리+이전 기승 몬스터가 모두 유지되고6제한/계속 주행/개별 viewer/화면 밖 해제 검사를 통과했다. 모든 실종의 원인을 확정한 것은 아니며 실제 Studio 재현 확인은 남았다.
+- patch_collision_rules.py와 patch_lobby_hunt_fix.py가 최신 저장 준비본에서 새 파일 dist/RodeoFantasy-CollisionRules.rbxlx 및 RodeoFantasy-LobbyHuntFix.rbxlx를 작성했다. Source3개와8개 기초 높이만 변경하며703MeshParts/나머지속성/참조/UniqueId 검사 통과. 사용자 변경 Capture.rbxlx는 덮어쓰거나 커밋하지 않는다. 새 파일의 고래는 이전 준비본 상태로, 승인 기본 고래의 실제 Studio 메시 설치 완료를 의미하지 않는다.
+- 9성 하늘고래 검토안: 길이1.4배/몸 깊이1.54배/결정5개 왕관+등 보석+금색 이마/지느러미/꼬리 장식,1060삼각형41노드512공유텍스처/재질1. 평면 법선/UV/유한성/2천미만 예산 검사 통과. 초기 이마 금색선이 눈을 가려 위로 옮기고 최종 실제 GLB 렌더를 직접 열어 확인했다. 게임 미적용/리깅·줄 위치 연결은 승인 후 진행한다.
+- LobbyGatewayReview:178 native Parts, 중앙24studs 평지 통로와8studs 이하 장식의 침범 없음 검사 통과. 크림 큰 아치/청록그라데이션 탑/낮은 외곽 담/수로/화단으로 실제 Part 검토 렌더를 열어 확인했다. 위치와 게임 통합은 승인 후 한다.
+- LobbyServicesRevisionReview: 기존 구성의 상점 지붕/기둥/간판3.4studs 높임, 랭킹 지붕/주택 제거하고 독립 게시판 준비. 사용자의 '너무 낮음' 후속 의견을 반영해 게시판 세로1.65배로 수정했다.103native Parts, 유한성/크기/직교 행렬 검사 및 실제 Part 렌더 육안 확인 완료. 새 검토안과9성고래/입구 디자인 적용 승인 질문을 보냈다. 판매 물품/새 기능/이름은 추가하지 않았다.
+- 모바일/PC: 표시 마릿수 예산6과 공유텍스처/낮은 폴리곤 예산 유지; 조작 변경 없음. 실제 Studio/모바일/PC FPS·시각·충돌·가독성 검증은 남아 있다.

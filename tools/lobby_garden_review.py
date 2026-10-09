@@ -65,7 +65,8 @@ def tree(x,z):
  block('TreeTrunk',(x,3.2,z),(.9,5.5,.9),wood)
  for dx,dy,dz,w in [(0,6,0,4.4),(-1,7,.4,3.4),(1,7,-.3,3.4),(0,8,0,2.7)]:
   block('TreeCanopy',(x+dx,dy,z+dz),(w,2.3,w),(83+int(dy)*3,126+int(dy)*3,75),15*dy)
-block('Foundation',(0,-.65,1),(83,1.3,99),stone)
+# Keep the exposed stone lip above the island lawn (top 0), below courtyard .175.
+block('Foundation',(0,-.57,1),(83,1.3,99),stone)
 block('CourtyardGround',(0,0,1),(79,.35,95),grass)
 block('CentralWalk',(0,.24,1),(12,.32,94),cream)
 for z in range(-40,44,4):
