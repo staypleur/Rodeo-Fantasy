@@ -42,10 +42,12 @@ if args.avatar_reference:
     pos=corners[list(ids)];normal=np.cross(pos[1]-pos[0],pos[2]-pos[0]);normal/=np.linalg.norm(normal)
     tris.append((pos,np.zeros((3,2)),normal))
  for i in range(3):
-  y=i*5
-  for center,size in (((0,4.5+y,0),(1,1,1)),((0,3+y,0),(2,2,1)),((-1.5,3+y,0),(1,2,1)),((1.5,3+y,0),(1,2,1)),((-.5,1+y,0),(1,2,1)),((.5,1+y,0),(1,2,1))):block(np.array(center),np.array(size))
+  y=i*5;ratio=.5 if i==2 else 1.
+  for center,size in (((0,4.5,0),(1,1,1)),((0,3,0),(2,2,1)),((-1.5,3,0),(1,2,1)),((1.5,3,0),(1,2,1)),((-.5,1,0),(1,2,1)),((.5,1,0),(1,2,1))):block(np.array(center)*ratio+np.array((0,y,0)),np.array(size)*ratio)
  pos=np.concatenate([t[0] for t in tris]);proj=np.stack((pos@right,pos@up),axis=-1)
- models.insert(3,dict(stage=0,tris=tris,texture=np.array([[[100,137,150]]],dtype=np.uint8),low=proj.min(0),high=proj.max(0),bodyHeight=15.,height=15.))
+ models.insert(3,dict(stage=0,tris=tris,texture=np.array([[[100,137,150]]],dtype=np.uint8),low=proj.min(0),high=proj.max(0),bodyHeight=12.5,height=12.5))
+ full_tris=tris[:72];full_pos=np.concatenate([t[0] for t in full_tris]);full_proj=np.stack((full_pos@right,full_pos@up),axis=-1)
+ models.insert(2,dict(stage=-1,tris=full_tris,texture=np.array([[[100,137,150]]],dtype=np.uint8),low=full_proj.min(0),high=full_proj.max(0),bodyHeight=5.,height=5.))
 W,H=2048,790;margin=54;gap=1.0
 scale=min((W-margin*2)/(sum(m['high'][0]-m['low'][0] for m in models)+gap*(len(models)-1)),590/max(m['high'][1]-m['low'][1] for m in models))
 frame=np.full((H,W,3),(249,242,226),dtype=np.uint8);depth=np.full((H,W),-np.inf)
@@ -88,16 +90,22 @@ image=Image.fromarray(frame);draw=ImageDraw.Draw(image)
 font=ImageFont.truetype('C:/Windows/Fonts/arial.ttf',28);small=ImageFont.truetype('C:/Windows/Fonts/arial.ttf',18)
 draw.text((28,16),'MOSSRAT / DISTINCT EVOLUTIONS / '+('SILHOUETTES' if args.silhouette else 'ACTUAL 3D'),font=font,fill=(60,43,29))
 draw.text((28,56),('Body height normalized (excluding crowns and tails), NOT actual size.' if args.equal_height else 'One camera and one shared scale.')+' Original baby unchanged. Review only, not installed.',font=small,fill=(105,86,63))
-if args.avatar_reference:draw.text((28,90),'REFERENCE: three illustrative 5-stud avatars = 15 studs, measured to the elder head (crown excluded).',font=small,fill=(105,86,63))
+if args.avatar_reference:draw.text((28,90),'BODY HEIGHT (ears included; plants/tails excluded): teen 4, adult 5.7, elder about 12.5 studs. Player reference 5.',font=small,fill=(105,86,63))
 if args.avatar_reference:
- reference_y=baseline-15*scale
- a=labels[3][0];b=labels[4][0]+slot_widths[4]/2
+ reference_y=baseline-12.5*scale
+ reference_index=next(i for i,m in enumerate(models) if m['stage']==0)
+ elder_index=next(i for i,m in enumerate(models) if m['stage']==9)
+ a=labels[reference_index][0];b=labels[elder_index][0]+slot_widths[elder_index]/2
  for x in range(int(a),int(b),16):draw.line((x,reference_y,min(x+8,b),reference_y),fill=(138,105,61),width=2)
- draw.text((a-15,reference_y-25),'15 studs',font=small,fill=(105,86,63),anchor='rt')
+ draw.text((a-15,reference_y-25),'12.5 studs',font=small,fill=(105,86,63),anchor='rt')
 for center,m in labels:
+ if m['stage']==-1:
+  draw.text((center,baseline+15),'PLAYER',font=font,fill=(71,52,30),anchor='mt')
+  draw.text((center,baseline+48),'5-stud illustration',font=small,fill=(105,86,63),anchor='mt')
+  continue
  if m['stage']==0:
-  draw.text((center,baseline+15),'3 PLAYERS',font=font,fill=(71,52,30),anchor='mt')
-  draw.text((center,baseline+48),'5 + 5 + 5 = 15 studs',font=small,fill=(105,86,63),anchor='mt')
+  draw.text((center,baseline+15),'2.5 PLAYER HEIGHTS',font=small,fill=(71,52,30),anchor='mt')
+  draw.text((center,baseline+48),'5 + 5 + 2.5 = 12.5 studs',font=small,fill=(105,86,63),anchor='mt')
   continue
  role={1:'BABY',3:'TEEN',6:'ADULT',9:'ELDER'}[m['stage']]
  draw.text((center,baseline+15),f'{m["stage"]} STAR / {role}',font=font,fill=(71,52,30),anchor='mt')
@@ -105,7 +113,7 @@ for center,m in labels:
 suffix='giant-comparison' if args.avatar_reference else 'silhouettes' if args.silhouette else 'equal-height' if args.equal_height else 'faceted-review'
 out=R/f'assets/previews/mossrat-growth-{suffix}.png';image.save(out)
 report={'bodyDisplayHeight':normalized_height} if args.equal_height else {'sharedPixelsPerUnit':scale,'stages':[{k:m[k] for k in ('stage','height')} for m in models]}
-stages=[m for m in models if m['stage']!=0]
+stages=[m for m in models if m['stage']>0]
 assert all(stages[i+1]['height']>stages[i]['height'] for i in range(3))
 if not args.equal_height and not args.avatar_reference:(R/'assets/previews/mossrat-growth-dimensions.json').write_text(json.dumps(report,indent=2)+'\n',encoding='utf-8')
 print('GROWTH_NORMALIZED_SHAPE_PASS' if args.equal_height else 'GROWTH_SHARED_SCALE_PASS',report)

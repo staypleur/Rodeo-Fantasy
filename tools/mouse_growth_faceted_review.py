@@ -140,22 +140,34 @@ for m in meshes:
    q[:,0]*=1.25;q[:,1]*=.66
    q[:,1]-=sg*q[:,0]*.27
   else:
-   q[:,0]*=.83;q[:,1]*=1.24
-   q[:,0]+=sg*np.maximum(q[:,1],0)*.35
+   q[:,0]*=.95;q[:,1]*=.80
+   q[:,0]+=sg*np.maximum(q[:,1],0)*.60
   p=q+np.array((sg*1.08,1.50,-1.07))
  m['p']=p.tolist()
 for sg in (-1,1):
  for j in range(2 if STAGE==3 else 3):
    leaf('ChestFur'+str(sg)+'_'+str(j),(sg*(.12+j*.20),.10,-.99),(sg*.16,-.96,-.05),.46 if STAGE==3 else .72,.30,.04,kind='Cream')
-# Ultimate evolution proposal: upright giant, not another enlarged quadruped.
+# Ultimate evolution: a giant quadruped with a continuous royal leaf cape.
 # This is review-only. Its height is calibrated independently of gameplay scale.
 giant_ground_to_head=None
 if STAGE==9:
- head_names=('Head','Nose','CalmSmile','RegalSprout')
- meshes[:]=[m for m in meshes if m['name'] in head_names or any(k in m['name'] for k in ('Eye','Ear','Cheek','SproutBloom','Crown','Beard'))]
+ meshes[:]=[m for m in meshes if m['name']!='CalmSmile']
+ face_patch('ElderClosedMouth',[(-.23,.21),(-.08,.18),(0,.19),(.08,.18),(.23,.21),(.11,.14),(0,.13),(-.11,.14)],'Dark',.055)
+ for sg,side in ((-1,'Left'),(1,'Right')):
+  face_patch(side+'ElderBrow',[(sg*.25,.98),(sg*.52,1.00),(sg*.76,1.09),(sg*.70,1.15),(sg*.28,1.08)],'Fur',.075)
+  for j in range(2):
+   leaf(f'ElderCheekMane{sg}_{j}',(sg*(.60+j*.12),.25+j*.15,-1.35),(sg*.66,.52,.53),.97+j*.14,.43,.055,kind='Ivory')
+ head_names=('Head','Nose','ElderClosedMouth','RegalSprout')
+ meshes[:]=[m for m in meshes if m['name'] in head_names or any(k in m['name'] for k in ('Eye','Ear','Cheek','SproutBloom','Crown','Beard','Brow'))]
  for m in meshes:
   p=np.asarray(m['p'],float)
-  p=(p-np.array((0,.62,-1.18)))*.94+np.array((0,3.05,-.25))
+  if m['name'].endswith('Eye'):
+   sg=-1 if m['name'].startswith('Left') else 1
+   p[:,1]=.77+(p[:,1]-.77)*.64+sg*(p[:,0]-sg*.49)*.25
+  if m['name'] in ('Head','Nose','ElderClosedMouth','LeftEye','RightEye','LeftCheek','RightCheek','LeftElderBrow','RightElderBrow'):
+   p[:,2]=-1.18+(p[:,2]+1.18)*1.20
+   p[:,0]*=.88+.22*np.clip((p[:,1]-.20)/.80,0,1)
+  p=(p-np.array((0,.62,-1.18)))*.94+np.array((0,2.15,-1.58))
   # A broad, angular elder face rather than the baby's large round head.
   p[:,0]*=1.08
   m['p']=p.tolist()
@@ -170,18 +182,39 @@ if STAGE==9:
   for i,hint in ((0,(0,-1,0)),(-1,(0,1,0))):
    for j in range(sides):tri(m,[rings[i][0],rows[i][j],rows[i][(j+1)%sides]],[(.5,.5),(0,0),(1,1)],kind,hint)
   return m
- upright_loft('ElderUprightTorso',[((0,-.05,.10),.77,.57),((0,.62,.10),.70,.48),((0,1.66,.08),1.17,.63),((0,2.35,.02),1.08,.57),((0,2.63,-.10),.44,.37)])
+ loft('Body',[((0,.62,-1.08),.85,.87),((0,.63,-.55),1.25,1.00),((0,.42,.71),1.19,.91),((0,.25,1.62),.84,.72)],sides=8)
+ loft('ElderNeck',[((0,1.25,-1.70),.49,.63),((0,1.18,-1.31),.76,.79),((0,.90,-.62),.98,.91)],sides=8)
  for sg in (-1,1):
-  upright_loft('ElderStandingLeg'+str(sg),[((sg*.55,-1.28,.02),.37,.50),((sg*.55,-1.04,.10),.29,.32),((sg*.53,-.48,.10),.30,.33),((sg*.47,.12,.10),.39,.37)],sides=4)
-  branch('ElderArm'+str(sg),[(sg*.94,2.18,.02),(sg*1.40,1.62,.02),(sg*1.40,.81,-.12)],.34)
-  upright_loft('ElderHand'+str(sg),[((sg*1.40,.41,-.14),.30,.30),((sg*1.40,.79,-.12),.34,.33),((sg*1.40,.96,-.12),.25,.25)],kind='Cream',sides=5)
-  # Broad shoulder mantle and downward leaf hems give an unmistakable robe.
+  for z,label,top in ((-.79,'Front',.87),(1.28,'Back',.56)):
+   upright_loft(('Left' if sg<0 else 'Right')+label+'Leg',[((sg*.94,-1.28,z-.17),.48,.58),((sg*.94,-1.03,z-.04),.36,.41),((sg*.94,-.35,z+.09),.38,.40),((sg*.87,top,z),.52,.50)],sides=4)
+  # Continuous faceted cape drapes from the back over both flanks, behind legs.
+  rows=[]
+  for j,z in enumerate((-.56,.08,.74,1.42,2.06)):
+   drop=.10*j
+   rows.append([np.array((sg*x,y-drop,z)) for x,y in ((0,1.73),(.64,1.59),(1.20,1.08),(1.60,.20))])
+  cape=mesh('RoyalCape'+str(sg));trim=mesh('CapeGoldHem'+str(sg))
+  for j in range(4):
+   for k in range(3):
+    pts=[rows[j][k],rows[j][k+1],rows[j+1][k+1],rows[j+1][k]]
+    coords=[(j/4,1-k/3),(j/4,1-(k+1)/3),((j+1)/4,1-(k+1)/3),((j+1)/4,1-k/3)]
+    quad(cape,pts,coords,'Leaf',(sg,.6,0))
+    under=[p+(0,-.028,0) for p in pts]
+    quad(cape,under,coords,'Leaf',(-sg,-.6,0))
+   a=rows[j][-1];b=rows[j+1][-1]
+   quad(trim,[a,b,b+(sg*.06,-.06,0),a+(sg*.06,-.06,0)],[(0,0),(1,0),(1,1),(0,1)],'Gold',(sg,0,0))
+  for k in range(3):
+   a=rows[-1][k];b=rows[-1][k+1]
+   quad(trim,[a,b,b+(0,-.055,.075),a+(0,-.055,.075)],[(0,0),(1,0),(1,1),(0,1)],'Gold',(0,.4,1))
   for j in range(3):
-   leaf(f'ElderRoyalMantle{sg}_{j}',(sg*(.70+j*.15),2.30-j*.16,.13+j*.14),(sg*(.20+j*.15),-.96,.13),2.13-j*.12,.78,.065)
+   leaf(f'RoyalShoulderLeaf{sg}_{j}',(sg*(.58+j*.20),1.57-j*.12,-.58+j*.23),(sg*.75,-.53,.33),1.13,.65,.065)
+   leaf(f'CapeLeafHem{sg}_{j}',(sg*1.55,.13-j*.10,.24+j*.63),(sg*.19,-.81,.55),.72,.42,.045)
   for j in range(2):
-   leaf(f'ElderChestIvory{sg}_{j}',(sg*(.19+j*.23),2.40,-.51),(sg*.10,-.98,0),1.14,.43,.045,kind='Cream')
-  flower('ElderShoulderFlower'+str(sg),(sg*.99,2.05,-.35),.20)
- tailpoints=[(0,.20,.65),(.73,.48,1.14),(1.39,1.29,1.45),(1.69,2.47,1.47),(1.22,3.36,1.42)]
+   leaf(f'ElderChestIvory{sg}_{j}',(sg*(.20+j*.22),1.26,-1.77),(sg*.16,-.97,0),1.20,.43,.045,kind='Cream')
+  flower('ElderShoulderFlower'+str(sg),(sg*1.04,1.30,-.78),.23)
+  flower('ElderCapeFlower'+str(sg),(sg*1.39,.77,.65),.19)
+ # Back clasp and orderly gold embroidery reinforce a cape, not a leaf cluster.
+ flower('RoyalCapeClasp',(0,1.58,-.80),.24)
+ tailpoints=[(0,.25,1.62),(.73,.48,2.08),(1.39,1.29,2.45),(1.69,2.47,2.47),(1.22,3.36,2.42)]
  branch('ElderTreeTail',tailpoints,.19,kind='Gold')
  for sg in (-1,1):
   endpoint=np.array(tailpoints[-1])+np.array((sg*.40,.20,0))
@@ -189,11 +222,11 @@ if STAGE==9:
   for j in range(3):
    a=(j-1)*1.1
    leaf(f'ElderTailCanopy{sg}_{j}',endpoint,(math.sin(a),math.cos(a),.02),.76,.48,.06,clover=True)
- ground=min(p[1] for m in meshes if 'StandingLeg' in m['name'] for p in m['p'])
- head_top=max(p[1] for m in meshes if m['name']=='Head' for p in m['p'])
- giant_scale=15.0/(head_top-ground)
+ ground=min(p[1] for m in meshes if m['name'].endswith('Leg') for p in m['p'])
+ head_top=max(p[1] for m in meshes if m['name']=='Head' or m['name'].endswith('Ear') for p in m['p'])
+ giant_scale=12.5/(head_top-ground)
  for m in meshes:m['p']=(np.asarray(m['p'])*giant_scale).tolist()
- giant_ground_to_head=15.0
+ giant_ground_to_head=12.5
 
 # Review geometry for 3/6 keeps the existing proposed growth multipliers.
 factor={3:1.4,6:1.9,9:2.5}[STAGE]
@@ -202,7 +235,7 @@ for m in meshes:
  name=m['name']
  head=name in ('Head','Nose','OpenSmile','CalmSmile','LeafWreath','RegalSprout') or any(k in name for k in ('Eye','Ear','Cheek','HeadSprout','SproutBloom','Crown','Beard'))
  if STAGE==9:
-  pass # Already independently modelled and calibrated to three 5-stud avatars.
+  pass # Already independently modelled; about 2.5 reference avatar heights.
  elif head:
   if 'Ear' in name:
    center=np.array((-1.08 if name.startswith('Left') else 1.08,1.50,-1.07))
@@ -228,10 +261,17 @@ for m in meshes:
  for i in range(0,len(p),3):
   assert np.allclose(n[i],n[i+1]) and np.allclose(n[i],n[i+2])
   assert np.dot(np.cross(p[i+1]-p[i],p[i+2]-p[i]),n[i])>1e-8
-if STAGE==9:
- actual=max(p[1] for m in meshes if m['name']=='Head' for p in m['p'])-min(p[1] for m in meshes if 'StandingLeg' in m['name'] for p in m['p'])
- assert abs(actual-15)<1e-6
- print('GIANT_REVIEW_HEIGHT_PASS: ground to head = 15; three illustrative 5-stud avatars; no game install')
+if STAGE in (3,6):
+ ground=min(p[1] for m in meshes if m['name'].endswith('Leg') for p in m['p'])
+ head_top=max(p[1] for m in meshes if m['name']=='Head' or m['name'].endswith('Ear') for p in m['p'])
+ target={3:4.0,6:5.7}[STAGE]
+ ratio=target/(head_top-ground)
+ for m in meshes:m['p']=(np.asarray(m['p'])*ratio).tolist()
+if STAGE in (3,6,9):
+ actual=max(p[1] for m in meshes if m['name']=='Head' or m['name'].endswith('Ear') for p in m['p'])-min(p[1] for m in meshes if m['name'].endswith('Leg') for p in m['p'])
+ assert abs(actual-{3:4.0,6:5.7,9:12.5}[STAGE])<1e-6
+ assert len([m for m in meshes if m['name'].endswith('Leg')])==4
+ print('AGE_REVIEW_HEIGHT_PASS:',STAGE,actual,'four legs; illustrative 5-stud avatar; no game install')
 '''
 for stage in (3,6,9):
  source=base.replace("STEM='MeadowMouse_A_S1_FacetedReview'",f"STAGE={stage}\nSTEM='Mossrat_S{stage}_FacetedReview'")
@@ -246,5 +286,5 @@ for stage in (3,6,9):
   source=source.replace('.62,.48,.065,clover=True',('.78,.59' if stage==6 else '.94,.70')+',.065,clover=True')
  marker='# Embed the actual atlas in the GLB; do not rely on importer vertex colors.'
  source=source.replace(marker,addition+'\n'+marker)
- source=source.replace("assert tri_count<2000", "if STAGE==9:gltf['extras'].update(referenceAvatarHeightStuds=5,groundToHeadHeightStuds=15,reviewUnitsPerStud=1,posture='upright biped review',gameInstalled=False)\nassert tri_count<2000")
+ source=source.replace("assert tri_count<2000", "gltf['extras'].update(referenceAvatarHeightStuds=5,groundToBodyHeightStuds={3:4.0,6:5.7,9:12.5}[STAGE],heightIncludesEars=True,reviewUnitsPerStud=1,posture='quadruped royal cape review' if STAGE==9 else 'quadruped review',gameInstalled=False)\nassert tri_count<2000")
  exec(compile(source,str(R/'tools/mouse_s1_faceted_revision.py'),'exec'),{'__file__':str(R/'tools/mouse_s1_faceted_revision.py')})

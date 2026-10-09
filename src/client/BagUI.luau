@@ -197,16 +197,16 @@ function UI.new(gui,remote)
    make("UICorner",{CornerRadius=UDim.new(0,12)},card)
    local male=item.sex=="Male" local female=item.sex=="Female"
    local color=male and Color3.fromRGB(72,130,180) or female and Color3.fromRGB(183,88,115) or Color3.fromRGB(119,109,91)
-   local badge=make("Frame",{Name="SexBadge",Position=UDim2.fromOffset(103,6),Size=UDim2.fromOffset(60,24),BackgroundColor3=Color3.fromRGB(255,241,213),BorderSizePixel=0,ZIndex=26},card)
+   local badge=make("Frame",{Name="SexBadge",AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-7,0,6),Size=UDim2.fromOffset(30,26),Visible=male or female,BackgroundColor3=Color3.fromRGB(255,241,213),BorderSizePixel=0,ZIndex=26},card)
    make("UICorner",{CornerRadius=UDim.new(0,6)},badge)
-   local ring=make("Frame",{Name="SexRing",Position=UDim2.fromOffset(6,5),Size=UDim2.fromOffset(11,11),BackgroundTransparency=1,ZIndex=27},badge)
+   local offset=male and 0 or 3
+   local ring=make("Frame",{Name="SexRing",Position=UDim2.fromOffset(6+offset,5),Size=UDim2.fromOffset(11,11),BackgroundTransparency=1,ZIndex=27},badge)
    make("UICorner",{CornerRadius=UDim.new(1,0)},ring) make("UIStroke",{Color=color,Thickness=2},ring)
    local function line(name,x,y,w,h,rotation)
-    make("Frame",{Name=name,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),Rotation=rotation or 0,BackgroundColor3=color,BorderSizePixel=0,ZIndex=27},badge)
+    make("Frame",{Name=name,Position=UDim2.fromOffset(x+offset,y),Size=UDim2.fromOffset(w,h),Rotation=rotation or 0,BackgroundColor3=color,BorderSizePixel=0,ZIndex=27},badge)
    end
    if male then line("MaleStem",14,4,9,2,-45) line("ArrowTop",18,2,6,2) line("ArrowRight",22,2,2,6)
    elseif female then line("FemaleStem",10,15,2,7) line("FemaleCross",7,18,8,2) end
-   make("TextLabel",{Name="SexText",Text=L.text(male and "Male" or female and "Female" or "Unknown sex",player.LocaleId),Position=UDim2.fromOffset(25,1),Size=UDim2.fromOffset(34,22),BackgroundTransparency=1,TextScaled=true,TextColor3=color,ZIndex=27},badge)
    self.cards[item.id]=card
    local preview=make("ViewportFrame",{Name="MonsterImage",BackgroundTransparency=1,Size=UDim2.new(1,0,0,140),ZIndex=23,Ambient=Color3.fromRGB(195,195,195),LightColor=Color3.new(1,1,1)},card)
    Portrait.fill(preview,item.monsterId,item.stars,false)
