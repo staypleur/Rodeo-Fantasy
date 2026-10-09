@@ -26,7 +26,8 @@ local function client(fail)
   end})
   function o:IsA(k) return k==self.ClassName or (k=='BasePart' and (kind=='Part' or kind=='MeshPart')) end
   function o:GetChildren() local list={} for _,item in ipairs(objects) do if item.Parent==self then list[#list+1]=item end end return list end
-  function o:GetDescendants() return self:GetChildren() end
+  function o:GetDescendants() local out={} for _,c in ipairs(self:GetChildren()) do out[#out+1]=c for _,d in ipairs(c:GetDescendants()) do out[#out+1]=d end end return out end
+  function o:IsDescendantOf(parent) local n=self.Parent while n do if n==parent then return true end n=n.Parent end return false end
   function o:GetAttribute(k) return self.attrs[k] end
   function o:SetAttribute(k,v) self.attrs[k]=v end
   function o:Destroy()
@@ -84,7 +85,7 @@ local function client(fail)
  local package={MonsterCatalog='catalog'} local script={Parent={FacetedMouseData='data'}}
  local game={ReplicatedStorage={RodeoFantasy=package},GetService=function() return Asset end}
  local require=function(which) return which=='data' and data or catalog end
- local task={wait=function() error('unexpected concurrent wait') end} local warn=function() end
+ local task={wait=function() error('unexpected concurrent wait') end,defer=function(fn) fn() end} local warn=function() end
  local module=(function()\n'''
 source=(R/'src/client/FacetedMouse.luau').read_text(encoding='utf-8')
 remember=(R/'src/client/RideAnimator.luau').read_text(encoding='utf-8').split('local function remember(model, existing)',1)[1].split('function RideAnimator.update',1)[0]
@@ -94,15 +95,16 @@ suffix='''\nend)()
  function package:WaitForChild() return {WaitForChild=function() return {CFrame=F()} end} end
  local function remember(model, existing)'''+remember+'''
  local function model(stars,silhouette)
-  local m=object('Model');m.DescendantAdded={Connect=function() return {} end};m.Parent={} m:SetAttribute('MonsterId','MeadowMouse') m:SetAttribute('Stars',stars)
+  local m=object('Model');m.DescendantAdded={callbacks={},Connect=function(self,fn) self.callbacks[#self.callbacks+1]=fn return {} end};m.Parent={} m:SetAttribute('MonsterId','MeadowMouse') m:SetAttribute('Stars',stars)
   m:SetAttribute('PortraitSilhouette',silhouette)
   local root=object('Part');root.Name='MountRoot' root.CFrame=F(0,2.05,0) root.Parent=m m.PrimaryPart=root
   local old=object('Part');old.Name='Body' old.Parent=m
+  local nested=object('Model');nested.Parent=m local leftover=object('Part');leftover.Name='LegacyTail' leftover.Parent=nested
   return m,old
  end
- return module,model,objects,function() return triangles,written end,function(target) target.PrimaryPart.CFrame=F(50,10,-100) return remember(target) end
+ return module,model,objects,function() return triangles,written end,function(target) target.PrimaryPart.CFrame=F(50,10,-100) return remember(target) end,function(target) local p=object('Part') p.Parent=target for _,fn in ipairs(target.DescendantAdded.callbacks) do fn(p) end return p end
 end
-local m,new,objects,metrics,remember=client(false)
+local m,new,objects,metrics,remember,late=client(false)
 local animal,old=new(1,false)
 assert(m.apply(animal) and old.destroyed and animal.PrimaryPart.Parent==animal)
 assert(animal:GetAttribute('FacetedMouseRevision')=='FacetedA1-v1')
@@ -120,6 +122,8 @@ for _,p in ipairs(animal:GetChildren()) do if p.ClassName=='MeshPart' then
  if p.Name=='LeftFrontLeg' then assert(math.abs(p.CFrame.Position.Y-p.Size.Y/2)<.00001,'paws must meet ground') end
 end end
 assert(count==29)
+for _,p in ipairs(animal:GetDescendants()) do if p:IsA('BasePart') and p~=animal.PrimaryPart then assert(p:GetAttribute('ApprovedRest'),'nested original must be removed') end end
+assert(late(animal).destroyed,'late server geometry must not reappear')
 -- Root is moved in the injected callback, before the real animator remembers.
 local pose=remember(animal)
 for _,entry in ipairs(pose) do assert(entry.rest==entry.part:GetAttribute('ApprovedRest'),'animator must use canonical parts, not stale world positions') end
