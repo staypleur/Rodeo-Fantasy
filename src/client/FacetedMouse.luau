@@ -83,11 +83,10 @@ function M.apply(model)
    for _,child in ipairs(part:GetChildren()) do if child:IsA("SurfaceAppearance") then child:Destroy() end end
    part.TextureID="" part.Color=Color3.new(0,0,0)
   else
-   -- Bind the retained image directly for each displayed part, avoiding a
-   -- dependency on cloned engine-generated texture-pack state across runs.
-   local surface=Asset:CreateSurfaceAppearanceAsync({ColorMap=Content.fromObject(texture)})
-   if not model.Parent then surface:Destroy() error("Mouse removed during texture preparation") end
-   surface.Parent=part
+   -- This model needs a base-color map only. Avoid per-part PBR texture-pack
+   -- creation across every replay; bind the same retained image to MeshPart.
+   for _,child in ipairs(part:GetChildren()) do if child:IsA("SurfaceAppearance") then child:Destroy() end end
+   part.TextureContent=Content.fromObject(texture)
   end
  end end)
  if not ok or not model.Parent then

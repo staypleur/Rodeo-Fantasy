@@ -331,9 +331,10 @@ end
 -- Contact while riding: include moving herds and the visible inner canyon face.
 function World.mountedHit(from,to,mount,selected,dashing)
  local half=mount.PrimaryPart.Size/2
+ local flying=mount:GetAttribute("Flying")==true
  for i=0,4 do
   local p=from:Lerp(to,i/4)
-  if not Course.contains(p.X,p.Z-half.Z,half.X) or not Course.contains(p.X,p.Z+half.Z,half.X) then return "Wall" end
+  if not Course.contains(p.X,p.Z-half.Z,half.X,flying) or not Course.contains(p.X,p.Z+half.Z,half.X,flying) then return "Wall" end
  end
  for other in pairs(animals) do
   if other==mount or not other.Parent or other:GetAttribute("Flying")~=mount:GetAttribute("Flying") or (selected and not other:GetAttribute("Occupied") and not selected[other]) then continue end
@@ -372,7 +373,7 @@ local function breakObstacle(rock,respawn)
 end
 function World.hit(from, to, flying,mount,dashing)
 	for _, rock in ipairs(obstacles:GetChildren()) do
-		if rock:GetAttribute("Broken") or (flying and rock:GetAttribute("ObstacleSize")~="Large") then continue end
+		if rock:GetAttribute("Broken") or (flying and rock:GetAttribute("WallClass")~="High" and rock:GetAttribute("ObstacleSize")~="Large") then continue end
 		local p,s = rock.Position,rock.Size
 		if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,1) then
    local obstacleSize=rock:GetAttribute("ObstacleSize") or (rock:GetAttribute("Scale")==1 and "Small" or nil)

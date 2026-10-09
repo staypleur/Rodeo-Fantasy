@@ -23,6 +23,12 @@ local function client(fail)
  local function object(kind)
   local o=setmetatable({ClassName=kind,attrs={}},{__newindex=function(t,k,v)
    if kind=='MeshPart' and k=='RenderFidelity' then error("The current thread cannot write 'RenderFidelity' (lacking capability PluginOrOpenCloud)") end
+   if kind=='MeshPart' and k=='TextureContent' then
+    assert(written and v.ClassName=='EditableImage' and not v.destroyed)
+    assert(not currentModel:GetAttribute('ApprovedVisualGuard'),'fallback must remain until every image binding succeeds')
+    currentModel.PrimaryPart.CFrame=F(60,2.05,-120)
+    if fail=='texture' then error('simulated direct image binding failure') end
+   end
    rawset(t,k,v)
   end})
   function o:IsA(k) return k==self.ClassName or (k=='BasePart' and (kind=='Part' or kind=='MeshPart')) end
@@ -54,11 +60,7 @@ local function client(fail)
   return o
  end
  function Asset:CreateSurfaceAppearanceAsync(content)
-  assert(written and content.ColorMap.ClassName=='EditableImage' and not content.ColorMap.destroyed)
-  assert(not currentModel:GetAttribute('ApprovedVisualGuard'),'fallback cleanup must not start before every texture finishes')
-  currentModel.PrimaryPart.CFrame=F(60,2.05,-120) -- Root can move while the real API yields.
-  if fail=='surface' then error('simulated surface binding failure') end
-  return object('SurfaceAppearance')
+  error('mouse must not allocate PBR surface packs per displayed part')
  end
  function Asset:CreateEditableMesh()
   assert(dynamicLive==0,'only one temporary dynamic mesh may be live')
@@ -127,7 +129,7 @@ local count=0
 for _,p in ipairs(animal:GetChildren()) do if p.ClassName=='MeshPart' then
  count+=1 assert(not p.CanCollide and not p.CanTouch and not p.CanQuery)
  assert(p.CFrame.Position.X==animal.PrimaryPart.CFrame.Position.X+p:GetAttribute("ApprovedRest").Position.X,"all staged parts must use latest root after texture yields")
- assert(#p:GetChildren()==1 and p:GetChildren()[1].ClassName=='SurfaceAppearance')
+ assert(#p:GetChildren()==0 and p.TextureContent.ClassName=='EditableImage' and not p.TextureContent.destroyed)
  if p.Name=='LeftFrontLeg' then assert(math.abs(p.CFrame.Position.Y-p.Size.Y/2)<.00001,'paws must meet ground') end
 end end
 assert(count==29)
@@ -144,7 +146,7 @@ local second=new(2,false) assert(m.apply(second))
 for run=1,10 do
  local replay=new(1,false) assert(m.apply(replay))
  for _,part in ipairs(replay:GetChildren()) do if part.ClassName=='MeshPart' then
-  assert(#part:GetChildren()==1 and part:GetChildren()[1].ClassName=='SurfaceAppearance','every restarted run must bind a surface')
+  assert(#part:GetChildren()==0 and part.TextureContent.ClassName=='EditableImage' and not part.TextureContent.destroyed,'every restarted run must directly bind the retained image')
  end end
  replay:Destroy()
 end
@@ -153,7 +155,7 @@ local third=new(3,false) assert(not m.apply(third),'unapproved growth stages mus
 local failed,newFailed,all=client(true) local target,prior=newFailed(1,false)
 assert(not failed.apply(target) and not prior.destroyed and target.PrimaryPart.Parent==target)
 for _,obj in ipairs(all) do if obj.ClassName=='EditableMesh' or obj.ClassName=='EditableImage' or obj.ClassName=='SurfaceAppearance' or obj.ClassName=='MeshPart' then assert(obj.destroyed,'failed factory must free resources') end end
-local surfaceFail,makeSurfaceFail=client('surface') local interrupted,previous=makeSurfaceFail(1,false)
+local surfaceFail,makeSurfaceFail=client('texture') local interrupted,previous=makeSurfaceFail(1,false)
 assert(not surfaceFail.apply(interrupted) and not previous.destroyed,'surface error must preserve original visual')
 assert(not interrupted:GetAttribute('FacetedMouseRevision'),'failed color binding must not mark installation complete')
 print('APPROVED_MOUSE_RUNTIME_PASS:747 faces/29 fixed textured meshes, single temporary builder, cache reuse, grounded paws, silhouette, growth scope and atomic failure cleanup; API stubs only')

@@ -71,7 +71,7 @@ for sg,side in ((-1,'Left'),(1,'Right')):
 
 
 # Calm mouth and bold current markings; a new crescent crest defines the final stage.
-tube('MouthLine',[(-10,0,-69),(-5,-1,-72),(0,-.4,-75.2),(5,-1,-72),(10,0,-69)],[.28]*5,'Dark',5)
+# User requested a clean belly/face boundary without a dark mouth strip.
 for sg,side in ((-1,'Left'),(1,'Right')):
  for j in range(3):
   z=-32+j*9

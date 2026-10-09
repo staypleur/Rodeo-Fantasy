@@ -661,3 +661,18 @@
 - 도감은 기본 이름순 정렬 때문에 숲이 앞에 올 수 있어 UIListLayout.SortOrder와 각 탭 LayoutOrder를 명시했다. 최종 사용자 지정 전체→초원→숲→늪지→바다와 기존 지역별 색을 반영한다. T/A/D/클릭/분류/모바일 한 페이지/입력 중 단축키 무시/이동복원 검사 통과.
 - tools/apply_approved_lobby.py는 별도 출력 경로를 지원하며 JournalBagReview 기반 9개 Source를 최신 코드로 교체하고 고래 모듈 2개를 추가한다. dist/RodeoFantasy-WhaleHuntFixed.rbxlx를 생성한다. 기존 저장 자산/703MeshParts/목장/발판/참조/UniqueId 보존 검사를 포함한다. 사용자 수정 dist/RodeoFantasy-Capture.rbxlx는 변경하거나 커밋하지 않는다.
 - 코드/API stub 및 저장 파일 검증은 실제 Studio 실행, 모바일·PC 화면/성능/오디오 검증을 대신하지 않는다. 고래는 F5 실행 시 교체되는 구조이며 게임 게시·자산 업로드는 이번 작업에 포함하지 않았다.
+
+## 2026-10-09 — 로비 입선 제거·모스랫 성장 검토·운영자 비밀번호·낮은 벽
+
+- 로비 외관 마무리 요청에 따라 고래 MouthLine을 제거했다. Regal-v3는988삼각형/37원본 노드/4런타임 그룹/512이미지. 실제 배·줄·anchor는 유지한다. runtime/API 모형 자원 실패 보존 및 중복 설치 검사는 통과했다.
+- tools/mouse_growth_faceted_review.py는 승인 A1 생성기를 재사용해 모스랫3·6·9성의 실제 GLB/OBJ/MTL/내장 색맵 검토안을 생성한다. 기존 A1 파일을 덮어쓰지 않는다. 각각873/1039/1228삼각형과39/52/67노드, 각진 면/유한 좌표/UV/면 방향/2000면 미만 검사 통과. 잎 망토 뿌리가 몸 안에 묻힌 첫 렌더를 확인해 바깥으로 조정하고 다시 렌더했다. assets/previews/mossrat-growth-faceted-review.png와 단계별 정면/사선/사냥시점 렌더를 직접 확인했다. 비교표는 각 단계를 화면에 맞춰 표시해 실제 크기 비율 비교가 아니다. 디자인 게임 적용/걷기 연결은 승인 대기다.
+- 처음 Studio 전용 테스트 지급을 준비하던 중 사용자 요청으로 모든 명령어를 운영자 명령어로 변경했다. 사용자에게 공개 게임 사용 여부와 계정을 확인받았다: 공개 게임에서도 puller3313만 허용. 초기 Studio 전용 파일과 임시 코드는 최종 산출물에서 제거한다.
+- OperatorCommands→OperatorAuth의 공통 인증 경로: 서버 GetUserIdFromNameAsync로 계정 확인, 명령어별 서버 지정 내용/일회용 GUID/45초 만료, 매번 비밀번호 확인, 5회 실패60초 제한, 위조/재사용/취소 차단. 검증 전에 가방을 수정하지 않는다. 미래 명령어도 이 공통 경로를 사용한다. 기본 OperatorSettings는 비밀번호 비어 있어 명령어가 비활성 상태이며 자격 정보는 Git에 넣지 않는다.
+- 운영자 설정 도구는 사용자 로컬 getpass 입력만 받으며 salt와 SHA-256 검증값을 서버 전용 모듈에 넣어 dist/LocalOperator/RodeoFantasy-OperatorConfigured.rbxlx를 만든다. 이 폴더를 .gitignore에 추가했다. 실제 사용자 비밀번호는 입력받거나 저장하지 않았다. tools/운영자비밀번호설정.cmd를 더블클릭해 준비하도록 docs/OPERATOR_COMMANDS.md에 절차 기록.
+- OperatorPrompt는 PC 클릭/Enter·터치용44px 입력/42px 버튼, 화면86%/최대460폭의 별도 창. 실제 입력 글자는 가리고 표시용 점을 사용하며 제출/닫기/응답 시 입력 내용을 지운다. 매 명령어 확인이며 로그인 재사용 없음. UI 모형의 가림/입력 지우기/중복 제출/Enter/취소 검사가 통과했다. 실제 화면·소프트키보드는 미검증.
+- operator 검사: SHA-256의 빈 문자열/abc/1000자/비ASCII를 Python hashlib와 비교, 운영자 외 계정/틀린 비밀번호/위조 nonce/재사용/만료/취소/잠금/빈 설정/입력 파싱/서버 실제 지급 callback/성별·수익·동기화/사냥 중 거절 검증 통과. 실제 Legacy 채팅 event→비밀번호 요청→확인→지급 연결도 API 모형에서 통과. 현재 장소 ChatVersion=0을 확인해 Legacy와 TextChatCommand 경로 모두 지원한다. 공식 TextChatCommand/Player/ChatVersion 문서 확인.
+- 최신 사용자 보고: 흰 모스랫 여전, 비행 중 낮은 중앙벽 충돌. 첨부 두 파일은 경로에서 읽히지 않아 이미지를 봤다고 주장하지 않는다. 현재 Studio 로그에는 해당 시점의 승인 쥐 색 연결 실패를 확정할 오류가 없었고 이전 SurfaceAppearance shader 경고만 확인했다. 모스랫은 PBR SurfaceAppearance 생성 경로를 없애고 동일한 EditableImage를 MeshPart.TextureContent로 직접 연결한다. 공식 MeshPart API 확인 https://create.roblox.com/docs/reference/engine/classes/MeshPart . 실제 Studio 재현/해결 확정은 남는다.
+- 승인 쥐 실제factory/apply 검사:747면/29fixed/단일 동적builder/유지한1024이미지,10회 재생성마다 직접 연결·PBR 팩 생성0·발바닥/실루엣/늦은 기본파트 제거·색 연결 실패시 기존 보존 통과. 픽셀의 실제 GPU 표시를 검사한 것은 아니다.
+- Course.ranges/contains에 flying 인자를 추가해 낮은 median만 비행 통과. mountedHit에 비행 속성을 전달하며 코스 외곽은 유지한다. World.hit의 미래 WallClass=High는 비행형도 충돌한다. 높은 벽을 실제 초원에 생성하지 않았다. 실제 mountedHit/World.hit Source를 실행해 중앙벽 지상 충돌·비행 통과·외곽 경계·미래 높은 벽 fixture를 검증했다. 사냥 밀도 및 이전 탑승체 주행/표시 회귀 통과.
+- 최종 dist/RodeoFantasy-LobbyFinal-Operator.rbxlx는 위 수정과 운영자 모듈/창을 포함하며 실제 비밀번호가 없는 공유본이다. 별도 개인용 파일을 설정해야 운영자 명령어가 작동한다. 기존703 저장MeshParts/목장/탑승 자산/참조/UniqueId 보존 검사를 포함한다. 사용자 수정 Capture.rbxlx는 그대로 보존한다. 실제 Studio/공개 경험 계정 인증/모바일·PC 성능 및 게시 검증은 미실시.
+- 최종 추가 확인: 변경/신규11개 Luau Source 컴파일 통과. 최종 게임 파일의 핵심11개 Source가 현재 src와 정확히 같고 기본 PasswordHash가 비어 있으며 옛 TestMonsterCommand가 없는지 확인했다. 개인용 경로가 git check-ignore에 포함됨을 확인했다. 사용자 비밀번호 설정 파일은 생성하지 않았다.

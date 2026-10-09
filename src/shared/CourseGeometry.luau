@@ -9,10 +9,10 @@ function Course.median(z)
  local d=math.max(0,-z/3)
  return 9*ramp(d,800,950)*(1-ramp(d,1200,1400))
 end
-function Course.ranges(z,padding)
+function Course.ranges(z,padding,flying)
  local edge=Course.width(z)-padding
  local middle=Course.median(z)
- if middle>0 then return {{-edge,-middle-padding},{middle+padding,edge}} end
+ if middle>0 and not flying then return {{-edge,-middle-padding},{middle+padding,edge}} end
  return {{-edge,edge}}
 end
 function Course.planningRanges(z,horizon,padding)
@@ -21,8 +21,8 @@ function Course.planningRanges(z,horizon,padding)
  if middle>0 then return {{-edge,-middle-padding},{middle+padding,edge}} end
  return {{-edge,edge}}
 end
-function Course.contains(x,z,padding)
- for _,range in ipairs(Course.ranges(z,padding)) do
+function Course.contains(x,z,padding,flying)
+ for _,range in ipairs(Course.ranges(z,padding,flying)) do
   if x>range[1] and x<range[2] then return true end
  end
  return false

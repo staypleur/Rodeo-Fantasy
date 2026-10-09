@@ -61,6 +61,18 @@ local function sendBag(player)
  end
  remote:FireClient(player,"Bag",items)
 end
+require(script.Parent:WaitForChild("OperatorCommands")).register(Catalog,remote,function(player,id,stars,count)
+ local bag=bags[player]
+ if not bag or states[player] then return false end
+ local species=Catalog[id]
+ for _=1,count do
+  BagRules.grant(bag,id,now(),species.IncomeSeconds,species.IncomeAmount)
+  bag.monsters[#bag.monsters].stars=stars
+ end
+ send(player,"운영자 명령어로 몬스터를 가방에 추가했습니다.")
+ sendBag(player)
+ return true
+end)
 local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
  state.rope=nil
