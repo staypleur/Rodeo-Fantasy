@@ -13,6 +13,7 @@ parser.add_argument('--grand-review',action='store_true')
 parser.add_argument('--forward-face',action='store_true')
 parser.add_argument('--sky-whale',action='store_true')
 parser.add_argument('--lineage-review',action='store_true')
+parser.add_argument('--side-label',default='SIDE / FLOWING MANE')
 args=parser.parse_args();data=args.model.read_bytes();n=struct.unpack_from('<I',data,12)[0]
 g=json.loads(data[20:20+n]);binary=data[28+n:]
 def values(index):
@@ -32,7 +33,7 @@ draw.text((22,15),args.title,fill=(65,49,35),font=font)
 draw.text((22,52),f'{len(triangles)} triangles / flat normals / actual embedded color texture / NOT a Roblox screenshot',fill=(106,88,64),font=small)
 views=[('FRONT',(0,.07,-1)),('THREE-QUARTER',(.65,.70,-1) if args.airship_detail else (.65,.30,-1)),('FACE DETAIL',(.1,.08,-1)) if args.airship_detail else ('HUNT VIEW',(.36,.84,.48))]
 if args.lineage_review:
- views=[('FRONT',(0,.08,-1)),('SIDE / FLOWING MANE',(1,.06,0)),('THREE-QUARTER',(.65,.20,-1))]
+ views=[('FRONT',(0,.08,-1)),(args.side_label,(1,.06,0)),('THREE-QUARTER',(.65,.20,-1))]
 if args.grand_review:
  views=[('FRONT / RAISED WINGS',(0,.25,-1)),('THREE-QUARTER',(.70,.40,-1)),('TOP / REAR',(.36,.84,.48))]
 if args.forward_face:
