@@ -11,6 +11,7 @@ parser.add_argument('--title',default='MEADOW MOUSE A1 / FACETED 3D REVIEW')
 parser.add_argument('--airship-detail',action='store_true')
 parser.add_argument('--grand-review',action='store_true')
 parser.add_argument('--forward-face',action='store_true')
+parser.add_argument('--sky-whale',action='store_true')
 args=parser.parse_args();data=args.model.read_bytes();n=struct.unpack_from('<I',data,12)[0]
 g=json.loads(data[20:20+n]);binary=data[28+n:]
 def values(index):
@@ -33,6 +34,8 @@ if args.grand_review:
  views=[('FRONT / RAISED WINGS',(0,.25,-1)),('THREE-QUARTER',(.70,.40,-1)),('TOP / REAR',(.36,.84,.48))]
 if args.forward_face:
  views=[('FRONT', (0,.16,-1)),('HEAD / SIDE',(.85,.30,-1)),('FACE DETAIL',(.55,.20,-1))]
+if args.sky_whale:
+ views=[('THREE-QUARTER',(.80,.40,-1)),('SIDE',(1,.15,-.15)),('TOP / TAIL',(.3,.9,.6))]
 for col,(label,eye) in enumerate(views):
  d=np.array(eye,dtype=float);d/=np.linalg.norm(d);right=np.cross(d,(0,1,0));right/=np.linalg.norm(right);up=np.cross(right,d)
  allpos=np.concatenate([t[0] for t in triangles])
@@ -62,5 +65,5 @@ for col,(label,eye) in enumerate(views):
   old[mask]=zz[mask];frame[y0:y1+1,x0:x1+1][mask]=rgb[mask]
  image.paste(Image.fromarray(frame),(col*520+5,134))
  draw.text((col*520+24,106),label,fill=(65,49,35),font=font)
-draw=ImageDraw.Draw(image);draw.text((22,621),'Static shape review only. No game installation, rigging or '+('wing' if args.airship_detail or args.grand_review or args.forward_face else 'walking')+' animation.',fill=(106,88,64),font=small)
+draw=ImageDraw.Draw(image);draw.text((22,621),'Static shape review only. No game installation, rigging or '+('swimming' if args.sky_whale else 'wing' if args.airship_detail or args.grand_review or args.forward_face else 'walking')+' animation.',fill=(106,88,64),font=small)
 args.output.parent.mkdir(parents=True,exist_ok=True);image.save(args.output);print(args.output)
