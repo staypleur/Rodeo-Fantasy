@@ -119,4 +119,4 @@ if not args.equal_height and not args.avatar_reference:(R/'assets/previews/mossr
 print('GROWTH_NORMALIZED_SHAPE_PASS' if args.equal_height else 'GROWTH_SHARED_SCALE_PASS',report)
 if args.equal_height or args.avatar_reference:sys.exit(0)
 for stage in (3,6,9):
- subprocess.run([sys.executable,str(R/'tools/render_textured_review.py'),'--model',str(R/f'dist/ReviewModels/Mossrat_S{stage}_FacetedReview.glb'),'--output',str(R/f'assets/previews/mossrat-s{stage}-faceted-review.png'),'--title',f'MOSSRAT {stage} STAR / AGE REFINEMENT'],check=True,cwd=R)
+ subprocess.run([sys.executable,str(R/'tools/render_textured_review.py'),'--model',str(R/f'dist/ReviewModels/Mossrat_S{stage}_FacetedReview.glb'),'--output',str(R/f'assets/previews/mossrat-s{stage}-faceted-review.png'),'--lineage-review','--title',f'MOSSRAT {stage} STAR / BRANCHING SPROUT & FLOWING MANE'],check=True,cwd=R)
