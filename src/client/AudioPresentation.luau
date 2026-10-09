@@ -6,6 +6,27 @@ local sounds,hooves={},{}
 local lastBurst={}
 local hoofId=settings.Hooves
 local lastWorld
+local groups={}
+local volumes={Music=1,Effects=1}
+function Audio.clampVolume(value)
+ if type(value)~="number" or value~=value then return nil end
+ return math.clamp(value,0,1)
+end
+local function group(kind)
+ if not groups[kind] then
+  local node=Instance.new("SoundGroup") node.Name="RodeoLocal"..kind
+  node.Volume=volumes[kind] node.Parent=service groups[kind]=node
+ end
+ return groups[kind]
+end
+function Audio.setVolume(kind,value)
+ if volumes[kind]==nil then return false end
+ local clamped=Audio.clampVolume(value)
+ if clamped==nil then return false end
+ volumes[kind]=clamped group(kind).Volume=clamped
+ return true
+end
+function Audio.getVolume(kind) return volumes[kind] end
 -- Event decisions are independent of sound loading and frame rate.
 function Audio.newEvents()
  local tracker={}
@@ -41,6 +62,7 @@ end
 local tracker=Audio.newEvents()
 local function sound(name,id,parent,volume,looped)
  local s=Instance.new("Sound") s.Name=name s.SoundId=id s.Volume=volume
+ s.SoundGroup=group((name=="RodeoBGM" or name=="RodeoLobbyBGM") and "Music" or "Effects")
  s.Looped=looped or false s.Parent=parent return s
 end
 local profiles={

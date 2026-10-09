@@ -1,5 +1,10 @@
 local L={}
 L.entries={
+ ["Settings"]={ko="설정",ja="設定"},
+ ["Sound settings"]={ko="소리 설정",ja="サウンド設定"},
+ ["Background music"]={ko="배경 음악",ja="背景音楽"},
+ ["Sound effects"]={ko="효과음",ja="効果音"},
+ ["Hunting continues while settings are open"]={ko="설정을 열어도 사냥은 계속 진행돼요",ja="設定中も狩りは続きます"},
  ["MeadowMouse"]={ko="꼬마쥐",ja="草原ネズミ"},
  ["GrassBoar"]={ko="풀멧돼지",ja="草イノシシ"},
  ["TreeWolf"]={ko="나무늑대강아지",ja="木オオカミの子"},

@@ -40,7 +40,10 @@ task.spawn(function() require(script.Parent.CreatureMesh).prepare() end)
 local incomeFX=require(script.Parent:WaitForChild("IncomeEffects"))
 local bagUI=require(script.Parent:WaitForChild("BagUI")).new(gui,remote)
 local journalUI=require(script.Parent:WaitForChild("JournalUI")).new(gui,remote)
-bagUI.onOpen=journalUI.close journalUI.onOpen=bagUI.close
+local settingsUI=require(script.Parent:WaitForChild("SettingsUI")).new(gui,audio)
+settingsUI.onOpen=function() bagUI.close() journalUI.close() held=false pointerOrigin,pointerX=nil,nil end
+bagUI.onOpen=function() journalUI.close() settingsUI.close() end
+journalUI.onOpen=function() bagUI.close() settingsUI.close() end
 local locale=require(script.Parent:WaitForChild("LocalizationController"))
 locale.watch(gui) locale.watch(workspace.RodeoLobby)
 -- Only the owner sees a ranch interaction. The server separately checks ownership/distance.
@@ -125,6 +128,7 @@ for i=1,32 do
 end
 local function active() return state.phase~="Idle" and state.phase~="GameOver" and state.phase~="CourseEnd" end
 local function steering()
+ if settingsUI.isOpen() then return 0 end
  if state.phase~="Riding" then return 0 end
  local keyLeft=not UIS:GetFocusedTextBox() and UIS:IsKeyDown(Enum.KeyCode.A)
  local keyRight=not UIS:GetFocusedTextBox() and UIS:IsKeyDown(Enum.KeyCode.D)
@@ -146,6 +150,7 @@ local function keyAction(_,inputState,input)
  return Enum.ContextActionResult.Sink
 end
 local function jumpAction(_,inputState)
+ if settingsUI.isOpen() then return Enum.ContextActionResult.Sink end
  if UIS:GetFocusedTextBox() or not active() then return Enum.ContextActionResult.Pass end
  if suppressJumpUntilRelease then
   if inputState==Enum.UserInputState.End or inputState==Enum.UserInputState.Cancel then suppressJumpUntilRelease=false end
@@ -190,7 +195,7 @@ local function menuMode(enabled)
 end
 startButton.Activated:Connect(function() remote:FireServer("Start") end)
 UIS.InputBegan:Connect(function(input,processed)
- if processed or not active() then return end
+ if processed or settingsUI.isOpen() or not active() then return end
  if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
   held=true pointerOrigin,pointerX=input.Position.X,input.Position.X
  end

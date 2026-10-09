@@ -178,6 +178,7 @@ script(starter_scripts, "ModuleScript", "TamingGauge", "src/client/TamingGauge.l
 script(starter_scripts, "ModuleScript", "CrashEffect", "src/client/CrashEffect.luau")
 script(starter_scripts, "ModuleScript", "DistanceMarkers", "src/client/DistanceMarkers.luau")
 script(starter_scripts, "ModuleScript", "AudioPresentation", "src/client/AudioPresentation.luau")
+script(starter_scripts, "ModuleScript", "SettingsUI", "src/client/SettingsUI.luau")
 script(starter_scripts, "ModuleScript", "DashPresentation", "src/client/DashPresentation.luau")
 script(starter_scripts, "ModuleScript", "CatchPresentation", "src/client/CatchPresentation.luau")
 lighting, lighting_props = item(document, "Lighting", "Lighting")
