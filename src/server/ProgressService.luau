@@ -10,22 +10,16 @@ if enabled then
  enabled=ok store=value
 end
 local entries={}
-local function nameplate(player,level)
+local function hideNameplate(player)
  local character=player.Character
- local head=character and character:FindFirstChild("Head")
- if not head then return end
- local gui=head:FindFirstChild("ExplorerNameplate")
- if not gui then
-  gui=Instance.new("BillboardGui") gui.Name="ExplorerNameplate" gui.Adornee=head
-  gui.Size=UDim2.fromOffset(160,44) gui.Parent=head
-  local humanoid=character:FindFirstChildOfClass("Humanoid") if humanoid then humanoid.NameDisplayDistance=0 end
+ if not character then return end
+ local humanoid=character:FindFirstChildOfClass("Humanoid")
+ if humanoid then humanoid.NameDisplayDistance=0 end
+ for _,node in ipairs(character:GetDescendants()) do
+  if node:IsA("BillboardGui") and node.Name=="ExplorerNameplate" then node:Destroy() end
  end
- -- Camera-relative lift plus a fixed screen gap stays above hats at overhead angles.
- gui.StudsOffset=Vector3.new(0,1.5,0) gui.StudsOffsetWorldSpace=Vector3.zero
- gui.SizeOffset=Vector2.new(0,2)
- gui.MaxDistance=120 gui.AlwaysOnTop=true
- require(script.Parent.LevelPlaque).update(gui,level,player.Name or player.DisplayName or "Player")
 end
+
 function S.join(player)
  local e={session=game:GetService("HttpService"):GenerateGUID(false),count=0,ack=0,saved=0,seen={},dirty=false,loading=enabled,loaded=not enabled,status=enabled and "Loading progress" or "Session progress"}
  entries[player]=e
@@ -53,7 +47,7 @@ function S.snapshot(player,includeSeen)
  local e=entries[player]
  local xp=e and e.saved+e.count-e.ack or 0
  local level,fraction,current,required=Rules.bar(xp)
- nameplate(player,level)
+ hideNameplate(player)
  return {xp=xp,level=level,fraction=fraction,current=current,required=required,status=e and e.status or "Loading progress",seen=includeSeen and e and table.clone(e.seen) or nil}
 end
 function S.save(player)

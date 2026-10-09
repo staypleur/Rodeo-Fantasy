@@ -59,6 +59,6 @@ def patch(source: Path, output: Path):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=ROOT / "dist/RodeoFantasy-Capture.rbxlx")
-    parser.add_argument("--output", type=Path, default=ROOT / "dist/RodeoFantasy-NameplateV3.rbxlx")
+    parser.add_argument("--output", type=Path, default=ROOT / "dist/RodeoFantasy-NoNameplate.rbxlx")
     args = parser.parse_args()
     patch(args.source, args.output)
