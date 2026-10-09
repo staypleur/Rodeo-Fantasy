@@ -29,6 +29,20 @@ local require=function() return {new=function() return {monsters={},eggs={},prof
 local function module()
 '''+(R/'src/server/InventoryStore.luau').read_text(encoding='utf-8').replace('return S','return S')+r'''
 end
+-- Unpublished Studio must not touch DataStore, including handle creation.
+services.RunService.IsStudio=function() return true end
+local originalGet=DS.GetDataStore
+DS.GetDataStore=function() error("unpublished DataStore access") end
+for _,ids in ipairs({{0,0},{123,0},{0,123}}) do
+ game.GameId,game.PlaceId=ids[1],ids[2]
+ local localStore=module()
+ local testPlayer={UserId=99,Kick=function() error("local session kicked") end}
+ local data=assert(localStore.open(testPlayer));data.balance=42
+ assert(localStore.save(testPlayer));localStore.close(testPlayer)
+end
+DS.GetDataStore=originalGet
+services.RunService.IsStudio=function() return false end
+game.GameId,game.PlaceId=123,123
 local function player(id) return {UserId=id,Kick=function(self,message) self.kicked=message end} end
 local a,b=player(1),player(2)
 local S=module();local aa=assert(S.open(a));local bb=assert(S.open(b))

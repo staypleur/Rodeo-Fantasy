@@ -1,4 +1,6 @@
--- Shared by lobby and cafe. Fenced sessions and recoverable two-player trades.
+assert(not game:GetService("RunService"):IsRunning(),"Stop Play first")
+local target=assert(game:GetService("ServerScriptService"):FindFirstChild("InventoryStore"),"Missing InventoryStore")
+target.Source=[====[-- Shared by lobby and cafe. Fenced sessions and recoverable two-player trades.
 local S={}
 local DS=game:GetService("DataStoreService")
 local Http=game:GetService("HttpService")
@@ -124,3 +126,5 @@ game:BindToClose(function()
  local deadline=os.clock()+27 while remaining>0 and os.clock()<deadline do task.wait(.1) end
 end)
 return S
+]====]
+print("STUDIO_STORAGE_REPAIR_APPLIED")

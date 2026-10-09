@@ -840,3 +840,8 @@
 - 사용자 스크린샷에서 로비 중앙 사냥 시작 버튼과 회색 비행선 보고. 시작 버튼 초기 Visible=false로 수정. RideAnimator 및 CreatureMesh는 MonsterId 없는 장식/NativeMeshyAirship을 처리하지 않도록 보호. 회색 텍스처와 조작 불가의 정확한 원인은 Studio 출력 추가 확인 필요.
 - 기존 설치 모델/비밀번호/사용자 Place를 덮어쓰지 않는 dist/LobbyClientRepair.commandbar.lua 작성. 편집 모드에서 세 클라이언트 소스만 교체.
 - Luau 컴파일 4파일 및 diff 검사 통과. 실제 Studio 조작/텍스처 확인 미완료. 배포하지 않으며 채팅에서 한 단계씩 적용 안내하기로 사용자 요청.
+
+
+## 2026-10-10 未게시 Studio 서버 초기화 오류 수정
+- InventoryStore:9 GetDataStore 호출이 임시 세션 분기 이전에 실행되어 CaptureServer 전체 로딩 실패, E 출발 프롬프트/상태 초기화 불가. 미게시 Studio는 GameId 또는 PlaceId 0일 때 저장소 핸들도 생성하지 않고 메모리 세션 사용. 공개 서버 저장 실패 정책은 유지.
+- 미게시 세 가지 ID 조합에서 DataStore 호출 시 오류를 던지는 테스트로 로드/열기/저장/종료 검증 추가. 기존 거래 복구 검사 유지. StudioStorage 수정 적용 파일 생성; 모델과 텍스처 위치는 수정하지 않음. 실제 Studio 재실행/회색 자산 확인 남음. 배포 없음.
