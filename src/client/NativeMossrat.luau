@@ -48,6 +48,14 @@ function M.apply(model)
  model:SetAttribute("MeshDecorated",true)
  return true
 end
+-- Hunt presentation faces the course while the authoritative root still avoids obstacles.
+function M.huntFrame(model,frame)
+ local hunt=package:FindFirstChild("MeshyMossratHuntTemplate")
+ if model:GetAttribute("VisualDeferred") and M.isTarget(model) and hunt and hunt:GetAttribute("FaceCourseForward") then
+  return CFrame.new(frame.Position),true
+ end
+ return frame,false
+end
 function M.animate(model,phase,moving,angry)
  if not M.isTarget(model) then return end
  local body=model:FindFirstChild("Body")

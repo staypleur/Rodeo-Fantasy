@@ -83,6 +83,9 @@ function M.prepare()
  end
  M.ready=ok M.failed=not ok pending.prepare=false return ok
 end
+function M.huntFrame(model,frame)
+ return NativeMossrat.huntFrame(model,frame)
+end
 function M.animate(model,phase,moving,angry)
  NativeMossrat.animate(model,phase,moving,angry)
 end

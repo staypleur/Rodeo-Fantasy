@@ -53,6 +53,14 @@ function M.apply(model)
  model:SetAttribute("MeshDecorated",true)
  return true
 end
+-- Hunt presentation faces the course while the authoritative root still avoids obstacles.
+function M.huntFrame(model,frame)
+ local hunt=package:FindFirstChild("MeshyMossratHuntTemplate")
+ if model:GetAttribute("VisualDeferred") and M.isTarget(model) and hunt and hunt:GetAttribute("FaceCourseForward") then
+  return CFrame.new(frame.Position),true
+ end
+ return frame,false
+end
 function M.animate(model,phase,moving,angry)
  if not M.isTarget(model) then return end
  local body=model:FindFirstChild("Body")
@@ -267,13 +275,14 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
    if label then label.TextTransparency=0.15+math.max(0,math.sin(clock*12))*0.45 end
   end
 		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds,Catalog[model:GetAttribute("MonsterId") or "MeadowMouse"].TripleHop)
-		local lean = running and (model:GetAttribute("Steering") or 0) * -0.18 or 0
+		local facingFrame,straightFacing=Mesh.huntFrame(model,pose.frame)
+		local lean = not straightFacing and running and (model:GetAttribute("Steering") or 0) * -0.18 or 0
   local moving=running and velocity.Magnitude>1
   Mesh.animate(model,phase,moving,angry)
   local flying=model:GetAttribute("Flying")==true
   local bounce=moving and (flying and (.55+math.sin(phase*.5)*.22) or (1-math.cos(phase))*.22) or 0
   local gallopPitch=moving and math.sin(phase)*0.085 or 0
-		local frame = pose.frame * CFrame.new(0,bounce,0)*CFrame.Angles(angry and not flying and pitch or gallopPitch, 0, lean)
+		local frame = facingFrame * CFrame.new(0,bounce,0)*CFrame.Angles(angry and not flying and pitch or gallopPitch, 0, lean)
     if monsters.Name~="RodeoLobby" and monsters.Name~="CafePets" and moving and not flying and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)>0.18 and #dust<80 then
    pose.lastDust=clock
    local puff=Instance.new("Part") puff.Name="LocalHerdDust" puff.Anchored=true
@@ -401,6 +410,9 @@ function M.prepare()
   warn("Creature mesh unavailable; native models retained: "..tostring(err))
  end
  M.ready=ok M.failed=not ok pending.prepare=false return ok
+end
+function M.huntFrame(model,frame)
+ return NativeMossrat.huntFrame(model,frame)
 end
 function M.animate(model,phase,moving,angry)
  NativeMossrat.animate(model,phase,moving,angry)
@@ -1124,6 +1136,7 @@ function M.apply()
   end
   model:SetAttribute("MeshyVisualYawDegrees",180)
   model:SetAttribute("MeshyFacingRevision","HuntFacing-v2")
+  model:SetAttribute("FaceCourseForward",true)
  end
  -- Use a fresh ModuleScript instance: require caches an already-loaded installer.
  local fresh=package.MeshyAirshipInstaller:Clone() fresh.Name="AirshipRealignOnce" fresh.Parent=package
