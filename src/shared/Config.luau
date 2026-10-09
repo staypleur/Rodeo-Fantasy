@@ -1,5 +1,6 @@
 -- Confirmed rules and adjustable prototype presentation values are kept separate.
 local Config = {}
+Config.LobbyWalkSpeed=24 -- Faster walking across the expanded lobby (was 16).
 
 -- Creator Store music/hoof recording plus Roblox bundled action sounds.
 Config.Audio = {

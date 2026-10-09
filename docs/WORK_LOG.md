@@ -509,3 +509,14 @@
 - 승인한 원래22×28 목장 및 건물83×99 크기를 유지하면서 구역 겹침을 피하기 위해 반경175/섬500×500으로 넓혔다. 길을12stud 폭으로 입구까지 연결하고 담장과 절벽·폭포의 가장자리 위치를 바꿨다. 중앙 광장/기존 비행선/상점/랭킹/출발점과 서버·클라이언트 코드는 유지했다. 중앙 비행선 디자인을 새로 제작한 것은 아니다.
 - dist/RodeoFantasy-LobbyGarden.rbxlx에 저장.32개 PenGrass 및 관리/소유 간판 경로,8개 건물의 OBB 분리/지면 안 배치, 참조 고유/끊김 없음, 모든 로비 바깥 저장 속성·스크립트 및703 MeshPart 보존 검증 통과. 총 native Part15129개인 장소이며 아직 Studio 부하/실제 이동·목장 선택·배치·그라데이션 조명은 검증하지 못했다. 사용자 Capture/기존 시험 장소를 덮어쓰거나 Roblox에 게시하지 않았다.
 - dist/ReviewModels/LobbyGardenAGradient.rbxmx와 assets/previews/lobby-garden-a-gradient.png를 별도 저장. assets/maps/lobby-garden-layout.png는 새 테스트 장소의 실제 부품을 위에서 투영한 전체 배치도다. 두 이미지 직접 확인으로 색 변화·4개 안뜰·8개 방사형 건물 배치를 점검했다. Studio 스크린샷은 아니다. preview_lobby.py는 source/output/wide 옵션을 받아 사용자 저장본을 읽어 덮어쓰지 않고 새 장소를 확인한다.
+
+
+## 2026-10-09 — 로비 이동속도·8색 지붕·입구 나무 정리와 다음 광장 검토안
+
+- 사용자 요청으로 로비 WalkSpeed를16→24(+50%)로 조정. Config.LobbyWalkSpeed와 Lobby.prepareCharacter를 입장/CharacterAdded/사냥 복귀에 연결했다. 캐릭터/Humanoid가 없는 경우 안전하게 종료하며 기존 사냥 주행 계산은 바꾸지 않았다.
+- tools/patch_lobby_colors.py로 Plot_1~8의 지붕/돔/목장 쉼터 지붕을 빨강·주황·노랑·초록·파랑·남색·보라·흰색으로 각각 짙은 아래→밝은 위의 native Part 층별 그라데이션으로 교체했다. 금색 능선 장식과 석조/목재는 유지한다. 각 구역 입구 중앙을 막던 옛 나무8그루(줄기8+수관24)만 제거했으며 나머지 기존 나무8그루와 안뜰 나무48그루 및 입구 돌은 유지한다.
+- dist/RodeoFantasy-LobbyColors.rbxlx를 별도 생성. 세 Source의 정확한 교체/모든 다른 저장 속성 보존 검사를 거친 뒤 로비 시각 부품만 수정했다. 실제8개 지붕에서5종 이상 색 단계,32개 PenGrass,나무 수,703 MeshPart 및 로비 밖 자산/스크립트 보존 검사 통과. 사용자 저장 Capture 및 이전 파일은 덮어쓰지 않았다.
+- tests/check_lobby_speed.py가 실제 helper를 실행해 기존 Humanoid/늦게 생성된 Humanoid/재호출의24속도와 nil안전을 검사했다. 처음 실행은 Luau의 한글 절대 경로 파일 열기 제한으로 실패했으며 기존 테스트처럼 상대 경로 실행으로 수정 후 통과. 변경3개 Luau 소스 컴파일 통과.
+- assets/maps/lobby-colors-layout.png는 새 장소의 실제 부품을 위에서 투영한 배치도이며 직접 열어8색 구역과 열린 입구를 확인했다. Studio 스크린샷이 아니며 실제 조명·주행·부하 시험은 아직 미실행. Roblox 게시도 미실행.
+- 다음 디자인은 tools/lobby_plaza_review.py로 만든 중앙 광장/8개 정원 쉼터 검토안. 크림 포장과 평평한 중심, 낮은 화단, 벤치·덩굴 퍼골라·가로등622 native Parts. 주요 통로12studs에 장식이 침범하지 않는 좌표 검사 통과. 기존 비행선·상점·게시판·로고는 이 검토 모델에 포함하지 않았으며 실제 적용 시 기존 기능/로고 보존을 별도로 점검해야 한다.
+- dist/ReviewModels/LobbyPlazaGardenReview.rbxmx와 동일 geometry를 렌더링한 assets/previews/LobbyPlazaGardenReview.png 저장. native_part_review.py는 실제 검토 모델 내보내기와 깊이 버퍼 이미지 생성 공통 도구다. 이미지 직접 확인 완료. 다음 디자인은 사용자 승인 대기이며 현재 게임 파일에는 적용하지 않았다.

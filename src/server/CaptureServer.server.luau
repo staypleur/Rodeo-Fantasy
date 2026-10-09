@@ -240,6 +240,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
    restoreAvatar(state)
    state.root.CFrame=Lobby.Spawn
    setCharacterGroup(player,"Default")
+   Lobby.prepareCharacter(player.Character)
    states[player]=nil send(player) sendBag(player)
   end
   return
@@ -355,8 +356,8 @@ RunService.Heartbeat:Connect(function(delta)
 end)
 local function added(player)
  if not Lobby.assign(player) then player:Kick("This server holds up to 8 players.") return end
- player.CharacterAdded:Connect(function() task.defer(function() if not states[player] then setCharacterGroup(player,"Default") end end) end)
- if player.Character then setCharacterGroup(player,"Default") end
+ player.CharacterAdded:Connect(function(character) task.defer(function() if not states[player] then setCharacterGroup(player,"Default") Lobby.prepareCharacter(character) end end) end)
+ if player.Character then setCharacterGroup(player,"Default") task.spawn(Lobby.prepareCharacter,player.Character) end
  player.CanLoadCharacterAppearance=true
  if player.UserId>0 then player.CharacterAppearanceId=player.UserId end
  bags[player]=BagRules.new() Progress.join(player)

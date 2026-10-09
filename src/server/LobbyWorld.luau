@@ -4,6 +4,11 @@ local plots=map:WaitForChild("Plots")
 local owned,occupants={},{}
 Lobby.Departure=map.Airport.Departure
 Lobby.Spawn=CFrame.new(6000,4,0)
+function Lobby.prepareCharacter(character)
+ if not character then return end
+ local humanoid=character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid",10)
+ if humanoid then humanoid.WalkSpeed=require(game.ReplicatedStorage.RodeoFantasy.Config).LobbyWalkSpeed end
+end
 for index=1,8 do
  local plot=plots["Plot_"..index]
  plot:SetAttribute("Slot",index)
