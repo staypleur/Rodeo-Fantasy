@@ -82,9 +82,10 @@ function World.spawn(position,speciesId,stars)
  stars=stars or 1
  local species=Catalog[speciesId or monsterId]
  local id=speciesId or monsterId
- local source=game.ServerStorage[Catalog.template(id,stars)]
-	local model = source:Clone()
  local stage=Catalog.stage(stars)
+ local source=if id==monsterId and stage==1 then template else game.ServerStorage:FindFirstChild(Catalog.template(id,stars))
+ assert(source and source:IsA("Model") and source.PrimaryPart,"Missing hunt model: "..Catalog.template(id,stars))
+	local model = source:Clone()
  model:ScaleTo(Catalog.scale(stars)/Catalog.Scales[stage])
  -- Wild herds replicate only their authoritative root. Clients build the approved visual
  -- for displayed creatures, instead of replicating hundreds of hidden body parts per runner.
@@ -203,6 +204,7 @@ function World.ensure(z)
 end
 
 function World.step(dt)
+ if not obstacles then return end
  local buckets={}
  for _,rock in ipairs(obstacles:GetChildren()) do
   if rock:IsA("BasePart") and not rock:GetAttribute("Broken") then

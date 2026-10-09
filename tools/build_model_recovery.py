@@ -6,6 +6,8 @@ entries=[('client','NativeMossrat','src/client/NativeMossrat.luau'),
  ('client','CreatureMesh','src/client/CreatureMesh.luau'),
  ('client','CaptureClient','src/client/CaptureClient.client.luau'),
  ('server','InventoryStore','src/server/InventoryStore.luau'),
+ ('server','CaptureServer','src/server/CaptureServer.server.luau'),
+ ('server','HuntWorld','src/server/HuntWorld.luau'),
  ('package','MeshyAirshipInstaller','src/authoring/MeshyAirshipInstaller.luau'),
  ('package','MeshyMossratInstaller','src/authoring/MeshyMossratInstaller.luau')]
 code=['assert(not game:GetService("RunService"):IsRunning(),"■ 정지 후 실행하세요.")',

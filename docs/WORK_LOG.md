@@ -889,3 +889,10 @@
 ## 2026-10-10 메시 검사 종류 오류 수정
 - 사용자04:06 출력 RECOVERY_MESH Hunt Failure로 선행 검사 중단, 기존 모델 미변경. Studio 동일 시점 로그: asset111983016620845에 ktx2 이미지 representation 요청, AssetDelivery403IncorrectAssetType / Asset type does not match requested type. 파일 형상 오류/인증 오류로 단정하지 않음.
 - geometry 선행 검사에서 MeshId 문자열 대신 MeshPart 인스턴스를 PreloadAsync에 전달하여 엔진이 MeshId 속성의 자산 종류를 유지하도록 수정. callback에서도 MeshId에 대한 상태만 반영. 실제 테스트 스텁에서 bare ID 문자열 입력을 명시적으로 거부하도록 강화. PBR pack 보존/설치 오류 복구/메시 실패 무변경 검사 및 Luau 컴파일 통과. 이미 가져온 세 모델 재사용, 적용 코드 전체 복사 재실행 안내. 실제 Studio 설치/색 확인은 여전히 필요.
+
+## 2026-10-10 E 사냥터 출발 복구
+- 사용자04:10 출력의 HuntWorld:207 nil/GetChildren 반복 오류와 Studio 로그의 선행 CaptureServer:166 RodeoMonsterTemplate 누락을 확인. E Triggered는 서버에 도착했으나 모델 조회에서 초기화가 중단됨. 현재 편집본에서 템플릿이 누락된 경위는 확정하지 않음. 비행선 위치는 사용자 정상 확인, 색/모스랫 머리의 Play 확인은 미완료.
+- 서버 템플릿이 없으면 현재 설치된 ReplicatedStorage의 승인된 MeshyMossratHuntTemplate을 복제해 복구. HuntWorld는 초기화에 전달된 기본 템플릿을 사용하며 다른 종류/단계 누락은 명확한 오류로 처리.
+- 사냥터 초기화/배치/첫 몬스터 생성이 모두 성공한 뒤에만 활성 사냥터로 등록. 실패한 임시 폴더를 제거하고 이전 사냥터/플레이어 상태 보존 및 재시도 가능. 미초기화 World.step 보호로 연속 오류 방지.
+- RepairHuntDeparture.commandbar.lua는 모델 재가져오기 없이 현재 Studio 편집본에 서버 코드 두 개와 누락 템플릿 복구만 적용. 기존 비행선/모스랫 보정/설정/비밀번호는 보존. 공개 검토 장소 두 개의 해당 스크립트와 향후 ApplyModels 번들 동기화. 개인 LocalOperator 파일과 사용자 변경 Capture.rbxlx는 미변경.
+- 실제 start 함수 실행 테스트: 템플릿/대체본 누락시 무등록·아바타 미고정, 승인본 복구 후 재시도 성공, 초기화 실패시 기존 실행 보존, 재출발 성공. 사냥터 cleanup/density, 기존 모델 일괄 설치/롤백, 두 장소 검증 및 관련 Luau 컴파일 통과. 실제 Studio E 이동 확인은 사용자가 적용 후 진행. Roblox 배포 없음.

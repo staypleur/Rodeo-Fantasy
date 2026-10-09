@@ -138,6 +138,18 @@ local function finish(player,reason,crashKind)
  end
  send(player,reason)
 end
+local function huntTemplate()
+ local storage=game:GetService("ServerStorage")
+ local existing=storage:FindFirstChild("RodeoMonsterTemplate")
+ if existing then return existing end
+ local approved=package:FindFirstChild("MeshyMossratHuntTemplate")
+ assert(approved and approved:IsA("Model") and approved.PrimaryPart and approved:GetAttribute("NativeMeshyMossrat"),"사냥터 모스랫 템플릿이 없습니다. 모델 복구 코드를 적용하세요.")
+ approved.Archivable=true
+ local restored=assert(approved:Clone(),"모스랫 템플릿 복제 실패")
+ restored.Name="RodeoMonsterTemplate" restored.Parent=storage
+ warn("HUNT_TEMPLATE_RESTORED: approved Mossrat hunt model")
+ return restored
+end
 local function start(player)
  local previous=states[player]
  if previous and previous.phase~="GameOver" and previous.phase~="CourseEnd" then return end
@@ -146,6 +158,24 @@ local function start(player)
  local humanoid=character and character:FindFirstChildOfClass("Humanoid")
  if not root or not humanoid or humanoid.Health<=0 then return end
  if not previous and not Lobby.canDepart(player) then send(player,"Approach the airship to start.") return end
+ local rootFolder=Instance.new("Folder") rootFolder.Name=tostring(player.UserId) rootFolder:SetAttribute("OwnerUserId",player.UserId)
+ local slot=player:GetAttribute("LobbySlot")
+ local collisionGroup=huntGroups[slot]
+ local herd=Instance.new("Folder") herd.Name="Monsters" herd.Parent=rootFolder
+ rootFolder.Parent=runs
+ if collisionGroup then isolateRoot(rootFolder,collisionGroup) end
+ local nextWorld=World.new()
+ local ok,model=pcall(function()
+  nextWorld.init(rootFolder,huntTemplate(),Config,Rules)
+  nextWorld.ensure(0) nextWorld.replenish(0,views[player] or 1,nil,true,40)
+  return nextWorld.spawn(Vector3.new(0,2,-8))
+ end)
+ if not ok then
+  rootFolder:Destroy()
+  warn("HUNT_START_FAILED: "..tostring(model))
+  send(player,"사냥터를 준비하지 못했습니다. 다시 시도해 주세요.")
+  return
+ end
  if previous then
   restoreAvatar(previous)
   freeMount(previous)
@@ -155,17 +185,8 @@ local function start(player)
   end
  end
  if worldRoots[player] then worldRoots[player]:Destroy() end
- local rootFolder=Instance.new("Folder") rootFolder.Name=tostring(player.UserId) rootFolder:SetAttribute("OwnerUserId",player.UserId)
- local slot=player:GetAttribute("LobbySlot")
- local collisionGroup=huntGroups[slot]
  if collisionGroup then setCharacterGroup(player,collisionGroup) end
- local herd=Instance.new("Folder") herd.Name="Monsters" herd.Parent=rootFolder
- rootFolder.Parent=runs
- if collisionGroup then isolateRoot(rootFolder,collisionGroup) end
- local World=World.new() worlds[player]=World worldRoots[player]=rootFolder
- World.init(rootFolder,game:GetService("ServerStorage").RodeoMonsterTemplate,Config,Rules)
- World.ensure(0) World.replenish(0,views[player] or 1,nil,true,40)
- local model=World.spawn(Vector3.new(0,2,-8))
+ worlds[player]=nextWorld worldRoots[player]=rootFolder
  model:SetAttribute("Occupied",true)
  model:SetAttribute("Angry",false) model:SetAttribute("InitialLanding",true)
  states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,initialLanding=true,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),distance=0,tamed=false}
