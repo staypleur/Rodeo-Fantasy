@@ -12,6 +12,8 @@ local function client(fail)
  local cf={}
  local function F(x,y,z) if type(x)=='table' then return setmetatable({Position=x},cf) else return setmetatable({Position=V(x or 0,y or 0,z or 0)},cf) end end
  cf.__mul=function(a,b) return F(a.Position+b.Position) end
+ cf.__index=cf
+ function cf:ToObjectSpace(b) return F(b.Position.X-self.Position.X,b.Position.Y-self.Position.Y,b.Position.Z-self.Position.Z) end
  local CFrame={new=F} local Color3={new=function(...) return {...} end}
  local Content={fromObject=function(obj) return obj end}
  local Enum={CollisionFidelity={Box=1},RenderFidelity={Precise=1}}
@@ -24,6 +26,7 @@ local function client(fail)
   end})
   function o:IsA(k) return k==self.ClassName or (k=='BasePart' and (kind=='Part' or kind=='MeshPart')) end
   function o:GetChildren() local list={} for _,item in ipairs(objects) do if item.Parent==self then list[#list+1]=item end end return list end
+  function o:GetDescendants() return self:GetChildren() end
   function o:GetAttribute(k) return self.attrs[k] end
   function o:SetAttribute(k,v) self.attrs[k]=v end
   function o:Destroy()
@@ -84,17 +87,22 @@ local function client(fail)
  local task={wait=function() error('unexpected concurrent wait') end} local warn=function() end
  local module=(function()\n'''
 source=(R/'src/client/FacetedMouse.luau').read_text(encoding='utf-8')
+remember=(R/'src/client/RideAnimator.luau').read_text(encoding='utf-8').split('local function remember(model, existing)',1)[1].split('function RideAnimator.update',1)[0]
 suffix='''\nend)()
+ local Catalog=catalog local poses={}
+ Catalog.visual=function() return 'visual' end
+ function package:WaitForChild() return {WaitForChild=function() return {CFrame=F()} end} end
+ local function remember(model, existing)'''+remember+'''
  local function model(stars,silhouette)
-  local m=object('Model');m.Parent={} m:SetAttribute('MonsterId','MeadowMouse') m:SetAttribute('Stars',stars)
+  local m=object('Model');m.DescendantAdded={Connect=function() return {} end};m.Parent={} m:SetAttribute('MonsterId','MeadowMouse') m:SetAttribute('Stars',stars)
   m:SetAttribute('PortraitSilhouette',silhouette)
   local root=object('Part');root.Name='MountRoot' root.CFrame=F(0,2.05,0) root.Parent=m m.PrimaryPart=root
   local old=object('Part');old.Name='Body' old.Parent=m
   return m,old
  end
- return module,model,objects,function() return triangles,written end
+ return module,model,objects,function() return triangles,written end,function(target) target.PrimaryPart.CFrame=F(50,10,-100) return remember(target) end
 end
-local m,new,objects,metrics=client(false)
+local m,new,objects,metrics,remember=client(false)
 local animal,old=new(1,false)
 assert(m.apply(animal) and old.destroyed and animal.PrimaryPart.Parent==animal)
 assert(animal:GetAttribute('FacetedMouseRevision')=='FacetedA1-v1')
@@ -112,6 +120,10 @@ for _,p in ipairs(animal:GetChildren()) do if p.ClassName=='MeshPart' then
  if p.Name=='LeftFrontLeg' then assert(math.abs(p.CFrame.Position.Y-p.Size.Y/2)<.00001,'paws must meet ground') end
 end end
 assert(count==29)
+-- Root is moved in the injected callback, before the real animator remembers.
+local pose=remember(animal)
+for _,entry in ipairs(pose) do assert(entry.rest==entry.part:GetAttribute('ApprovedRest'),'animator must use canonical parts, not stale world positions') end
+assert(#pose==29)
 local silhouette=new(1,true) assert(m.apply(silhouette))
 for _,p in ipairs(silhouette:GetChildren()) do if p.ClassName=='MeshPart' then assert(#p:GetChildren()==0 and p.TextureID=='' and p.Color[1]==0) end end
 assert(metrics()==747,'portraits must reuse the shared factory')

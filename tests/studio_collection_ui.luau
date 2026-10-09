@@ -37,7 +37,7 @@ assert(#cards()==8)
 assert(pageAction) pageAction(nil,Enum.UserInputState.Begin,{KeyCode=Enum.KeyCode.D}) assert(book.page==2)
 pageAction(nil,Enum.UserInputState.Begin,{KeyCode=Enum.KeyCode.A}) assert(book.page==1)
 for _,card in ipairs(cards()) do assert(card.SpeciesName.Text=='???') for _,part in ipairs(card.JournalPortrait.WorldModel:GetDescendants()) do if part:IsA('BasePart') then assert(part.Color==Color3.fromRGB(22,28,23)) end end end
-book.snapshot({xp=1,level=2,current=0,required=1,fraction=0,seen={['MeadowMouse:1']=true}})
+book.snapshot({seen={['MeadowMouse:1']=true}})
 local known=0 for _,card in ipairs(cards()) do if card.SpeciesName.Text~='???' then known+=1 end end assert(known==1)
 book.state({area='Hunt'}) assert(humanoid.WalkSpeed==16 and humanoid.JumpPower==50,'closing restores movement') assert(not gui.FieldJournal.Visible and not gui.OpenJournal.Visible)
 input(inputs) clock=104 for _,f in ipairs(renders) do f() end assert(not gui.FieldJournal.Visible)

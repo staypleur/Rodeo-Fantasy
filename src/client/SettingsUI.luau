@@ -43,8 +43,13 @@ function UI.new(gui,audio)
    -- Keep settings accessible on narrow screens with no free topbar slot.
    button.Parent=gui button.AnchorPoint=Vector2.new(0,0) button.Position=UDim2.fromOffset(14,12) button.Size=UDim2.fromOffset(48,48)
   end
+  local stats=gui:FindFirstChild("LobbyStats")
+  if stats then stats.Position=UDim2.fromOffset(16,math.max(12,button.AbsolutePosition.Y+button.AbsoluteSize.Y-gui.AbsolutePosition.Y+8)) end
  end
+ listen(button:GetPropertyChangedSignal("AbsolutePosition"),placeButton)
+ listen(button:GetPropertyChangedSignal("AbsoluteSize"),placeButton)
  listen(GuiService:GetPropertyChangedSignal("TopbarInset"),placeButton) placeButton()
+ self.refreshLayout=placeButton
  local function row(kind,title,y)
   label(title,UDim2.fromOffset(18,y),UDim2.new(.7,0,0,28))
   local value=label("",UDim2.new(1,-74,0,y),UDim2.fromOffset(56,28))

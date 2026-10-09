@@ -80,8 +80,10 @@ function Lobby.display(player,index,items)
    local offset=model.PrimaryPart.CFrame:ToObjectSpace(boxFrame).Position
    local margin=boxSize/2+Vector3.new(math.abs(offset.X)+.2,0,math.abs(offset.Z)+.2)
    local startX=math.clamp(slot==1 and -3 or 3,-math.max(0,pen.PenGrass.Size.X/2-margin.X),math.max(0,pen.PenGrass.Size.X/2-margin.X))
-   model:PivotTo(pen.PenGrass.CFrame*CFrame.new(startX,height,0))
+   local target=pen.PenGrass.CFrame*CFrame.new(startX,height+pen.PenGrass.Size.Y/2,0)
+   model:PivotTo(target*model.PrimaryPart.CFrame:Inverse()*model:GetPivot())
    model.Parent=folder
+   height+=pen.PenGrass.Size.Y/2
    roaming[model]={pen=pen,height=height,margin=margin,position=Vector3.new(startX,height,0),goal=Vector3.new(startX,height,0),pause=0,seed=Random.new(item.id+player.UserId)}
   end
  end

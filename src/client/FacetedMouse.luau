@@ -73,7 +73,9 @@ function M.apply(model)
  local silhouette=model:GetAttribute("PortraitSilhouette")==true local staged={}
  for _,entry in ipairs(cache) do
   local part=entry.part:Clone() part.Size*=scale
-  part.CFrame=root.CFrame*CFrame.new((entry.center+Vector3.new(0,-data.GroundY-C.MeadowMouse.RootHeight,0))*scale)
+  local rest=CFrame.new((entry.center+Vector3.new(0,-data.GroundY-C.MeadowMouse.RootHeight,0))*scale)
+  part:SetAttribute("ApprovedRest",rest)
+  part.CFrame=root.CFrame*rest
   if silhouette then
    for _,child in ipairs(part:GetChildren()) do if child:IsA("SurfaceAppearance") then child:Destroy() end end
    part.TextureID="" part.Color=Color3.new(0,0,0)

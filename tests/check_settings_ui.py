@@ -29,9 +29,10 @@ local UDim2={new=function(...) return {...} end,fromOffset=function(...) return 
 local created={}
 local Instance={}
 function Instance.new(kind)
- local node={ClassName=kind,AbsolutePosition={X=65},AbsoluteSize={X=200},
+ local node={ClassName=kind,AbsolutePosition={X=65,Y=0},AbsoluteSize={X=200,Y=56},
   Activated=signal(),InputBegan=signal(),Destroying=signal()}
  function node:Destroy() self.Parent=nil end
+ function node:GetPropertyChangedSignal() return signal() end
  function node:Clone()
   local clone=Instance.new(self.ClassName)
   for key,value in pairs(self) do if type(value)~='function' and key~='Activated' and key~='InputBegan' and key~='Destroying' then clone[key]=value end end
@@ -44,12 +45,15 @@ suffix='''
 end)()
 local volume={Music=1,Effects=1}
 local audio={getVolume=function(kind) return volume[kind] end,setVolume=function(kind,value) volume[kind]=math.clamp(value,0,1) end}
-local gui={Parent={},AbsoluteSize={X=900}}
+local stats={}
+local gui={Parent={},AbsolutePosition={Y=64},AbsoluteSize={X=900},FindFirstChild=function() return stats end}
 local ui=UI.new(gui,audio)
 local function find(name)
  for _,node in ipairs(created) do if node.Name==name then return node end end
  error('missing '..name)
 end
+find('OpenSettings').AbsolutePosition.Y=80
+ui.refreshLayout() assert(stats.Position[2]==80,'HUD should follow actual settings button bottom')
 assert(not ui.isOpen())
 assert(find('OpenSettings').Parent.Name=='RodeoTopbarSettings' and find('OpenSettings').Text=='')
 assert(find('Gear').Parent==find('OpenSettings'))

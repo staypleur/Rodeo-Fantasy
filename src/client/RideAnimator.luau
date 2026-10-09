@@ -38,7 +38,10 @@ local function remember(model, existing)
 	for _, part in ipairs(model:GetDescendants()) do
 		if part:IsA("BasePart") and part ~= root and not pose.tracked[part] then
    local restFrame
-   if model:GetAttribute("ImportedA") then
+   if part:GetAttribute("ApprovedRest") then
+    -- Canonical mesh coordinates survive root movement during async installation.
+    restFrame=part:GetAttribute("ApprovedRest")
+   elseif model:GetAttribute("ImportedA") then
     -- Imported meshes already carry their correct per-model offsets; many are
     -- color-batched nodes whose names do not exist in the old part template.
     restFrame=root.CFrame:ToObjectSpace(part.CFrame)

@@ -90,7 +90,8 @@ distance.BackgroundColor3=Color3.fromRGB(31,55,42) distance.BackgroundTransparen
 make("UICorner",{CornerRadius=UDim.new(0,14)},distance)
 make("UIStroke",{Color=Color3.fromRGB(113,148,95),Thickness=2},distance)
 local lastAspect=nil
-local bag=make("Frame",{Name="LobbyStats",Position=UDim2.fromOffset(16,66),Size=UDim2.fromOffset(240,48),BackgroundColor3=Color3.fromRGB(40,65,56),BackgroundTransparency=.1},gui)
+local bag=make("Frame",{Name="LobbyStats",Position=UDim2.fromOffset(16,12),Size=UDim2.fromOffset(240,48),BackgroundColor3=Color3.fromRGB(40,65,56),BackgroundTransparency=.1},gui)
+settingsUI.refreshLayout()
 make("UICorner",{CornerRadius=UDim.new(0,12)},bag)
 local function iconBlock(name,pos,size,color,parent,round)
  local frame=make("Frame",{Name=name,Position=pos,Size=size,BackgroundColor3=color,BorderSizePixel=0},parent)

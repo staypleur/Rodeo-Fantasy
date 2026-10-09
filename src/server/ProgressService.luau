@@ -1,4 +1,4 @@
--- Collection and capture XP persist separately from session-only bag contents.
+-- Collection discoveries persist separately from session-only bag contents.
 local S={}
 local Rules=require(game.ReplicatedStorage.RodeoFantasy.ProgressRules)
 local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
@@ -41,14 +41,12 @@ function S.discover(player,id,stars)
 end
 function S.caught(player,id,stars)
  local e=entries[player] if not e then return end
- e.count+=1 e.dirty=true S.discover(player,id,stars)
+ S.discover(player,id,stars)
 end
 function S.snapshot(player,includeSeen)
  local e=entries[player]
- local xp=e and e.saved+e.count-e.ack or 0
- local level,fraction,current,required=Rules.bar(xp)
  hideNameplate(player)
- return {xp=xp,level=level,fraction=fraction,current=current,required=required,status=e and e.status or "Loading progress",seen=includeSeen and e and table.clone(e.seen) or nil}
+ return {status=e and e.status or "Loading progress",seen=includeSeen and e and table.clone(e.seen) or nil}
 end
 function S.save(player)
  local e=entries[player]
