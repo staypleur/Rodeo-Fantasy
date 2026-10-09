@@ -30,8 +30,8 @@ function M.apply()
    model:SetAttribute("HuntFacingRepair20261010",nil)
   end
   model:SetAttribute("MeshyVisualYawDegrees",180)
-  model:SetAttribute("MeshyFacingRevision","HuntFacing-v2")
-  model:SetAttribute("FaceCourseForward",true)
+  model:SetAttribute("MeshyFacingRevision",model:GetAttribute("HeadShapeStraightened") and "HeadStraight-v1" or "HuntFacing-v2")
+  model:SetAttribute("FaceCourseForward",false)
  end
  -- Use a fresh ModuleScript instance: require caches an already-loaded installer.
  local fresh=package.MeshyAirshipInstaller:Clone() fresh.Name="AirshipRealignOnce" fresh.Parent=package

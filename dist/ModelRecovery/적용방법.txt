@@ -1,0 +1,35 @@
+모스랫 머리 + 비행선 일괄 적용
+
+1. Roblox Studio에서 기존 작업 파일을 연다:
+C:\Users\wucha\OneDrive\바탕 화면\Project\Rodeo Fantasy\dist\LocalOperator\RodeoFantasy-Social-Operator-Hatchery.rbxlx
+재생 중이면 ■ 정지. Ctrl+S로 기존 작업 저장.
+
+2. 파일 > 가져오기(Import)를 누른다. 아래 폴더에서 다음 GLB 세 개만 함께 선택한다:
+C:\Users\wucha\OneDrive\바탕 화면\Project\Rodeo Fantasy\dist\ModelRecovery
+Mossrat_S1_Hunt_HeadStraight.glb
+Mossrat_S1_Detail_HeadStraight.glb
+LobbyAirship_Recovery.glb
+PNG 파일은 이번에는 선택하지 않는다.
+
+3. 가져오기 설정은 Studio Default를 사용한다. 모스랫 두 파일의 Rig Type은 Custom(사용자 지정), No Rig는 사용하지 않는다. Add to Workspace(Workspace에 추가)를 켠다. 모델/텍스처 모두 가져온다. World Forward=Front, World Up=Top를 유지하고 추가 회전을 넣지 않는다. 세 항목 체크 후 가져오기 시작.
+이 작업은 모델 에셋 가져오기이며 게임 공개/배포는 하지 않는다.
+
+4. Workspace에 새로 추가된 세 모델의 맨 위 이름을 각각 F2로 바꾼다:
+사냥 모스랫 -> RecoveryMossratHunt
+상세 모스랫 -> RecoveryMossratDetail
+비행선 -> RecoveryAirship
+내부 MeshPart/Bone/SurfaceAppearance 이름은 바꾸지 않는다. 기존 로비 Airship은 바꾸지 않는다.
+
+5. 같은 폴더의 ApplyModels.commandbar.lua를 메모장으로 열어 Ctrl+A, Ctrl+C.
+Studio 아래 명령 모음에 붙여넣고 실행한다. 가져온 모델 선택/이전 설치 명령은 필요 없다.
+
+6. 출력 확인:
+MOSSRAT_HEAD_SHAPE_APPLIED: 머리 보정 모스랫 설치 완료.
+MODEL_RECOVERY_COMPLETE: 비행선 색/재질 로딩과 일괄 설치 완료.
+AIRSHIP_TEXTURE_PENDING: 새 비행선 맵도 로딩 실패. 모스랫은 설치하지만 기존 비행선은 보존한다. 이 경우 비행선 해결 완료는 아니다. 출력의 RECOVERY_TEXTURE Failure 행을 함께 확인한다. 이후 같은 코드 재실행 시 보관된 모스랫 가져오기를 재사용하므로 모스랫 재가져오기는 필요 없다.
+
+7. 완료 문구가 나오면 Ctrl+S 후 ▶ 플레이.
+로비 비행선이 청록/금색인지, 배 아래 네 줄이 바구니 쪽으로 연결되는지, 중앙 출발 지점 E 길게 누르기가 작동하는지 확인.
+사냥터에서 모스랫이 앞으로 달리며 머리 자체가 덜 기울어졌는지, 다리 움직임과 장애물 회피가 유지되는지 확인.
+
+실제 Studio 업로드/게임 확인은 위 적용 후 필요. 원본 GLB와 운영자 설정은 보존한다.
