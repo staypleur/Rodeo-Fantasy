@@ -3,6 +3,7 @@
 local M={}
 local Asset=game:GetService("AssetService")
 local FacetedMouse=require(script.Parent:WaitForChild("FacetedMouse"))
+local NativeMossrat=require(script.Parent:WaitForChild("NativeMossrat"))
 local cache,contents,pending={},{},{}
 local builder
 local function build(kind)
@@ -83,6 +84,7 @@ function M.prepare()
  M.ready=ok M.failed=not ok pending.prepare=false return ok
 end
 function M.materialize(model)
+ if NativeMossrat.isTarget(model) then NativeMossrat.apply(model) return end
  if not FacetedMouse.failed and FacetedMouse.isTarget(model) and not model:GetAttribute("FacetedMouseRevision") then task.spawn(FacetedMouse.apply,model) end
  if model:FindFirstChild("Body") or not model.PrimaryPart then return end
  local package=game.ReplicatedStorage.RodeoFantasy
@@ -98,6 +100,7 @@ function M.materialize(model)
  end
 end
 function M.decorate(model)
+ if NativeMossrat.isTarget(model) then NativeMossrat.apply(model) return end
  if FacetedMouse.isTarget(model) then FacetedMouse.apply(model) return end
  if model:GetAttribute("MeshDecorated") or pending[model] then return end
  pending[model]=true

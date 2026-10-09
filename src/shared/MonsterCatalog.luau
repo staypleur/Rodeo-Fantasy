@@ -30,7 +30,13 @@ function C.saddleHeight(id,stars)
  end
  if id=="MeadowMouse" then
   local stage=C.stage(stars)
-  if stage==1 then return 1.2*C.scale(stars) end
+  if stage==1 then
+   local package=game and game:GetService("ReplicatedStorage"):FindFirstChild("RodeoFantasy")
+   local visual=package and package:FindFirstChild("VisualTemplate")
+   local back=visual and visual:GetAttribute("MeshyBackHeight")
+   if back then return back*C.scale(stars)+1.36-C[id].RootHeight*C.scale(stars) end
+   return 1.2*C.scale(stars)
+  end
   -- Meshes already contain their approved stage size. Seat above the back,
   -- with a constant clearance for the unscaled player rather than its crown.
   local back={[3]=2.212572,[6]=3.232653,[9]=7.460891}

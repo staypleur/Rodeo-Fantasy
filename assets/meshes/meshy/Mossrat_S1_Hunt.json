@@ -1,0 +1,27 @@
+{
+  "source_name": "Meshy_AI_Leaf_Mouse_Remesh_3k_1009160115_texture.glb",
+  "source_sha256": "d4356b91c3fd94721596724ca2cf8e25c102754daaec91c7ba21cf64d767c844",
+  "triangles": 3114,
+  "role": "Hunt",
+  "geometry": "Original approved triangles/normals/UVs unchanged; rotate 180 degrees about Y only",
+  "images": [
+    {
+      "sha256": "9190e336f745a32a10408fca7be27f4981d7e42e01280a7b14280dd32d9a13e8",
+      "size": [
+        512,
+        512
+      ]
+    },
+    {
+      "sha256": "842a7b540a665a0da3b438e1cbac95373bc3cec9bf0c65c8d2e936dfcdfe0632",
+      "size": [
+        512,
+        512
+      ]
+    }
+  ],
+  "rigged": false,
+  "aura": false,
+  "roblox_height_studs": 2.5,
+  "forward": "-Z"
+}

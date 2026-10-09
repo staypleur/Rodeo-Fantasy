@@ -1,0 +1,27 @@
+{
+  "source_name": "Meshy_AI_Leaf_Mouse_Remesh_3k_1009160115_texture.glb",
+  "source_sha256": "d4356b91c3fd94721596724ca2cf8e25c102754daaec91c7ba21cf64d767c844",
+  "triangles": 3114,
+  "role": "Detail",
+  "geometry": "Original approved triangles/normals/UVs unchanged; rotate 180 degrees about Y only",
+  "images": [
+    {
+      "sha256": "e8660927ae166a71afcb983107256b8996805025478c3375d021a2605e21f6cd",
+      "size": [
+        2048,
+        2048
+      ]
+    },
+    {
+      "sha256": "ef1e927e2e02f6b13f29be30fc2e7a48d88ac27dfc1375f4b0d74e635fcfa91e",
+      "size": [
+        4096,
+        4096
+      ]
+    }
+  ],
+  "rigged": false,
+  "aura": false,
+  "roblox_height_studs": 2.5,
+  "forward": "-Z"
+}
