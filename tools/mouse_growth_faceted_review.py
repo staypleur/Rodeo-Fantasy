@@ -140,36 +140,31 @@ for m in meshes:
    q[:,0]*=1.25;q[:,1]*=.66
    q[:,1]-=sg*q[:,0]*.27
   else:
-   q[:,0]*=.95;q[:,1]*=.80
-   q[:,0]+=sg*np.maximum(q[:,1],0)*.60
+   q[:,0]*=.90;q[:,1]*=.90
+   q[:,0]+=sg*np.maximum(q[:,1],0)*.15
   p=q+np.array((sg*1.08,1.50,-1.07))
  m['p']=p.tolist()
 for sg in (-1,1):
  for j in range(2 if STAGE==3 else 3):
    leaf('ChestFur'+str(sg)+'_'+str(j),(sg*(.12+j*.20),.10,-.99),(sg*.16,-.96,-.05),.46 if STAGE==3 else .72,.30,.04,kind='Cream')
-# Ultimate evolution: a giant quadruped with a continuous royal leaf cape.
+# Ultimate evolution: a giant quadruped with a clear face and no cape.
 # This is review-only. Its height is calibrated independently of gameplay scale.
 giant_ground_to_head=None
 if STAGE==9:
- meshes[:]=[m for m in meshes if m['name']!='CalmSmile']
- face_patch('ElderClosedMouth',[(-.23,.21),(-.08,.18),(0,.19),(.08,.18),(.23,.21),(.11,.14),(0,.13),(-.11,.14)],'Dark',.055)
+ meshes[:]=[m for m in meshes if m['name']!='CalmSmile' and 'Beard' not in m['name']]
+ face_patch('ElderClosedMouth',[(-.15,.22),(-.065,.18),(0,.20),(.065,.18),(.15,.22),(.065,.20),(0,.225),(-.065,.20)],'Dark',.055)
  for sg,side in ((-1,'Left'),(1,'Right')):
-  face_patch(side+'ElderBrow',[(sg*.25,.98),(sg*.52,1.00),(sg*.76,1.09),(sg*.70,1.15),(sg*.28,1.08)],'Fur',.075)
-  for j in range(2):
-   leaf(f'ElderCheekMane{sg}_{j}',(sg*(.60+j*.12),.25+j*.15,-1.35),(sg*.66,.52,.53),.97+j*.14,.43,.055,kind='Ivory')
+  leaf(f'ElderCheekMane{sg}',(sg*.60,.28,-1.40),(sg*.83,-.15,.54),.70,.42,.055,kind='Ivory')
  head_names=('Head','Nose','ElderClosedMouth','RegalSprout')
  meshes[:]=[m for m in meshes if m['name'] in head_names or any(k in m['name'] for k in ('Eye','Ear','Cheek','SproutBloom','Crown','Beard','Brow'))]
  for m in meshes:
   p=np.asarray(m['p'],float)
   if m['name'].endswith('Eye'):
    sg=-1 if m['name'].startswith('Left') else 1
-   p[:,1]=.77+(p[:,1]-.77)*.64+sg*(p[:,0]-sg*.49)*.25
-  if m['name'] in ('Head','Nose','ElderClosedMouth','LeftEye','RightEye','LeftCheek','RightCheek','LeftElderBrow','RightElderBrow'):
-   p[:,2]=-1.18+(p[:,2]+1.18)*1.20
-   p[:,0]*=.88+.22*np.clip((p[:,1]-.20)/.80,0,1)
+   p[:,1]=.77+(p[:,1]-.77)*.98+sg*(p[:,0]-sg*.49)*.06
   p=(p-np.array((0,.62,-1.18)))*.94+np.array((0,2.15,-1.58))
   # A broad, angular elder face rather than the baby's large round head.
-  p[:,0]*=1.08
+  p[:,0]*=1.02
   m['p']=p.tolist()
  def upright_loft(name,rings,kind='Fur',sides=8):
   m=mesh(name);rows=[]
@@ -187,33 +182,10 @@ if STAGE==9:
  for sg in (-1,1):
   for z,label,top in ((-.79,'Front',.87),(1.28,'Back',.56)):
    upright_loft(('Left' if sg<0 else 'Right')+label+'Leg',[((sg*.94,-1.28,z-.17),.48,.58),((sg*.94,-1.03,z-.04),.36,.41),((sg*.94,-.35,z+.09),.38,.40),((sg*.87,top,z),.52,.50)],sides=4)
-  # Continuous faceted cape drapes from the back over both flanks, behind legs.
-  rows=[]
-  for j,z in enumerate((-.56,.08,.74,1.42,2.06)):
-   drop=.10*j
-   rows.append([np.array((sg*x,y-drop,z)) for x,y in ((0,1.73),(.64,1.59),(1.20,1.08),(1.60,.20))])
-  cape=mesh('RoyalCape'+str(sg));trim=mesh('CapeGoldHem'+str(sg))
-  for j in range(4):
-   for k in range(3):
-    pts=[rows[j][k],rows[j][k+1],rows[j+1][k+1],rows[j+1][k]]
-    coords=[(j/4,1-k/3),(j/4,1-(k+1)/3),((j+1)/4,1-(k+1)/3),((j+1)/4,1-k/3)]
-    quad(cape,pts,coords,'Leaf',(sg,.6,0))
-    under=[p+(0,-.028,0) for p in pts]
-    quad(cape,under,coords,'Leaf',(-sg,-.6,0))
-   a=rows[j][-1];b=rows[j+1][-1]
-   quad(trim,[a,b,b+(sg*.06,-.06,0),a+(sg*.06,-.06,0)],[(0,0),(1,0),(1,1),(0,1)],'Gold',(sg,0,0))
-  for k in range(3):
-   a=rows[-1][k];b=rows[-1][k+1]
-   quad(trim,[a,b,b+(0,-.055,.075),a+(0,-.055,.075)],[(0,0),(1,0),(1,1),(0,1)],'Gold',(0,.4,1))
-  for j in range(3):
-   leaf(f'RoyalShoulderLeaf{sg}_{j}',(sg*(.58+j*.20),1.57-j*.12,-.58+j*.23),(sg*.75,-.53,.33),1.13,.65,.065)
-   leaf(f'CapeLeafHem{sg}_{j}',(sg*1.55,.13-j*.10,.24+j*.63),(sg*.19,-.81,.55),.72,.42,.045)
+  # A restrained shoulder collar leaves the torso and all four legs visible.
+  leaf('ElderShoulderLeaf'+str(sg),(sg*.80,1.48,-.48),(sg*.71,-.58,.39),.72,.46,.055)
   for j in range(2):
    leaf(f'ElderChestIvory{sg}_{j}',(sg*(.20+j*.22),1.26,-1.77),(sg*.16,-.97,0),1.20,.43,.045,kind='Cream')
-  flower('ElderShoulderFlower'+str(sg),(sg*1.04,1.30,-.78),.23)
-  flower('ElderCapeFlower'+str(sg),(sg*1.39,.77,.65),.19)
- # Back clasp and orderly gold embroidery reinforce a cape, not a leaf cluster.
- flower('RoyalCapeClasp',(0,1.58,-.80),.24)
  tailpoints=[(0,.25,1.62),(.73,.48,2.08),(1.39,1.29,2.45),(1.69,2.47,2.47),(1.22,3.36,2.42)]
  branch('ElderTreeTail',tailpoints,.19,kind='Gold')
  for sg in (-1,1):
@@ -286,5 +258,5 @@ for stage in (3,6,9):
   source=source.replace('.62,.48,.065,clover=True',('.78,.59' if stage==6 else '.94,.70')+',.065,clover=True')
  marker='# Embed the actual atlas in the GLB; do not rely on importer vertex colors.'
  source=source.replace(marker,addition+'\n'+marker)
- source=source.replace("assert tri_count<2000", "gltf['extras'].update(referenceAvatarHeightStuds=5,groundToBodyHeightStuds={3:4.0,6:5.7,9:12.5}[STAGE],heightIncludesEars=True,reviewUnitsPerStud=1,posture='quadruped royal cape review' if STAGE==9 else 'quadruped review',gameInstalled=False)\nassert tri_count<2000")
+ source=source.replace("assert tri_count<2000", "gltf['extras'].update(referenceAvatarHeightStuds=5,groundToBodyHeightStuds={3:4.0,6:5.7,9:12.5}[STAGE],heightIncludesEars=True,reviewUnitsPerStud=1,posture='quadruped no cape face review' if STAGE==9 else 'quadruped review',gameInstalled=False)\nassert tri_count<2000")
  exec(compile(source,str(R/'tools/mouse_s1_faceted_revision.py'),'exec'),{'__file__':str(R/'tools/mouse_s1_faceted_revision.py')})
