@@ -1,10 +1,11 @@
-"""Export and render the exact same native box geometry for design review."""
+"""Export native Part reviews; software-render boxes and approximate ellipsoids."""
 from pathlib import Path
 import math,itertools,xml.etree.ElementTree as E
 import numpy as np
 from PIL import Image,ImageDraw,ImageFont
 R=Path(__file__).resolve().parents[1]
-def save_review(parts,model_name,title,note,eye_direction=(.72,.85,-1.1)):
+def save_review(parts,model_name,title,note,eye_direction=(.72,.85,-1.1),sphere_names=None):
+ sphere_names=sphere_names or set()
  root=E.Element('roblox',version='4');model=E.SubElement(root,'Item',{'class':'Model','referent':model_name})
  props=E.SubElement(model,'Properties');E.SubElement(props,'string',name='Name').text=model_name
  for index,(name,pos,size,color,matrix) in enumerate(parts):
@@ -12,6 +13,7 @@ def save_review(parts,model_name,title,note,eye_direction=(.72,.85,-1.1)):
   p=E.SubElement(item,'Properties');E.SubElement(p,'string',name='Name').text=name
   for key,value in [('Anchored','true'),('CanCollide','true'),('CanTouch','false')]:E.SubElement(p,'bool',name=key).text=value
   E.SubElement(p,'token',name='Material').text='272'
+  E.SubElement(p,'token',name='shape').text='0' if name in sphere_names else '1'
   E.SubElement(p,'token',name='TopSurface').text='0';E.SubElement(p,'token',name='BottomSurface').text='0'
   E.SubElement(p,'Color3uint8',name='Color3uint8').text=str(color[0]*65536+color[1]*256+color[2])
   cf=E.SubElement(p,'CoordinateFrame',name='CFrame');dims=E.SubElement(p,'Vector3',name='size')
@@ -26,6 +28,27 @@ def save_review(parts,model_name,title,note,eye_direction=(.72,.85,-1.1)):
  vertices=[];faces=[]
  faceids=[(0,1,3,2),(4,6,7,5),(0,4,5,1),(2,3,7,6),(0,2,6,4),(1,5,7,3)]
  for name,pos,size,color,matrix in parts:
+  if name in sphere_names:
+   # Approximate Roblox's native ellipsoid for software review rendering.
+   # Export remains a native Ball Part, never a runtime EditableMesh.
+   cloud=[]
+   for j in range(17):
+    phi=-math.pi/2+j*math.pi/16
+    cloud.append([np.array((math.cos(phi)*math.cos(k*math.pi/12),math.sin(phi),math.cos(phi)*math.sin(k*math.pi/12)))*size/2@matrix.T+pos for k in range(24)])
+   vertices.extend(p for row in cloud for p in row)
+   for j in range(16):
+    for k in range(24):
+     q=np.array((cloud[j][k],cloud[j+1][k],cloud[j+1][(k+1)%24],cloud[j][(k+1)%24]))
+     n=np.cross(q[1]-q[0],q[2]-q[0]);length=np.linalg.norm(n)
+     if length<1e-8:
+      q=q[::-1];n=np.cross(q[1]-q[0],q[2]-q[0]);length=np.linalg.norm(n)
+     if length<1e-8:continue
+     n/=length
+     if n@(q.mean(axis=0)-pos)<0:q=q[::-1];n=-n
+     if n@eye<=0:continue
+     shade=.66+.34*max(0,float(n@np.array((-.3,.85,-.4))))
+     faces.append((float(q.mean(axis=0)@eye),q,tuple(int(c*shade) for c in color)))
+   continue
   corners=np.array(list(itertools.product((-1,1),repeat=3)))*size/2
   world=corners@matrix.T+pos
   for ids in faceids:
