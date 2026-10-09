@@ -9,25 +9,30 @@ helpers=helpers.replace('tea=np.array((239,194,168))','tea=np.array((133,169,86)
 helpers=helpers.replace('(254,220,186)','(192,211,128)').replace('cream)', 'cream*.18)')
 helpers=helpers.replace("'Dark':(0,2)","'Hoof':(3,2),'Dark':(0,2)")
 helpers=helpers.replace("if kind=='Fur':", "if kind=='Hoof':return blend((81,62,45),(137,110,73),1-v)\n if kind=='Fur':")
+helpers=helpers.replace("name=='Body' and j in (5,6)","name=='Body' and j in (6,7,8)")
 head=base.split('# Angular cheek silhouette')[1].split('for sg,side in')[0]
 head=head.replace('profiles=[(-.20,.34,.33),(.08,.80,.61),(.43,1.06,.73),(.94,.99,.69),(1.29,.72,.53),(1.48,.28,.27)]',
  'profiles=[(-.20,.30,.32),(.08,.67,.58),(.43,.91,.75),(.94,.86,.73),(1.29,.62,.57),(1.48,.22,.28)]')
 leaf=base.split('def leaf(')[1].split("leaf('HeadSproutLeft'")[0]
 export=base.split('# Embed the actual atlas')[1]
 body=r'''
-loft('Body',[((0,-.04,-.74),.87,.66),((0,.05,-.1),1.13,.85),((0,.03,.95),1.13,.84),((0,-.10,1.62),.80,.60)],sides=10)
+# Lift and taper the front torso into the rear of the head. The closed end
+# sits inside the head rather than showing as a vertical block below it.
+loft('Body',[((0,.55,-1.20),.49,.54),((0,.37,-.79),.83,.67),((0,.12,-.12),1.10,.80),((0,.03,.95),1.13,.84),((0,-.10,1.62),.80,.60)],sides=10)
 for sg,side in ((-1,'Left'),(1,'Right')):
  for z,label in ((-.52,'Front'),(1.14,'Back')):
   m=mesh(side+label+'Leg');rows=[]
-  for y,w,d in ((-.34,.32,.33),(-.9,.26,.29),(-1.18,.36,.40)):
-   rows.append([np.array((sg*.79+dx*w,y,z+dz*d)) for dx,dz in ((-1,-1),(1,-1),(1,1),(-1,1))])
-  for i in range(2):
-   for j in range(4):
-    k=(j+1)%4;quad(m,[rows[i][j],rows[i][k],rows[i+1][k],rows[i+1][j]],[(0,0),(1,0),(1,1),(0,1)],'Hoof' if i==1 else 'Fur',rows[i][j]-np.array((sg*.79,-.5,z)))
-  quad(m,rows[-1],[(0,0),(1,0),(1,1),(0,1)],'Hoof',(0,-1,0))
+  for y,cx,w,d in ((.30,.53,.24,.30),(.06,.62,.32,.34),(-.22,.70,.36,.36),(-.53,.77,.29,.32),(-.83,.79,.25,.29),(-.96,.79,.31,.35),(-1.10,.79,.36,.40),(-1.18,.79,.33,.37)):
+   rows.append([np.array((sg*cx+math.cos(j*math.tau/8)*w,y,z+math.sin(j*math.tau/8)*d)) for j in range(8)])
+  for i in range(len(rows)-1):
+   for j in range(8):
+    k=(j+1)%8;quad(m,[rows[i][j],rows[i][k],rows[i+1][k],rows[i+1][j]],[(j/8,.25),((j+1)/8,.25),((j+1)/8,.4),(j/8,.4)],'Hoof' if i>=4 else 'Fur',rows[i][j]-np.array((sg*.79,-.5,z)))
+  for j in range(1,7):tri(m,[rows[-1][0],rows[-1][j],rows[-1][j+1]],[(0,0),(.5,1),(1,0)],'Hoof',(0,-1,0))
   # Two visible toe seams distinguish boar feet from mouse paws.
   seam=mesh(side+label+'ToeSplit')
-  quad(seam,[(sg*.79-.025,-.98,z-.405),(sg*.79+.025,-.98,z-.405),(sg*.79+.025,-1.175,z-.405),(sg*.79-.025,-1.175,z-.405)],[(0,0),(1,0),(1,1),(0,1)],'Cream',(0,0,-1))
+  marks=[(-.98,.365),(-1.10,.408),(-1.179,.378)]
+  for (y,d),(ny,nd) in zip(marks,marks[1:]):
+   quad(seam,[(sg*.79-.023,y,z-d),(sg*.79+.023,y,z-d),(sg*.79+.023,ny,z-nd),(sg*.79-.023,ny,z-nd)],[(0,0),(1,0),(1,1),(0,1)],'Cream',(0,0,-1))
 '''
 details=r'''
 for sg,side in ((-1,'Left'),(1,'Right')):
@@ -51,7 +56,7 @@ for sg,side in ((-1,'Left'),(1,'Right')):
  ring=[root+np.array((math.cos(j*math.tau/5)*.10,0,math.sin(j*math.tau/5)*.10)) for j in range(5)]
  for j in range(5):tri(tusk,[ring[j],ring[(j+1)%5],tip],[(0,1),(1,1),(.5,0)],'Ivory',ring[j]-root)
  for j in range(1,4):tri(tusk,[ring[0],ring[j],ring[j+1]],[(0,1),(1,1),(.5,0)],'Ivory',(0,-1,0))
-snout=loft('Snout',[((0,.42,-1.88),.47,.28),((0,.42,-2.25),.57,.35),((0,.42,-2.34),.50,.29)],kind='Pink',sides=8)
+snout=loft('Snout',[((0,.42,-1.80),.38,.23),((0,.42,-2.00),.51,.31),((0,.42,-2.20),.55,.33),((0,.42,-2.34),.50,.29)],kind='Pink',sides=8)
 for sg,side in ((-1,'Left'),(1,'Right')):
  nostril=mesh(side+'Nostril');cx=sg*.23;cy=.46
  points=[(cx+math.cos(j*math.tau/6)*.075,cy+math.sin(j*math.tau/6)*.10,-2.345) for j in range(6)]
@@ -65,11 +70,16 @@ for sg in (-1,1):
  leaf('ShoulderLeaf'+str(sg),(sg*.72,.38,-.52),(sg*.70,-.24,.62),.64,.38,.07)
 # One short curled tail with a single sprout: no mouse-like clover tail.
 tail=mesh('Tail');centers=[(0,.0,1.6),(.15,.18,1.95),(.38,.31,2.08),(.52,.55,2.05),(.39,.73,1.98)]
-for i in range(len(centers)-1):
- a=np.array(centers[i]);b=np.array(centers[i+1]);axis=(b-a)/np.linalg.norm(b-a);side=np.cross(axis,(0,0,1));side/=np.linalg.norm(side);up=np.cross(axis,side)
- rows=[[c+.075*(math.cos(j*math.tau/5)*side+math.sin(j*math.tau/5)*up) for j in range(5)] for c in (a,b)]
+rows=[]
+for i,c in enumerate(centers):
+ axis=np.array(centers[min(i+1,len(centers)-1)])-np.array(centers[max(i-1,0)]);axis/=np.linalg.norm(axis)
+ side=np.cross(axis,(0,0,1));side/=np.linalg.norm(side);up=np.cross(axis,side)
+ rows.append([np.array(c)+.075*(math.cos(j*math.tau/5)*side+math.sin(j*math.tau/5)*up) for j in range(5)])
+for i in range(len(rows)-1):
  for j in range(5):
-  k=(j+1)%5;quad(tail,[rows[0][j],rows[0][k],rows[1][k],rows[1][j]],[(0,0),(1,0),(1,1),(0,1)],'Fur',rows[0][j]-a)
+  k=(j+1)%5;quad(tail,[rows[i][j],rows[i][k],rows[i+1][k],rows[i+1][j]],[(0,0),(1,0),(1,1),(0,1)],'Fur',rows[i][j]-np.array(centers[i]))
+for i,hint in ((0,np.array(centers[0])-np.array(centers[1])),(-1,np.array(centers[-1])-np.array(centers[-2]))):
+ for j in range(5):tri(tail,[centers[i],rows[i][j],rows[i][(j+1)%5]],[(.5,.5),(0,0),(1,1)],'Fur',hint)
 leaf('TailSprout',centers[-1],(-.7,.55,.05),.38,.25,.05)
 # Medium baby body is wider/heavier than the small mouse, retaining low stature.
 for m in meshes:
