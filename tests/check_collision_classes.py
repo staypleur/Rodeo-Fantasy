@@ -46,9 +46,11 @@ for _,size in ipairs(classes) do for _,target in ipairs(classes) do for _,dash i
  for _,crate in ipairs({false,true}) do
   local rock=node({ObstacleSize=target,Scale=target=='Small' and 1 or 2,BreakableCrate=crate})
   W.testSetup({}, {GetChildren=function() return {rock} end})
-  local expected=size=='Large' and target=='Small' and dash
+  local expected=crate and (size=='Medium' or size=='Large') or (not crate and size=='Large' and target=='Small' and dash)
   local hit
-  if crate then hit=W.crateHit(from,to,mount,size,dash)
+  if crate then
+   assert(not W.hit(from,to,false,mount,dash) and not rock:GetAttribute('Broken'),'crate must bypass ordinary obstacle rule')
+   hit=W.crateHit(from,to,mount,size,dash)
   else hit=W.hit(from,to,false,mount,dash) end
   assert(hit==not expected,'wrong obstacle collision')
   assert((rock:GetAttribute('Broken')==true)==expected,'wrong obstacle breakup')

@@ -36,6 +36,7 @@ assert(not auth.request(owner,operation),'five failures lock the account for 60 
 clock+=61 assert(auth.request(owner,operation)) auth.remove(owner)
 local disabled=Auth.new(42,{Salt='',PasswordHash=''},hash,function() return clock end,function() error('must not issue challenge') end,function() end,function() error('must not execute') end)
 assert(not disabled.request(owner,operation))
+local os={clock=function() return clock end}
 local modules={OperatorSettings=settings,OperatorSha256=hash,OperatorAuth=Auth}
 local script={Parent={WaitForChild=function(_,name) return name end}}
 local require=function(name) return modules[name] end
@@ -58,23 +59,38 @@ assert(sync==1 and bagSync==1 and bags[owner].pending==0)
 states[owner]={} assert(not grant(owner,'MeadowMouse',9,3) and #bags[owner].monsters==3)
 states[owner]=nil
 settings.OwnerUsername='puller3313'
-local commandHandler local chatCallbacks={} local latest local receiver
+local commandHandler local chatCallbacks={} local latest local receiver local chatVersion=0
 owner.Chatted={Connect=function(_,f) chatCallbacks[42]=f end}
 outsider.Chatted={Connect=function(_,f) chatCallbacks[99]=f end}
 Enum={ChatVersion={LegacyChatService=0}}
 game={GetService=function(_,name)
- if name=='TextChatService' then return {ChatVersion=0} end
+ if name=='TextChatService' then return {ChatVersion=chatVersion} end
  if name=='Players' then return {GetUserIdFromNameAsync=function(_,name) assert(name=='puller3313') return 42 end,
-  PlayerRemoving={Connect=function() end},PlayerAdded={Connect=function() end},GetPlayers=function() return {owner,outsider} end} end
+  GetPlayerByUserId=function(_,id) return id==42 and owner or outsider end,PlayerRemoving={Connect=function() end},PlayerAdded={Connect=function() end},GetPlayers=function() return {owner,outsider} end} end
  if name=='HttpService' then return {GenerateGUID=function() return 'server-nonce' end} end
  error(name)
 end}
-local remote={OnServerEvent={Connect=function(_,f) receiver=f end},FireClient=function(_,p,kind,data) assert(p==owner) latest={kind=kind,data=data} end}
+local remote={OnServerEvent={Connect=function(_,f) receiver=f end},FireClient=function(_,p,kind,data) latest={player=p,kind=kind,data=data} end}
 Command.register(Catalog,remote,grant)
-chatCallbacks[99]('/monster 모스랫 9 3') assert(not latest)
+receiver(outsider,'OperatorStatus') assert(latest.kind=='OperatorStatus' and not latest.data.allowed)
+receiver(owner,'OperatorStatus') assert(latest.data.allowed)
+chatCallbacks[99]('/monster 모스랫 9 3') assert(latest.kind=='OperatorResult' and not latest.data.ok and #bags[owner].monsters==3)
 chatCallbacks[42]('/monster 모스랫 9 3') assert(latest.kind=='OperatorPrompt' and #bags[owner].monsters==3)
 receiver(outsider,'OperatorVerify',{token='server-nonce',password='dummy-test-password'}) assert(#bags[owner].monsters==3)
 receiver(owner,'OperatorVerify',{token='server-nonce',password='dummy-test-password'}) assert(#bags[owner].monsters==6 and latest.data.ok)
+clock+=2
+receiver(owner,'OperatorRequest','/monster 모스랫 6 1') assert(latest.kind=='OperatorPrompt' and #bags[owner].monsters==6)
+receiver(owner,'OperatorVerify',{token='server-nonce',password='dummy-test-password'}) assert(#bags[owner].monsters==7 and bags[owner].monsters[7].stars==6)
+clock+=2
+receiver(outsider,'OperatorRequest','/monster 모스랫 9') assert(not latest.data.ok and #bags[owner].monsters==7)
+receiver(owner,'OperatorRequest','/monster unknown 9') assert(latest.kind=='OperatorResult' and not latest.data.ok)
+clock+=2 chatVersion=1
+Instance={new=function(kind) assert(kind=='TextChatCommand') return {Triggered={Connect=function(_,fn) commandHandler=fn end}} end}
+Command.register(Catalog,remote,grant)
+assert(commandHandler and chatCallbacks[42],'modern mode must retain legacy window fallback')
+chatCallbacks[42]('/monster 모스랫 3') assert(latest.kind=='OperatorPrompt')
+commandHandler({UserId=42},'/monster 모스랫 3') assert(#bags[owner].monsters==7,'duplicate entry must not bypass password')
+receiver(owner,'OperatorVerify',{token='server-nonce',password='dummy-test-password'}) assert(#bags[owner].monsters==8 and bags[owner].monsters[8].stars==3)
 print('OPERATOR_COMMANDS_PASS: SHA-256 vectors, owner restriction, per-command password, forged/replayed/expired/cancelled tokens, lockout, blank config disabled, parser and real grant')
 '''
 p=R/'.tools/check_operator_commands.luau';p.write_text(code,encoding='utf-8')

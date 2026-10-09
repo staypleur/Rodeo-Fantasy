@@ -20,6 +20,25 @@ function M.new(playerGui,remote)
  local confirm=make('TextButton',{Text='확인',Position=UDim2.new(.5,6,0,185),Size=UDim2.new(.5,-26,0,42),BackgroundColor3=Color3.fromRGB(91,128,77),TextColor3=Color3.new(1,1,1),Font=Enum.Font.GothamBold,TextSize=17,BorderSizePixel=0},panel)
  local cancel=make('TextButton',{Text='닫기',Position=UDim2.new(0,20,0,185),Size=UDim2.new(.5,-26,0,42),BackgroundColor3=Color3.fromRGB(210,185,140),TextColor3=Color3.fromRGB(61,57,40),Font=Enum.Font.GothamBold,TextSize=17,BorderSizePixel=0},panel)
  local nonce,busy=nil,false
+ local controls=make('ScreenGui',{Name='OperatorCommandEntry',DisplayOrder=999,ResetOnSpawn=false,Enabled=false},playerGui)
+ local launch=make('TextButton',{Name='OperatorLaunch',Text='운영자',AnchorPoint=Vector2.new(0,1),Position=UDim2.new(0,18,1,-20),Size=UDim2.fromOffset(104,44),BackgroundColor3=Color3.fromRGB(64,94,72),TextColor3=Color3.fromRGB(255,241,199),Font=Enum.Font.GothamBold,TextSize=17,BorderSizePixel=0},controls)
+ make('UICorner',{CornerRadius=UDim.new(0,10)},launch)
+ local entry=make('Frame',{Name='OperatorEntry',Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.45),Size=UDim2.new(.9,0,0,170),BackgroundColor3=Color3.fromRGB(247,232,203),BorderSizePixel=0},controls)
+ make('UISizeConstraint',{MaxSize=Vector2.new(460,170)},entry) make('UICorner',{CornerRadius=UDim.new(0,12)},entry)
+ make('TextLabel',{Text='운영자 명령어 · 실행마다 비밀번호 확인',Position=UDim2.fromOffset(12,12),Size=UDim2.new(1,-24,0,30),BackgroundTransparency=1,Font=Enum.Font.GothamBold,TextSize=16,TextColor3=Color3.fromRGB(61,57,40)},entry)
+ local command=make('TextBox',{Name='OperatorCommand',Text='/monster 모스랫 9',ClearTextOnFocus=false,Position=UDim2.fromOffset(20,52),Size=UDim2.new(1,-40,0,42),BackgroundColor3=Color3.fromRGB(255,249,232),Font=Enum.Font.Gotham,TextSize=17,TextColor3=Color3.fromRGB(61,57,40),BorderSizePixel=0},entry)
+ make('UICorner',{CornerRadius=UDim.new(0,7)},command)
+ local request=make('TextButton',{Name='OperatorRequest',Text='비밀번호 확인',Position=UDim2.new(.5,6,0,110),Size=UDim2.new(.5,-26,0,42),BackgroundColor3=Color3.fromRGB(91,128,77),TextColor3=Color3.new(1,1,1),Font=Enum.Font.GothamBold,TextSize=16,BorderSizePixel=0},entry)
+ local dismiss=make('TextButton',{Text='취소',Position=UDim2.new(0,20,0,110),Size=UDim2.new(.5,-26,0,42),BackgroundColor3=Color3.fromRGB(210,185,140),TextColor3=Color3.fromRGB(61,57,40),Font=Enum.Font.GothamBold,TextSize=16,BorderSizePixel=0},entry)
+ local function requestCommand()
+  if not controls.Enabled or #command.Text==0 or #command.Text>160 then return end
+  entry.Visible=false command:ReleaseFocus()
+  remote:FireServer('OperatorRequest',command.Text)
+ end
+ request.Activated:Connect(requestCommand)
+ command.FocusLost:Connect(function(enter) if enter then requestCommand() end end)
+ launch.Activated:Connect(function() entry.Visible=not entry.Visible if entry.Visible then command:CaptureFocus() end end)
+ dismiss.Activated:Connect(function() entry.Visible=false command:ReleaseFocus() end)
  local function clear() field.Text='' field:ReleaseFocus() end
  local function submit()
   if not nonce or busy or #field.Text==0 then return end
@@ -33,11 +52,26 @@ function M.new(playerGui,remote)
  field.FocusLost:Connect(function(enter) if enter then submit() end end)
  cancel.Activated:Connect(function() if nonce then remote:FireServer('OperatorCancel',nonce) end nonce=nil clear() gui.Enabled=false end)
  remote.OnClientEvent:Connect(function(kind,data)
-  if kind=='OperatorPrompt' then
+  if kind=='OperatorStatus' then controls.Enabled=data.allowed==true
+  elseif kind=='OperatorPrompt' then
+   entry.Visible=false
    nonce=data.token busy=false clear() description.Text=data.description status.Text='' confirm.Visible=true gui.Enabled=true field:CaptureFocus()
   elseif kind=='OperatorResult' then
    clear() busy=false status.Text=data.message gui.Enabled=true
    if data.ok or not data.retry then nonce=nil confirm.Visible=false end
+  end
+ end)
+ -- Relay locally submitted chat as a fallback. The server never trusts this
+ -- event as authorization; duplicate chat callbacks share its one-second gate.
+ local player=game:GetService('Players').LocalPlayer
+ player.Chatted:Connect(function(text)
+  if type(text)=='string' and text:match('^/monster') then remote:FireServer('OperatorRequest',text) end
+ end)
+ task.spawn(function()
+  for _=1,10 do
+   remote:FireServer('OperatorStatus')
+   if controls.Enabled then return end
+   task.wait(2)
   end
  end)
  return gui

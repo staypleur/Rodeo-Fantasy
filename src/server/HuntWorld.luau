@@ -373,6 +373,7 @@ local function breakObstacle(rock,respawn)
 end
 function World.hit(from, to, flying,mount,dashing)
 	for _, rock in ipairs(obstacles:GetChildren()) do
+  if mount and rock:GetAttribute("BreakableCrate") then continue end -- dedicated crateHit rule
 		if rock:GetAttribute("Broken") or (flying and rock:GetAttribute("WallClass")~="High" and rock:GetAttribute("ObstacleSize")~="Large") then continue end
 		local p,s = rock.Position,rock.Size
 		if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,1) then
@@ -390,7 +391,7 @@ function World.crateHit(from,to,mount,sizeClass,dashing)
   if not box:GetAttribute("BreakableCrate") or box:GetAttribute("Broken") then continue end
   local p,s=box.Position,box.Size+mount.PrimaryPart.Size
   if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,0) then
-   if not Rules.canBreakObstacle(sizeClass,box:GetAttribute("ObstacleSize") or "Small",dashing) then return true end
+   if not Rules.canBreakCrate(sizeClass) then return true end
    box.CanQuery=false box.CanTouch=false
    box:SetAttribute("Broken",true) box:SetAttribute("BrokenAt",workspace:GetServerTimeNow())
    for _,piece in ipairs(box:GetDescendants()) do if piece:IsA("BasePart") then piece.Transparency=1 piece.CanQuery=false end end

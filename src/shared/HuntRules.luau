@@ -32,6 +32,11 @@ function Rules.canBreakObstacle(size,target,dashing)
  return size=="Large" and target=="Small" and dashing==true
 end
 
+-- Wooden loot containers are distinct from rocks/trees and need no dash.
+function Rules.canBreakCrate(size)
+ return size=="Medium" or size=="Large"
+end
+
 function Rules.progress(elapsed, duration)
 	return math.clamp(elapsed / duration, 0, 1)
 end

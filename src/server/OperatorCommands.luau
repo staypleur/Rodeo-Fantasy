@@ -24,26 +24,32 @@ function M.register(catalog,remote,grant)
  local auth=Auth.new(ownerId,settings,hash,os.clock,function() return game:GetService('HttpService'):GenerateGUID(false) end,
   function(player,kind,data) remote:FireClient(player,kind,data) end,
   function(player,operation) return grant(player,operation.id,operation.stars,operation.count) end)
- remote.OnServerEvent:Connect(function(player,action,value)
-  if action=='OperatorVerify' then auth.verify(player,value)
-  elseif action=='OperatorCancel' and type(value)=='string' then auth.cancel(player,value) end
- end)
  players.PlayerRemoving:Connect(auth.remove)
  local function process(player,text)
-  if player.UserId~=ownerId then return end
+  if player.UserId~=ownerId then
+   remote:FireClient(player,'OperatorResult',{ok=false,message='이 계정은 운영자 권한이 없습니다.'}) return
+  end
   local id,stars,count=M.parse(text,catalog)
   if not id then
-   if type(text)=='string' and text:match('^/monster') then warn('사용법: /monster 모스랫 9 [마릿수 1~10] — 별은 1~9') end
+   if type(text)=='string' and text:match('^/monster') then remote:FireClient(player,'OperatorResult',{ok=false,message='사용법: /monster 모스랫 9 (마릿수 1~10 선택). 별은 1~9입니다.'}) end
    return
   end
   auth.request(player,{id=id,stars=stars,count=count,description=string.format('%s · %d성 · %d마리 지급',names[id] or id,stars,count)})
  end
- if chat.ChatVersion==Enum.ChatVersion.LegacyChatService then
-  local function connect(player) player.Chatted:Connect(function(text) process(player,text) end) end
-  players.PlayerAdded:Connect(connect)
-  for _,player in ipairs(players:GetPlayers()) do connect(player) end
-  return
+ remote.OnServerEvent:Connect(function(player,action,value)
+  if action=='OperatorVerify' then auth.verify(player,value)
+  elseif action=='OperatorCancel' and type(value)=='string' then auth.cancel(player,value)
+  elseif action=='OperatorStatus' then remote:FireClient(player,'OperatorStatus',{allowed=player.UserId==ownerId})
+  elseif action=='OperatorRequest' and type(value)=='string' and #value<=160 then process(player,value) end
+ end)
+ -- Saved places can use a legacy chat window even when ChatVersion differs.
+ -- Both entry paths pass through the same server owner check/password challenge.
+ local function connect(player)
+  player.Chatted:Connect(function(text) if type(text)=='string' and text:match('^/monster') then process(player,text) end end)
  end
+ players.PlayerAdded:Connect(connect)
+ for _,player in ipairs(players:GetPlayers()) do connect(player) end
+ if chat.ChatVersion==Enum.ChatVersion.LegacyChatService then return end
  local command=Instance.new('TextChatCommand')
  command.Name='OperatorMonsterCommand' command.PrimaryAlias='/monster'
  command.Triggered:Connect(function(source,text)

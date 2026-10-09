@@ -728,3 +728,11 @@
 - tests/check_approved_mouse_runtime.py의 실제 코드/API stub 검사 통과:1/3/6/9 및4/7/10의 크기·발 접지·실루엣·8배치/네다리·애니메이션 pivot·등 기준 탑승 위치·10회 재사냥 재사용·32 fixed/2 image·메시/색 연결 실패 fallback. 수정 Luau4파일 컴파일 통과. check_journal_book.py와 check_operator_commands.py 회귀 검사 통과. 이는 엔진 렌더/실기기 플레이 검사가 아니다.
 - 공유 dist/RodeoFantasy-LobbyFinal-Operator.rbxlx 갱신:14개 Source 패치, 기존703 MeshPart와 저장된 로비/목장/승선 속성 보존, UniqueIds 검사 통과. 개인용 dist/LocalOperator/RodeoFantasy-OperatorConfigured.rbxlx는 기존 서버 운영자 검증값을 그대로 재사용해 갱신했다. 개인 인증 자료는 Git 제외하며 사용자가 수정한 Capture 파일은 보존한다.
 - 실제 Studio의 색/GPU 렌더·걷기/탑승 화면·PC/모바일 FPS는 미검증이다. 공개 게임 게시도 수행하지 않았다. 이번 결과는 최신 실행용 로컬 파일과 소스의 적용이며 Studio에서 Ctrl+O/F5 확인이 남는다.
+
+## 2026-10-09 — 운영자 명령어 미응답 보완 및 상자 규칙
+
+- 사용자가 공백을 넣은 /monster 모스랫 9가 일반 채팅으로 올라오며 비밀번호 창이 뜨지 않는다고 재제보했다. 표시 이름 staypleur는 사용자 확인상 @puller3313이므로 운영자 제한을 바꾸지 않았다. 기존 코드는 ChatVersion에 따라 Player.Chatted/TextChatCommand 중 하나만 연결했다. 저장된 채팅 UI와 이벤트 경로 불일치 가능성을 보완하도록 양쪽 서버 경로를 연결하고 클라이언트 Chatted에서 동일 요청을 서버로 전달한다. 실제 Studio 이벤트 추적을 할 수 없어 정확한 기존 실패 원인은 확정하지 않는다. 공식 TextChatCommand 서버 사용 예제를 확인했다: https://create.roblox.com/docs/chat/examples/custom-text-chat-commands
+- 운영자 전용 명령어 입력 UI를 추가해 채팅 이벤트에 의존하지 않는 요청 경로를 제공했다. 서버가 UserId 권한을 확인한 상태 응답으로만 버튼을 표시한다. 직접 요청도 서버 파서/소유자/기존 비밀번호 challenge를 동일하게 사용한다. 상태 요청은 시작 시2초 간격 최대10회 보내 초기 등록 순서에 대응한다. 잘못된 명령어와 권한 거절에 안내를 표시하며 인증/비밀번호는 저장하거나 공유하지 않는다.
+- 나무상자는 Rules.canBreakCrate의 별도 중형/대형 규칙으로 변경했다. 일반 World.hit에서 기승 중 상자를 제외하고 crateHit가 판정한다. 중형/대형은 평상시·대시 모두 파괴, 소형은 충돌, 비행형은 기존 상공 통과 유지. 드롭 내용은 미정으로 남기며 상자 파편/목재 효과는 기존 코드 유지한다. 일반 나무/바위는 대형 대시 중 소형 장애물만 부수는 규칙을 유지했다.
+- check_operator_commands.py 통과: 실제 register의 현대/레거시 혼합 채팅, 직접 요청/상태, 타 계정 거절, 별도 입력 후 비밀번호 확인 전 지급 없음, 중복 경로 제한, 기존 nonce/만료/잠금/서버 지급 검사. check_operator_prompt.py 통과: 마스킹/단회 확인/지우기 및 권한별 버튼/직접 요청/로컬 채팅 전달. check_collision_classes.py의72개 충돌 사례, check_flying_low_walls.py 통과. 수정5개 Luau 컴파일 통과. Studio smoke fixture의 낡은 상자 기대값도 새 규칙으로 갱신했지만 실제 Studio에서 실행하지는 않았다.
+- 공유/개인 실행 파일을 갱신하며 기존 로비/목장/모스랫 모델/703 MeshPart와 개인용 운영자 검증값을 보존한다. 사용자 Capture 파일은 변경하지 않는다. 실제 Studio 채팅/버튼/파괴 효과와 모바일 터치 확인, 공개 게시가 남는다.

@@ -10,6 +10,7 @@ P.SOURCES['CaptureServer']=R/'src/server/CaptureServer.server.luau'
 P.SOURCES['HuntWorld']=R/'src/server/HuntWorld.luau'
 P.SOURCES['CourseGeometry']=R/'src/shared/CourseGeometry.luau'
 P.SOURCES['MonsterCatalog']=R/'src/shared/MonsterCatalog.luau'
+P.SOURCES['HuntRules']=R/'src/shared/HuntRules.luau'
 parser=argparse.ArgumentParser()
 parser.add_argument('--output',type=Path,default=R/'dist/RodeoFantasy-ApprovedLobby.rbxlx')
 args=parser.parse_args()
