@@ -50,7 +50,11 @@ local function geometry(mesh,label)
  -- processed texture pack by requesting its individual image IDs.
  local success=false
  local ok=pcall(function()
-  game:GetService("ContentProvider"):PreloadAsync({mesh.MeshId},function(_,status) success=status==Enum.AssetFetchStatus.Success end)
+  -- Pass the instance so ContentProvider requests MeshId as mesh geometry,
+  -- rather than resolving an untyped ID as an image/ktx2 representation.
+  game:GetService("ContentProvider"):PreloadAsync({mesh},function(id,status)
+   if id==mesh.MeshId then success=status==Enum.AssetFetchStatus.Success end
+  end)
  end)
  print("RECOVERY_MESH",label,ok and success and "Success" or "Failure")
  assert(ok and success,"새 메시 로드 실패. 기존 모델은 변경하지 않았습니다: "..label)

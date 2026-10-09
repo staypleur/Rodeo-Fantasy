@@ -884,3 +884,8 @@
 - 일괄 설치기에 메시 geometry만 선행 로드 검증. UV/이미지가 보존된 모스랫 보정본에는 기존에 표시되던 역할별 SurfaceAppearance 전체(숨겨진 pack 포함)를 Clone하여 사용. 비행선은 새로 가져온 SurfaceAppearance 전체를 보존한 채 몸/줄 정렬 설치. 색 성공을 확정하는 COMPLETE 문구와 RecoveryTexturesChecked=true 제거, MODEL_RECOVERY_INSTALLED와 Play 확인 안내로 대체.
 - 종전 로비 재시도 코드의 개별 맵 URI 교체도 제거해 pack 무효화 방지. 원본 맵/설정/개인 파일/비밀번호 변경 없음. 실제 배포 없음. 세 가지 모델 입력을 재사용하는 적용 방법을 한 번에 안내.
 - 실제 일괄 설치 모듈 테스트: 역할별 기존 PBR pack 복사, 개별 이미지 요청 금지, 메시 실패시 무변경, 설치 오류 롤백, E Departure/선택 보존, 시각 성공 오표시 방지 통과. 관련 Luau 컴파일 통과. 공식 근거: https://create.roblox.com/docs/reference/engine/classes/ContentProvider
+
+
+## 2026-10-10 메시 검사 종류 오류 수정
+- 사용자04:06 출력 RECOVERY_MESH Hunt Failure로 선행 검사 중단, 기존 모델 미변경. Studio 동일 시점 로그: asset111983016620845에 ktx2 이미지 representation 요청, AssetDelivery403IncorrectAssetType / Asset type does not match requested type. 파일 형상 오류/인증 오류로 단정하지 않음.
+- geometry 선행 검사에서 MeshId 문자열 대신 MeshPart 인스턴스를 PreloadAsync에 전달하여 엔진이 MeshId 속성의 자산 종류를 유지하도록 수정. callback에서도 MeshId에 대한 상태만 반영. 실제 테스트 스텁에서 bare ID 문자열 입력을 명시적으로 거부하도록 강화. PBR pack 보존/설치 오류 복구/메시 실패 무변경 검사 및 Luau 컴파일 통과. 이미 가져온 세 모델 재사용, 적용 코드 전체 복사 재실행 안내. 실제 Studio 설치/색 확인은 여전히 필요.

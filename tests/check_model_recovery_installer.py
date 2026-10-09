@@ -75,8 +75,8 @@ local selection={Get=function() return selected end,Set=function(_,v) selected=v
 local Enum={AssetFetchStatus={Success='Success'}}
 local game={ReplicatedStorage=rs,GetService=function(_,k) return ({ServerStorage=ss,RunService={IsRunning=function() return false end},Selection=selection,
  ContentProvider={PreloadAsync=function(_,ids,cb)
-  assert(ids[1]:sub(1,4)=='Mesh','must not gate PBR on individual image preloading')
-  cb(ids[1],failMesh and ids[1]=='Mesh1' and 'Failure' or 'Success')
+  assert(type(ids[1])=='table' and ids[1]:IsA('MeshPart'),'must pass MeshPart instance to preserve asset type, never a bare ID string')
+  cb(ids[1].MeshId,failMesh and ids[1].MeshId=='Mesh1' and 'Failure' or 'Success')
  end}})[k] end}
 obj('ModuleScript','MeshyMossratInstaller',package);obj('ModuleScript','MeshyAirshipInstaller',package)
 local require=function(m)
