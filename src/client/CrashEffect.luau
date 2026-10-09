@@ -79,5 +79,62 @@ function Effect.update(model,phase,clock)
   end
  end
 end
-function Effect.clear() clear() end
+-- Independent wild-monster shards never alter bag entries or avatar crash state.
+local knockShards={}
+local knocked=setmetatable({},{__mode="k"})
+local MAX_KNOCK_SHARDS=96
+function Effect.knock(model,clock)
+ if knocked[model] or not model.PrimaryPart then return 0 end
+ knocked[model]=true
+ local root=model.PrimaryPart
+ local started=model:GetAttribute("KnockedAt") or clock
+ if clock-started>1.1 then return 0 end
+ local direction=model:GetAttribute("KnockDirection") or 1
+ require(script.Parent.CreatureMesh).materialize(model)
+ local parts={}
+ for _,part in ipairs(model:GetChildren()) do
+  if part:IsA("BasePart") and part~=root and part.Transparency<1 then table.insert(parts,part) end
+ end
+ -- Keep large recognisable pieces before tiny details when the budget is full.
+ table.sort(parts,function(a,b) return a.Size.X*a.Size.Y*a.Size.Z>b.Size.X*b.Size.Y*b.Size.Z end)
+ local made=0
+ for index,original in ipairs(parts) do
+  original.LocalTransparencyModifier=1
+  if made>=32 then continue end
+  if #knockShards>=MAX_KNOCK_SHARDS then
+   knockShards[1].part:Destroy() table.remove(knockShards,1)
+  end
+  local archived=original.Archivable original.Archivable=true
+  local shard=original:Clone() original.Archivable=archived
+  for _,child in ipairs(shard:GetChildren()) do
+   if not child:IsA("SpecialMesh") and not child:IsA("SurfaceAppearance") and not child:IsA("Decal") and not child:IsA("Texture") then child:Destroy() end
+  end
+  shard.Name="LocalKnockShard" shard.Anchored=true shard.LocalTransparencyModifier=0
+  shard.CanCollide,shard.CanTouch,shard.CanQuery=false,false,false
+  shard.Parent=workspace
+  local angle=index*2.4
+  local velocity=Vector3.new(direction*18+math.cos(angle)*11,12+index%5,-14+math.sin(angle)*9)
+  table.insert(knockShards,{part=shard,origin=shard.CFrame,velocity=velocity,started=started,
+   alpha=shard.Transparency,spin=Vector3.new(index%3+1,direction,index%2+1),world=model.Parent,
+   floor=root.Position.Y-root.Size.Y/2})
+  made+=1
+ end
+ local outline=model:FindFirstChild("LocalCreatureOutline") if outline then outline.Enabled=false end
+ return made
+end
+function Effect.updateKnocks(clock,world)
+ for i=#knockShards,1,-1 do
+  local entry=knockShards[i] local elapsed=math.max(0,clock-entry.started)
+  if elapsed>=1.1 or not world or entry.world~=world then
+   entry.part:Destroy() table.remove(knockShards,i)
+  else
+   local position=entry.origin.Position+entry.velocity*elapsed+Vector3.new(0,-24*elapsed*elapsed,0)
+   position=Vector3.new(position.X,math.max(entry.floor+.15,position.Y),position.Z)
+   local spin=entry.spin*elapsed*5
+   entry.part.CFrame=CFrame.new(position)*entry.origin.Rotation*CFrame.Angles(spin.X,spin.Y,spin.Z)
+   entry.part.Transparency=entry.alpha+(1-entry.alpha)*math.clamp((elapsed-.65)/.45,0,1)
+  end
+ end
+end
+function Effect.clear() clear() Effect.updateKnocks(0,nil) end
 return Effect

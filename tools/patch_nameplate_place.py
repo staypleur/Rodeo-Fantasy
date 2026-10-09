@@ -35,24 +35,24 @@ def patch(source: Path, output: Path):
 
     updated = properties.sub(update, text).encode("utf-8")
     if any(count != 1 for count in counts.values()):
-        raise ValueError(f"Expected exactly one of each nameplate module: {counts}")
+        raise ValueError(f"Expected exactly one of each selected script: {counts}")
     before, after = ET.fromstring(original), ET.fromstring(updated)
     scripts = {}
     for node in after.iter("Item"):
         name = node.findtext("Properties/string[@name='Name']")
-        if name in replacements and node.get("class") == "ModuleScript":
+        if name in replacements and node.get("class") in ("ModuleScript", "Script", "LocalScript"):
             scripts[name] = node.findtext("Properties/ProtectedString[@name='Source']")
     assert scripts == replacements, "Patched script sources do not match local files"
     # Only the selected Source text may change; every saved property and asset stays intact.
     for tree in (before, after):
         for node in tree.iter("Item"):
-            if node.get("class") == "ModuleScript" and node.findtext("Properties/string[@name='Name']") in replacements:
+            if node.get("class") in ("ModuleScript", "Script", "LocalScript") and node.findtext("Properties/string[@name='Name']") in replacements:
                 node.find("Properties/ProtectedString[@name='Source']").text = ""
     assert ET.tostring(before) == ET.tostring(after), "A saved asset or property changed during patching"
     output.parent.mkdir(parents=True, exist_ok=True)
     output.write_bytes(updated)
     mesh_count = sum(n.get("class") == "MeshPart" for n in after.iter("Item"))
-    print(f"PASS: patched {len(replacements)} nameplate modules; preserved all saved properties and {mesh_count} MeshParts")
+    print(f"PASS: patched {len(replacements)} selected scripts; preserved all saved properties and {mesh_count} MeshParts")
     print(output)
 
 

@@ -287,6 +287,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  rider.update(player.Character,state.phase,visualFrame,dt,clock,state.dashUntil)
  dash.update(state.phase,visualFrame,clock,state.dashUntil,t.SwitchDashSeconds)
  crashEffect.update(player.Character,state.phase,clock)
+ crashEffect.updateKnocks(clock,state.area=="Hunt" and monsters or nil)
  catch.crates(state.huntRoot and state.huntRoot:FindFirstChild("Obstacles") or workspace.RodeoPrototype:FindFirstChild("Obstacles"),root and root.Position,clock,dt)
  audio.update(state,monsters,root and root.Position,clock,selected)
  local displayDistance=state.distance or 0

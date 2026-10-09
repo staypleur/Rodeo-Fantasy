@@ -10,6 +10,7 @@ local tuning = require(package:WaitForChild("Config")).Prototype
 local Rules = require(package:WaitForChild("HuntRules"))
 local Catalog=require(package.MonsterCatalog)
 local Mesh=require(script.Parent.CreatureMesh)
+local Crash=require(script.Parent.CrashEffect)
 local dust={}
 local contexts=setmetatable({},{__mode="k"})
 local function clearHerdPath(from,to,root)
@@ -102,6 +103,11 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
   if not model:IsA("Model") then continue end
 		local root = model.PrimaryPart
 		if not root then continue end
+  if model:GetAttribute("KnockedAway") then
+   Crash.knock(model,clock)
+   for _,part in ipairs(model:GetChildren()) do if part:IsA("BasePart") and part~=root then part.LocalTransparencyModifier=1 end end
+   continue
+  end
   local nameplate = root:FindFirstChild("Nameplate")
   if nameplate then nameplate.Enabled = false end
 		if cameraPosition then

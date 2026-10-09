@@ -320,10 +320,14 @@ function World.mountedHit(from,to,mount,selected,dashing)
   if Rules.sweptBox(a.X,a.Y,a.Z,b.X,b.Y,b.Z,0,0,0,size.X,size.Y,size.Z,0) then
    if not other:GetAttribute("Occupied") and Rules.canKnock(mount:GetAttribute("SizeClass"),other:GetAttribute("SizeClass"),dashing) then
     animals[other]=nil previousPositions[other]=nil
-    other:SetAttribute("Running",false) other:SetAttribute("KnockedAway",true)
     local direction=other.PrimaryPart.Position.X>=mount.PrimaryPart.Position.X and 1 or -1
-    game:GetService("TweenService"):Create(other.PrimaryPart,TweenInfo.new(.6),{CFrame=other.PrimaryPart.CFrame*CFrame.new(direction*12,14,-8)*CFrame.Angles(1.2,0,direction*1.2)}):Play()
-    game:GetService("Debris"):AddItem(other,.65)
+    other:SetAttribute("Running",false)
+    other:SetAttribute("KnockedAt",workspace:GetServerTimeNow())
+    other:SetAttribute("KnockDirection",direction)
+    other:SetAttribute("KnockedAway",true)
+    -- Clients scatter the actual visual parts immediately. Retain the root briefly
+    -- so a replicated hit is observable even after selection removes the victim.
+    game:GetService("Debris"):AddItem(other,2)
    else return "Monster" end
   end
  end
