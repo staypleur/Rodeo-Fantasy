@@ -16,6 +16,7 @@ local function client(fail)
  local Content={fromObject=function(obj) return obj end}
  local Enum={CollisionFidelity={Box=1},RenderFidelity={Precise=1}}
  local objects={} local meshes={} local triangles=0 local written
+ local dynamicLive,fixedCount=0,0
  local function object(kind)
   local o=setmetatable({ClassName=kind,attrs={}},{__newindex=function(t,k,v)
    if kind=='MeshPart' and k=='RenderFidelity' then error("The current thread cannot write 'RenderFidelity' (lacking capability PluginOrOpenCloud)") end
@@ -25,7 +26,11 @@ local function client(fail)
   function o:GetChildren() local list={} for _,item in ipairs(objects) do if item.Parent==self then list[#list+1]=item end end return list end
   function o:GetAttribute(k) return self.attrs[k] end
   function o:SetAttribute(k,v) self.attrs[k]=v end
-  function o:Destroy() for _,child in ipairs(self:GetChildren()) do child:Destroy() end self.Parent=nil self.destroyed=true end
+  function o:Destroy()
+   if self.destroyed then return end
+   if self.dynamic then dynamicLive-=1 end
+   for _,child in ipairs(self:GetChildren()) do child:Destroy() end self.Parent=nil self.destroyed=true
+  end
   function o:Clone()
    local copy=object(kind)
    for k,v in pairs(self) do if type(v)~='function' and k~='Parent' and k~='attrs' then copy[k]=v end end
@@ -45,8 +50,10 @@ local function client(fail)
  end
  function Asset:CreateSurfaceAppearanceAsync(content) assert(written and content.ColorMap.ClassName=='EditableImage') return object('SurfaceAppearance') end
  function Asset:CreateEditableMesh()
-  if fail and #meshes==2 then error('simulated denied mesh budget') end
+  assert(dynamicLive==0,'only one temporary dynamic mesh may be live')
+  dynamicLive+=1
   local m=object('EditableMesh');m.vertices={} m.normals={} m.uvs={}
+  m.dynamic=true
   function m:AddVertex(p) self.vertices[#self.vertices+1]=p return #self.vertices end
   function m:AddNormal(n) self.normals[#self.normals+1]=n return #self.normals end
   function m:AddUV(uv) self.uvs[#self.uvs+1]=uv return #self.uvs end
@@ -55,7 +62,16 @@ local function client(fail)
   function m:SetFaceUVs(face,ids) assert(#ids==3 and self.uvs[ids[3]]) end
   meshes[#meshes+1]=m return m
  end
+ function Asset:CreateEditableMeshAsync(source,options)
+  assert(options.FixedSize==true and source.dynamic and not source.destroyed)
+  if fail and fixedCount==2 then error('simulated denied fixed mesh budget') end
+  fixedCount+=1
+  local fixed=object('EditableMesh');fixed.FixedSize=true
+  fixed.vertices=table.clone(source.vertices) fixed.normals=table.clone(source.normals) fixed.uvs=table.clone(source.uvs)
+  return fixed
+ end
  function Asset:CreateMeshPartAsync(mesh,options)
+  assert(mesh.FixedSize and dynamicLive==0,'display meshes must use compact fixed topology')
   assert(options.RenderFidelity==Enum.RenderFidelity.Precise,'fidelity must be set in creation options')
   local p=object('MeshPart') local low=V(math.huge,math.huge,math.huge) local high=V(-math.huge,-math.huge,-math.huge)
   for _,v in ipairs(mesh.vertices) do for _,a in ipairs({'X','Y','Z'}) do low[a]=math.min(low[a],v[a]) high[a]=math.max(high[a],v[a]) end end
@@ -84,6 +100,11 @@ assert(m.apply(animal) and old.destroyed and animal.PrimaryPart.Parent==animal)
 assert(animal:GetAttribute('FacetedMouseRevision')=='FacetedA1-v1')
 assert(not m.apply(animal),'same model must not install twice')
 local tri,pixels=metrics() assert(tri==747)
+local fixedCount=0
+for _,o in ipairs(objects) do if o.ClassName=='EditableMesh' then
+ if o.dynamic then assert(o.destroyed,'temporary topology builder must be freed') else fixedCount+=1 assert(o.FixedSize and not o.destroyed) end
+end end
+assert(fixedCount==29)
 local count=0
 for _,p in ipairs(animal:GetChildren()) do if p.ClassName=='MeshPart' then
  count+=1 assert(not p.CanCollide and not p.CanTouch and not p.CanQuery)
@@ -99,7 +120,7 @@ local third=new(3,false) assert(not m.apply(third),'unapproved growth stages mus
 local failed,newFailed,all=client(true) local target,prior=newFailed(1,false)
 assert(not failed.apply(target) and not prior.destroyed and target.PrimaryPart.Parent==target)
 for _,obj in ipairs(all) do if obj.ClassName=='EditableMesh' or obj.ClassName=='EditableImage' or obj.ClassName=='SurfaceAppearance' or obj.ClassName=='MeshPart' then assert(obj.destroyed,'failed factory must free resources') end end
-print('APPROVED_MOUSE_RUNTIME_PASS:747 faces/29 textured parts, cache reuse, grounded paws, silhouette, growth scope and atomic failure cleanup; API stubs only')
+print('APPROVED_MOUSE_RUNTIME_PASS:747 faces/29 fixed textured meshes, single temporary builder, cache reuse, grounded paws, silhouette, growth scope and atomic failure cleanup; API stubs only')
 '''
 harness=R/'.tools/approved_mouse_runtime.luau';harness.write_text(prefix+source+suffix,encoding='utf-8')
 subprocess.run([str(R/'.tools/luau/luau.exe'),str(harness.relative_to(R))],cwd=R,check=True)

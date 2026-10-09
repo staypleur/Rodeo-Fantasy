@@ -4,8 +4,10 @@ local M={}
 local Asset=game:GetService("AssetService")
 local FacetedMouse=require(script.Parent.FacetedMouse)
 local cache,contents,pending={},{},{}
+local builder
 local function build(kind)
  local mesh=assert(Asset:CreateEditableMesh(),"Editable mesh budget unavailable")
+ builder=mesh
  local function vertex(x,y,z) return mesh:AddVertex(Vector3.new(x,y,z)) end
  local function triangle(a,b,c)
   local face=mesh:AddTriangle(a,b,c)
@@ -57,10 +59,13 @@ local function build(kind)
    end
   end
  end
- local part=Asset:CreateMeshPartAsync(Content.fromObject(mesh),{CollisionFidelity=Enum.CollisionFidelity.Box,RenderFidelity=Enum.RenderFidelity.Precise})
+ local fixed=assert(Asset:CreateEditableMeshAsync(Content.fromObject(mesh),{FixedSize=true}),"Fixed mesh budget unavailable")
+ contents[kind]=fixed
+ mesh:Destroy() builder=nil
+ local part=Asset:CreateMeshPartAsync(Content.fromObject(fixed),{CollisionFidelity=Enum.CollisionFidelity.Box,RenderFidelity=Enum.RenderFidelity.Precise})
+ cache[kind]=part
  part.Anchored=true part.CanCollide=false part.CanTouch=false part.CanQuery=false
  part.DoubleSided=true
- contents[kind]=mesh cache[kind]=part
  return part
 end
 function M.prepare()
@@ -69,7 +74,12 @@ function M.prepare()
  if M.ready then return true end
  pending.prepare=true
  local ok,err=pcall(function() for _,kind in ipairs({"Faceted","Smooth","Leaf","Clover"}) do if not cache[kind] then build(kind) end end end)
- if not ok then warn("Creature mesh unavailable; native models retained: "..tostring(err)) end
+ if not ok then
+  if builder then builder:Destroy() builder=nil end
+  for _,part in pairs(cache) do part:Destroy() end cache={}
+  for _,mesh in pairs(contents) do mesh:Destroy() end contents={}
+  warn("Creature mesh unavailable; native models retained: "..tostring(err))
+ end
  M.ready=ok M.failed=not ok pending.prepare=false return ok
 end
 function M.materialize(model)

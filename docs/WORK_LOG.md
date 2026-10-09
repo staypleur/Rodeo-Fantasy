@@ -465,3 +465,11 @@
 - FacetedMouse/CreatureMesh에서 part.RenderFidelity 대입을 제거하고 공식 API에 맞춰 CreateMeshPartAsync의 RenderFidelity 옵션으로 Precise를 지정했다. 일반 오류 문구도 무조건 권한 설정 변경을 지시하지 않고 실제 오류를 표시한다. 디자인·텍스처·충돌/속도 규칙은 바꾸지 않는다.
 - 실제 모듈 검사에서 MeshPart.RenderFidelity 직접 쓰기를 Studio처럼 거부하는 스텁과 생성 옵션 검증을 추가했다.747면/29부분/캐시/지면/실루엣/단계 범위/실패 시 보존 검사는 통과, 두 모듈 Luau 컴파일 통과. API 스텁 검사이므로 수정 후 실제 Roblox 엔진 화면은 아직 확인하지 못했다.
 - ApprovedMouse의 해당 두 Source만 바꾼 RodeoFantasy-MouseRuntimeFix.rbxlx를 생성했다. 다른 모든 저장 속성/703 MeshPart 보존 및 소스 일치 검사 통과. 사용자 Capture/이전 적용본은 덮어쓰지 않았으며 Roblox에 게시하지 않았다.
+
+## 2026-10-09 — 클라이언트 메시 예산 및 사냥터 정리 오류 수정
+
+- 사용자 실제 Studio 오류에서 빈 EditableMesh 메모리 예산 초과와 HuntWorld.cleanup의 nil 길이 접근을 확인했다. FacetedMouse가 29개 동적 메시를 계속 보관하던 방식이 원인이 되는 할당 패턴이었다. 공식 AssetService/EditableMesh 문서의 기존 EditableMesh Content 복사와 FixedSize 옵션을 확인했다.
+- FacetedMouse는 각 부품의 임시 동적 메시를 만든 뒤 CreateEditableMeshAsync(Content.fromObject(builder), {FixedSize=true})로 고정 크기 복사본을 만들고 임시 메시를 즉시 해제한다. 표시용 고정 메시와 텍스처는 공유한다. 기존 CreatureMesh의 4개 공통 형상도 같은 방식으로 바꿨다. 두 모듈 모두 중간 실패 시 임시 메시와 캐시 자원을 해제한다. 승인한 747삼각형/29부분/텍스처/법선/다리 위치를 바꾸지 않았다.
+- HuntWorld.cleanup에서 제거된 동굴 기능의 dens/denByPosition을 접근하는 잔여 줄을 삭제했다. 동굴을 되살리거나 사냥터 배치·규칙을 바꾸지 않았다.
+- 검증: 실제 FacetedMouse 코드 모의 실행에서 작업용 동적 메시 최대 1개, 생성 완료 후 모두 해제, 29개 고정 메시 사용, 747면/캐시/지면/실루엣/성장 범위 및 고정 메시 복사 실패 시 자원 정리와 이전 모델 보존 검사 통과. 실제 HuntWorld 모듈의 빈 상태/반복/별도 월드 정리, 먼 청크·장애물·상자 행 제거, 몬스터 이전 위치 정리 및 탑승 몬스터 보존 검사 통과. 변경 3개 Luau 소스 컴파일 통과. API 모의 검사이며 실제 기기 메모리 한도·Studio 렌더링 통과를 증명하지 않는다.
+- MouseRuntimeFix에서 3개 Source만 교체한 dist/RodeoFantasy-MouseMemoryFix.rbxlx 생성. 다른 모든 저장 속성 및 703 MeshPart 보존 검사 통과. 사용자 수정 Capture와 이전 파일은 덮어쓰지 않았다. 실제 Studio 재시험 및 Roblox 게시는 미실행이다.

@@ -376,7 +376,6 @@ end
 
 -- Preserve each active runner's vicinity, and avoid unlimited course/animal growth.
 function World.cleanup(nearZ)
- for i=#dens,1,-1 do if not chunks[dens[i].chunk] then denByPosition[dens[i].side..":"..dens[i].z]=nil table.remove(dens,i) end end
 	for index, chunk in pairs(chunks) do
 		local keep = false
 		for _, z in ipairs(nearZ) do if math.abs(index*tuning.GroundChunkStuds-z) < tuning.GroundChunkStuds*4 then keep = true break end end

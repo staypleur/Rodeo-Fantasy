@@ -6,6 +6,7 @@ local data=require(script.Parent.FacetedMouseData)
 local cache,resources={},{}
 local preparing,ready,failed=false,false,false
 local pending=setmetatable({},{__mode="k"})
+local builder
 function M.isTarget(model)
  return model:GetAttribute("MonsterId")=="MeadowMouse" and C.stage(model:GetAttribute("Stars") or 1)==1
 end
@@ -28,7 +29,8 @@ function M.prepare()
   image:WritePixelsBuffer(Vector2.zero,Vector2.new(data.ImageSize,data.ImageSize),pixels)
   local surface=Asset:CreateSurfaceAppearanceAsync({ColorMap=Content.fromObject(image)}) resources[#resources+1]=surface
   for _,entry in ipairs(data.Parts) do
-   local mesh=assert(Asset:CreateEditableMesh(),"No mesh budget") resources[#resources+1]=mesh
+   local mesh=assert(Asset:CreateEditableMesh(),"No mesh budget for "..entry.Name)
+   builder=mesh
    for i=1,#entry.Vertices,3 do
     local ids,uvs={},{} local v=entry.Vertices[i]
     local normal=mesh:AddNormal(Vector3.new(v[4],v[5],v[6]))
@@ -39,7 +41,13 @@ function M.prepare()
     end
     local face=mesh:AddTriangle(ids[1],ids[2],ids[3]) mesh:SetFaceNormals(face,{normal,normal,normal}) mesh:SetFaceUVs(face,uvs)
    end
-   local part=Asset:CreateMeshPartAsync(Content.fromObject(mesh),{CollisionFidelity=Enum.CollisionFidelity.Box,RenderFidelity=Enum.RenderFidelity.Precise})
+   -- Empty meshes reserve dynamic topology capacity. Keep only compact fixed-size
+   -- copies, freeing the single temporary builder before constructing the next part.
+   local fixed=assert(Asset:CreateEditableMeshAsync(Content.fromObject(mesh),{FixedSize=true}),"No fixed mesh budget for "..entry.Name)
+   resources[#resources+1]=fixed
+   mesh:Destroy() builder=nil
+   local part=Asset:CreateMeshPartAsync(Content.fromObject(fixed),{CollisionFidelity=Enum.CollisionFidelity.Box,RenderFidelity=Enum.RenderFidelity.Precise})
+   resources[#resources+1]=part
    part.Name=entry.Name part.Color=Color3.new(1,1,1) part.Anchored=true
    part.CanCollide,part.CanTouch,part.CanQuery=false,false,false
    part.DoubleSided=true
@@ -50,7 +58,8 @@ function M.prepare()
  ready=ok failed=not ok preparing=false
  M.failed=failed
  if not ok then
-  for _,entry in ipairs(cache) do entry.part:Destroy() end cache={}
+  if builder then builder:Destroy() builder=nil end
+  cache={}
   for _,resource in ipairs(resources) do resource:Destroy() end resources={}
   warn("Approved mouse failed to load; existing visual retained. Actual error: "..tostring(err))
  end
