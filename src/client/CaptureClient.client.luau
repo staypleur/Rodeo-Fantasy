@@ -36,7 +36,10 @@ local gui=make("ScreenGui",{Name="RodeoCaptureUI",ResetOnSpawn=false,DisplayOrde
 local function text(parent,value,pos,size,font)
  return make("TextLabel",{Text=value,Position=pos,Size=size,TextSize=font or 18,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(255,245,219),BackgroundTransparency=1,TextWrapped=true},parent)
 end
-task.spawn(function() require(script.Parent.CreatureMesh).prepare() end)
+task.spawn(function()
+ require(script.Parent.FacetedMouse).prepare()
+ require(script.Parent.CreatureMesh).prepare()
+end)
 local incomeFX=require(script.Parent:WaitForChild("IncomeEffects"))
 local bagUI=require(script.Parent:WaitForChild("BagUI")).new(gui,remote)
 local journalUI=require(script.Parent:WaitForChild("JournalUI")).new(gui,remote)

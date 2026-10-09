@@ -446,3 +446,14 @@
 - 검증: 실제 Luau 모듈을 사용한 두 클라이언트 볼륨 독립/범위/잘못된 값/음소거·복원/새 이벤트·발소리/월드 전환 검사 통과. 실제 SettingsUI 입력 콜백으로 열기/닫기/±/터치·마우스 드래그/해제/게임패드/취소/분리된 수치 검사 통과(렌더링/레이아웃은 모의 실행으로 검증하지 않음). 기존 오디오 이벤트 검사와 변경4개 Luau 소스 컴파일 통과.
 - GLB 검증 통과:747삼각형<2000, 전 면의 동일 법선과 와인딩 일치, 평면 눈, 유효 UV, 내장/외부 텍스처 바이트 동일, 유일한 노드 이름.
 - HuntAudio에서 AudioPresentation/CaptureClient/Localization 세 Source와 SettingsUI 하나만 추가한 RodeoFantasy-AudioSettings.rbxlx 생성. 검증에서 나머지 모든 저장 속성/703 MeshPart 보존을 확인했다. 사용자가 저장한 Capture 파일과 기존 시험 파일은 덮어쓰지 않았다. Studio F5에서 실제 소리/패널 크기·터치·공개8클라이언트 검사는 실행하지 못했고 Roblox 게시도 하지 않았다.
+
+
+## 2026-10-09 — 승인 꼬마쥐 런타임 연결과 원형 톱니바퀴 설정
+
+- 사용자747삼각형 모델 적용 승인 및 향후 저폴리 스타일 요청 기록. GLB의29부분 메시를 중심 기준으로 변환하여 삼각형/평면 법선/UV를 FacetedMouseData에 저장하고1024×1024색 아틀라스를 무손실 RLE로 포함했다. 생성 도구는 디코딩 결과가 원본 이미지와 일치함을 검사한다. 새로운 그림/근사 구체 모델을 대신 넣지 않았다.
+- FacetedMouse는 EditableMesh/EditableImage/CreateSurfaceAppearanceAsync로 실제 형상·표면을 클라이언트에서 한 번 생성하고 이후 복제해 재사용한다. 준비가 모두 완료된 후에만 기존 시각 부품을 교체한다. 서버 충돌 root/물리 크기는 보존한다. 권한/예산 실패 시 부분 캐시를 정리하고 기존 모델을 보존하며 Output에 Mesh/Image APIs 권한/실패 원인을 표시한다. 업로드된 새 MeshId/ImageId를 취득한 것은 아니다.
+- CreatureMesh의 사냥·목장 시각 경로와 MonsterPortrait의 가방·도감을 공통 모델로 연결했다.1·2성 꼬마쥐만 적용하고3·6·9성은 기존 모델 유지. ImportedA로 실제 부품 위치를 애니메이터가 기억하고 기존4다리/귀/꼬리 주행 동작을 사용한다. 골격 애니메이션 파일을 새로 제작한 것은 아니다. 도감 미발견은 SurfaceAppearance/TextureID 제거 후 검정으로 표시한다. 충돌 파편에서도 SurfaceAppearance를 보존한다.
+- 발바닥 시각 위치는 지면0으로 맞췄고, 짧은 체형에 맞춘1·2성 안장1.2×성장배율을 서버/클라이언트 공통 속성으로 사용한다. 다른 단계/종의 안장, 속도·포획·진화·충돌·생산 규칙은 유지한다. 실제 탑승 자세의 시각 검사는 Studio에서 필요하다.
+- 설정 버튼을56px 어두운 원형/직접 그린 흰 톱니바퀴로 변경하고 별도 TopbarSafeInsets ScreenGui로 Roblox 메뉴 옆에 둔다. TopbarInset 변경을 추적하고 좁으면 기존 HUD 아래 왼쪽48px 버튼으로 표시한다. 열린 소리 패널은 버튼 근처에서 화면 폭 안으로 배치한다. 기존 개인 볼륨과 입력 취소 동작은 유지한다.
+- 검증: 실제 FacetedMouse 모듈을 API 모의 환경에서 실행하여747면/29텍스처 부분, 캐시 재사용, 발바닥 지면, 검은 실루엣,2성 보간/3성 제외, 생성 중 예산 실패 시 기존 모델 보존·자원 정리 검사 통과. 이 검사는 실제 Roblox 렌더링/권한/성능을 증명하지 않는다. 실제 SettingsUI 콜백으로 상단 여유 공간/좁은 화면 이동 및 기존 열기/드래그/볼륨 입력 검사 통과. 변경9개 Luau 소스 컴파일 통과.
+- AudioSettings 파일에서7개 소스만 변경하고 FacetedMouse/FacetedMouseData 두 모듈을 추가한 RodeoFantasy-ApprovedMouse.rbxlx 작성. XML 속성 비교로 다른 저장 속성 및 기존703 MeshPart 보존을 검사한다. 사용자 Capture 파일은 그대로 유지한다. 실제 Studio F5 메시/텍스처/주행/표시/UI 검사는 미실행이며 Roblox 게시도 하지 않았다.

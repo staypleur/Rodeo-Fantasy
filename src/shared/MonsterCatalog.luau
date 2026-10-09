@@ -20,6 +20,11 @@ function C.scale(stars)
 end
 function C.visual(id,stars) local stage=C.stage(stars or 1) return C[id].Visual..(stage==1 and "" or "_S"..stage) end
 function C.template(id,stars) local stage=C.stage(stars or 1) return C[id].Template..(stage==1 and "" or "_S"..stage) end
+function C.saddleHeight(id,stars)
+ -- The approved A1 has shorter, grounded legs. Higher approved growth stages keep their seats.
+ local height=id=="MeadowMouse" and C.stage(stars or 1)==1 and 1.2 or C[id].SaddleHeight
+ return height*C.scale(stars or 1)
+end
 function C.pick(meters,serial)
  local unlocked={}
  for _,id in ipairs(C.Order) do if meters>=C[id].UnlockMeters then table.insert(unlocked,id) end end

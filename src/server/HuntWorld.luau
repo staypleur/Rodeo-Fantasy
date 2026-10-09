@@ -94,7 +94,7 @@ function World.spawn(position,speciesId,stars)
  model.Name = id
 	model:SetAttribute("MonsterId", id)
  model:SetAttribute("Stars",stars)
- model:SetAttribute("SaddleHeight",species.SaddleHeight*Catalog.scale(stars))
+ model:SetAttribute("SaddleHeight",Catalog.saddleHeight(id,stars))
 	model:SetAttribute("Occupied", false)
 	model:SetAttribute("Running", true)
  model:SetAttribute("RideSpeed",species.RunSpeed)

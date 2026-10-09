@@ -2,6 +2,7 @@
 -- Mesh content is reused across all visible creatures; authoritative roots stay untouched.
 local M={}
 local Asset=game:GetService("AssetService")
+local FacetedMouse=require(script.Parent.FacetedMouse)
 local cache,contents,pending={},{},{}
 local function build(kind)
  local mesh=assert(Asset:CreateEditableMesh(),"Editable mesh budget unavailable")
@@ -72,6 +73,7 @@ function M.prepare()
  M.ready=ok M.failed=not ok pending.prepare=false return ok
 end
 function M.materialize(model)
+ if not FacetedMouse.failed and FacetedMouse.isTarget(model) and not model:GetAttribute("FacetedMouseRevision") then task.spawn(FacetedMouse.apply,model) end
  if model:FindFirstChild("Body") or not model.PrimaryPart then return end
  local package=game.ReplicatedStorage.RodeoFantasy
  local C=require(package.MonsterCatalog)
@@ -86,6 +88,7 @@ function M.materialize(model)
  end
 end
 function M.decorate(model)
+ if FacetedMouse.isTarget(model) then FacetedMouse.apply(model) return end
  if model:GetAttribute("MeshDecorated") or pending[model] then return end
  pending[model]=true
  if not M.ready then M.prepare() end

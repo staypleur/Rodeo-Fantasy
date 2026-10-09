@@ -10,9 +10,11 @@ function P.fill(viewport,id,stars,silhouette)
  model.Parent=world model:PivotTo(CFrame.new())
  for _,node in ipairs(model:GetDescendants()) do
   if node:IsA("BillboardGui") or node:IsA("Light") then node:Destroy()
-  elseif silhouette and node:IsA("BasePart") then node.Color=Color3.fromRGB(22,28,23) node.Material=Enum.Material.SmoothPlastic end
+  elseif silhouette and node:IsA("SurfaceAppearance") then node:Destroy()
+  elseif silhouette and node:IsA("BasePart") then node.Color=Color3.new(0,0,0) node.Material=Enum.Material.SmoothPlastic if node:IsA("MeshPart") then node.TextureID="" end end
  end
  model:SetAttribute("Stars",stars)
+ model:SetAttribute("MonsterId",id) model:SetAttribute("PortraitSilhouette",silhouette==true)
  Mesh.decorate(model)
  local frame,size=model:GetBoundingBox()
  local camera=Instance.new("Camera") camera.FieldOfView=32

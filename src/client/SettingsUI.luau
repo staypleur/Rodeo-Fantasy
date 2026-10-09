@@ -12,9 +12,18 @@ end
 function UI.new(gui,audio)
  local self={}
  local ink=Color3.fromRGB(43,74,55)
- local button=make("TextButton",{Name="OpenSettings",Text="Settings",Font=Enum.Font.GothamBold,TextSize=15,TextColor3=Color3.fromRGB(255,245,219),BackgroundColor3=ink,AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-14,0,12),Size=UDim2.fromOffset(96,38),ZIndex=30},gui)
- round(button)
- local window=make("Frame",{Name="AudioSettings",Visible=false,AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-14,0,60),Size=UDim2.new(.9,0,0,252),BackgroundColor3=Color3.fromRGB(249,242,222),BorderSizePixel=0,ZIndex=40,Active=true},gui)
+ local topbar=make("ScreenGui",{Name="RodeoTopbarSettings",ResetOnSpawn=false,DisplayOrder=30,ScreenInsets=Enum.ScreenInsets.TopbarSafeInsets,ZIndexBehavior=Enum.ZIndexBehavior.Sibling},gui.Parent)
+ local button=make("TextButton",{Name="OpenSettings",Text="",AutoButtonColor=true,BackgroundColor3=Color3.fromRGB(23,28,32),BackgroundTransparency=.12,BorderSizePixel=0,AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,10,.5,0),Size=UDim2.fromOffset(56,56),ZIndex=30},topbar)
+ round(button,28)
+ local gear=make("Frame",{Name="Gear",BackgroundTransparency=1,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(30,30),ZIndex=31},button)
+ for i=0,7 do
+  local angle=i*math.pi/4
+  local tooth=make("Frame",{AnchorPoint=Vector2.new(.5,.5),Position=UDim2.new(.5,math.sin(angle)*12,.5,-math.cos(angle)*12),Size=UDim2.fromOffset(7,8),Rotation=i*45,BackgroundColor3=Color3.fromRGB(240,243,244),BorderSizePixel=0,ZIndex=32},gear)
+  round(tooth,1)
+ end
+ local disc=make("Frame",{AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(24,24),BackgroundColor3=Color3.fromRGB(240,243,244),BorderSizePixel=0,ZIndex=33},gear) round(disc,12)
+ local hole=make("Frame",{AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(10,10),BackgroundColor3=Color3.fromRGB(23,28,32),BorderSizePixel=0,ZIndex=34},gear) round(hole,5)
+ local window=make("Frame",{Name="AudioSettings",Visible=false,AnchorPoint=Vector2.new(0,0),Position=UDim2.fromOffset(14,12),Size=UDim2.new(.9,0,0,252),BackgroundColor3=Color3.fromRGB(249,242,222),BorderSizePixel=0,ZIndex=40,Active=true},gui)
  make("UISizeConstraint",{MaxSize=Vector2.new(370,252)},window) round(window,16)
  make("UIStroke",{Color=Color3.fromRGB(177,155,112),Thickness=1},window)
  local function label(value,pos,size,font)
@@ -25,6 +34,17 @@ function UI.new(gui,audio)
  label("Hunting continues while settings are open",UDim2.fromOffset(18,213),UDim2.new(1,-36,0,28),11)
  local drag,connections=nil,{}
  local function listen(signal,callback) connections[#connections+1]=signal:Connect(callback) end
+ local function placeButton()
+  local inset=GuiService.TopbarInset
+  if inset.Width>=76 and inset.Height>=40 then
+   button.Parent=topbar button.AnchorPoint=Vector2.new(0,.5) button.Position=UDim2.new(0,10,.5,0)
+   local diameter=math.min(56,inset.Height-8) button.Size=UDim2.fromOffset(diameter,diameter)
+  else
+   -- Keep settings accessible on narrow screens with no free topbar slot.
+   button.Parent=gui button.AnchorPoint=Vector2.new(0,0) button.Position=UDim2.fromOffset(14,12) button.Size=UDim2.fromOffset(48,48)
+  end
+ end
+ listen(GuiService:GetPropertyChangedSignal("TopbarInset"),placeButton) placeButton()
  local function row(kind,title,y)
   label(title,UDim2.fromOffset(18,y),UDim2.new(.7,0,0,28))
   local value=label("",UDim2.new(1,-74,0,y),UDim2.fromOffset(56,28))
@@ -65,6 +85,7 @@ function UI.new(gui,audio)
  listen(button.Activated,function()
   if window.Visible then self.close() else
    if self.onOpen then self.onOpen() end
+   window.Position=UDim2.fromOffset(math.max(14,math.min(button.AbsolutePosition.X,gui.AbsoluteSize.X-window.AbsoluteSize.X-14)),button.Parent==topbar and 12 or 68)
    window.Visible=true
   end
  end)
@@ -76,7 +97,7 @@ function UI.new(gui,audio)
   if drag and (input==drag.input or (drag.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseButton1)) then drag=nil end
  end)
  listen(UIS.WindowFocusReleased,function() drag=nil end)
- listen(window.Destroying,function() for _,connection in ipairs(connections) do connection:Disconnect() end end)
+ listen(window.Destroying,function() for _,connection in ipairs(connections) do connection:Disconnect() end topbar:Destroy() end)
  return self
 end
 return UI

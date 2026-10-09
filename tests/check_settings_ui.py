@@ -14,7 +14,9 @@ local function signal()
  end}
 end
 local UIS={InputBegan=signal(),InputChanged=signal(),InputEnded=signal(),WindowFocusReleased=signal()}
-local GuiService={}
+local insetSignal=signal()
+local GuiService={TopbarInset={Width=550,Height=64}}
+function GuiService:GetPropertyChangedSignal() return insetSignal end
 local game={GetService=function(self,name) return name=='UserInputService' and UIS or GuiService end}
 local Enum={}
 setmetatable(Enum,{__index=function(t,key)
@@ -29,6 +31,7 @@ local Instance={}
 function Instance.new(kind)
  local node={ClassName=kind,AbsolutePosition={X=65},AbsoluteSize={X=200},
   Activated=signal(),InputBegan=signal(),Destroying=signal()}
+ function node:Destroy() self.Parent=nil end
  function node:Clone()
   local clone=Instance.new(self.ClassName)
   for key,value in pairs(self) do if type(value)~='function' and key~='Activated' and key~='InputBegan' and key~='Destroying' then clone[key]=value end end
@@ -41,12 +44,19 @@ suffix='''
 end)()
 local volume={Music=1,Effects=1}
 local audio={getVolume=function(kind) return volume[kind] end,setVolume=function(kind,value) volume[kind]=math.clamp(value,0,1) end}
-local ui=UI.new({},audio)
+local gui={Parent={},AbsoluteSize={X=900}}
+local ui=UI.new(gui,audio)
 local function find(name)
  for _,node in ipairs(created) do if node.Name==name then return node end end
  error('missing '..name)
 end
 assert(not ui.isOpen())
+assert(find('OpenSettings').Parent.Name=='RodeoTopbarSettings' and find('OpenSettings').Text=='')
+assert(find('Gear').Parent==find('OpenSettings'))
+GuiService.TopbarInset={Width=20,Height=64} insetSignal:Fire()
+assert(find('OpenSettings').Parent==gui,'narrow topbar must keep settings accessible')
+GuiService.TopbarInset={Width=550,Height=64} insetSignal:Fire()
+assert(find('OpenSettings').Parent.Name=='RodeoTopbarSettings','button must follow changed core menu space')
 local opens=0 ui.onOpen=function() opens+=1 end
 find('OpenSettings').Activated:Fire() assert(ui.isOpen() and opens==1)
 find('MusicDown').Activated:Fire() assert(math.abs(volume.Music-.95)<1e-6 and volume.Effects==1)

@@ -50,7 +50,7 @@ function Effect.start(model,clock,monsterFrame,monsterId)
    if not original:IsA("BasePart") or original==template.PrimaryPart or original.Transparency>=1 then continue end
    index+=1
    local shard=original:Clone()
-   for _,item in ipairs(shard:GetDescendants()) do if not item:IsA("SpecialMesh") and not item:IsA("Decal") then item:Destroy() end end
+   for _,item in ipairs(shard:GetDescendants()) do if not item:IsA("SpecialMesh") and not item:IsA("Decal") and not item:IsA("SurfaceAppearance") then item:Destroy() end end
    shard.Name="LocalMonsterCrashShard" shard.Anchored=true
    shard.CanCollide,shard.CanTouch,shard.CanQuery=false,false,false
    shard.CFrame=monsterFrame*template.PrimaryPart.CFrame:ToObjectSpace(original.CFrame)
