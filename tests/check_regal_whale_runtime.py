@@ -58,6 +58,7 @@ local function trial(failure)
  end
  local game={GetService=function() return asset end}
  local script={Parent={SkyWhaleData=data}} local require=function(x) return x end local warn=function() end
+ function script.Parent:WaitForChild(name) return self[name] end
  local runtime='''+wrap('src/client/SkyWhaleRuntime.luau')+r'''
  local airport=object('Model') local area=object('Model') airport.BoardingArea=area
  local ship=object('Model') ship.Parent=airport
@@ -70,21 +71,21 @@ local function trial(failure)
   assert(not result and not old.destroyed and not ship:GetAttribute('SkyWhaleRevision'))
   for _,o in ipairs(objects) do if o.ClassName=='EditableMesh' or o.ClassName=='EditableImage' or o.ClassName=='SurfaceAppearance' or o.ClassName=='MeshPart' then assert(o.destroyed,'failure must free temporary resources') end end
  else
-  assert(result and old.destroyed and triangles==990 and fixedCount==4 and surfaceCount==4)
-  assert(ship:GetAttribute('SkyWhaleRevision')==data.Revision and ship:GetAttribute('WhaleAnchor').Position.Y==75)
+  assert(result and old.destroyed and triangles==1038 and fixedCount==4 and surfaceCount==4)
+  assert(ship:GetAttribute('SkyWhaleRevision')==data.Revision and ship:GetAttribute('WhaleAnchor').Position.Y==95)
   local count=0
   for _,part in ipairs(ship:GetChildren()) do if part.ClassName=='MeshPart' then
    count+=1 assert(not part.CanCollide and not part.CanQuery and part:GetAttribute('WhaleRest'))
    assert(#part:GetChildren()==1)
    if part.Name~='RegalWhaleBody' then assert(part:GetAttribute('WhaleHinge') and part:GetAttribute('WhaleMotionGroup')) end
   end end
-  assert(count==4 and not runtime.install(ship) and triangles==990,'reentry must not allocate or install again')
+  assert(count==4 and not runtime.install(ship) and triangles==1038,'reentry must not allocate or install again')
   for i,c in ipairs(data.Cables) do local p=area:GetChildren()[i] assert(math.abs(p.Size.Y-(c[4]-c[3]))<1e-7) end
  end
  assert(dynamic==0)
 end
 trial(nil) trial('mesh') trial('surface')
-print('REGAL_RUNTIME_PASS:990 faces/four fixed groups/shared512 image; texture/hinges/cables, idempotent install, allocation/texture failure preserves old ship and frees resources; API stubs only')
+print('REGAL_RUNTIME_PASS:1038 faces/four fixed groups/shared512 image; texture/hinges/cables, idempotent install, allocation/texture failure preserves old ship and frees resources; API stubs only')
 '''
 p=R/'.tools/regal_whale_runtime_test.luau';p.write_text(code,encoding='utf-8')
 subprocess.run([str(R/'.tools/luau/luau.exe'),str(p.relative_to(R))],cwd=R,check=True)

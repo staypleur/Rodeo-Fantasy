@@ -20,7 +20,9 @@ for node in g['nodes']:
  groups[group].append(vertices)
  if name=='WhaleBody':body=vertices[:,:3]
 allpos=np.concatenate([v[:,:3] for values in groups.values() for v in values]);center=(allpos.min(0)+allpos.max(0))/2
-scale=.85;target=np.array((6000.,75.,-5.))
+scale=.85;target=np.array((6000.,95.,0.))
+# Align the broad mid-belly (design z=-20), not the ornament/tail bounding box, over the deck.
+center[2]=-20*1.25
 transform=lambda p:target+(np.asarray(p)-center)*scale
 tree=E.parse(R/'dist/RodeoFantasy-JournalBagReview.rbxlx').getroot()
 airport=next(x for x in tree.iter('Item') if x.findtext("Properties/string[@name='Name']")=='Airport')
@@ -51,7 +53,7 @@ for i in range(0,len(encoded),10):decoded.extend([tuple(bytes.fromhex(encoded[i+
 assert decoded==px
 fmt=lambda a:'{'+','.join(f'{float(x):.10g}' for x in a)+'}'
 lines=['-- Approved RegalReview geometry, lossless texture; four shared motion groups.',
- 'return {Revision="SkyWhale-Regal-v1",Triangles=990,ImageSize=512,Anchor='+fmt(target)+',Cables={'+','.join(fmt(c) for c in cables)+'},ImageRLE=[[',encoded,']],Parts={']
+ 'return {Revision="SkyWhale-Regal-v2",Triangles=1038,ImageSize=512,Anchor='+fmt(target)+',Cables={'+','.join(fmt(c) for c in cables)+'},ImageRLE=[[',encoded,']],Parts={']
 hinges={'LeftFin':(-24,-3,-30),'RightFin':(24,-3,-30),'Tail':(0,2,78)}
 count=0
 for group,arrays in groups.items():
@@ -59,7 +61,7 @@ for group,arrays in groups.items():
  lines.append('{Name='+json.dumps(group)+',Center='+fmt(c)+((',Hinge='+fmt(transform(np.array(hinges[group])*1.25))) if group in hinges else '')+',Vertices={')
  for p,v in zip(world,verts):lines.append(fmt([*(p-c),*v[3:]])+',')
  lines.append('}},');count+=len(verts)//3
-assert count==990 and len(groups)==4
+assert count==1038 and len(groups)==4
 lines.append('}}')
 (R/'src/client/SkyWhaleData.luau').write_text('\n'.join(lines)+'\n',encoding='utf-8')
-print('REGAL_EMBED_PASS: unchanged990 triangles/UV/normals, lossless512 texture, four motion groups, four belly cables;',cables)
+print('REGAL_EMBED_PASS: unchanged1038 triangles/UV/normals, lossless512 texture, four motion groups, four belly cables;',cables)

@@ -1,12 +1,17 @@
 """Apply approved journal/bag and startup whale modules to a separate playable place."""
 from pathlib import Path
-import copy
+import copy,argparse
 import xml.etree.ElementTree as E
 import patch_nameplate_place as P
 from place_identity import assert_unique_ids
 R=Path(__file__).resolve().parents[1]
 P.SOURCES={'CaptureClient':R/'src/client/CaptureClient.client.luau','SkyWhaleMotion':R/'src/client/SkyWhaleMotion.luau'}
-out=R/'dist/RodeoFantasy-ApprovedLobby.rbxlx'
+parser=argparse.ArgumentParser()
+parser.add_argument('--output',type=Path,default=R/'dist/RodeoFantasy-ApprovedLobby.rbxlx')
+args=parser.parse_args()
+out=args.output
+for name in ('RideAnimator','CreatureMesh','FacetedMouse','MonsterPortrait','CrashEffect','JournalUI','BagUI'):
+ P.SOURCES[name]=R/f'src/client/{name}.luau'
 P.patch(R/'dist/RodeoFantasy-JournalBagReview.rbxlx',out)
 root=E.parse(out).getroot();before=copy.deepcopy(root)
 client=next(n for n in root.iter('Item') if n.findtext("Properties/string[@name='Name']")=='CaptureClient')

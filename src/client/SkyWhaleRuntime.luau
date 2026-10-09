@@ -1,7 +1,7 @@
 -- Build the approved whale once per client, using only four compact fixed meshes.
 local M={}
 local Asset=game:GetService("AssetService")
-local data=require(script.Parent.SkyWhaleData)
+local data=require(script.Parent:WaitForChild("SkyWhaleData"))
 local resources={} -- Keep EditableImage and fixed geometry alive across hunt restarts.
 local busy=false
 function M.install(ship)
@@ -60,7 +60,7 @@ function M.install(ship)
   for _,part in ipairs(ship:GetDescendants()) do if part:IsA("BasePart") then part:Destroy() end end
   for _,part in ipairs(staged) do part.Parent=ship end
   for _,v in ipairs(cables) do
-   local c=v.c v.part.Size=Vector3.new(v.part.Size.X,c[4]-c[3],v.part.Size.Z)
+   local c=v.c v.part.Size=Vector3.new(.35,c[4]-c[3],.35)
    v.part.CFrame=CFrame.new(c[1],(c[3]+c[4])/2,c[2])
   end
   ship:SetAttribute("WhaleAnchor",CFrame.new(unpack(data.Anchor)))

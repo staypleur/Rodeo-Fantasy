@@ -45,7 +45,7 @@ function Effect.start(model,clock,monsterFrame,monsterId)
   local package=game.ReplicatedStorage.RodeoFantasy
   local species=require(package.MonsterCatalog)[monsterId or "MeadowMouse"]
   local template=package[species.Visual]:Clone()
-  require(script.Parent.CreatureMesh).decorate(template)
+  require(script.Parent:WaitForChild("CreatureMesh")).decorate(template)
   for _,original in ipairs(template:GetChildren()) do
    if not original:IsA("BasePart") or original==template.PrimaryPart or original.Transparency>=1 then continue end
    index+=1
@@ -90,7 +90,7 @@ function Effect.knock(model,clock)
  local started=model:GetAttribute("KnockedAt") or clock
  if clock-started>1.1 then return 0 end
  local direction=model:GetAttribute("KnockDirection") or 1
- require(script.Parent.CreatureMesh).materialize(model)
+ require(script.Parent:WaitForChild("CreatureMesh")).materialize(model)
  local parts={}
  for _,part in ipairs(model:GetChildren()) do
   if part:IsA("BasePart") and part~=root and part.Transparency<1 then table.insert(parts,part) end

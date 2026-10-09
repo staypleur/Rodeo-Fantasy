@@ -9,8 +9,8 @@ local templateRoot=template:WaitForChild("MountRoot")
 local tuning = require(package:WaitForChild("Config")).Prototype
 local Rules = require(package:WaitForChild("HuntRules"))
 local Catalog=require(package.MonsterCatalog)
-local Mesh=require(script.Parent.CreatureMesh)
-local Crash=require(script.Parent.CrashEffect)
+local Mesh=require(script.Parent:WaitForChild("CreatureMesh"))
+local Crash=require(script.Parent:WaitForChild("CrashEffect"))
 local dust={}
 local contexts=setmetatable({},{__mode="k"})
 local function clearHerdPath(from,to,root)

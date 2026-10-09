@@ -1,7 +1,7 @@
 local P={}
 local package=game.ReplicatedStorage.RodeoFantasy
 local C=require(package.MonsterCatalog)
-local Mesh=require(script.Parent.CreatureMesh)
+local Mesh=require(script.Parent:WaitForChild("CreatureMesh"))
 function P.fill(viewport,id,stars,silhouette,distanceScale)
  local world=Instance.new("WorldModel") world.Parent=viewport
  local model=package[C.visual(id,stars)]:Clone()

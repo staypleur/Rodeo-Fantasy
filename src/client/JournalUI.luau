@@ -8,9 +8,9 @@ local package=game.ReplicatedStorage.RodeoFantasy
 local C=require(package.MonsterCatalog)
 local Q=require(package.CollectionQuery)
 local L=require(package.Localization)
-local Portrait=require(script.Parent.MonsterPortrait)
-local Buttons=require(script.Parent.BagUI)
-local Audio=require(script.Parent.AudioPresentation)
+local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
+local Buttons=require(script.Parent:WaitForChild("BagUI"))
+local Audio=require(script.Parent:WaitForChild("AudioPresentation"))
 local function make(class,props,parent)
  local node=Instance.new(class)
  if node:IsA("TextLabel") or node:IsA("TextButton") then node.Font=Enum.Font.GothamMedium node.TextColor3=Color3.fromRGB(68,52,33) end
@@ -48,7 +48,7 @@ function J.new(gui,remote)
   end
  end
  local regions=make("ScrollingFrame",{Name="JournalRegions",Position=UDim2.fromScale(.005,.18),Size=UDim2.fromScale(.125,.64),BackgroundTransparency=1,BorderSizePixel=0,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ScrollBarThickness=2,ZIndex=45},book)
- make("UIListLayout",{Padding=UDim.new(0,8)},regions)
+ make("UIListLayout",{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},regions)
  local pages=make("Frame",{Name="JournalEntries",BackgroundTransparency=1,Position=UDim2.fromScale(.15,.085),Size=UDim2.fromScale(.70,.83),ZIndex=43},book)
  local close=make("TextButton",{Name="CloseJournal",Text="×",Position=UDim2.fromScale(.91,.005),Size=UDim2.fromScale(.075,.065),BackgroundTransparency=1,TextColor3=Color3.fromRGB(246,226,184),TextSize=30,ZIndex=46},book)
  local previous=make("TextButton",{Name="JournalPrevious",Text="‹",Position=UDim2.fromScale(.145,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
@@ -146,9 +146,9 @@ function J.new(gui,remote)
   if self.area~="Lobby" then self.close() end
   if book.Visible and data.count~=self.lastCount then remote:FireServer("Journal") end self.lastCount=data.count
  end
- for index,region in ipairs({"All","Meadow","Ocean","Swamp","Forest"}) do
-  local colors={Color3.fromRGB(172,145,85),Color3.fromRGB(112,153,85),Color3.fromRGB(75,137,164),Color3.fromRGB(122,120,76),Color3.fromRGB(70,123,88)}
-  local tab=make("TextButton",{Name="Region_"..region,Text=T(region),Size=UDim2.new(1,-3,0,42),TextScaled=true,BackgroundColor3=colors[index],TextColor3=Color3.fromRGB(255,242,214),BorderSizePixel=0,ZIndex=46},regions)
+ for index,region in ipairs({"All","Meadow","Forest","Swamp","Ocean"}) do
+  local colors={Color3.fromRGB(172,145,85),Color3.fromRGB(112,153,85),Color3.fromRGB(70,123,88),Color3.fromRGB(122,120,76),Color3.fromRGB(75,137,164)}
+  local tab=make("TextButton",{Name="Region_"..region,LayoutOrder=index,Text=T(region),Size=UDim2.new(1,-3,0,42),TextScaled=true,BackgroundColor3=colors[index],TextColor3=Color3.fromRGB(255,242,214),BorderSizePixel=0,ZIndex=46},regions)
   make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=16},tab)
   tab.Activated:Connect(function()
    if turning or self.region==region then return end

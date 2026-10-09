@@ -66,9 +66,9 @@ end
 for _,node in ipairs(airship:GetDescendants()) do rememberShip(node) end
 airship.DescendantAdded:Connect(rememberShip)
 task.spawn(function()
- require(script.Parent.FacetedMouse).prepare()
+ require(script.Parent:WaitForChild("FacetedMouse")).prepare()
  require(script.Parent:WaitForChild("SkyWhaleRuntime")).install(airship)
- require(script.Parent.CreatureMesh).prepare()
+ require(script.Parent:WaitForChild("CreatureMesh")).prepare()
 end)
 local function animateShip(clock)
  if airship:GetAttribute("SkyWhaleRevision") then whaleMotion.step(airship,clock) return end

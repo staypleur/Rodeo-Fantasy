@@ -51,6 +51,7 @@ local Portrait={fill=function(node,id,stars,black) node.monsterId=id node.stars=
 local Buttons={iconButton=function(gui) local n=Instance.new('TextButton') n.Parent=gui return n end}
 local package={MonsterCatalog=C,CollectionQuery=Q,Localization=L}
 local script={Parent={MonsterPortrait=Portrait,BagUI=Buttons,AudioPresentation=Audio}}
+function script.Parent:WaitForChild(name) return self[name] end
 local game={ReplicatedStorage={RodeoFantasy=package}}
 local services={Players={LocalPlayer=player},UserInputService=UIS,RunService=Run,TweenService=Tween,ContextActionService=CAS}
 function game:GetService(k) return services[k] end
@@ -61,6 +62,10 @@ end)()
 local gui=Instance.new('ScreenGui') local requests=0
 local book=J.new(gui,{FireServer=function() requests+=1 end})
 local function find(name) for _,n in ipairs(nodes) do if not n.destroyed and n.Name==name then return n end end error(name) end
+for i,region in ipairs({"All","Meadow","Forest","Swamp","Ocean"}) do assert(find("Region_"..region).LayoutOrder==i) end
+local regionLayout
+for _,n in ipairs(find("JournalRegions"):GetChildren()) do if n.ClassName=="UIListLayout" then regionLayout=n end end
+assert(regionLayout.SortOrder==Enum.SortOrder.LayoutOrder,"region tabs must follow explicit game order, not alphabetical names")
 local function key(k,processed) UIS.InputBegan:fire({KeyCode=k},processed or false) end
 book.snapshot({seen={['MeadowMouse:1']=true},caught={['MeadowMouse:1']=9},captures=9})
 key('T') assert(find('FieldJournal').Visible and h.WalkSpeed==0 and sounds[1]=='BookOpen')

@@ -2,7 +2,7 @@
 local M={}
 local Asset=game:GetService("AssetService")
 local C=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
-local data=require(script.Parent.FacetedMouseData)
+local data=require(script.Parent:WaitForChild("FacetedMouseData"))
 local cache,resources={},{}
 local preparing,ready,failed=false,false,false
 local pending=setmetatable({},{__mode="k"})
@@ -72,18 +72,6 @@ function M.apply(model)
  pending[model]=true
  if not M.prepare() or not model.Parent or not model.PrimaryPart then pending[model]=nil return false end
  local root=model.PrimaryPart local scale=C.scale(model:GetAttribute("Stars") or 1)
- if not model:GetAttribute("ApprovedVisualGuard") then
-  model:SetAttribute("ApprovedVisualGuard",true)
-  -- Server template parts can arrive after the client replacement (streaming /
-  -- late replication). They must not reappear above the approved local model.
-  model.DescendantAdded:Connect(function(part)
-   if part:IsA("BasePart") and part~=root and not part:GetAttribute("ApprovedRest") then
-    task.defer(function()
-     if part.Parent and part:IsDescendantOf(model) and not part:GetAttribute("ApprovedRest") then part:Destroy() end
-    end)
-   end
-  end)
- end
  local silhouette=model:GetAttribute("PortraitSilhouette")==true local staged={}
  local ok,err=pcall(function() for _,entry in ipairs(cache) do
   local part=entry.part:Clone() part.Size*=scale
@@ -109,9 +97,21 @@ function M.apply(model)
   if not ok then warn("Approved mouse texture binding failed; existing visual retained: "..tostring(err)) end
   return false
  end
+ if not model:GetAttribute("ApprovedVisualGuard") then
+  model:SetAttribute("ApprovedVisualGuard",true)
+  -- Server template parts can arrive after the client replacement (streaming /
+  -- late replication). They must not reappear above the approved local model.
+  model.DescendantAdded:Connect(function(part)
+   if part:IsA("BasePart") and part~=root and not part:GetAttribute("ApprovedRest") then
+    task.defer(function()
+     if part.Parent and part:IsDescendantOf(model) and not part:GetAttribute("ApprovedRest") then part:Destroy() end
+    end)
+   end
+  end)
+ end
  model:SetAttribute("ImportedA",true)
  for _,old in ipairs(model:GetDescendants()) do if old:IsA("BasePart") and old~=root then old:Destroy() end end
- for _,part in ipairs(staged) do part.Parent=model end
+ for _,part in ipairs(staged) do part.CFrame=root.CFrame*part:GetAttribute("ApprovedRest") part.Parent=model end
  model:SetAttribute("MeshDecorated",true) model:SetAttribute("FacetedMouseRevision",data.Revision)
  retryAfter[model]=nil
  pending[model]=nil return true

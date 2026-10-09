@@ -652,3 +652,12 @@
 - tools/apply_approved_lobby.py로 dist/RodeoFantasy-ApprovedLobby.rbxlx 생성: 승인 UI/버그수정/이름이 포함된JournalBagReview를 기준으로2Source패치와2Module추가. 나머지속성/703저장MeshParts/목장/출발/바구니 보존 비교, referent/Ref/UniqueId 검사 통과. 핵심11Source를파일내코드와정확히 대조했다. 편집화면의 옛 비행선은 F5 후 로컬 승인고래로 대체된다.
 - tests/check_regal_whale_runtime.py 실제runtime/APIstub:990면/4fixed/1이미지/텍스처/그룹힌지/줄/중복설치방지/메시예산실패/3번째텍스처실패 때 기존유지 및자원정리 통과. tests/check_sky_whale.py20·30·60·120fps모션bounds/대칭 통과. 변경4개Luau컴파일 통과. check_journal_book.py 및 check_local_audio_settings.py 회귀 통과. 실제Studio오디오·색·움직임·터치/PC·FPS·공개게임 업로드는 미실시.
 - 사용자 수정Capture.rbxlx는 보존한다. 새 파일은 실행 가능한 적용 준비본이며 실제 게시 완료를 의미하지 않는다. 교배/돌연변이 미정기능은 구현하지 않았다.
+
+## 2026-10-09 — 모스랫 초기화 오류, 고래 정렬, 도감 탭 순서
+
+- 실제 Studio 로그에서 CreatureMesh 모듈이 PlayerScripts에 아직 없을 때 RideAnimator 초기화가 실패하고 CaptureClient까지 중단되는 오류를 확인했다. 클라이언트 형제 모듈 의존성을 WaitForChild로 기다리도록 변경했다. 실제 RideAnimator 소스에 CreatureMesh/CrashEffect가 늦게 도착하는 상황을 재현한 검사가 통과했다.
+- FacetedMouse의 옛 부품 제거 가드를 새 텍스처 준비 완료 뒤로 옮겼다. 준비 중 기본 외형이 먼저 삭제되는 경로를 방지하고, 비동기 준비 완료 시 최신 root 위치로 새 부품을 정렬한다. API stub 검사에서 747면/29고정 메시, 반복 재생성, 준비 중 fallback 보존, 이동 후 위치, 텍스처 실패 정리를 확인했다. 실제 Studio 재사냥 화면 확인은 아직 하지 않았다.
+- 고래 Regal-v2는 앞머리 단면을 앞으로 좁아지는 경사로 수정한 1038삼각형/38원본 노드/512텍스처다. 실제 GLB 오프라인 렌더 assets/previews/sky-whale-regal-v2-review.png를 확인했다. 4개 런타임 그룹으로 병합하며 UV/법선/텍스처를 유지한다. 몸통 기준 anchor (6000,95,0), 기존보다 20studs 상승. 발판은 유지하고 줄 상단을 실제 배 삼각형 교차 높이 약51.8~52.3에 연결한다. 줄 굵기 .35. 런타임 API stub에서 그룹/줄/중복 생성 방지/자원 실패 보존 검사 통과.
+- 도감은 기본 이름순 정렬 때문에 숲이 앞에 올 수 있어 UIListLayout.SortOrder와 각 탭 LayoutOrder를 명시했다. 최종 사용자 지정 전체→초원→숲→늪지→바다와 기존 지역별 색을 반영한다. T/A/D/클릭/분류/모바일 한 페이지/입력 중 단축키 무시/이동복원 검사 통과.
+- tools/apply_approved_lobby.py는 별도 출력 경로를 지원하며 JournalBagReview 기반 9개 Source를 최신 코드로 교체하고 고래 모듈 2개를 추가한다. dist/RodeoFantasy-WhaleHuntFixed.rbxlx를 생성한다. 기존 저장 자산/703MeshParts/목장/발판/참조/UniqueId 보존 검사를 포함한다. 사용자 수정 dist/RodeoFantasy-Capture.rbxlx는 변경하거나 커밋하지 않는다.
+- 코드/API stub 및 저장 파일 검증은 실제 Studio 실행, 모바일·PC 화면/성능/오디오 검증을 대신하지 않는다. 고래는 F5 실행 시 교체되는 구조이며 게임 게시·자산 업로드는 이번 작업에 포함하지 않았다.

@@ -7,7 +7,8 @@ from airship_c_faceted_refinement import atlas, blade, crystal, tube
 F.meshes.clear();F.STEM='SkyWhale_RegalReview'
 
 # A broad whale head flows directly into the chest and tapering tail stock.
-rings=[((0,8,-62),13,12),((0,8,-57),25,19),((0,8,-44),31,23),
+rings=[((0,0,-75),1.5,2),((0,1,-71),7,6),((0,3,-65),15,11),
+ ((0,6,-56),24,18),((0,8,-44),31,23),
  ((0,7,-20),29,22),((0,5,10),21,17),((0,3,38),10,8),((0,2,65),3,3),((0,2,82),2,2)]
 body=F.mesh('WhaleBody');rows=[];sides=12
 for c,rx,ry in rings:
@@ -70,7 +71,7 @@ for sg,side in ((-1,'Left'),(1,'Right')):
 
 
 # Calm mouth and bold current markings; a new crescent crest defines the final stage.
-tube('MouthLine',[(-9,1.5,-62.18),(-5,.6,-62.18),(0,.3,-62.18),(5,.6,-62.18),(9,1.5,-62.18)],[.28]*5,'Dark',5)
+tube('MouthLine',[(-10,0,-69),(-5,-1,-72),(0,-.4,-75.2),(5,-1,-72),(10,0,-69)],[.28]*5,'Dark',5)
 for sg,side in ((-1,'Left'),(1,'Right')):
  for j in range(3):
   z=-32+j*9

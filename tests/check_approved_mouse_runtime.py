@@ -19,6 +19,7 @@ local function client(fail)
  local Enum={CollisionFidelity={Box=1},RenderFidelity={Precise=1}}
  local objects={} local meshes={} local triangles=0 local written
  local dynamicLive,fixedCount=0,0
+ local currentModel
  local function object(kind)
   local o=setmetatable({ClassName=kind,attrs={}},{__newindex=function(t,k,v)
    if kind=='MeshPart' and k=='RenderFidelity' then error("The current thread cannot write 'RenderFidelity' (lacking capability PluginOrOpenCloud)") end
@@ -54,6 +55,8 @@ local function client(fail)
  end
  function Asset:CreateSurfaceAppearanceAsync(content)
   assert(written and content.ColorMap.ClassName=='EditableImage' and not content.ColorMap.destroyed)
+  assert(not currentModel:GetAttribute('ApprovedVisualGuard'),'fallback cleanup must not start before every texture finishes')
+  currentModel.PrimaryPart.CFrame=F(60,2.05,-120) -- Root can move while the real API yields.
   if fail=='surface' then error('simulated surface binding failure') end
   return object('SurfaceAppearance')
  end
@@ -90,7 +93,7 @@ local function client(fail)
  local game={ReplicatedStorage={RodeoFantasy=package},GetService=function() return Asset end}
  local require=function(which) return which=='data' and data or catalog end
  local task={wait=function() error('unexpected concurrent wait') end,defer=function(fn) fn() end} local warn=function() end
- local module=(function()\n'''
+ function script.Parent:WaitForChild(name) return self[name] end\n local module=(function()\n'''
 source=(R/'src/client/FacetedMouse.luau').read_text(encoding='utf-8')
 remember=(R/'src/client/RideAnimator.luau').read_text(encoding='utf-8').split('local function remember(model, existing)',1)[1].split('function RideAnimator.update',1)[0]
 suffix='''\nend)()
@@ -104,6 +107,7 @@ suffix='''\nend)()
   local root=object('Part');root.Name='MountRoot' root.CFrame=F(0,2.05,0) root.Parent=m m.PrimaryPart=root
   local old=object('Part');old.Name='Body' old.Parent=m
   local nested=object('Model');nested.Parent=m local leftover=object('Part');leftover.Name='LegacyTail' leftover.Parent=nested
+  currentModel=m
   return m,old
  end
  return module,model,objects,function() return triangles,written end,function(target) target.PrimaryPart.CFrame=F(50,10,-100) return remember(target) end,function(target) local p=object('Part') p.Parent=target for _,fn in ipairs(target.DescendantAdded.callbacks) do fn(p) end return p end
@@ -122,6 +126,7 @@ assert(fixedCount==29)
 local count=0
 for _,p in ipairs(animal:GetChildren()) do if p.ClassName=='MeshPart' then
  count+=1 assert(not p.CanCollide and not p.CanTouch and not p.CanQuery)
+ assert(p.CFrame.Position.X==animal.PrimaryPart.CFrame.Position.X+p:GetAttribute("ApprovedRest").Position.X,"all staged parts must use latest root after texture yields")
  assert(#p:GetChildren()==1 and p:GetChildren()[1].ClassName=='SurfaceAppearance')
  if p.Name=='LeftFrontLeg' then assert(math.abs(p.CFrame.Position.Y-p.Size.Y/2)<.00001,'paws must meet ground') end
 end end

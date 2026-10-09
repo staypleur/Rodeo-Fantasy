@@ -2,7 +2,7 @@
 -- Mesh content is reused across all visible creatures; authoritative roots stay untouched.
 local M={}
 local Asset=game:GetService("AssetService")
-local FacetedMouse=require(script.Parent.FacetedMouse)
+local FacetedMouse=require(script.Parent:WaitForChild("FacetedMouse"))
 local cache,contents,pending={},{},{}
 local builder
 local function build(kind)
