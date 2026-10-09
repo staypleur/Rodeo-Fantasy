@@ -788,3 +788,9 @@
 - 모스랫6/9성 오라 검토로 자체128x128RGBA잎/softGlow/반짝임 sprites와MossratAuraReview.json,미설치MossratAuraReview.luau를 준비했다.6성 은은한오라→9성 넓은 잎·금빛 반짝임·흐름을32프레임GIF로 원본GLB와함께 오프라인렌더했다. 실제engine화면이나 동일한파티클물리 simulation은 아니고 강도/움직임 디자인시안이다. 첫 렌더에서9성이 약해 보여 바깥쪽흐름/광량을 늘린 최종PNG를 직접확인했다.
 - draftLuau는모스랫/6성 이상만 허용하고승인tex를인자로받으며임의assetID를만들지 않는다.2/4orbitAttachments에Emitter를두고mobileRate*.45,가시성Enabled,중앙관리자가step호출하는 구조를준비했다. 가까운2개mobile/4개PC선택과90스터드distanceculling은후속통합조건이며현재자동설치/중앙스케줄러는없다. 중복attach와모델제거 시자원cleanup을검증했다. 테스트check_mossrat_aura_review.py 통과 및Luaucompile통과. PC/모바일FPS는미검증이다.
 - Roblox ParticleEmitter 공식문서 https://create.roblox.com/docs/reference/engine/classes/ParticleEmitter 의Attachment/Rate·Lifetime/Size·Transparency·LightEmission/LockedToPart 속성을확인했다. 외부몬스터자산은사용하지않았다. 효과텍스처 Roblox업로드·게임통합은디자인승인후다음작업이며이번에는검토source/asset만저장한다. 승인된실행파일/기존운영자설정/사용자Capture는보존했다.
+## 2026-10-09 — 바인팽 옆면 눈/얼굴 보완 및 모스랫 얼굴 비교
+
+- 사용자가 귀여운 새끼 늑대 방향을 확인하고 옆면의 찌그러진 얼굴/휘어진 눈을 구체적으로 지적했다.1성 두개골 단면의 앞뒤 중심을 정렬했다. 전 단계 눈을 두개골 삼각형에 clip하는 방식에서 표면 밖의 완만하게 볼록한 독립 타원으로 변경해 홍채 UV가 얼굴 각 면을 따라 꺾이지 않게 했다. 얇은 닫힌 테두리와 안쪽 뒷면을 두었다.
+- 전 단계 귀는 단순 삼각형에서5점 윤곽·두꺼운 크림 테두리·뒤쪽 닫힌 면·오목한 분홍 내부와 귀 밑 털로 수정했다.1/3/6/9성1210/1350/1554/1870삼각형, 전체높이3.65/5/10/15. 생성기의 유한좌표/법선/UV/네 다리/2000삼각형 미만 검사를 통과했다. 실제GLB 정면·옆면·사선/같은 크기/실제크기/아바타 비교 렌더를 갱신하고1성 및6성 상세를 직접 확인했다.
+- 모스랫9성의 얼굴이 납작해졌는지 이전 목/얼굴 수정 커밋 전후의 Head 메시를 측정했다. XYZ bounding box 이전2.6391/2.9047/3.3321,현재2.6198/3.3030/4.0485스터드로 앞뒤 두께가 감소하지 않았다. 목 단축과 얼굴 테이퍼 후 전체 높이 정규화로 비율은 실제 변경됐다. 단순히 이미지 탓이라고 단정하지 않는다. compare_mossrat_face.py로 동일한 정면/옆면/사선의 얼굴 비교 PNG를 생성하고 확인했다. 각 머리는 화면에 따로 맞춘 크기이므로 절대 크기 비교용은 아니다. 모스랫 geometry는 이번 작업에서 변경하지 않았다.
+- 검토 모델/미리보기/생성기/기록만 변경했다. 게임 설치·실제 움직임·모바일/PC FPS 검증은 아직이며 승인된 실행 파일/개인 운영자 설정/사용자 Capture를 보존했다.

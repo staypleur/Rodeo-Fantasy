@@ -24,7 +24,10 @@ loft('Body',[((0,hy-.07,-1.66),h*.47,.43),((0,hy-.16,-1.37),h*.61,.48),((0,.76,-
 # A rounded, closed skull built vertically; the face is its curved front
 # surface, rather than an enormous cap across the front of a lengthwise tube.
 profiles=[(hy-.53,h*.35,.28,-1.76),(hy-.34,h*.72,.44,-1.81),(hy-.08,h*.84,.54,-1.83),(hy+.19,h*.82,.56,-1.89),(hy+.39,h*.66,.43,-1.70),(hy+.54,h*.39,.25,-1.57),(hy+.59,h*.09,.08,-1.61)]
-head=mesh('Head');rows=[];sides=10
+if STAGE==1:
+ # A consistent centerline prevents the forehead/eye plane jutting out as a kink.
+ profiles=[(y,rx,rz,-1.76) for y,rx,rz,cz in profiles]
+head=mesh('Head');rows=[];sides=12 if STAGE==1 else 10
 for y,rx,rz,cz in profiles:
  rows.append([np.array((math.sin(j*math.tau/sides)*rx,y,cz-math.cos(j*math.tau/sides)*rz)) for j in range(sides)])
 for i in range(len(rows)-1):
@@ -52,47 +55,37 @@ loft('Nose',[((0,hy-.16,mz-.07),nose_width*.80,.085),((0,hy-.16,mz-.025),nose_wi
 for sg,side in ((-1,'Left'),(1,'Right')):
  cx=sg*h*.51;cy=hy+.12
  rx={1:.145,3:.155,6:.16,9:.165}[STAGE];ry={1:.19,3:.16,6:.13,9:.105}[STAGE]
- eye=mesh(side+'Eye');outline=[]
- for k in range(8):
-  a=k*math.tau/8;x=cx+math.cos(a)*rx;y=cy+math.sin(a)*ry
-  if STAGE>=3:y+=sg*(x-cx)*.24
-  outline.append((x,y,face_z(x,y)))
- # Clip the eye polygon to every visible skull triangle so it shares the
- # curved surface exactly; a single projected fan can sink behind a facet.
- polygon=[np.array(v[:2]) for v in outline]
- def clip(poly,a,b,orientation):
-  out=[]
-  def distance(p):return orientation*((b[0]-a[0])*(p[1]-a[1])-(b[1]-a[1])*(p[0]-a[0]))
-  for index,end in enumerate(poly):
-   start=poly[index-1];ds=distance(start);de=distance(end)
-   if (ds>=-1e-8)!=(de>=-1e-8):out.append(start+(end-start)*ds/(ds-de))
-   if de>=-1e-8:out.append(end)
-  return out
- positions=np.asarray(head['p'])
- for i in range(0,len(positions),3):
-  triangle=positions[i:i+3];normal=np.cross(triangle[1]-triangle[0],triangle[2]-triangle[0])
-  if normal[2]>=-1e-8:continue
-  xy=triangle[:,:2];area=np.cross(xy[1]-xy[0],xy[2]-xy[0]);orientation=1 if area>0 else -1
-  clipped=polygon
-  for j in range(3):
-   clipped=clip(clipped,xy[j],xy[(j+1)%3],orientation)
-   if len(clipped)<3:break
-  if len(clipped)<3:continue
-  matrix=np.stack((triangle[:,0],triangle[:,1],np.ones(3)))
-  verts=[];coords=[]
-  for x,y in clipped:
-   weights=np.linalg.solve(matrix,np.array((x,y,1)))
-   verts.append((x,y,float(weights@triangle[:,2])-.012))
-   tilt=sg*(x-cx)*.24 if STAGE>=3 else 0
-   coords.append((float(np.clip(.5+(x-cx)/(2*rx),0,1)),float(np.clip(.5-(y-cy-tilt)/(2*ry),0,1))))
-  for j in range(1,len(verts)-1):tri(eye,[verts[0],verts[j],verts[j+1]],[coords[0],coords[j],coords[j+1]],'Eye',normal)
+ eye=mesh(side+'Eye')
+ # A gently domed oval with its own tangent axes avoids wrapping a flat iris
+ # across several skull facets. Its hidden backing enters the skull.
+ normal=np.array((sg*.52,0,-.85));normal/=np.linalg.norm(normal)
+ tangent=np.array((.85,0,sg*.52));tangent/=np.linalg.norm(tangent)
+ center=np.array((cx,cy,face_z(cx,cy)))+normal*.052
+ outline=[]
+ for k in range(10):
+  a=k*math.tau/10
+  outline.append(center+tangent*math.cos(a)*rx+np.array((0,math.sin(a)*ry,0)))
+ forward=center+normal*.035
+ for k in range(10):
+  a=k*math.tau/10;b=(k+1)*math.tau/10
+  tri(eye,[forward,outline[k],outline[(k+1)%10]],[(.5,.5),(.5+.5*math.cos(a),.5-.5*math.sin(a)),(.5+.5*math.cos(b),.5-.5*math.sin(b))],'Eye',normal)
+ # Closed thin rim shares the eye's shape, without a floating rectangular card.
+ for k in range(10):
+  j=(k+1)%10;back1=outline[k]-normal*.055;back2=outline[j]-normal*.055
+  quad(eye,[outline[k],outline[j],back2,back1],[(.5,.5)]*4,'Fur',outline[k]-center)
  root=np.array((sg*h*.69,hy+h*.58,-1.65));height={1:.40,3:.85,6:.74,9:.83}[STAGE]
- front=[root+np.array((sg*x,y,z)) for x,y,z in ((-.19,0,-.10),(.23,-.04,-.03),(.14,height,.02))]
- back=[v+np.array((0,0,.19)) for v in front];m=mesh(side+'Ear')
- tri(m,front,[(0,1),(1,1),(.5,0)],'Fur',(0,0,-1));tri(m,back,[(0,1),(1,1),(.5,0)],'Fur',(0,0,1))
- for j in range(3):quad(m,[front[j],front[(j+1)%3],back[(j+1)%3],back[j]],[(0,0),(1,0),(1,1),(0,1)],'Fur',front[j]-root)
- inner=[root+(v-root)*.64+np.array((0,.07,-.025)) for v in front]
- tri(mesh(side+'EarPink'),inner,[(0,1),(1,1),(.5,0)],'Pink',(0,0,-1))
+ front=[root+np.array((sg*x,y,z)) for x,y,z in ((-.18,0,-.12),(.18,-.02,-.08),(.15,height*.70,-.015),(.06,height,.02),(-.08,height*.63,-.025))]
+ center=np.mean(front,axis=0);outer=[center+(v-center)*1.10 for v in front]
+ back=[v+np.array((0,0,.20)) for v in outer];rim=[center+(v-center)*.72+np.array((0,0,-.055)) for v in outer]
+ inner=[center+(v-center)*.53+np.array((0,0,.025)) for v in outer];m=mesh(side+'Ear')
+ for j in range(5):
+  k=(j+1)%5
+  for row1,row2,kind in ((back,outer,'Fur'),(outer,rim,'Cream'),(rim,inner,'Pink')):
+   quad(m,[row1[j],row1[k],row2[k],row2[j]],[(0,1),(1,1),(1,0),(0,0)],kind,(0,0,-1) if row1 is not back else outer[j]-center)
+ for j in range(1,4):
+  tri(m,[inner[0],inner[j],inner[j+1]],[(0,1),(1,1),(.5,0)],'Pink',(0,0,-1))
+  tri(m,[back[0],back[j],back[j+1]],[(0,1),(1,1),(.5,0)],'Fur',(0,0,1))
+ leaf(side+'EarBaseFur',root+np.array((0,-.06,0)),(sg*.52,-.26,.45),.32,.19,.06,kind='Fur')
  for z,label in ((-.57,'Front'),(1.28,'Back')):
   cx=sg*w*.64
   upright(side+label+'Leg',[((cx,-1.03,z-.20),.24,.36),((cx,-.91,z-.17),.26,.35),((cx,-.76,z-.04),.19,.23),((cx,-.48,z+.10),.17,.20),((cx,-.14,z+.15),.22,.25),((cx*.92,.21,z+.06),.28,.31),((cx*.74,.61,z),.18,.24)],'Cream',6)
