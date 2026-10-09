@@ -3,6 +3,7 @@ from pathlib import Path
 import copy, math, itertools, xml.etree.ElementTree as E
 import numpy as np
 import patch_nameplate_place as patcher
+from place_identity import repair_duplicate_unique_ids
 R=Path(__file__).resolve().parents[1]
 def name(n):return n.findtext("Properties/string[@name='Name']")
 def find(n,key):return next(c for c in n.findall('Item') if name(c)==key)
@@ -90,5 +91,6 @@ refset=set(refs)
 assert all(n.text in refset or n.text in ('null','nil',None) for n in after.iter('Ref'))
 assert sum(n.get('class')=='MeshPart' for n in after.iter('Item'))==703
 out=R/'dist/RodeoFantasy-LobbyPlaza.rbxlx'
+repair_duplicate_unique_ids(after)
 E.ElementTree(after).write(out,encoding='utf-8',xml_declaration=True)
 print(f'PLAZA_APPLY_PASS: {count} installed parts, 8 clear paths, 32 pens, logo/spawn/airport/703 meshes preserved; {out}')

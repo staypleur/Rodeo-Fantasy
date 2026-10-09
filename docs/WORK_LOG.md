@@ -551,3 +551,13 @@
 - dist/RodeoFantasy-LobbyBoarding.rbxlx 별도 저장.114개 실제 시각 부품/등반 구조1개/줄4개/데크 높이13 확인, 기존 Departure·비행선 본체 동일성, Airport 외 로비/모든 Source와703 MeshPart 보존, 참조 고유/끊김 없음 검사 통과. 사용자 Capture/이전 시험 파일은 덮어쓰지 않았으며 Roblox 게시는 미실행. 전체 위쪽 배치도 assets/maps/lobby-boarding-layout.png 생성.
 - 다음 디자인은 바다코끼리 비행선 본체의 실제3D 후보3개: A 크림색 깃날개·왕관, B 청록 지느러미 날개·등 볏, C 남청 겹날개·결정 장식. 푸른 계열/큰 몸/긴 코·엄니/큰 날개라는 기존 방향을 유지하되 부품 떨어짐 대신 겹치는 긴 몸체와 연속된 코/엄니 형태로 준비했다. 새 캐릭터 이름·능력·지역을 정하지 않았다. tools/lobby_airship_reviews.py 생성, 각각101/85/95 native Parts의 dist/ReviewModels/AirshipBodyReviewA/B/C.rbxmx 저장.
 - native_part_review.py에 기본 Ball Part 내보내기와 곡면 근사 렌더링을 추가했다. 리뷰에만 사용하며 EditableMesh/외부 업로드 자산/실시간 고정 메시를 추가하지 않는다. 기본구체는 소프트웨어 검토 이미지에서 근사 다각형으로 렌더링하므로 실제 Studio 곡면/조명과 동일하다고 주장하지 않는다. 모델별 양수 크기/유한 좌표/회전, native Ball/Block 개수, 스크립트 없음 검사 통과. assets/previews/AirshipBodyReviewA/B/C.png 및 비교 AirshipBodyReviews.png를 만들고 직접 열어 확인했다. 본체 후보는 게임 미적용/사용자 선택 대기이며 기존 본체는 그대로다. 바구니 연결/날갯짓/충돌은 선택 뒤 통합 검증할 후속 작업이다.
+
+## 2026-10-09 — Boarding 열기 오류 수정·비행선 C 각진 검토안·공통 품질 기준
+
+- 사용자 보고: LobbyBoarding을 Studio에서 열 때 DM contains duplicate Unique ids 오류. 원인은 광장 WarmLight PointLight 16개 복제 시 같은 nonzero UniqueId가 남은 것이다. 이전 XML referent 검사만으로는 실제 Roblox UniqueId 중복을 발견하지 못했다.
+- tools/place_identity.py로 두 종류의 식별자와 Ref 연결을 검사하고, 중복 nonzero UniqueId의 첫 번째만 유지하고 나머지 15개 속성을 생략해 Studio가 새 식별자를 배정하게 했다. 기존 native Parts처럼 ID를 생략한다. 광장/상점/탑승 생성 도구에도 저장 직전 검사를 연결했다.
+- tools/repair_boarding_ids.py가 dist/RodeoFantasy-LobbyBoardingFixed.rbxlx를 별도 생성했다. 양쪽에서 UniqueId 속성만 제외한 XML 전체의 정확한 동일성 및 저장 파일 재검사 통과: 모든 게임 속성·코드·모델·참조 보존. 사용자 Capture 파일은 변경하거나 커밋하지 않는다. 기존 Plaza/Services/Boarding 파일에는 이전 중복이 남아 있으므로 최신 시험은 Fixed를 사용한다. 실제 Studio 열기 성공은 아직 사용자 확인 전이다.
+- tests/check_place_identity.py: 중복 복제 ID 정리, zero ID 보존, 반복 실행 무변경, duplicate referent와 잘못된 Ref 거부 통과. BOARDING_IDS_PASS는 15개 중복 제거와 게임 내용 보존을 확인한다.
+- 사용자 본체 C 선택과 꼬마쥐처럼 다듬기 요청에 따라 실제 GLB 검토안을 새로 제작했다. 매끄러운 구체/타원 Part 조립을 이어진 각진 몸체·연속 코/엄니·평면 금빛 눈·크림 볼·겹날개·결정 장식으로 바꾸고 푸른/금색/아이보리 그라데이션 아틀라스를 만들었다. 1,280삼각형, 52노드, 512×512 텍스처 하나/재질 하나이며 평면 법선이다. 다른 최종형 몬스터 디자인은 변경하지 않는다.
+- tools/airship_c_faceted_refinement.py와 faceted_airship_mesh.py 생성. dist/ReviewModels/Airship_C_FacetedRefinement.glb, OBJ/MTL/PNG 소스, 실제 GLB를 읽어 만든 assets/previews/airship-c-faceted-refinement.png 저장. 유한 정점/UV 범위/평면 법선/면 방향/2,000미만 예산 검사 및 내장 텍스처 렌더 통과, 이미지를 직접 열어 확인. 정지 모델 검토이며 게임 적용·업로드·리깅·날갯짓·바구니 통합은 미실행, 새 수정안 승인 대기다. 렌더는 실제 Studio 조명 화면이 아니다.
+- 최신 사용자 요청을 AGENTS.md와 GAME_DESIGN.md에 기록했다. 매 작업마다 비주얼 일관성, 모바일 터치·안전 영역·화면비·가독성·렌더링/메모리 부담, PC 키보드·마우스·해상도, 버그/회귀 검토를 함께 고려한다. 소스/파일 검사와 실제 기기 검증을 구분한다. C의 낮은 삼각형 수는 설계 예산 검사이며 실제 모바일 프레임·조작감 검증은 아니다. 실제 Studio/모바일/PC 실행 검증은 남아 있다.

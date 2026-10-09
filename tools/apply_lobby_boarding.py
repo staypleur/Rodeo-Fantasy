@@ -2,6 +2,7 @@
 from pathlib import Path
 import copy,math,xml.etree.ElementTree as E
 import numpy as np
+from place_identity import repair_duplicate_unique_ids
 R=Path(__file__).resolve().parents[1]
 def name(n):return n.findtext("Properties/string[@name='Name']")
 def find(n,key):return next(c for c in n.findall('Item') if name(c)==key)
@@ -70,5 +71,6 @@ lobby.append(airport)
 refs=[n.get('referent') for n in after.iter('Item')];assert len(refs)==len(set(refs))
 refset=set(refs);assert all(n.text in refset or n.text in ('null','nil',None) for n in after.iter('Ref'))
 assert sum(n.get('class')=='MeshPart' for n in after.iter('Item'))==703
+repair_duplicate_unique_ids(after)
 out=R/'dist/RodeoFantasy-LobbyBoarding.rbxlx';E.ElementTree(after).write(out,encoding='utf-8',xml_declaration=True)
 print(f'BOARDING_APPLY_PASS: 114 visible parts, one hidden aligned truss, departure/body/scripts/703 meshes preserved; {out}')

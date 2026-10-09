@@ -3,6 +3,7 @@ from pathlib import Path
 import copy,math,itertools,xml.etree.ElementTree as E
 import numpy as np
 import patch_nameplate_place as patcher
+from place_identity import repair_duplicate_unique_ids
 R=Path(__file__).resolve().parents[1]
 def name(n):return n.findtext("Properties/string[@name='Name']")
 def find(n,key):return next(k for k in n.findall('Item') if name(k)==key)
@@ -86,5 +87,6 @@ parent.append(lobby)
 refs=[n.get('referent') for n in after.iter('Item')];assert len(refs)==len(set(refs))
 assert all(n.text in set(refs) or n.text in ('null','nil',None) for n in after.iter('Ref'))
 assert sum(n.get('class')=='MeshPart' for n in after.iter('Item'))==703
+repair_duplicate_unique_ids(after)
 out=R/'dist/RodeoFantasy-LobbyServices.rbxlx';E.ElementTree(after).write(out,encoding='utf-8',xml_declaration=True)
 print(f'SERVICES_APPLY_PASS: {len(installed)} parts, two shops/two ranking pavilions, working GUI paths, clear walks, preserved gardens/32 pens/703 meshes; {out}')
