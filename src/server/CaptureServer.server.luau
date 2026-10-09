@@ -12,6 +12,10 @@ local Lobby=require(script.Parent.LobbyWorld)
 local Records=require(script.Parent.RecordService)
 local Progress=require(script.Parent.ProgressService)
 local Course=require(package.CourseGeometry)
+local Store=require(script.Parent.InventoryStore)
+local Social=require(script.Parent.SocialService)
+local Travel=require(script.Parent.PlaceTravel)
+local SocialRules=require(package.SocialRules)
 local remote=package.CaptureRemote
 local tuning=Config.Prototype
 local states,bags,limits,views={},{},{},{}
@@ -45,25 +49,25 @@ local function baseSpeed(state)
 end
 local function send(player,message)
  local state,bag=states[player],bags[player]
- if not bag then return end
+ if not bag or Store.busy(player) or player:GetAttribute("Travelling") then return end
  local gains=BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
  Records.sample(player,bag.totalProduced or 0,state and state.distance or 0)
  local wildIds={}
  if state then for model in pairs(worlds[player].visibleSet(state.root.Position.Z,views[player],player)) do table.insert(wildIds,model:GetAttribute("SpawnSerial")) end end
- remote:FireClient(player,"State",{huntRoot=worldRoots[player],initialLanding=state and state.initialLanding,income=not state and gains or nil,progress=Progress.snapshot(player),wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,tameSeconds=state and state.monster and Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds or 5,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
+ remote:FireClient(player,"State",{huntRoot=worldRoots[player],initialLanding=state and state.initialLanding,income=not state and gains or nil,progress=Progress.snapshot(player),wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,tameSeconds=state and state.monster and Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds or 5,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,balance=bag.balance,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
 end
 local function sendBag(player)
  local bag=bags[player]
  if not bag or states[player] then return end
  local items={}
  for _,item in ipairs(bag.monsters) do
-  table.insert(items,{id=item.id,assignedPen=item.assignedPen,monsterId=item.monsterId,stars=item.stars,sex=item.sex,incomeSeconds=item.incomeSeconds or Config.BagIncome.IncomeSeconds,incomeAmount=BagRules.income(item,Config.BagIncome.IncomeAmount)})
+  table.insert(items,{id=item.id,breedingTeam=item.breedingTeam,assignedPen=item.assignedPen,monsterId=item.monsterId,stars=item.stars,sex=item.sex,incomeSeconds=item.incomeSeconds or Config.BagIncome.IncomeSeconds,incomeAmount=BagRules.income(item,Config.BagIncome.IncomeAmount)})
  end
  remote:FireClient(player,"Bag",items)
 end
 require(script.Parent:WaitForChild("OperatorCommands")).register(Catalog,remote,function(player,id,stars,count)
  local bag=bags[player]
- if not bag or states[player] then return false end
+ if not bag or states[player] or Store.busy(player) or Social.trading(player) then return false end
  local species=Catalog[id]
  for _=1,count do
   BagRules.grant(bag,id,now(),species.IncomeSeconds,species.IncomeAmount)
@@ -198,13 +202,14 @@ local function lasso(player,state)
  attachRope(state)
  send(player)
 end
-Lobby.connect(start)
+Social.start(bags,function(p) return bags[p] and not states[p] and not p:GetAttribute("Travelling") end,sendBag)
+Lobby.connect(function(p) if not Store.busy(p) and not p:GetAttribute("Travelling") then start(p) end end)
 Lobby.connectPens(function(player)
  if not states[player] then sendBag(player) remote:FireClient(player,"RanchMenu") end
 end)
 remote.OnServerEvent:Connect(function(player,action,value)
- if type(action)~="string" or not bags[player] then return end
- if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" then return end
+ if type(action)~="string" or not bags[player] or Store.busy(player) or player:GetAttribute("Travelling") then return end
+ if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" and action~="PlaceEgg" and action~="RemoveEgg" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
@@ -216,17 +221,19 @@ remote.OnServerEvent:Connect(function(player,action,value)
   return
  end
  if action=="Manage" then
-  if not states[player] and Lobby.canUsePen(player,value) then sendBag(player) remote:FireClient(player,"Pen",value) end
+  if not states[player] and Lobby.canUsePen(player,value) then remote:FireClient(player,"Eggs",{pen=value,eggs=bags[player].eggs or {}}) end
   return
  end
- if action=="Place" or action=="Remove" then
+ if action=="Place" or action=="Remove" then return end -- Monster pens were replaced by egg incubators.
+ if action=="PlaceEgg" or action=="RemoveEgg" then
   if states[player] or type(value)~="table" or not Lobby.canUsePen(player,value.pen) then return end
-  local changed=action=="Place" and BagRules.place(bags[player],value.id,value.pen) or action=="Remove" and BagRules.remove(bags[player],value.id,value.pen)
-  if changed then Lobby.display(player,value.pen,bags[player].monsters) sendBag(player) end
-  return
+  if SocialRules.egg(bags[player],value.id,value.pen,action=="RemoveEgg") then
+   Lobby.display(player,value.pen,bags[player].eggs)
+   remote:FireClient(player,"Eggs",{pen=value.pen,eggs=bags[player].eggs})
+  end return
  end
  if action=="Evolve" then
-  if states[player] or type(value)~="table" then return end
+  if states[player] or Social.trading(player) or type(value)~="table" then return end
   -- Credit every completed income tick before consuming source monsters.
   local gains=BagRules.accrue(bags[player],now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
   local evolved,affected=BagRules.evolve(bags[player],value,now())
@@ -374,11 +381,37 @@ local function added(player)
  if player.Character then setCharacterGroup(player,"Default") task.spawn(Lobby.prepareCharacter,player.Character) end
  player.CanLoadCharacterAppearance=true
  if player.UserId>0 then player.CharacterAppearanceId=player.UserId end
- bags[player]=BagRules.new() Progress.join(player)
+ local bag,message=Store.open(player)
+ if not bag then Lobby.release(player) player:Kick(message) return end
+ bags[player]=bag player:SetAttribute("Area","Lobby") Progress.join(player)
+ for pen=1,4 do Lobby.display(player,pen,bag.eggs or {}) end
  player.CharacterRemoving:Connect(function() finish(player,"Hunt ended") states[player]=nil end)
 end
 Players.PlayerAdded:Connect(added)
-Players.PlayerRemoving:Connect(function(player) send(player) if worlds[player] then worlds[player].resetVisibility(player) end Records.leave(player) Progress.leave(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil if worldRoots[player] then worldRoots[player]:Destroy() end worlds[player],worldRoots[player]=nil,nil end)
+Players.PlayerRemoving:Connect(function(player) send(player) if worlds[player] then worlds[player].resetVisibility(player) end Records.leave(player) Progress.leave(player) Store.close(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil if worldRoots[player] then worldRoots[player]:Destroy() end worlds[player],worldRoots[player]=nil,nil end)
 for _,player in ipairs(Players:GetPlayers()) do added(player) end
 
 if RunService:IsRunning() then Records.start() Progress.start() end
+
+local bench
+local garden=workspace.RodeoLobby:FindFirstChild("PlazaGarden",true)
+local desired=Vector3.new(6057.28,0,23.73)
+if garden then
+ for _,part in ipairs(garden:GetChildren()) do
+  if part:IsA("BasePart") and part.Name=="BenchSeat" and (not bench or (part.Position-desired).Magnitude<(bench.Position-desired).Magnitude) then bench=part end
+ end
+end
+local position=bench and bench.Position or Vector3.new(6057.28,1,23.73)
+if bench then
+ for _,part in ipairs(garden:GetChildren()) do
+  if part:IsA("BasePart") and part.Name:match("^Bench") and (part.Position-position).Magnitude<6 then part:Destroy() end
+ end
+end
+local sign=Instance.new("Part") sign.Name="CafeTravel" sign.Size=Vector3.new(8,6,1) sign.CFrame=CFrame.lookAt(position+Vector3.new(0,3,0),Vector3.new(6000,position.Y+3,0)) sign.Color=Color3.fromRGB(64,96,72) sign.Anchored=true sign.Parent=workspace.RodeoLobby
+local gui=Instance.new("SurfaceGui") gui.Parent=sign
+local text=Instance.new("TextLabel") text.Size=UDim2.fromScale(1,1) text.BackgroundTransparency=1 text.Text="MONSTER CAFE" text.TextScaled=true text.TextColor3=Color3.fromRGB(249,230,189) text.Parent=gui
+local prompt=Instance.new("ProximityPrompt") prompt.ActionText="카페로 이동" prompt.HoldDuration=1 prompt.MaxActivationDistance=12 prompt.RequiresLineOfSight=false prompt.Parent=sign
+prompt.Triggered:Connect(function(p)
+ local r=p.Character and p.Character:FindFirstChild("HumanoidRootPart")
+ if r and not states[p] and (r.Position-sign.Position).Magnitude<=16 then Travel.go(p,true) end
+end)

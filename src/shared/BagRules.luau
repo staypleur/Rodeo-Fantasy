@@ -2,7 +2,7 @@
 local BagRules = {}
 
 function BagRules.new()
-	return { monsters = {}, pending = 0, balance = 0, serial = 0, totalProduced = 0 }
+ return { monsters = {}, eggs={}, breedingTeams={}, profile={}, pending = 0, balance = 0, serial = 0, totalProduced = 0 }
 end
 
 function BagRules.grant(session, monsterId, clock, incomeSeconds, incomeAmount)
@@ -58,6 +58,7 @@ function BagRules.evolve(session,ids,clock)
   unique[id]=true
   local item=BagRules.find(session,id)
   if not item then return nil,"MissingMonster" end
+  if item.breedingTeam or item.tradeLock then return nil,"MonsterBusy" end
   table.insert(selected,item)
  end
  local first=selected[1]
@@ -72,6 +73,7 @@ function BagRules.evolve(session,ids,clock)
  for index=#session.monsters,1,-1 do
   if unique[session.monsters[index].id] then table.remove(session.monsters,index) end
  end
+ if session.profile then for index=#session.profile,1,-1 do if unique[session.profile[index]] then table.remove(session.profile,index) end end end
  session.serial=(session.serial or 0)+1
  local evolved={id=session.serial,monsterId=first.monsterId,stars=first.stars+1,lastIncome=clock,
   incomeSeconds=first.incomeSeconds,incomeAmount=first.incomeAmount}

@@ -40,6 +40,7 @@ end
 local incomeFX=require(script.Parent:WaitForChild("IncomeEffects"))
 local bagUI=require(script.Parent:WaitForChild("BagUI")).new(gui,remote)
 local journalUI=require(script.Parent:WaitForChild("JournalUI")).new(gui,remote)
+local socialUI=require(script.Parent:WaitForChild("SocialUI")).new(gui,remote,bagUI,journalUI)
 local settingsUI=require(script.Parent:WaitForChild("SettingsUI")).new(gui,audio)
 settingsUI.onOpen=function() bagUI.close() journalUI.close() held=false pointerOrigin,pointerX=nil,nil end
 bagUI.onOpen=function() journalUI.close() settingsUI.close() end
@@ -227,7 +228,7 @@ remote.OnClientEvent:Connect(function(kind,data)
  if kind=="Bag" then bagUI.snapshot(data) return end
  if kind=="EvolutionResult" then bagUI.evolutionResult(data) return end
  if kind=="BagIncome" then bagUI.income(data) return end
- if kind~="State" then return end
+ if kind~="State" then socialUI.event(kind,data) return end
  if data.huntRoot and data.huntRoot:FindFirstChild("Monsters") and monsters~=data.huntRoot.Monsters then
   monsters=data.huntRoot.Monsters
   monsters.DescendantAdded:Connect(function(part) if part:IsA("BasePart") then part.LocalTransparencyModifier=1 end end)
@@ -235,7 +236,7 @@ remote.OnClientEvent:Connect(function(kind,data)
  if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow(),data.monsterCrashFrame,data.monsterCrashId) end
  if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
- bagUI.state(data) journalUI.state(data)
+ bagUI.state(data) journalUI.state(data) socialUI.state(data)
  if data.area=="Lobby" then
   bagUI.income(data.income)
   local slot=player:GetAttribute("LobbySlot")

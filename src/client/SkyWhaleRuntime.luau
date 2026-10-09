@@ -5,6 +5,7 @@ local data=require(script.Parent:WaitForChild("SkyWhaleData"))
 local resources={} -- Keep EditableImage and fixed geometry alive across hunt restarts.
 local busy=false
 function M.install(ship)
+ if ship:GetAttribute("NativeMeshyAirship") then return false end
  if busy or ship:GetAttribute("SkyWhaleRevision")==data.Revision then return false end
  busy=true
  local staged,owned={},{}

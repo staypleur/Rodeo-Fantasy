@@ -4,7 +4,7 @@ import xml.etree.ElementTree as ET
 import patch_nameplate_place as patcher
 from place_identity import assert_unique_ids
 R=Path(__file__).resolve().parents[1]
-patcher.SOURCES={'CreatureMesh':R/'src/client/CreatureMesh.luau','MonsterCatalog':R/'src/shared/MonsterCatalog.luau'}
+patcher.SOURCES={'CreatureMesh':R/'src/client/CreatureMesh.luau','MonsterCatalog':R/'src/shared/MonsterCatalog.luau','RideAnimator':R/'src/client/RideAnimator.luau'}
 def prepare(source,output):
  temp=R/'.tools/meshy-patched.rbxlx';patcher.patch(source,temp)
  before=ET.parse(temp).getroot();after=ET.fromstring(ET.tostring(before))
@@ -25,6 +25,6 @@ def prepare(source,output):
  assert ET.tostring(before)==ET.tostring(after)
  print('PASS: saved assets unchanged; unique IDs valid; native renderer and installer embedded')
 if __name__=='__main__':
- prepare(R/'dist/RodeoFantasy-LobbyFinal-Operator.rbxlx',R/'dist/RodeoFantasy-MeshyMossrat.rbxlx')
+ prepare(R/'dist/RodeoFantasy-LobbyFinal-Operator.rbxlx',R/'dist/RodeoFantasy-MeshyMossrat-Rigged.rbxlx')
  private=R/'dist/LocalOperator/RodeoFantasy-OperatorConfigured.rbxlx'
- if private.exists():prepare(private,R/'dist/LocalOperator/RodeoFantasy-MeshyMossrat-Operator.rbxlx')
+ if private.exists():prepare(private,R/'dist/LocalOperator/RodeoFantasy-MeshyMossrat-Rigged-Operator.rbxlx')

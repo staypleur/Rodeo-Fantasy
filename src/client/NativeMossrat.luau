@@ -2,6 +2,7 @@
 local M={}
 local package=game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy")
 local C=require(package:WaitForChild("MonsterCatalog"))
+local boneCache=setmetatable({},{__mode="k"})
 function M.isTarget(model)
  local visual=package:FindFirstChild("VisualTemplate")
  return model:GetAttribute("MonsterId")=="MeadowMouse" and C.stage(model:GetAttribute("Stars") or 1)==1 and visual~=nil and visual:GetAttribute("NativeMeshyMossrat")==true
@@ -20,6 +21,11 @@ function M.apply(model)
    local rest=source.PrimaryPart.CFrame:ToObjectSpace(original.CFrame)
    rest=CFrame.new(rest.Position*scale)*rest.Rotation
    part.Size*=scale
+   if scale~=1 then
+    for _,bone in ipairs(part:GetDescendants()) do
+     if bone:IsA("Bone") then bone.CFrame=CFrame.new(bone.CFrame.Position*scale)*bone.CFrame.Rotation end
+    end
+   end
    part.CFrame=model.PrimaryPart.CFrame*rest
    part:SetAttribute("ApprovedRest",rest)
    part:SetAttribute("ApprovedPivot",rest.Position)
@@ -38,5 +44,24 @@ function M.apply(model)
  model:SetAttribute("NativeMeshyStars",stars)
  model:SetAttribute("MeshDecorated",true)
  return true
+end
+function M.animate(model,phase,moving,angry)
+ if not M.isTarget(model) then return end
+ local body=model:FindFirstChild("Body")
+ if not body then return end
+ local cached=boneCache[model]
+ if not cached or cached.body~=body then
+  cached={body=body,bones={}}
+  for _,bone in ipairs(body:GetDescendants()) do
+   if bone:IsA("Bone") and bone.Name:match("^Moss.+Leg$") then
+    table.insert(cached.bones,{bone=bone,opposite=(bone.Name:find("Left")~=nil)~=(bone.Name:find("Front")~=nil)})
+   end
+  end
+  boneCache[model]=cached
+ end
+ for _,entry in ipairs(cached.bones) do
+  local angle=moving and math.sin(phase+(entry.opposite and math.pi or 0))*(angry and .55 or .45) or 0
+  entry.bone.Transform=CFrame.Angles(angle,0,0)
+ end
 end
 return M

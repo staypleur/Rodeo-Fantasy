@@ -83,6 +83,9 @@ function M.prepare()
  end
  M.ready=ok M.failed=not ok pending.prepare=false return ok
 end
+function M.animate(model,phase,moving,angry)
+ NativeMossrat.animate(model,phase,moving,angry)
+end
 function M.materialize(model)
  if NativeMossrat.isTarget(model) then NativeMossrat.apply(model) return end
  if not FacetedMouse.failed and FacetedMouse.isTarget(model) and not model:GetAttribute("FacetedMouseRevision") then task.spawn(FacetedMouse.apply,model) end

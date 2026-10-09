@@ -128,10 +128,10 @@ function J.new(gui,remote)
   self.page=next self.render() flip(direction)
  end
  function self.open()
-  if self.area~="Lobby" then return end
+  if self.area=="Hunt" then return end
   if book.Visible then self.close() return end
   if self.onOpen then self.onOpen() end
-  book.Visible=true freeze() self.render() Audio.ui("BookOpen") remote:FireServer("Journal")
+  book.Visible=true freeze() self.render() Audio.ui("BookOpen") if not self.other then remote:FireServer("Journal") end
   CAS:BindActionAtPriority("JournalPages",function(_,state,input)
    if state==Enum.UserInputState.Begin then
     if input.KeyCode==Enum.KeyCode.A or input.KeyCode==Enum.KeyCode.Left then self.turn(-1)
@@ -140,11 +140,12 @@ function J.new(gui,remote)
    return Enum.ContextActionResult.Sink
   end,false,3000,Enum.KeyCode.W,Enum.KeyCode.A,Enum.KeyCode.S,Enum.KeyCode.D,Enum.KeyCode.Space,Enum.KeyCode.Up,Enum.KeyCode.Down,Enum.KeyCode.Left,Enum.KeyCode.Right,Enum.KeyCode.Thumbstick1,Enum.KeyCode.ButtonA)
  end
+ function self.viewOther(data) self.other=true self.close() self.snapshot(data) self.open() end
  function self.snapshot(data) self.data=data self.seen=data.seen or self.seen if book.Visible then self.render() end end
  function self.state(data)
-  self.area=data.area button.Visible=self.area=="Lobby"
-  if self.area~="Lobby" then self.close() end
-  if book.Visible and data.count~=self.lastCount then remote:FireServer("Journal") end self.lastCount=data.count
+   self.area=data.area button.Visible=self.area~="Hunt"
+  if self.area=="Hunt" then self.close() end
+  if book.Visible and not self.other and data.count~=self.lastCount then remote:FireServer("Journal") end self.lastCount=data.count
  end
  for index,region in ipairs({"All","Meadow","Forest","Swamp","Ocean"}) do
   local colors={Color3.fromRGB(172,145,85),Color3.fromRGB(112,153,85),Color3.fromRGB(70,123,88),Color3.fromRGB(122,120,76),Color3.fromRGB(75,137,164)}
@@ -157,9 +158,9 @@ function J.new(gui,remote)
  end
  -- Mutation/breeding tabs wait for confirmed content and recipe rules.
  previous.Activated:Connect(function() self.turn(-1) end) nextPage.Activated:Connect(function() self.turn(1) end)
- close.Activated:Connect(self.close) button.Activated:Connect(self.open)
+ close.Activated:Connect(self.close) button.Activated:Connect(function() self.other=false self.open() end)
  UIS.InputBegan:Connect(function(input,processed)
-  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T then self.open() end
+  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and self.area=="Lobby" then self.other=false self.open() end
  end)
  local function resize()
   local n=book.AbsoluteSize.X<700 and 1 or 2

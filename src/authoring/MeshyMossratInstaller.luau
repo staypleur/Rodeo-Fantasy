@@ -3,7 +3,7 @@ local M={}
 local RS=game:GetService("ReplicatedStorage")
 local SS=game:GetService("ServerStorage")
 local C=require(RS.RodeoFantasy.MonsterCatalog)
-local function prepare(source,old,name)
+local function prepare(source,old,name,sourceForward)
  assert(source and (source:IsA("Model") or source:IsA("MeshPart")),"Missing imported model: "..name)
  local meshes={}
  local descendants=source:IsA("MeshPart") and {source} or source:GetDescendants()
@@ -26,9 +26,13 @@ local function prepare(source,old,name)
  for i,original in ipairs(meshes) do
   local part=original:Clone()
   local relative=frame:ToObjectSpace(original.CFrame)
-  local rest=CFrame.new(relative.Position*scale-Vector3.new(0,C.MeadowMouse.RootHeight,0))*relative.Rotation
+  -- Supplied Hunt/Detail GLBs already face -Z. Raw Meshy +Z is explicit opt-in.
+  local rest=CFrame.Angles(0,sourceForward=="+Z" and math.pi or 0,0)*CFrame.new(relative.Position*scale-Vector3.new(0,C.MeadowMouse.RootHeight,0))*relative.Rotation
   part.Name=i==1 and "Body" or "BodyDetail"..i
   part.Size*=scale part.CFrame=root.CFrame*rest
+  for _,bone in ipairs(part:GetDescendants()) do
+   if bone:IsA("Bone") then bone.CFrame=CFrame.new(bone.CFrame.Position*scale)*bone.CFrame.Rotation end
+  end
   part.Anchored=true part.CanCollide=false part.CanTouch=false part.CanQuery=false
   part:SetAttribute("ApprovedRest",rest) part:SetAttribute("ApprovedPivot",rest.Position)
   -- Preserve imported SurfaceAppearance and material textures unchanged.
@@ -40,18 +44,21 @@ local function prepare(source,old,name)
  model:SetAttribute("NativeMeshyReady",true)
  model:SetAttribute("NativeMeshyStars",1)
  model:SetAttribute("MeshyBackHeight",1.18)
+ model:SetAttribute("MeshyFacingCorrected",true)
  return model
 end
-function M.install(hunt,detail)
+function M.install(hunt,detail,sourceForward)
  assert(not game:GetService("RunService"):IsRunning(),"Stop Play before installing and saving")
  assert(hunt,"사냥터용 가져온 모델을 찾지 못했습니다. 탐색기에서 가져온 모스랫을 선택한 뒤 installSelected()를 사용하세요.")
  detail=detail or hunt
+ sourceForward=sourceForward or "-Z"
+ assert(sourceForward=="-Z" or sourceForward=="+Z","sourceForward must be -Z (prepared files) or +Z (original Meshy files)")
  local package=RS.RodeoFantasy
  -- Prepare every replacement before touching any existing template.
  local replacements={
-  {SS,"RodeoMonsterTemplate",prepare(hunt,SS.RodeoMonsterTemplate,"RodeoMonsterTemplate")},
-  {package,"VisualTemplate",prepare(detail,package.VisualTemplate,"VisualTemplate")},
-  {package,"MeshyMossratHuntTemplate",prepare(hunt,package.VisualTemplate,"MeshyMossratHuntTemplate")},
+  {SS,"RodeoMonsterTemplate",prepare(hunt,SS.RodeoMonsterTemplate,"RodeoMonsterTemplate",sourceForward)},
+  {package,"VisualTemplate",prepare(detail,package.VisualTemplate,"VisualTemplate",sourceForward)},
+  {package,"MeshyMossratHuntTemplate",prepare(hunt,package.VisualTemplate,"MeshyMossratHuntTemplate",sourceForward)},
  }
  for _,entry in ipairs(replacements) do
   local old=entry[1]:FindFirstChild(entry[2])

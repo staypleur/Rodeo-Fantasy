@@ -49,8 +49,8 @@ function UI.new(gui,remote)
  make("UIStroke",{Color=Color3.fromRGB(177,151,108),Thickness=1},window)
  local title=make("TextLabel",{Text="Bag",BackgroundTransparency=1,Position=UDim2.fromOffset(20,10),Size=UDim2.new(1,-100,0,40),TextSize=26,TextColor3=Color3.fromRGB(43,74,55),ZIndex=21},window)
  local close=make("TextButton",{Name="CloseBag",Text="×",Position=UDim2.new(1,-54,0,12),Size=UDim2.fromOffset(38,34),BackgroundTransparency=1,TextSize=26,TextColor3=Color3.fromRGB(70,58,40),ZIndex=21},window)
- local money=make("TextLabel",{Name="BagMoney",BackgroundTransparency=1,Position=UDim2.fromOffset(20,55),Size=UDim2.new(.62,-20,0,34),TextSize=20,TextColor3=Color3.fromRGB(43,74,55),TextXAlignment=Enum.TextXAlignment.Left,ZIndex=21},window)
- local evolveToggle=make("TextButton",{Name="EvolutionMode",Text=L.text("Evolve",player.LocaleId),Position=UDim2.new(1,-142,0,55),Size=UDim2.fromOffset(122,34),TextSize=16,BackgroundColor3=Color3.fromRGB(110,133,91),TextColor3=Color3.new(1,1,1),ZIndex=23},window)
+ local money=make("TextLabel",{Name="BagMoney",BackgroundTransparency=1,Position=UDim2.fromOffset(20,55),Size=UDim2.new(.56,-20,0,34),TextSize=20,TextColor3=Color3.fromRGB(43,74,55),TextXAlignment=Enum.TextXAlignment.Left,ZIndex=21},window)
+ local evolveToggle=make("TextButton",{Name="EvolutionMode",Text=L.text("Evolve",player.LocaleId),Position=UDim2.new(.81,0,0,55),Size=UDim2.new(.17,0,0,34),TextSize=16,BackgroundColor3=Color3.fromRGB(110,133,91),TextColor3=Color3.new(1,1,1),ZIndex=23},window)
  make("UICorner",{CornerRadius=UDim.new(0,9)},evolveToggle)
  local evolveControls=make("Frame",{Name="EvolutionControls",Visible=false,BackgroundColor3=Color3.fromRGB(235,222,194),Position=UDim2.fromOffset(16,174),Size=UDim2.new(1,-32,0,58),ZIndex=22},window)
  make("UICorner",{CornerRadius=UDim.new(0,10)},evolveControls)
@@ -79,6 +79,12 @@ function UI.new(gui,remote)
   make("UICorner",{CornerRadius=UDim.new(0,8)},tab)
   tab.Activated:Connect(function() self.filter(region,nil) end)
  end
+ local breed=make("TextButton",{Name="Breed",Text="교배",Position=UDim2.new(.62,0,0,55),Size=UDim2.new(.17,0,0,34),TextSize=16,BackgroundColor3=Color3.fromRGB(110,133,91),TextColor3=Color3.new(1,1,1),ZIndex=23},window)
+ breed.Activated:Connect(function() if self.onBreed then self.onBreed() end end)
+ local hovered,hold
+ UIS.InputBegan:Connect(function(input,processed) if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.E and hovered and window.Visible and self.area=="Cafe" then hold={id=hovered,at=os.clock()} end end)
+ UIS.InputEnded:Connect(function(input) if input.KeyCode==Enum.KeyCode.E then hold=nil end end)
+ game:GetService("RunService").RenderStepped:Connect(function() if hold and window.Visible and hovered==hold.id and os.clock()-hold.at>=1 then remote:FireServer("Summon",hold.id) hold=nil end end)
  local chooser
  local revision=0
  local function selectedCount() local n=0 for _ in pairs(self.selected) do n+=1 end return n end
@@ -113,11 +119,11 @@ function UI.new(gui,remote)
   self.snapshot(self.items)
  end
  evolveToggle.Activated:Connect(function()
-  if self.area=="Lobby" and not self.pen then self.setEvolutionMode(not self.evolutionMode) end
+  if self.area~="Hunt" and not self.pen then self.setEvolutionMode(not self.evolutionMode) end
  end)
  evolveCancel.Activated:Connect(function() self.setEvolutionMode(false) end)
  evolveConfirm.Activated:Connect(function()
-  if not evolveConfirm.Active or self.area~="Lobby" then return end
+  if not evolveConfirm.Active or self.area=="Hunt" then return end
   local ids={} for id in pairs(self.selected) do table.insert(ids,id) end
   table.sort(ids)
   if #ids==3 then remote:FireServer("Evolve",ids) end
@@ -133,17 +139,17 @@ function UI.new(gui,remote)
  chooser=make("Frame",{Name="RanchChooser",Visible=false,BackgroundTransparency=1,Position=UDim2.fromOffset(20,110),Size=UDim2.new(1,-40,1,-130),ZIndex=23},window)
  make("UIGridLayout",{CellSize=UDim2.new(.45,0,0,90),CellPadding=UDim2.fromOffset(18,18)},chooser)
  for index=1,4 do
-  local choice=make("TextButton",{Name="RanchChoice"..index,Text=L.text("Ranch",player.LocaleId).." "..index,BackgroundColor3=Color3.fromRGB(147,182,154),TextColor3=Color3.fromRGB(37,61,46),TextSize=22,ZIndex=24},chooser)
+  local choice=make("TextButton",{Name="RanchChoice"..index,Text="부화소".." "..index,BackgroundColor3=Color3.fromRGB(147,182,154),TextColor3=Color3.fromRGB(37,61,46),TextSize=22,ZIndex=24},chooser)
   make("UICorner",{CornerRadius=UDim.new(0,14)},choice)
   choice.Activated:Connect(function() if self.area=="Lobby" then remote:FireServer("Manage",index) end end)
  end
  function self.openRanchMenu()
-  if self.area~="Lobby" then return end
+  if self.area=="Hunt" then return end
   self.setEvolutionMode(false) self.mode="RanchMenu" self.pen=nil self.snapshot(self.items) window.Visible=true self.opened() chooser.Visible=true scroll.Visible=false empty.Visible=false
-  title.Text=L.text("Choose ranch",player.LocaleId)
+  title.Text="알 관리 · 부화소 선택"
  end
  function self.toggle()
-  if self.area~="Lobby" then return end
+  if self.area=="Hunt" then return end
   self.mode=nil self.pen=nil self.setEvolutionMode(false) chooser.Visible=false scroll.Visible=true
   self.snapshot(self.items)
   window.Visible=not window.Visible
@@ -156,19 +162,21 @@ function UI.new(gui,remote)
  end)
  function self.state(state)
   self.area=state.area
-  button.Visible=state.area=="Lobby"
-  if state.area~="Lobby" then window.Visible=false self.pen=nil self.setEvolutionMode(false) end
-  money.Text=L.text("Uncollected coins",player.LocaleId)..": "..tostring(state.pending or 0)
+  local nextSummoned=state.summonedId
+  if self.summonedId~=nextSummoned then self.summonedId=nextSummoned self.snapshot(self.items) end
+  button.Visible=state.area~="Hunt"
+  if state.area=="Hunt" then window.Visible=false self.pen=nil self.setEvolutionMode(false) end
+  money.Text="코인: "..tostring((state.pending or 0)+(state.balance or 0))
   button.Text=""
-  if state.area=="Lobby" and self.count~=state.count then self.count=state.count remote:FireServer("Bag") end
+  if state.area~="Hunt" and self.count~=state.count then self.count=state.count remote:FireServer("Bag") end
  end
  function self.openPen(index)
-  if self.area~="Lobby" then return end
+  if self.area=="Hunt" then return end
   self.setEvolutionMode(false) self.mode=nil chooser.Visible=false scroll.Visible=true
   self.pen=index self.snapshot(self.items) window.Visible=true self.opened()
  end
  function self.snapshot(items)
-  self.items=items self.cards={}
+  self.items=items self.cards={} hovered=nil hold=nil
   local present={} for _,item in ipairs(items) do present[item.id]=true end
   for id in pairs(self.selected) do if not present[id] then self.selected[id]=nil end end
   local placed=0
@@ -180,7 +188,7 @@ function UI.new(gui,remote)
   pageLabel.Text=self.page.." / "..pages
   local show=self.mode~="RanchMenu"
   search.Visible=show tabs.Visible=show previous.Visible=show nextPage.Visible=show pageLabel.Visible=show
-  evolveToggle.Visible=show and not self.pen
+  evolveToggle.Visible=show and not self.pen breed.Visible=show and not self.pen
   evolveControls.Visible=show and self.evolutionMode and not self.pen
   if self.evolutionMode then
    scroll.Position=UDim2.fromOffset(16,240) scroll.Size=UDim2.new(1,-32,1,-295)
@@ -229,9 +237,18 @@ function UI.new(gui,remote)
     make("UICorner",{CornerRadius=UDim.new(0,8)},choose)
     choose.Activated:Connect(function()
      if self.selected[item.id] then self.selected[item.id]=nil
-     elseif compatible and selectedCount()<3 and self.area=="Lobby" then self.selected[item.id]=true end
+     elseif compatible and selectedCount()<3 and self.area~="Hunt" then self.selected[item.id]=true end
      self.snapshot(self.items)
     end)
+   elseif self.area=="Cafe" then
+    if item.id==self.summonedId then
+     make("TextLabel",{Text="소환 중",BackgroundTransparency=1,Position=UDim2.fromOffset(4,208),Size=UDim2.new(1,-8,0,29),TextSize=14,ZIndex=23},card)
+    elseif not item.breedingTeam then
+     local summon=make("TextButton",{Text="E 꾹 · 소환",Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,29),TextSize=14,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},card)
+     card.MouseEnter:Connect(function() hovered=item.id end) card.MouseLeave:Connect(function() if hovered==item.id then hovered=nil hold=nil end end)
+     summon.InputBegan:Connect(function(input) if input.UserInputType==Enum.UserInputType.Touch or input.UserInputType==Enum.UserInputType.MouseButton1 then hovered=item.id hold={id=item.id,at=os.clock()} end end)
+     summon.InputEnded:Connect(function() hold=nil end)
+    end
    elseif item.assignedPen then
     make("TextLabel",{Text=L.text("Placed",player.LocaleId).." · "..item.assignedPen,BackgroundTransparency=1,Position=UDim2.fromOffset(4,208),Size=UDim2.new(1,-8,0,29),TextSize=14,ZIndex=23},card)
    end
@@ -251,7 +268,7 @@ function UI.new(gui,remote)
   end
  end
  function self.income(gains)
-  if self.area~="Lobby" or not window.Visible then return end
+  if self.area=="Hunt" or not window.Visible then return end
   for _,gain in ipairs(gains or {}) do
    local card=self.cards and self.cards[gain.id]
    if card and card.Parent then Income.card(card,gain.amount) end

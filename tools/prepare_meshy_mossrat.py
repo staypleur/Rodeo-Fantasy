@@ -7,7 +7,8 @@ R=Path(__file__).resolve().parents[1]
 source=Path(sys.argv[1]);raw=source.read_bytes()
 n=struct.unpack_from('<I',raw,12)[0];original=json.loads(raw[20:20+n]);binary=bytearray(raw[28+n:])
 base=R/'assets/meshes/meshy';base.mkdir(parents=True,exist_ok=True)
-shutil.copyfile(source,base/'Mossrat_S1_Source.glb')
+target=base/('Mossrat_S1_Source10k.glb' if '--detail' in sys.argv else 'Mossrat_S1_Source.glb')
+if source.resolve()!=target.resolve():shutil.copyfile(source,target)
 # Reorient +Z Meshy front to the game's -Z; no remesh or UV rebake.
 for mesh in original['meshes']:
  for p in mesh['primitives']:
@@ -19,7 +20,7 @@ for mesh in original['meshes']:
    if 'min' in a:a['min']=arr.min(axis=0).tolist();a['max']=arr.max(axis=0).tolist()
 triangles=sum(original['accessors'][p['indices']]['count']//3 for m in original['meshes'] for p in m['primitives'])
 assert triangles in (3114,10348)
-for role in ('Hunt','Detail'):
+for role in (('Detail',) if '--detail' in sys.argv else ('Hunt',)):
  g=copy.deepcopy(original);parts=[];offset=0;hashes=[]
  for i,v in enumerate(g['bufferViews']):
   ov=original['bufferViews'][i];data=bytes(binary[ov.get('byteOffset',0):ov.get('byteOffset',0)+ov['byteLength']])

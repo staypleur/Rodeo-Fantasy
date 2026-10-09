@@ -14,6 +14,7 @@ parser.add_argument('--forward-face',action='store_true')
 parser.add_argument('--sky-whale',action='store_true')
 parser.add_argument('--lineage-review',action='store_true')
 parser.add_argument('--side-label',default='SIDE / FLOWING MANE')
+parser.add_argument('--front-axis',choices=['positive-z','negative-z'],default='negative-z')
 args=parser.parse_args();data=args.model.read_bytes();n=struct.unpack_from('<I',data,12)[0]
 g=json.loads(data[20:20+n]);binary=data[28+n:]
 def values(index):
@@ -40,6 +41,8 @@ if args.forward_face:
  views=[('FRONT', (0,.16,-1)),('HEAD / SIDE',(.85,.30,-1)),('FACE DETAIL',(.55,.20,-1))]
 if args.sky_whale:
  views=[('THREE-QUARTER',(.80,.40,-1)),('SIDE',(1,.15,-.15)),('TOP / TAIL',(.3,.9,.6))]
+if args.front_axis=='positive-z':
+ views=[('FRONT / FACE +Z',(0,.08,1)),('SIDE',(1,.08,0)),('THREE-QUARTER / FACE',(.65,.30,1))]
 for col,(label,eye) in enumerate(views):
  d=np.array(eye,dtype=float);d/=np.linalg.norm(d);right=np.cross(d,(0,1,0));right/=np.linalg.norm(right);up=np.cross(right,d)
  allpos=np.concatenate([t[0] for t in triangles])

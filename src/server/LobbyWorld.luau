@@ -12,7 +12,7 @@ end
 for index=1,8 do
  local plot=plots["Plot_"..index]
  plot:SetAttribute("Slot",index)
- for _,pen in ipairs(plot.Pens:GetChildren()) do pen:SetAttribute("Capacity",2) end
+ for _,pen in ipairs(plot.Pens:GetChildren()) do pen:SetAttribute("Capacity",1) end
 end
 local function label(index,name)
  local board=plots["Plot_"..index].OwnerBoard
@@ -60,36 +60,15 @@ end
 function Lobby.canUsePen(player,index)
  return Lobby.getPen(player,index) and Lobby.canManage(player)
 end
-local roaming={}
 function Lobby.display(player,index,items)
  local pen=Lobby.getPen(player,index) if not pen then return end
- local old=pen:FindFirstChild("DisplayMonsters") if old then old:Destroy() end
- local folder=Instance.new("Folder") folder.Name="DisplayMonsters" folder.Parent=pen
- local slot=0
- for _,item in ipairs(items) do
-  if item.assignedPen==index then
-   slot+=1
-   local species=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)[item.monsterId]
-   local model=game.ServerStorage[require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog).template(item.monsterId,item.stars)]:Clone()
-   model.Name="Pet_"..item.id model:SetAttribute("BagItemId",item.id)
-   model:SetAttribute("Running",true)
-   model:SetAttribute("MonsterId",item.monsterId) model:SetAttribute("Stars",item.stars) model:SetAttribute("Flying",species.Flying)
-   model:SetAttribute("RunStarted",workspace:GetServerTimeNow())
-   for _,node in ipairs(model:GetDescendants()) do if node:IsA("BillboardGui") then node:Destroy() end end
-   local catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
-   local stage=catalog.stage(item.stars)
-   local scale=catalog.scale(item.stars)
-   model:ScaleTo(scale/catalog.Scales[stage])
-   local height=species.Flying and 3*scale or species.RootHeight*scale
-   local boxFrame,boxSize=model:GetBoundingBox()
-   local offset=model.PrimaryPart.CFrame:ToObjectSpace(boxFrame).Position
-   local margin=boxSize/2+Vector3.new(math.abs(offset.X)+.2,0,math.abs(offset.Z)+.2)
-   local startX=math.clamp(slot==1 and -3 or 3,-math.max(0,pen.PenGrass.Size.X/2-margin.X),math.max(0,pen.PenGrass.Size.X/2-margin.X))
-   local target=pen.PenGrass.CFrame*CFrame.new(startX,height+pen.PenGrass.Size.Y/2,0)
-   model:PivotTo(target*model.PrimaryPart.CFrame:Inverse()*model:GetPivot())
-   model.Parent=folder
-   height+=pen.PenGrass.Size.Y/2
-   roaming[model]={pen=pen,height=height,margin=margin,position=Vector3.new(startX,height,0),goal=Vector3.new(startX,height,0),pause=0,seed=Random.new(item.id+player.UserId)}
+ for _,name in ipairs({"DisplayMonsters","DisplayEggs"}) do local old=pen:FindFirstChild(name) if old then old:Destroy() end end
+ local folder=Instance.new("Folder") folder.Name="DisplayEggs" folder.Parent=pen
+ for _,egg in ipairs(items) do
+  if egg.assignedPen==index then
+   local shell=Instance.new("Part") shell.Name="IncubatingEgg" shell.Shape=Enum.PartType.Ball shell.Size=Vector3.new(2.6,3.4,2.6)
+   shell.CFrame=pen.PenGrass.CFrame*CFrame.new(0,pen.PenGrass.Size.Y/2+1.7,0) shell.Color=Color3.fromRGB(246,234,196) shell.Material=Enum.Material.SmoothPlastic shell.Anchored=true shell.Parent=folder
+   break
   end
  end
 end
@@ -97,7 +76,7 @@ function Lobby.connectPens(callback)
  for plotIndex=1,8 do
   local plot=plots["Plot_"..plotIndex]
   local prompt=Instance.new("ProximityPrompt")
-  prompt.Name="ManageRanch" prompt.ActionText="Manage ranch" prompt.ObjectText=""
+  prompt.Name="ManageRanch" prompt.ActionText="알 관리" prompt.ObjectText=""
   prompt.HoldDuration=1 prompt.MaxActivationDistance=10 prompt.RequiresLineOfSight=false
   prompt.KeyboardKeyCode=Enum.KeyCode.E prompt.Parent=plot.ManagePoint
   prompt.Triggered:Connect(function(player)
@@ -105,29 +84,6 @@ function Lobby.connectPens(callback)
   end)
  end
 end
-local roamClock=0
-game:GetService("RunService").Heartbeat:Connect(function(dt)
- roamClock+=dt if roamClock<.1 then return end local step=math.min(roamClock,.2) roamClock=0
- for model,motion in pairs(roaming) do
-  if not model.Parent then roaming[model]=nil continue end
-  local delta=motion.goal-motion.position
-  if delta.Magnitude<.1 then
-   model:SetAttribute("Running",false) motion.pause-=step
-   if motion.pause<=0 then
-    local size=motion.pen.PenGrass.Size
-    local x=math.max(.1,size.X/2-motion.margin.X) local z=math.max(.1,size.Z/2-motion.margin.Z)
-    motion.goal=Vector3.new(motion.seed:NextNumber(-x,x),motion.height,motion.seed:NextNumber(-z,z))
-    motion.pause=motion.seed:NextNumber(.8,2.2)
-   end
-  else
-   model:SetAttribute("Running",true)
-   motion.position+=delta.Unit*math.min(delta.Magnitude,step*2.5)
-   local localFrame=CFrame.lookAt(motion.position,motion.position+delta.Unit)
-   model.PrimaryPart.CFrame=motion.pen.PenGrass.CFrame*localFrame
-   model:SetAttribute("HerdVelocity",motion.pen.PenGrass.CFrame:VectorToWorldSpace(delta.Unit*2.5))
-  end
- end
-end)
 function Lobby.connect(callback)
  local prompt=Instance.new("ProximityPrompt")
  prompt.Name="FlyToHunt" prompt.ActionText="Fly to hunt" prompt.ObjectText="Airship"

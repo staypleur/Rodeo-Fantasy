@@ -72,7 +72,7 @@ assert(upgraded and upgraded.monsterId=="MeadowMouse" and upgraded.stars==2 and 
 assert(upgraded.incomeAmount==1 and upgraded.incomeSeconds==3 and #evolve.monsters==2)
 assert(affected[2] and upgraded.assignedPen==nil,"evolution clears consumed ranch placements")
 Rules.accrue(evolve,8,3,1)
-assert(evolve.pending==2,"evolved monster earns double after the next full interval")
+assert(evolve.pending==6,"evolved mouse earns 2; the unconsumed boar also earns two ticks of 2")
 local bad=Rules.new()
 Rules.grant(bad,"MeadowMouse",0) Rules.grant(bad,"MeadowMouse",0) Rules.grant(bad,"GrassBoar",0)
 assert(not Rules.evolve(bad,{1,2,3},1) and #bad.monsters==3,"mixed species must fail without consuming")

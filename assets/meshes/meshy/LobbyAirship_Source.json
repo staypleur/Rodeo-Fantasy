@@ -1,0 +1,46 @@
+{
+  "source": "Meshy_AI_Crystal_Phoenix_Remes_1009165547_texture.glb",
+  "sha256": "c6e49564cb76a6e659ae318133966b261c432468ba2e8c6cf6b1ca88ad68069c",
+  "triangles": 10293,
+  "rigged": false,
+  "geometry": "untouched",
+  "height_meters": 10,
+  "target_height_studs": 90,
+  "source_anchor": [
+    0,
+    0,
+    5.0
+  ],
+  "world_anchor": [
+    6000,
+    41.05699046080295,
+    0
+  ],
+  "rotation_y_degrees": 180,
+  "cables": [
+    [
+      5993,
+      -5,
+      16.5,
+      67.57111022207219
+    ],
+    [
+      5993,
+      5,
+      16.5,
+      63.8433598001632
+    ],
+    [
+      6007,
+      -5,
+      16.5,
+      69.3698256254341
+    ],
+    [
+      6007,
+      5,
+      16.5,
+      68.0157043523305
+    ]
+  ]
+}

@@ -192,11 +192,12 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
 		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds,Catalog[model:GetAttribute("MonsterId") or "MeadowMouse"].TripleHop)
 		local lean = running and (model:GetAttribute("Steering") or 0) * -0.18 or 0
   local moving=running and velocity.Magnitude>1
+  Mesh.animate(model,phase,moving,angry)
   local flying=model:GetAttribute("Flying")==true
   local bounce=moving and (flying and (.55+math.sin(phase*.5)*.22) or (1-math.cos(phase))*.22) or 0
   local gallopPitch=moving and math.sin(phase)*0.085 or 0
 		local frame = pose.frame * CFrame.new(0,bounce,0)*CFrame.Angles(angry and not flying and pitch or gallopPitch, 0, lean)
-  if monsters.Name~="RodeoLobby" and moving and not flying and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)>0.18 and #dust<80 then
+    if monsters.Name~="RodeoLobby" and monsters.Name~="CafePets" and moving and not flying and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)>0.18 and #dust<80 then
    pose.lastDust=clock
    local puff=Instance.new("Part") puff.Name="LocalHerdDust" puff.Anchored=true
    puff.CanCollide,puff.CanTouch,puff.CanQuery=false,false,false
