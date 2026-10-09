@@ -1,7 +1,24 @@
 -- The supplied untouched Meshy lobby creature faces +Z. Install in EDIT mode.
 local M={}
 local D=require(script.Parent.MeshyAirshipData)
-function M.installSelected()
+local function bodyRotation(world,importedForward)
+ assert(importedForward=="+Z" or importedForward=="-Z","Imported mesh forward must be +Z or -Z")
+ return world.Rotation*CFrame.Angles(0,importedForward=="-Z" and math.pi or 0,0)
+end
+function M.realignInstalled(importedForward)
+ assert(not game:GetService("RunService"):IsRunning(),"Stop Play first")
+ local ship=workspace.RodeoLobby.Airport.Airship
+ assert(ship:GetAttribute("NativeMeshyAirship"),"Expected installed native airship")
+ local body=assert(ship:FindFirstChild("MeshyAirshipBody"),"Missing airship body")
+ local world=CFrame.new(unpack(D.WorldAnchor))*CFrame.Angles(0,math.pi,0)
+ local center=world:PointToWorldSpace((Vector3.new(.0124306679,5,-.0058398247)-Vector3.new(unpack(D.SourceAnchor)))*(D.Height/D.SourceHeight))
+ body.CFrame=CFrame.new(center)*bodyRotation(world,importedForward)
+ body:SetAttribute("WhaleRest",body.CFrame)
+ ship:SetAttribute("WhaleAnchor",CFrame.new(center))
+ ship:SetAttribute("MeshyImportedForward",importedForward)
+ return ship
+end
+function M.installSelected(importedForward)
  assert(not game:GetService("RunService"):IsRunning(),"재생을 정지한 뒤 설치해주세요.")
  local selected=game:GetService("Selection"):Get()
  assert(#selected==1,"가져온 새 로비 모델 하나를 선택해주세요.")
@@ -29,9 +46,10 @@ function M.installSelected()
  local center=world:PointToWorldSpace((sourceCenter-Vector3.new(unpack(D.SourceAnchor)))*(D.Height/D.SourceHeight))
  local clone=Instance.new("Model") clone.Name="Airship"
  local body=p:Clone() body.Name="MeshyAirshipBody" body.Size*=scale
- body.CFrame=CFrame.new(center)*world.Rotation body.Anchored=true body.CanCollide=false body.CanTouch=false body.CanQuery=false
+ body.CFrame=CFrame.new(center)*bodyRotation(world,importedForward or "+Z") body.Anchored=true body.CanCollide=false body.CanTouch=false body.CanQuery=false
  body.Color=Color3.new(1,1,1) body.DoubleSided=true body.RenderFidelity=Enum.RenderFidelity.Precise
  body:SetAttribute("WhaleRest",body.CFrame) body.Parent=clone
+ clone:SetAttribute("MeshyImportedForward",importedForward or "+Z")
  clone.PrimaryPart=body clone:SetAttribute("NativeMeshyAirship",true) clone:SetAttribute("SkyWhaleRevision","MeshyLobby-v1") clone:SetAttribute("WhaleAnchor",CFrame.new(center))
  local changes={}
  for _,cable in ipairs(airport.BoardingArea:GetChildren()) do

@@ -43,11 +43,14 @@ local vm={} vm.__index=vm
 local function V(x,y,z) return setmetatable({X=x or 0,Y=y or 0,Z=z or 0},vm) end
 vm.__mul=function(a,b) return V(a.X*b,a.Y*b,a.Z*b) end
 vm.__add=function(a,b) return V(a.X+b.X,a.Y+b.Y,a.Z+b.Z) end
-local cm={} cm.__index=cm
-local function F(v) return setmetatable({Position=v or V(),Rotation=0},cm) end
-cm.__mul=function(a,b) if b==0 then return a end return F(a.Position+b.Position) end
-function cm:ToObjectSpace(b) return F(V(b.Position.X-self.Position.X,b.Position.Y-self.Position.Y,b.Position.Z-self.Position.Z)) end
-local CFrame={new=F,Angles=function(x,y,z) return F(V(x,y,z)) end} local Color3={new=function(...) return {...} end}
+local cm={}
+local function F(v,yaw) return setmetatable({Position=v or V(),yaw=yaw or 0},cm) end
+cm.__index=function(self,k) if k=='Rotation' then return F(V(),self.yaw) end return cm[k] end
+local function rotate(v,yaw) return V(math.cos(yaw)*v.X+math.sin(yaw)*v.Z,v.Y,-math.sin(yaw)*v.X+math.cos(yaw)*v.Z) end
+cm.__mul=function(a,b) return F(a.Position+rotate(b.Position,a.yaw),a.yaw+b.yaw) end
+function cm:ToObjectSpace(b) return F(rotate(V(b.Position.X-self.Position.X,b.Position.Y-self.Position.Y,b.Position.Z-self.Position.Z),-self.yaw),b.yaw-self.yaw) end
+function cm:VectorToWorldSpace(v) return rotate(v,self.yaw) end
+local CFrame={new=F,Angles=function(x,y,z) return F(V(x,0,z),y) end} local Color3={new=function(...) return {...} end}
 local function obj(kind,name)
  local o={ClassName=kind,Name=name,attrs={},Size=V(1,1,1),CFrame=F()}
  function o:IsA(k) return k==kind or k=='BasePart' and (kind=='MeshPart' or kind=='Part') end
@@ -83,6 +86,13 @@ assert(M.apply(model));assert(old.destroyed)
 local body=model:FindFirstChild('Body');assert(body.MeshId=='uploaded-mesh' and body.TextureID=='uploaded-texture' and body:FindFirstChild('PBR'))
 assert(math.abs(body.CFrame.Position.Y-.85)<.00001 and model.PrimaryPart.CFrame.Position.Y==2.05)
 local allocations=#objects;assert(M.apply(model) and #objects==allocations,'repeat must not allocate new geometry')
+hunt:SetAttribute('MeshyVisualYawDegrees',180);hunt:SetAttribute('MeshyFacingRevision','test-yaw')
+local oldBody=body;assert(M.apply(model));body=model:FindFirstChild('Body')
+assert(oldBody.destroyed and model:GetAttribute('NativeMeshyFacingRevision')=='test-yaw','revision change must rebuild already-ready body')
+assert(body.CFrame:VectorToWorldSpace(V(0,0,1)).Z<-.99,'a native +Z nose must point along hunt -Z after correction')
+assert(body.CFrame.Position.Y==.85 or math.abs(body.CFrame.Position.Y-.85)<.00001,'rotation must not change height')
+local afterRepair=#objects;assert(M.apply(model) and #objects==afterRepair,'facing correction must not accumulate')
+assert(body.TextureID=='uploaded-texture' and body:FindFirstChild('PBR'),'facing revision retains native textures')
 M.animate(model,math.pi/2,true,false)
 assert(body:FindFirstChild('MossLeftFrontLeg').Transform.Position.X>.4 and body:FindFirstChild('MossRightFrontLeg').Transform.Position.X<-.4,'diagonal leg bones must alternate')
 assert(math.abs(body:FindFirstChild('MossLeftFrontLeg').CFrame.Position.Y-.24)<.00001,'bones must scale with intermediate-star meshes')

@@ -10,16 +10,18 @@ end
 function M.apply(model)
  if not M.isTarget(model) or not model.PrimaryPart then return false end
  local stars=model:GetAttribute("Stars") or 1
- if model:GetAttribute("NativeMeshyReady") and model:GetAttribute("NativeMeshyStars")==stars and model:FindFirstChild("Body") then return true end
  local source=model:GetAttribute("VisualDeferred") and package:FindFirstChild("MeshyMossratHuntTemplate") or package.VisualTemplate
  if not source then return false end
+ local facingRevision=source:GetAttribute("MeshyFacingRevision") or "Original"
+ local yaw=source:GetAttribute("MeshyVisualYawDegrees") or 0
+ if model:GetAttribute("NativeMeshyReady") and model:GetAttribute("NativeMeshyStars")==stars and model:GetAttribute("NativeMeshyFacingRevision")==facingRevision and model:FindFirstChild("Body") then return true end
  local scale=C.scale(model:GetAttribute("Stars") or 1)
  local staged={}
  for _,original in ipairs(source:GetChildren()) do
   if original:IsA("MeshPart") then
    local part=original:Clone()
    local rest=source.PrimaryPart.CFrame:ToObjectSpace(original.CFrame)
-   rest=CFrame.new(rest.Position*scale)*rest.Rotation
+   rest=CFrame.new(rest.Position*scale)*CFrame.Angles(0,math.rad(yaw),0)*rest.Rotation
    part.Size*=scale
    if scale~=1 then
     for _,bone in ipairs(part:GetDescendants()) do
@@ -42,6 +44,7 @@ function M.apply(model)
  model:SetAttribute("ImportedA",true)
  model:SetAttribute("NativeMeshyReady",true)
  model:SetAttribute("NativeMeshyStars",stars)
+ model:SetAttribute("NativeMeshyFacingRevision",facingRevision)
  model:SetAttribute("MeshDecorated",true)
  return true
 end

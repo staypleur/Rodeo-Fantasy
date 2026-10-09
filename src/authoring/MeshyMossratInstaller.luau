@@ -38,6 +38,8 @@ local function prepare(source,old,name,sourceForward)
   -- Preserve imported SurfaceAppearance and material textures unchanged.
   part.Parent=model
  end
+ model:SetAttribute("MeshyVisualYawDegrees",0)
+ model:SetAttribute("MeshyFacingRevision","Imported-"..sourceForward)
  model:SetAttribute("NativeMeshyMossrat",true)
  model:SetAttribute("ImportedA",true)
  model:SetAttribute("MeshDecorated",true)
