@@ -1,6 +1,6 @@
 local cfg=require(game.ReplicatedStorage.RodeoFantasy.Config)
 local sounds={}
-for _,kind in ipairs({"LobbyBGM","BGM","Hooves","Jump","Rope","Land","Success"}) do
+for _,kind in ipairs({"LobbyBGM","BGM","Hooves","Jump","Rope","Land","Success","Warning","CrashObstacle","CrashMonster","Fall","Knock","BreakWood","BreakRock","HoovesFallback"}) do
  local sound=Instance.new("Sound") sound.SoundId=cfg.Audio[kind] sound.Parent=game.SoundService
  table.insert(sounds,sound)
 end
@@ -10,4 +10,4 @@ game:GetService("ContentProvider"):PreloadAsync(sounds,function(id,status)
 end)
 assert(#failures==0,"audio failed to load: "..table.concat(failures,", "))
 for _,sound in ipairs(sounds) do assert(sound.IsLoaded and sound.TimeLength>0,"empty audio: "..sound.SoundId) sound:Destroy() end
-print("AUDIO_ASSETS_PASS: all seven music/effect resources loaded with positive duration")
+print("AUDIO_ASSETS_PASS: all music/effect resources loaded with positive duration")
