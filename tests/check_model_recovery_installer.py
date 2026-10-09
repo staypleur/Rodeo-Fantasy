@@ -1,9 +1,9 @@
-"""Run the real batch installer: success, failed ship color, and rollback."""
+"""Run the batch installer: PBR-pack preservation, mesh validation, and rollback."""
 from pathlib import Path
 import subprocess
 R=Path(__file__).resolve().parents[1]
 code=r'''
-local function scenario(failColor,failInstall)
+local function scenario(failColor,failInstall,failMesh)
 local function V(x,y,z) return {X=x or 0,Y=y or 0,Z=z or 0} end
 local cm={}
 local function F(v,yaw) return setmetatable({Position=v or V(),yaw=yaw or 0},cm) end
@@ -55,6 +55,8 @@ for i=1,4 do obj('Part','Cable',area) end
 local function template(name,parent)
  local t=obj('Model',name,parent);t.PrimaryPart=obj('Part','Root',t)
  local b=obj('MeshPart','Body',t);b.CFrame=F(V(0,-.8,0),.2)
+ local surface=obj('SurfaceAppearance','SurfaceAppearance',b)
+ surface.ColorMap='ApprovedColor'..name;surface.TexturePack='ApprovedPack'..name
  return t
 end
 local oldHunt=template('MeshyMossratHuntTemplate',package)
@@ -72,7 +74,10 @@ local selected={departure}
 local selection={Get=function() return selected end,Set=function(_,v) selected=v end}
 local Enum={AssetFetchStatus={Success='Success'}}
 local game={ReplicatedStorage=rs,GetService=function(_,k) return ({ServerStorage=ss,RunService={IsRunning=function() return false end},Selection=selection,
- ContentProvider={PreloadAsync=function(_,ids,cb) cb(ids[1],failColor and ids[1]=='Color3' and 'Failure' or 'Success') end}})[k] end}
+ ContentProvider={PreloadAsync=function(_,ids,cb)
+  assert(ids[1]:sub(1,4)=='Mesh','must not gate PBR on individual image preloading')
+  cb(ids[1],failMesh and ids[1]=='Mesh1' and 'Failure' or 'Success')
+ end}})[k] end}
 obj('ModuleScript','MeshyMossratInstaller',package);obj('ModuleScript','MeshyAirshipInstaller',package)
 local require=function(m)
  if m.Name=='MeshyMossratInstaller' then return {install=function(h,d,forward)
@@ -96,26 +101,27 @@ __INSTALLER__
 end)()
 local ok,result=pcall(installer.install)
 assert(selected[1]==departure and airport.Departure==departure,'selection and E departure preserved')
-if failInstall then
+if failMesh then
+ assert(not ok and package.MeshyMossratHuntTemplate==oldHunt and airport.Airship==oldShip,'mesh failure must leave old models intact')
+elseif failInstall then
  assert(not ok and package.MeshyMossratHuntTemplate:GetAttribute('HeadShapeStraightened')==nil,'failed ship install must roll back head templates')
  assert(airport.Airship==oldShip,'unchanged ship stays in place on install failure')
 else
- assert(ok and result==not failColor)
+ assert(ok and result==true)
  assert(package.MeshyMossratHuntTemplate:GetAttribute('HeadShapeStraightened'))
  assert(package.MeshyMossratHuntTemplate:GetAttribute('FaceCourseForward')==false)
  assert(package.MeshyMossratHuntTemplate:GetAttribute('MeshyVisualYawDegrees')==180)
  assert(math.abs(package.MeshyMossratHuntTemplate.Body.CFrame.yaw-.2)<1e-6)
  assert(package.VisualTemplate:GetAttribute('MeshyVisualYawDegrees')==0)
- if failColor then
-  assert(airport.Airship==oldShip and roots[3].Parent==workspace,'failed color must preserve old ship and new import for retry')
-  failColor=false
-  assert(installer.install(),'retry must reuse archived mouse inputs without importing again')
-  assert(airport.Airship~=oldShip and airport.Airship:GetAttribute('RecoveryTexturesChecked'))
- else assert(airport.Airship~=oldShip and airport.Airship:GetAttribute('RecoveryTexturesChecked')) end
+ local appearance=package.MeshyMossratHuntTemplate.Body:FindFirstChildOfClass('SurfaceAppearance')
+ assert(appearance.ColorMap=='ApprovedColorMeshyMossratHuntTemplate' and appearance.TexturePack=='ApprovedPackMeshyMossratHuntTemplate','retain previously displayed PBR pack')
+ assert(package.VisualTemplate.Body:FindFirstChildOfClass('SurfaceAppearance').TexturePack=='ApprovedPackVisualTemplate','detail retains its own pack')
+ assert(airport.Airship~=oldShip and airport.Airship:GetAttribute('RecoveryPBRPreserved'))
+ assert(not airport.Airship:GetAttribute('RecoveryTexturesChecked'),'do not claim texture render success from preload')
 end
 end
-scenario(false,false);scenario(true,false);scenario(false,true)
-print('BATCH_INSTALLER_PASS: success, failed color preserves ship, archived-input retry, rollback; E departure/selection preserved')
+scenario(false,false,false);scenario(true,false,false);scenario(false,true,false);scenario(false,false,true)
+print('BATCH_INSTALLER_PASS: PBR-pack reuse, mesh-only preload, geometry failure, rollback; E departure/selection preserved; color success not falsely claimed')
 '''
 code=code.replace('__INSTALLER__',(R/'src/authoring/ModelRecoveryInstaller.luau').read_text(encoding='utf-8'))
 p=R/'.tools/check_model_recovery_installer.luau';p.write_text(code,encoding='utf-8')

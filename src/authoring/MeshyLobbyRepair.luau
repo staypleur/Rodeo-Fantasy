@@ -42,26 +42,8 @@ function M.apply()
  return true
 end
 function M.retryTextures()
- local body=workspace.RodeoLobby.Airport.Airship.MeshyAirshipBody
- local appearance=assert(body:FindFirstChildOfClass("SurfaceAppearance"),"Missing appearance")
- local count=0
- for _,key in ipairs({"ColorMap","MetalnessMap","RoughnessMap"}) do
-  local id=appearance[key]:match("(%d+)$")
-  if id then
-   -- A different supported asset URI makes one fresh request after prior cached failures.
-   local uri="https://www.roblox.com/asset/?id="..id
-   task.spawn(function()
-    local succeeded=false
-    local ok,err=pcall(function()
-     game:GetService("ContentProvider"):PreloadAsync({uri},function(_,status)
-      succeeded=status==Enum.AssetFetchStatus.Success
-     end)
-    end)
-    if ok and succeeded and appearance.Parent then appearance[key]=uri count+=1 end
-    print("AIRSHIP_TEXTURE_RETRY",key,ok and succeeded and "Success" or "Failure")
-    if not ok then warn(tostring(err)) end
-   end)
-  end
- end
+ -- SurfaceAppearance renders a processed PBR pack. Individual image preloading
+ -- cannot certify that pack, and rewriting map URIs can invalidate it.
+ print("AIRSHIP_PBR_PRESERVED: uploaded appearance unchanged; verify color in Play")
 end
 return M

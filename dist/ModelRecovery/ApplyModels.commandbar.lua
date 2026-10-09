@@ -1150,23 +1150,15 @@ local function fresh(module,callback)
  local ok,result=pcall(function() return callback(require(copy)) end)
  copy:Destroy() assert(ok,result) return result
 end
-local function textures(mesh,label)
- local appearance=mesh:FindFirstChildOfClass("SurfaceAppearance")
- local colorOK=false
- local allOK=true
- for _,key in ipairs({"ColorMap","MetalnessMap","RoughnessMap","NormalMap"}) do
-  local id=appearance[key]
-  if id~="" then
-   local success=false
-   local ok=pcall(function()
-    game:GetService("ContentProvider"):PreloadAsync({id},function(_,status) success=status==Enum.AssetFetchStatus.Success end)
-   end)
-   print("RECOVERY_TEXTURE",label,key,ok and success and "Success" or "Failure",id)
-   if key=="ColorMap" then colorOK=ok and success end
-   if not ok or not success then allOK=false end
-  end
- end
- return colorOK and allOK
+local function geometry(mesh,label)
+ -- PreloadAsync supports mesh geometry, but cannot validate SurfaceAppearance's
+ -- processed texture pack by requesting its individual image IDs.
+ local success=false
+ local ok=pcall(function()
+  game:GetService("ContentProvider"):PreloadAsync({mesh.MeshId},function(_,status) success=status==Enum.AssetFetchStatus.Success end)
+ end)
+ print("RECOVERY_MESH",label,ok and success and "Success" or "Failure")
+ assert(ok and success,"새 메시 로드 실패. 기존 모델은 변경하지 않았습니다: "..label)
 end
 function M.install()
  assert(not game:GetService("RunService"):IsRunning(),"■ 정지 후 실행하세요.")
@@ -1188,9 +1180,7 @@ function M.install()
   if part:IsA("BasePart") and part.Name=="Cable" then table.insert(cables,part) end
  end
  assert(#cables==4,"비행선 연결 줄 4개가 필요합니다.")
- -- Validate uploads before replacing existing templates. Failed ship color stays pending.
- assert(textures(hunt,"Hunt") and textures(detail,"Detail"),"모스랫 새 색 텍스처 로드 실패. 기존 모델은 변경하지 않았습니다.")
- local shipColorOK=textures(shipMesh,"Airship")
+ geometry(hunt,"Hunt") geometry(detail,"Detail") geometry(shipMesh,"Airship")
  local backup=Instance.new("Folder") backup.Name="ModelRecoveryBackup" backup.Parent=ss
  for _,model in ipairs({oldHunt,oldDetail,oldServer,ship}) do model:Clone().Parent=backup end
  local frames={}
@@ -1204,6 +1194,15 @@ function M.install()
   for _,entry in ipairs({{package.MeshyMossratHuntTemplate,oldHuntRotation,180},{ss.RodeoMonsterTemplate,oldHuntRotation,180},{package.VisualTemplate,oldDetailRotation,oldDetailYaw}}) do
    local model,rotation,yaw=unpack(entry)
    local body=model.Body
+   -- Recovery files preserve the exact role-specific UVs and texture bytes.
+   -- Reuse the previously displayed mouse PBR, including its processed pack.
+   local old=backup:FindFirstChild(model.Name)
+   local approved=old and old.Body:FindFirstChildOfClass("SurfaceAppearance")
+   if approved and approved.ColorMap~="" then
+    for _,child in ipairs(body:GetChildren()) do if child:IsA("SurfaceAppearance") then child:Destroy() end end
+    approved:Clone().Parent=body
+    model:SetAttribute("RecoveryExistingPBRReused",true)
+   end
    local rest=model.PrimaryPart.CFrame:ToObjectSpace(body.CFrame)
    rest=CFrame.new(rest.Position)*rotation
    body.CFrame=model.PrimaryPart.CFrame*rest
@@ -1215,7 +1214,7 @@ function M.install()
    -- Restore natural movement: the prior course-lock did not correct the head shape.
    model:SetAttribute("FaceCourseForward",false)
   end
-  if shipColorOK then
+  do
    local selection=game:GetService("Selection") local before=selection:Get()
    selection:Set({shipMesh})
    local installed,reason=pcall(function()
@@ -1223,7 +1222,8 @@ function M.install()
    end)
    selection:Set(before)
    assert(installed,reason)
-   airport.Airship:SetAttribute("RecoveryTexturesChecked",true)
+   airport.Airship:SetAttribute("RecoveryPBRPreserved",true)
+   airport.Airship:SetAttribute("RecoveryTexturesChecked",nil)
   end
  end)
  if not ok then
@@ -1241,11 +1241,10 @@ function M.install()
  end
  local imports=Instance.new("Folder") imports.Name="RecoveryImports" imports.Parent=backup
  huntRoot.Parent=imports detailRoot.Parent=imports
- if shipColorOK then shipRoot.Parent=imports end
+ shipRoot.Parent=imports
  print("MOSSRAT_HEAD_SHAPE_APPLIED: head-only geometry, four leg bones, hunt 3k/detail 10k; natural steering restored")
- if shipColorOK then print("MODEL_RECOVERY_COMPLETE: airship color loaded; hull and four cables installed; Departure preserved. Ctrl+S then Play")
- else warn("AIRSHIP_TEXTURE_PENDING: new color/material map failed. Mossrat installed; old airship preserved. Game publishing is not required by this patch.") end
- return shipColorOK
+ print("MODEL_RECOVERY_INSTALLED: meshes installed; imported airship PBR pack preserved; four cables and Departure preserved. Ctrl+S then check colors in Play")
+ return true
 end
 return M
 ]====]

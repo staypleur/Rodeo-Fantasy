@@ -24,9 +24,11 @@ PNG 파일은 이번에는 선택하지 않는다.
 Studio 아래 명령 모음에 붙여넣고 실행한다. 가져온 모델 선택/이전 설치 명령은 필요 없다.
 
 6. 출력 확인:
+RECOVERY_MESH Hunt/Detail/Airship Success: 세 메시 로드 성공.
 MOSSRAT_HEAD_SHAPE_APPLIED: 머리 보정 모스랫 설치 완료.
-MODEL_RECOVERY_COMPLETE: 비행선 색/재질 로딩과 일괄 설치 완료.
-AIRSHIP_TEXTURE_PENDING: 새 비행선 맵도 로딩 실패. 모스랫은 설치하지만 기존 비행선은 보존한다. 이 경우 비행선 해결 완료는 아니다. 출력의 RECOVERY_TEXTURE Failure 행을 함께 확인한다. 이후 같은 코드 재실행 시 보관된 모스랫 가져오기를 재사용하므로 모스랫 재가져오기는 필요 없다.
+MODEL_RECOVERY_INSTALLED: 모스랫/비행선 배치 설치 완료. 색 렌더링 성공을 보증하는 문구는 아니므로 Play에서 확인한다.
+SurfaceAppearance는 처리된 텍스처 묶음을 사용하므로 개별 이미지 PreloadAsync 결과로 설치를 막지 않는다. 모스랫은 기존에 보이던 역할별 재질 묶음을 재사용하며, 비행선은 새 가져오기의 재질 묶음을 그대로 보존한다.
+이전 코드가 RECOVERY_TEXTURE Failure로 중단됐다면 가져오기/이름 변경을 반복할 필요 없이 업데이트된 ApplyModels.commandbar.lua 전체를 다시 복사해서 실행한다.
 
 7. 완료 문구가 나오면 Ctrl+S 후 ▶ 플레이.
 로비 비행선이 청록/금색인지, 배 아래 네 줄이 바구니 쪽으로 연결되는지, 중앙 출발 지점 E 길게 누르기가 작동하는지 확인.

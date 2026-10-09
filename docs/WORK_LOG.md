@@ -876,3 +876,11 @@
 - dist/ModelRecovery/ApplyModels.commandbar.lua에서 세 가져오기 검증 후 사냥/상세 템플릿과 비행선 일괄 설치. 기존 모델 백업, 이전 앞뒤 보정 유지, 공개/게시 설정 변경 없음, 사용자 비밀번호/설정 보존. 새 비행선 색·재질맵이 모두 로드 성공 때만 교체하며 실패하면 모스랫만 설치하고 AIRSHIP_TEXTURE_PENDING 출력/기존 비행선 보존. 재실행 시 보관된 모스랫 입력 재사용 가능. 실패를 해결 완료로 표시하지 않음.
 - 실제 메시 보정 렌더 직접 시각 검토. 모델 구조/고정 영역/UV/스킨/정규 법선/삼각형 검사, 실제 일괄 설치 모듈의 정상/색 실패/설치 오류 복구 및 E 출발/선택 보존 검사 통과. Studio 실제 신규 자산 업로드·색 로드·플레이 확인은 사용자 적용 후 필요. 카페 시각 검증은 추후.
 - 잘못된 도로 정면 잠금용 MossratStraightLook.commandbar.lua는 제거하고 새 일괄 적용 파일로 대체. 적용방법.txt와 채팅에 전체 적용/성공/실패/플레이 확인 절차 제공. 원본/개인 Place/Capture 파일은 직접 수정하지 않음.
+
+
+## 2026-10-10 설치 출력 후 재질 검사 정정
+- 사용자03:58 출력: Hunt 색74547528827940/금속96306295369426/거칠기85852510141470 개별 이미지 Preload Failure로 선행 assert 중단. 기존 템플릿/비행선은 미변경. 가져오기 루트/네 다리 뼈 검사는 통과했으므로 재가져오기 불필요.
+- Roblox 공식 ContentProvider 문서 확인: SurfaceAppearance는 처리된 texture pack을 사용하며 PreloadAsync로 객체를 검증하는 것을 지원하지 않음. 개별 이미지 요청 실패를 전체 PBR 렌더 실패로 단정하거나 설치 필수 조건으로 사용한 이전 설계를 정정. 실제 회색 비행선의 표시 문제는 여전히 Play 시각 확인 필요.
+- 일괄 설치기에 메시 geometry만 선행 로드 검증. UV/이미지가 보존된 모스랫 보정본에는 기존에 표시되던 역할별 SurfaceAppearance 전체(숨겨진 pack 포함)를 Clone하여 사용. 비행선은 새로 가져온 SurfaceAppearance 전체를 보존한 채 몸/줄 정렬 설치. 색 성공을 확정하는 COMPLETE 문구와 RecoveryTexturesChecked=true 제거, MODEL_RECOVERY_INSTALLED와 Play 확인 안내로 대체.
+- 종전 로비 재시도 코드의 개별 맵 URI 교체도 제거해 pack 무효화 방지. 원본 맵/설정/개인 파일/비밀번호 변경 없음. 실제 배포 없음. 세 가지 모델 입력을 재사용하는 적용 방법을 한 번에 안내.
+- 실제 일괄 설치 모듈 테스트: 역할별 기존 PBR pack 복사, 개별 이미지 요청 금지, 메시 실패시 무변경, 설치 오류 롤백, E Departure/선택 보존, 시각 성공 오표시 방지 통과. 관련 Luau 컴파일 통과. 공식 근거: https://create.roblox.com/docs/reference/engine/classes/ContentProvider
