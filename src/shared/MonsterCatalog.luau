@@ -22,9 +22,16 @@ end
 function C.visual(id,stars) local stage=C.stage(stars or 1) return C[id].Visual..(stage==1 and "" or "_S"..stage) end
 function C.template(id,stars) local stage=C.stage(stars or 1) return C[id].Template..(stage==1 and "" or "_S"..stage) end
 function C.saddleHeight(id,stars)
- -- The approved A1 has shorter, grounded legs. Higher approved growth stages keep their seats.
- local height=id=="MeadowMouse" and C.stage(stars or 1)==1 and 1.2 or C[id].SaddleHeight
- return height*C.scale(stars or 1)
+ stars=stars or 1
+ if id=="MeadowMouse" then
+  local stage=C.stage(stars)
+  if stage==1 then return 1.2*C.scale(stars) end
+  -- Meshes already contain their approved stage size. Seat above the back,
+  -- with a constant clearance for the unscaled player rather than its crown.
+  local back={[3]=2.212572,[6]=3.232653,[9]=6.561222}
+  return back[stage]*C.scale(stars)/C.Scales[stage]+1.36-C[id].RootHeight*C.scale(stars)
+ end
+ return C[id].SaddleHeight*C.scale(stars)
 end
 function C.pick(meters,serial)
  if meters<0 or meters>=C.MeadowEndMeters then return nil end

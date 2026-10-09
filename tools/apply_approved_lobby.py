@@ -9,11 +9,12 @@ P.SOURCES={'CaptureClient':R/'src/client/CaptureClient.client.luau','SkyWhaleMot
 P.SOURCES['CaptureServer']=R/'src/server/CaptureServer.server.luau'
 P.SOURCES['HuntWorld']=R/'src/server/HuntWorld.luau'
 P.SOURCES['CourseGeometry']=R/'src/shared/CourseGeometry.luau'
+P.SOURCES['MonsterCatalog']=R/'src/shared/MonsterCatalog.luau'
 parser=argparse.ArgumentParser()
 parser.add_argument('--output',type=Path,default=R/'dist/RodeoFantasy-ApprovedLobby.rbxlx')
 args=parser.parse_args()
 out=args.output
-for name in ('RideAnimator','CreatureMesh','FacetedMouse','MonsterPortrait','CrashEffect','JournalUI','BagUI'):
+for name in ('RideAnimator','CreatureMesh','FacetedMouse','FacetedMouseData','MonsterPortrait','CrashEffect','JournalUI','BagUI'):
  P.SOURCES[name]=R/f'src/client/{name}.luau'
 P.patch(R/'dist/RodeoFantasy-JournalBagReview.rbxlx',out)
 root=E.parse(out).getroot();before=copy.deepcopy(root)

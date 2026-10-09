@@ -7,6 +7,7 @@ local function client(fail)
  local vec={}
  local function V(x,y,z) return setmetatable({X=x,Y=y,Z=z},vec) end
  vec.__add=function(a,b) return V(a.X+b.X,a.Y+b.Y,a.Z+b.Z) end
+ vec.__sub=function(a,b) return V(a.X-b.X,a.Y-b.Y,a.Z-b.Z) end
  vec.__mul=function(a,b) return V(a.X*b,a.Y*b,a.Z*b) end
  local Vector3={new=V} local Vector2={new=function(x,y) return {X=x,Y=y} end,zero={X=0,Y=0}}
  local cf={}
@@ -91,6 +92,10 @@ local function client(fail)
   p.Size=V(high.X-low.X,high.Y-low.Y,high.Z-low.Z) return p
  end
  local catalog={MeadowMouse={RootHeight=2.05},stage=function(stars) return stars>=3 and 3 or 1 end,scale=function(stars) return stars==2 and 1.2 or 1 end}
+ for _,star in ipairs({3,6,9}) do
+  local back={[3]=2.212572,[6]=3.232653,[9]=6.561222}
+  assert(math.abs(catalog.saddleHeight('MeadowMouse',star)+2.05*catalog.scale(star)-back[star]-1.36)<.00001,'seat must use back rather than crown height')
+ end
  local package={MonsterCatalog='catalog'} local script={Parent={FacetedMouseData='data'}}
  local game={ReplicatedStorage={RodeoFantasy=package},GetService=function() return Asset end}
  local require=function(which) return which=='data' and data or catalog end
@@ -117,14 +122,14 @@ end
 local m,new,objects,metrics,remember,late=client(false)
 local animal,old=new(1,false)
 assert(m.apply(animal) and old.destroyed and animal.PrimaryPart.Parent==animal)
-assert(animal:GetAttribute('FacetedMouseRevision')=='FacetedA1-v1')
+assert(animal:GetAttribute('FacetedMouseRevision')=='Mossrat-Lineage-v1-S1')
 assert(not m.apply(animal),'same model must not install twice')
 local tri,pixels=metrics() assert(tri==747)
 local fixedCount=0
 for _,o in ipairs(objects) do if o.ClassName=='EditableMesh' then
  if o.dynamic then assert(o.destroyed,'temporary topology builder must be freed') else fixedCount+=1 assert(o.FixedSize and not o.destroyed) end
 end end
-assert(fixedCount==29)
+assert(fixedCount==8)
 local count=0
 for _,p in ipairs(animal:GetChildren()) do if p.ClassName=='MeshPart' then
  count+=1 assert(not p.CanCollide and not p.CanTouch and not p.CanQuery)
@@ -132,13 +137,13 @@ for _,p in ipairs(animal:GetChildren()) do if p.ClassName=='MeshPart' then
  assert(#p:GetChildren()==0 and p.TextureContent.ClassName=='EditableImage' and not p.TextureContent.destroyed)
  if p.Name=='LeftFrontLeg' then assert(math.abs(p.CFrame.Position.Y-p.Size.Y/2)<.00001,'paws must meet ground') end
 end end
-assert(count==29)
+assert(count==8)
 for _,p in ipairs(animal:GetDescendants()) do if p:IsA('BasePart') and p~=animal.PrimaryPart then assert(p:GetAttribute('ApprovedRest'),'nested original must be removed') end end
 assert(late(animal).destroyed,'late server geometry must not reappear')
 -- Root is moved in the injected callback, before the real animator remembers.
 local pose=remember(animal)
 for _,entry in ipairs(pose) do assert(entry.rest==entry.part:GetAttribute('ApprovedRest'),'animator must use canonical parts, not stale world positions') end
-assert(#pose==29)
+assert(#pose==8)
 local silhouette=new(1,true) assert(m.apply(silhouette))
 for _,p in ipairs(silhouette:GetChildren()) do if p.ClassName=='MeshPart' then assert(#p:GetChildren()==0 and p.TextureID=='' and p.Color[1]==0) end end
 assert(metrics()==747,'portraits must reuse the shared factory')
@@ -151,14 +156,42 @@ for run=1,10 do
  replay:Destroy()
 end
 assert(metrics()==747,'restarting must reuse meshes and image rather than allocate new geometry')
-local third=new(3,false) assert(not m.apply(third),'unapproved growth stages must stay unchanged')
+for _,stars in ipairs({3,6,9,4,7,10}) do
+ local growth=new(stars,false) assert(m.apply(growth),'approved stages must install')
+ local scales={[1]=1,[3]=1.4,[6]=1.9,[9]=2.5}
+ local stage=stars>=9 and 9 or stars>=6 and 6 or 3
+ local scale=stage==9 and 2.5+(stars-9)*.2 or scales[stage]+(scales[stage+3]-scales[stage])*(stars-stage)/3
+ local legs=0 local top=-math.huge
+ for _,part in ipairs(growth:GetChildren()) do if part.ClassName=='MeshPart' then
+  assert(part:GetAttribute('ApprovedPivot'),'animation pivot must survive replacement')
+  local rest=part:GetAttribute('ApprovedRest').Position
+  top=math.max(top,rest.Y+part.Size.Y/2+2.05*scale)
+  if part.Name:find('Leg') then
+   legs+=1
+   assert(math.abs(rest.Y-part.Size.Y/2+2.05*scale)<.00001,'growth feet must be grounded')
+  end
+ end end
+ assert(legs==4,'four separately animated legs')
+ local heights={[3]=4,[6]=6.62043285,[9]=16.1318016}
+ assert(math.abs(top-heights[stage]*scale/scales[stage])<.0001,'growth must not scale twice')
+ local black=new(stars,true) assert(m.apply(black))
+ for _,part in ipairs(black:GetChildren()) do if part.ClassName=='MeshPart' then assert(part.Color[1]==0 and part.TextureID=='') end end
+end
+assert(metrics()==747+1075+1399+1671,'all stages must reuse factory')
+local imageCount,meshCount=0,0
+for _,obj in ipairs(objects) do
+ if obj.ClassName=='EditableImage' then imageCount+=1 end
+ if obj.ClassName=='EditableMesh' and not obj.dynamic then meshCount+=1 end
+end
+assert(imageCount==2 and meshCount==32,'two atlases/eight animation batches per stage')
 local failed,newFailed,all=client(true) local target,prior=newFailed(1,false)
 assert(not failed.apply(target) and not prior.destroyed and target.PrimaryPart.Parent==target)
-for _,obj in ipairs(all) do if obj.ClassName=='EditableMesh' or obj.ClassName=='EditableImage' or obj.ClassName=='SurfaceAppearance' or obj.ClassName=='MeshPart' then assert(obj.destroyed,'failed factory must free resources') end end
+for _,obj in ipairs(all) do if obj.ClassName=='EditableMesh' or obj.ClassName=='SurfaceAppearance' or obj.ClassName=='MeshPart' then assert(obj.destroyed,'failed factory must free mesh resources') end end
 local surfaceFail,makeSurfaceFail=client('texture') local interrupted,previous=makeSurfaceFail(1,false)
 assert(not surfaceFail.apply(interrupted) and not previous.destroyed,'surface error must preserve original visual')
 assert(not interrupted:GetAttribute('FacetedMouseRevision'),'failed color binding must not mark installation complete')
-print('APPROVED_MOUSE_RUNTIME_PASS:747 faces/29 fixed textured meshes, single temporary builder, cache reuse, grounded paws, silhouette, growth scope and atomic failure cleanup; API stubs only')
+print('APPROVED_MOUSE_RUNTIME_PASS: four stages, 32 fixed meshes/two atlases, four animated legs/ears/tail pivots, grounding/interpolated scale/silhouettes/replay/cache/failure fallback; API stubs only')
 '''
+prefix=prefix.replace("local catalog={MeadowMouse={RootHeight=2.05},stage=function(stars) return stars>=3 and 3 or 1 end,scale=function(stars) return stars==2 and 1.2 or 1 end}","local catalog=(function()\n"+(R/'src/shared/MonsterCatalog.luau').read_text(encoding='utf-8')+"\nend)()")
 harness=R/'.tools/approved_mouse_runtime.luau';harness.write_text(prefix+source+suffix,encoding='utf-8')
 subprocess.run([str(R/'.tools/luau/luau.exe'),str(harness.relative_to(R))],cwd=R,check=True)

@@ -222,10 +222,10 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
 			end
    if running and entry.part.Name:find("Ear") then
     local sign=entry.part.Name:find("Left") and -1 or 1
-    local pivot=CFrame.new(sign*0.87*scale,1.3*scale,-1.21*scale)
+    local pivot=entry.part:GetAttribute("ApprovedPivot") and CFrame.new(entry.part:GetAttribute("ApprovedPivot")) or CFrame.new(sign*0.87*scale,1.3*scale,-1.21*scale)
     localFrame=pivot*CFrame.Angles(math.sin(phase)*0.12,0,sign*math.sin(phase)*0.1)*pivot:Inverse()*localFrame
    elseif running and entry.part.Name:find("Tail") then
-    local pivot=CFrame.new(0,-0.1*scale,1.7*scale)
+    local pivot=entry.part:GetAttribute("ApprovedPivot") and CFrame.new(entry.part:GetAttribute("ApprovedPivot")) or CFrame.new(0,-0.1*scale,1.7*scale)
     localFrame=pivot*CFrame.Angles(0,math.sin(phase*0.65)*0.3,0)*pivot:Inverse()*localFrame
    end
 			entry.part.CFrame = frame * localFrame
