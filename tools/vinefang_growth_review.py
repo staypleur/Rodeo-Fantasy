@@ -4,42 +4,88 @@ R=Path(__file__).resolve().parents[1]
 base=(R/'tools/mouse_s1_faceted_revision.py').read_text(encoding='utf-8')
 helpers=base.split('# A short bevelled torso')[0]
 helpers=helpers.replace('(220,162,136),(251,216,182)','(137,175,66),(207,233,120)')
+helpers=helpers.replace("name=='Body' and j in (5,6)","name=='Body' and j in (6,7,8)")
 helpers=helpers.replace('(64,140,68),(179,220,65)','(124,174,56),(211,235,119)')
 helpers=helpers.replace("'Dark':(0,2),'Ivory':(1,2)","'Dark':(0,2),'Ivory':(1,2),'Gold':(2,2)")
 helpers=helpers.replace(" if kind=='Fur':", " if kind=='Gold':return blend((157,111,44),(238,202,103),1-v)\n if kind=='Fur':",1)
 leaf=base.split('def leaf(')[1].split("leaf('HeadSproutLeft'")[0]
 leaf=leaf.replace('clover=False):','clover=False,kind="Leaf"):').replace("'Leaf',normal)","kind,normal)").replace("'Leaf',-normal)","kind,-normal)").replace("'Leaf',verts[j]-middle)","kind,verts[j]-middle)")
 growth=(R/'tools/mouse_growth_faceted_review.py').read_text(encoding='utf-8').split("addition=r'''",1)[1].split("meshes[:]=",1)[0]
+# Fewer guide samples in mane strands leave room for rounded joints/head.
+growth=growth.replace('for t in (0.,.5):','for t in (0.,):')
+growth=growth.replace('],kind,rows[i][j]-np.array(rings[i][0]))',"],'Fur' if name.endswith('Leg') and i>=4 else kind,rows[i][j]-np.array(rings[i][0]))")
 export=base.split('# Embed the actual atlas')[1]
 body=r'''
-P={1:dict(width=.66,head=.72,muzzle=.62,mane=.20,tail=.35),3:dict(width=.72,head=.69,muzzle=.77,mane=.65,tail=.90),6:dict(width=.94,head=.63,muzzle=1.06,mane=1.35,tail=1.27),9:dict(width=1.22,head=.64,muzzle=1.48,mane=2.10,tail=1.75)}[STAGE]
+P={1:dict(width=.66,head=.64,muzzle=.85,mane=.20,tail=.35),3:dict(width=.72,head=.69,muzzle=.77,mane=.65,tail=.90),6:dict(width=.94,head=.63,muzzle=1.28,mane=1.35,tail=1.27),9:dict(width=1.22,head=.64,muzzle=1.68,mane=2.10,tail=1.75)}[STAGE]
 w=P['width'];h=P['head'];hy=1.15 if STAGE==1 else 1.37
-loft('Body',[((0,.48,-.85),w*.72,.68),((0,.49,-.28),w,.75),((0,.35,.77),w*.78,.57),((0,.35,1.60),w*.67,.64)],sides=8)
-loft('Neck',[((0,hy,-1.67),h*.65,.60),((0,1.07,-1.12),w*.75,.68),((0,.74,-.57),w*.86,.67)],'Fur',8)
-if STAGE==1:
- # More small bevels round the skull outline while every triangle stays flat.
- loft('Head',[((0,hy,-2.10),.61,.54),((0,hy+.035,-1.91),.69,.59),((0,hy+.025,-1.58),.59,.53),((0,hy,-1.38),.40,.40)],'Fur',14)
-else:loft('Head',[((0,hy,-2.10),h*.78,h*.72),((0,hy+.09,-1.87),h,h),((0,hy+.04,-1.45),h*.77,h*.77)],'Fur',8)
-mz=-2.12-P['muzzle']*.55
-loft('Muzzle',[((0,hy-.20,-2.00),h*.66,.31),((0,hy-.24,mz+.13),h*.48,.23),((0,hy-.23,mz),h*.29,.16)],'Cream',8)
-nose_width=h*(.21 if STAGE==1 else .27)
-loft('Nose',[((0,hy-.16,mz-.055),nose_width,.11 if STAGE==1 else .13),((0,hy-.16,mz+.025),nose_width,.11 if STAGE==1 else .13)],'Dark',6)
+# Body and rising neck are a single continuous ring surface. The front cap
+# is inside the skull, and the shoulder/hips have small intermediate bevels.
+loft('Body',[((0,hy-.07,-1.66),h*.47,.43),((0,hy-.16,-1.37),h*.61,.48),((0,.76,-1.00),w*.68,.61),((0,.54,-.60),w*.92,.74),((0,.48,-.18),w,.73),((0,.37,.42),w*.91,.65),((0,.35,1.03),w*.79,.61),((0,.35,1.52),w*.57,.46)],sides=10)
+# A rounded, closed skull built vertically; the face is its curved front
+# surface, rather than an enormous cap across the front of a lengthwise tube.
+profiles=[(hy-.53,h*.35,.28,-1.76),(hy-.34,h*.72,.44,-1.81),(hy-.08,h*.84,.54,-1.83),(hy+.19,h*.82,.56,-1.89),(hy+.39,h*.66,.43,-1.70),(hy+.54,h*.39,.25,-1.57),(hy+.59,h*.09,.08,-1.61)]
+head=mesh('Head');rows=[];sides=10
+for y,rx,rz,cz in profiles:
+ rows.append([np.array((math.sin(j*math.tau/sides)*rx,y,cz-math.cos(j*math.tau/sides)*rz)) for j in range(sides)])
+for i in range(len(rows)-1):
+ for j in range(sides):
+  k=(j+1)%sides;points=[rows[i][j],rows[i][k],rows[i+1][k],rows[i+1][j]]
+  coords=[(.5+v[0]/(h*2.1),.5-(v[1]-hy)/1.3) for v in points]
+  quad(head,points,coords,'Fur',rows[i][j]-np.array((0,profiles[i][0],profiles[i][3])))
+for row,hint in ((0,(0,-1,0)),(-1,(0,1,0))):
+ center=(0,profiles[row][0],profiles[row][3])
+ for j in range(sides):tri(head,[center,rows[row][j],rows[row][(j+1)%sides]],[(.5,.5),(.5,.5),(.5,.5)],'Fur',hint)
+
+def face_z(x,y):
+ heights=[];positions=np.asarray(head['p'])
+ for i in range(0,len(positions),3):
+  triangle=positions[i:i+3];a=np.stack((triangle[:,0],triangle[:,1],np.ones(3)))
+  if abs(np.linalg.det(a))<1e-9:continue
+  weights=np.linalg.solve(a,np.array((x,y,1)))
+  if weights.min()>=-1e-6:heights.append(float(weights@triangle[:,2]))
+ assert heights,(STAGE,x,y,'face attachment outside skull')
+ return min(heights)-.026
+mz=-2.20-P['muzzle']*.58
+loft('Muzzle',[((0,hy-.23,-1.96),h*.52,.26),((0,hy-.24,-2.18),h*.47,.22),((0,hy-.25,mz+.19),h*.32,.17),((0,hy-.23,mz),h*.22,.13)],'Cream',10)
+nose_width=h*(.20 if STAGE==1 else .25)
+loft('Nose',[((0,hy-.16,mz-.07),nose_width*.80,.085),((0,hy-.16,mz-.025),nose_width,.12),((0,hy-.16,mz+.035),nose_width*.82,.10)],'Dark',6)
 for sg,side in ((-1,'Left'),(1,'Right')):
- cx=sg*h*.50;cy=hy+.16;z=-2.125
- pts=[(cx-sg*.18,cy+.08,z),(cx+sg*.20,cy+.16,z),(cx+sg*.17,cy-.13,z),(cx-sg*.15,cy-.12,z)]
- pts=[(x,y,z+.30*abs(x)-.10) for x,y,z in pts]
- if STAGE==1:pts=[(x,cy+(y-cy)*1.50,z) for x,y,z in pts]
- if STAGE==9:pts=[(x,cy+(y-cy)*.65,z) for x,y,z in pts]
- if STAGE==1:
-  eye=mesh(side+'Eye');outline=[]
-  for k in range(8):
-   a=k*math.tau/8;x=cx+math.cos(a)*.15;y=cy+math.sin(a)*.205
-   outline.append((x,y,z+.30*abs(x)-.10))
-  for k in range(8):
-   a=k*math.tau/8;b=(k+1)*math.tau/8
-   tri(eye,[(cx,cy,z+.30*abs(cx)-.10),outline[k],outline[(k+1)%8]],[(.5,.5),(.5+.5*math.cos(a),.5-.5*math.sin(a)),(.5+.5*math.cos(b),.5-.5*math.sin(b))],'Eye',(0,0,-1))
- else:quad(mesh(side+'Eye'),pts,[(0,0),(1,0),(1,1),(0,1)],'Eye',(0,0,-1))
- if STAGE>=3:leaf(side+'Brow',(cx-sg*.18,cy+.08,z-.018),(sg*.90,.30,.08),.40,.15,.035,kind='Fur')
+ cx=sg*h*.51;cy=hy+.12
+ rx={1:.145,3:.155,6:.16,9:.165}[STAGE];ry={1:.19,3:.16,6:.13,9:.105}[STAGE]
+ eye=mesh(side+'Eye');outline=[]
+ for k in range(8):
+  a=k*math.tau/8;x=cx+math.cos(a)*rx;y=cy+math.sin(a)*ry
+  if STAGE>=3:y+=sg*(x-cx)*.24
+  outline.append((x,y,face_z(x,y)))
+ # Clip the eye polygon to every visible skull triangle so it shares the
+ # curved surface exactly; a single projected fan can sink behind a facet.
+ polygon=[np.array(v[:2]) for v in outline]
+ def clip(poly,a,b,orientation):
+  out=[]
+  def distance(p):return orientation*((b[0]-a[0])*(p[1]-a[1])-(b[1]-a[1])*(p[0]-a[0]))
+  for index,end in enumerate(poly):
+   start=poly[index-1];ds=distance(start);de=distance(end)
+   if (ds>=-1e-8)!=(de>=-1e-8):out.append(start+(end-start)*ds/(ds-de))
+   if de>=-1e-8:out.append(end)
+  return out
+ positions=np.asarray(head['p'])
+ for i in range(0,len(positions),3):
+  triangle=positions[i:i+3];normal=np.cross(triangle[1]-triangle[0],triangle[2]-triangle[0])
+  if normal[2]>=-1e-8:continue
+  xy=triangle[:,:2];area=np.cross(xy[1]-xy[0],xy[2]-xy[0]);orientation=1 if area>0 else -1
+  clipped=polygon
+  for j in range(3):
+   clipped=clip(clipped,xy[j],xy[(j+1)%3],orientation)
+   if len(clipped)<3:break
+  if len(clipped)<3:continue
+  matrix=np.stack((triangle[:,0],triangle[:,1],np.ones(3)))
+  verts=[];coords=[]
+  for x,y in clipped:
+   weights=np.linalg.solve(matrix,np.array((x,y,1)))
+   verts.append((x,y,float(weights@triangle[:,2])-.012))
+   tilt=sg*(x-cx)*.24 if STAGE>=3 else 0
+   coords.append((float(np.clip(.5+(x-cx)/(2*rx),0,1)),float(np.clip(.5-(y-cy-tilt)/(2*ry),0,1))))
+  for j in range(1,len(verts)-1):tri(eye,[verts[0],verts[j],verts[j+1]],[coords[0],coords[j],coords[j+1]],'Eye',normal)
  root=np.array((sg*h*.69,hy+h*.58,-1.65));height={1:.40,3:.85,6:.74,9:.83}[STAGE]
  front=[root+np.array((sg*x,y,z)) for x,y,z in ((-.19,0,-.10),(.23,-.04,-.03),(.14,height,.02))]
  back=[v+np.array((0,0,.19)) for v in front];m=mesh(side+'Ear')
@@ -49,7 +95,7 @@ for sg,side in ((-1,'Left'),(1,'Right')):
  tri(mesh(side+'EarPink'),inner,[(0,1),(1,1),(.5,0)],'Pink',(0,0,-1))
  for z,label in ((-.57,'Front'),(1.28,'Back')):
   cx=sg*w*.64
-  upright(side+label+'Leg',[((cx,-1.03,z-.20),.28,.38),((cx,-.84,z-.09),.22,.27),((cx,-.40,z+.12),.18,.19),((cx,-.06,z+(.22 if label=='Back' else 0)),.20,.25),((cx*.90,.53,z),.34,.37)],'Cream',6)
+  upright(side+label+'Leg',[((cx,-1.03,z-.20),.24,.36),((cx,-.91,z-.17),.26,.35),((cx,-.76,z-.04),.19,.23),((cx,-.48,z+.10),.17,.20),((cx,-.14,z+.15),.22,.25),((cx*.92,.21,z+.06),.28,.31),((cx*.74,.61,z),.18,.24)],'Cream',6)
   for k in (-1,0,1):
    loft(side+label+'Claw'+str(k),[((cx+k*.13,-.96,z-.60),.037,.046),((cx+k*.13,-.96,z-.41),.05,.055)],'Dark',4)
  # A slim mouth line and small visible canine make the muzzle read as a wolf.
