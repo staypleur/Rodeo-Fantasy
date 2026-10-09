@@ -520,3 +520,13 @@
 - assets/maps/lobby-colors-layout.png는 새 장소의 실제 부품을 위에서 투영한 배치도이며 직접 열어8색 구역과 열린 입구를 확인했다. Studio 스크린샷이 아니며 실제 조명·주행·부하 시험은 아직 미실행. Roblox 게시도 미실행.
 - 다음 디자인은 tools/lobby_plaza_review.py로 만든 중앙 광장/8개 정원 쉼터 검토안. 크림 포장과 평평한 중심, 낮은 화단, 벤치·덩굴 퍼골라·가로등622 native Parts. 주요 통로12studs에 장식이 침범하지 않는 좌표 검사 통과. 기존 비행선·상점·게시판·로고는 이 검토 모델에 포함하지 않았으며 실제 적용 시 기존 기능/로고 보존을 별도로 점검해야 한다.
 - dist/ReviewModels/LobbyPlazaGardenReview.rbxmx와 동일 geometry를 렌더링한 assets/previews/LobbyPlazaGardenReview.png 저장. native_part_review.py는 실제 검토 모델 내보내기와 깊이 버퍼 이미지 생성 공통 도구다. 이미지 직접 확인 완료. 다음 디자인은 사용자 승인 대기이며 현재 게임 파일에는 적용하지 않았다.
+
+
+## 2026-10-09 — 중앙 광장 정원 승인 적용·추가 속도 조정·서비스 건축 검토안
+
+- 사용자가 중앙 광장 정원을 승인하고 로비 속도를 더 높이도록 요청했다. Config.LobbyWalkSpeed를24→32로 조정(직전보다33%, 최초16보다2배). 기존 입장/재등장/복귀 helper 연결은 유지했고 사냥 이동 값은 변경하지 않았다. 실제 helper 모의 실행 검사 및 Config Luau 컴파일 통과.
+- tools/apply_lobby_plaza.py는 LobbyColors의 Config Source만 정확히 교체한 중간 파일에서 출발해 승인 LobbyPlazaGardenReview 모델을 추가한다. 총622 부품 중 검토 바닥1개/길8개는 기존 섬·연결길을 사용해613개 실제 정원/포장 부품을 설치한다. 중앙 타일 높이는 기존 로고 아래에 맞췄다. 이전 PlazaBrick/PavingStone/정원 코너4개/가로등을 교체하되 중앙 원형 기반/수로는 유지한다. 꽃·잎·덩굴·등 본체는 비충돌. 기존 WarmLight 속성을 새 가로등16개에 복사했다.
+- 기존 상점2개와 랭킹 게시판2개가 새 화단·쉼터와 겹쳐 반경49→95의 각 통로 사이 공간으로 옮겼다. 시각 형상과 GUI/게시판 참조 이름 등 CFrame 위치 이외 모든 속성은 보존했다. 새 상점 건축은 아직 적용하지 않았다.
+- dist/RodeoFantasy-LobbyPlaza.rbxlx를 별도 저장했다. 설치613부품/16등, 정원 및 옮긴 서비스 시설의 주요12stud 통로 불침범 검사, 32개 실제 목장/8길, Plots·Airport·바닥 로고·Spawn·Boundary 동일성, 로비 밖 속성/스크립트와703 MeshPart 보존, 참조 고유/끊김 없음 검사 통과. 원래 Capture/이전 파일은 덮어쓰지 않았다. 실제 Studio 이동·렌더링·성능/Roblox 게시는 아직 미실행.
+- assets/maps/lobby-plaza-layout.png로 실제 장소의 위쪽 배치도를 만들고 열어8개 정원/길/옮긴 시설과8색 개인 구역 배치를 확인했다. 거대한 기존 비행선 때문에 위쪽 투영에서 중심부가 가려지는 것은 이 배치도 시점의 한계다.
+- 다음 디자인은 tools/lobby_services_review.py의 정원 상점/랭킹 게시판 쉼터120 native Parts. 크림 기둥·청록→민트 지붕층·금색 띠·화단, 상점의 빈 진열대/카운터, 랭킹의 두 열 게시면/벤치로 준비했다. 상점 판매 품목·가격을 확정하지 않았고 랭킹 UI도 검토 모델에는 연결하지 않았다. dist/ReviewModels/LobbyServicesReview.rbxmx와 실제 geometry 렌더 assets/previews/LobbyServicesReview.png 저장. 모델 좌표/크기/회전 및 스크립트 없음 검사 통과, 이미지 직접 확인. native_part_review.py에 선택적 카메라 방향을 추가해 지붕 아래 게시면이 보이게 했다. 다음 디자인은 사용자 승인 대기/게임 미적용.

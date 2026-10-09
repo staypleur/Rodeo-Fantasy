@@ -4,7 +4,7 @@ import math,itertools,xml.etree.ElementTree as E
 import numpy as np
 from PIL import Image,ImageDraw,ImageFont
 R=Path(__file__).resolve().parents[1]
-def save_review(parts,model_name,title,note):
+def save_review(parts,model_name,title,note,eye_direction=(.72,.85,-1.1)):
  root=E.Element('roblox',version='4');model=E.SubElement(root,'Item',{'class':'Model','referent':model_name})
  props=E.SubElement(model,'Properties');E.SubElement(props,'string',name='Name').text=model_name
  for index,(name,pos,size,color,matrix) in enumerate(parts):
@@ -22,7 +22,7 @@ def save_review(parts,model_name,title,note):
  E.ElementTree(root).write(folder/(model_name+'.rbxmx'),encoding='utf-8',xml_declaration=True)
  # Orthographic render of actual geometry, no generated concept art.
  image=Image.new('RGB',(1500,1020),(234,237,226));draw=ImageDraw.Draw(image)
- eye=np.array((.72,.85,-1.1));eye/=np.linalg.norm(eye);right=np.cross((0,1,0),eye);right/=np.linalg.norm(right);up=np.cross(eye,right)
+ eye=np.array(eye_direction,dtype=float);eye/=np.linalg.norm(eye);right=np.cross((0,1,0),eye);right/=np.linalg.norm(right);up=np.cross(eye,right)
  vertices=[];faces=[]
  faceids=[(0,1,3,2),(4,6,7,5),(0,4,5,1),(2,3,7,6),(0,2,6,4),(1,5,7,3)]
  for name,pos,size,color,matrix in parts:
