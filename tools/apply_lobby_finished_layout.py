@@ -1,4 +1,4 @@
-"""Apply approved tall shops, freestanding boards and outer entrance to a saved place."""
+"""Apply approved tall shops, freestanding boards without the rejected outer entrance to a saved place."""
 from pathlib import Path
 import argparse,copy,math,itertools,xml.etree.ElementTree as E
 import numpy as np
@@ -87,39 +87,11 @@ refs=[n.get('referent') for n in after.iter('Item')];assert len(refs)==len(set(r
 assert all(n.text in set(refs) or n.text in ('null','nil',None) for n in after.iter('Ref'))
 meshCount=sum(n.get('class')=='MeshPart' for n in after.iter('Item'))
 assert meshCount==sum(n.get('class')=='MeshPart' for n in before.iter('Item'))
-# Approved outer gate goes between ranches, inside the perimeter.
+# Latest user decision: remove the added arch and outer garden.
 for old in list(lobby.findall('Item')):
  if name(old)=='OuterGatewayGarden':lobby.remove(old)
-gateway=E.parse(R/'dist/ReviewModels/LobbyGatewayReview.rbxmx').getroot().find('Item')
-container=E.SubElement(lobby,'Item',{'class':'Model','referent':'ApprovedOuterGate'})
-p=E.SubElement(container,'Properties');E.SubElement(p,'string',name='Name').text='OuterGatewayGarden'
-a=math.radians(22.5);co,si=math.cos(a),math.sin(a)
-rotation=np.array([[co,0,si],[0,1,0],[-si,0,co]])
-center=np.array([6000+si*231,0,co*231])
-for index,original in enumerate(gateway.findall('Item')):
- if name(original)=='ReviewGround':continue
- n=copy.deepcopy(original);n.set('referent',f'ApprovedOuterGate{index}')
- # Trim the outer end of the level paving to stop inside the enclosure.
- if name(n)=='OpenLevelWalk':n.find("Properties/Vector3[@name='size']/Z").text='68'
- _,pos,matrix=pose(n);transform(n,center+rotation@pos,rotation@matrix)
- key=name(n)
- flag(n,'CanCollide',key not in ('Flowers','Leaves','WaterRill','ArchGoldInset','CrestInset','Lamp'))
- container.append(n)
- # Explicit 3D separating-axis bounds against each existing ranch's footprint.
- _,pos,matrix=pose(n)
- size=np.array([float(n.findtext(f"Properties/Vector3[@name='size']/{q}")) for q in 'XYZ'])
- corners=np.array(list(itertools.product((-1,1),repeat=3)))*size/2@matrix.T+pos
- assert abs(corners[:,0]-6000).max()<250 and abs(corners[:,2]).max()<250,'gateway outside island'
- if corners[:,1].min()>8:continue
- for i in range(8):
-  angle=i*math.pi/4;cs,sn=math.cos(angle),math.sin(angle)
-  pr=np.array([[cs,0,sn],[0,1,0],[-sn,0,cs]])
-  pc=np.array([6000+sn*175,0,cs*175])
-  # Project all corners onto ranch axes; no low decor may enter its 83x99 base.
-  local=(corners-pc)@pr
-  assert local[:,0].min()>41.5 or local[:,0].max()<-41.5 or local[:,2].min()>49.5 or local[:,2].max()<-49.5, f'gateway overlaps ranch {i+1}: {key}'
 repair_duplicate_unique_ids(after)
 from place_identity import assert_unique_ids
 assert_unique_ids(after)
 out=args.output;E.ElementTree(after).write(out,encoding='utf-8',xml_declaration=True)
-print(f'SERVICES_APPLY_PASS: {len(installed)} service parts + {len(container.findall("Item"))} gateway parts, clear walks, preserved gardens/32 pens/{meshCount} meshes; {out}')
+print(f'SERVICES_APPLY_PASS: {len(installed)} service parts; added outer gateway removed, clear walks, preserved gardens/32 pens/{meshCount} meshes; {out}')
