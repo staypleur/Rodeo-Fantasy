@@ -9,6 +9,7 @@ local C=require(package.MonsterCatalog)
 local Q=require(package.CollectionQuery)
 local L=require(package.Localization)
 local Portrait=require(script.Parent.MonsterPortrait)
+local Buttons=require(script.Parent.BagUI)
 local function make(class,properties,parent)
  local node=Instance.new(class)
  if node:IsA("TextLabel") or node:IsA("TextButton") then node.Font=Enum.Font.Garamond node.TextColor3=Color3.fromRGB(63,57,42) end
@@ -24,8 +25,7 @@ local function hint(entry)
 end
 function J.new(gui,remote)
  local self={area="Lobby",page=1,region="All",seen={},data={},entries=Q.entries(C)}
- local button=make("TextButton",{Name="OpenJournal",Text=T("Field journal").." [T]",Size=UDim2.fromOffset(175,44),Position=UDim2.new(1,-310,1,-60),BackgroundColor3=Color3.fromRGB(79,101,76),TextColor3=Color3.fromRGB(255,239,189),TextSize=20},gui)
- make("UICorner",{CornerRadius=UDim.new(0,10)},button)
+ local button=Buttons.iconButton(gui,"Journal","T",92)
  local holdBar=make("Frame",{Name="JournalHold",Size=UDim2.new(0,0,0,3),Position=UDim2.new(0,0,1,-3),BackgroundColor3=Color3.fromRGB(231,187,93),BorderSizePixel=0},button)
  local book=make("Frame",{Name="FieldJournal",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.91,.84),BackgroundColor3=Color3.fromRGB(101,77,62),BorderSizePixel=0,ZIndex=40},gui)
  make("UISizeConstraint",{MaxSize=Vector2.new(980,680)},book)

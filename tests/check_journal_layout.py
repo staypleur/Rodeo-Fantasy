@@ -29,26 +29,33 @@ local Run={RenderStepped=signal()}
 local Tween={Create=function(_,node,info,goals) return {Completed=signal(),Play=function() for k,v in pairs(goals) do node[k]=v end end} end}
 local CAS={BindActionAtPriority=function() end,UnbindAction=function() end}
 local player={LocaleId='ko',Character=nil}
-local package={MonsterCatalog='C',CollectionQuery='Q',Localization='L'}
+local package={MonsterCatalog='C',CollectionQuery='Q',Localization='L',Config='Config'}
 local game={ReplicatedStorage={RodeoFantasy=package},GetService=function(_,name) return ({Players={LocalPlayer=player},UserInputService=UIS,RunService=Run,TweenService=Tween,ContextActionService=CAS})[name] end}
 local TweenInfo={new=function() return {} end}
 local task={delay=function() end}
-local script={Parent={MonsterPortrait='P'}}
+local script={Parent={MonsterPortrait='P',IncomeEffects='Income',BagUI='B'}}
 """
 prefix+='local C='+module('src/shared/MonsterCatalog.luau')+'\nlocal Q='+module('src/shared/CollectionQuery.luau')+'\n'
 prefix+=r"""
 local portraits={}
 local L={text=function(t) return t end,huntHint=function() return 'Hunt acquisition hint' end,evolutionHint=function(s) return 'Evolution '..s end}
 local P={fill=function(view,id,stars,silhouette,zoom) portraits[#portraits+1]={view=view,id=id,stars=stars,silhouette=silhouette,zoom=zoom} end}
-local require=function(k) return ({C=C,Q=Q,L=L,P=P})[k] end
-local J=(function()
+local Buttons
+local require=function(k) return ({C=C,Q=Q,L=L,P=P,B=Buttons,Config={},Income={}})[k] end
+
 """
+prefix+='Buttons='+module('src/client/BagUI.luau')+'\nlocal J=(function()\n'
 source=(R/'src/client/JournalUI.luau').read_text(encoding='utf-8')
 suffix=r"""
 end)()
 local gui=Instance.new('ScreenGui') local calls=0
 local ui=J.new(gui,{FireServer=function() calls+=1 end})
 local function find(name) for _,o in ipairs(objects) do if o.Name==name and o.Parent then return o end end end
+local bagButton=Buttons.iconButton(gui,'Bag','R',18)
+local journalButton=find('OpenJournal')
+assert(bagButton.Size.a==64 and journalButton.Size.a==64 and bagButton.Text=='' and journalButton.Text=='')
+assert(bagButton.Position.a==-18 and journalButton.Position.a==-92)
+assert(find('Shortcut').Font=='GothamBold')
 ui.open() ui.snapshot({seen={['MeadowMouse:1']=true}})
 assert(not find('JournalTitle') and not find('ExplorerLevel') and not find('JournalXPTrack'))
 local function verify(left,right,count)

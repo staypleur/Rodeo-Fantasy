@@ -1,5 +1,6 @@
 local L={}
 L.entries={
+ ["Collection discoveries"]={ko="도감 수집 랭킹",ja="図鑑収集ランキング"},
  ["Settings"]={ko="설정",ja="設定"},
  ["Sound settings"]={ko="소리 설정",ja="サウンド設定"},
  ["Background music"]={ko="배경 음악",ja="背景音楽"},

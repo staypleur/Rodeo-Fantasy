@@ -4,9 +4,14 @@ local Rules=require(game.ReplicatedStorage.RodeoFantasy.ProgressRules)
 local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
 local Run=game:GetService("RunService")
 local enabled=Run:IsRunning() and game.GameId>0
-local store
+local store,collection
 if enabled then
- local ok,value=pcall(function() return game:GetService("DataStoreService"):GetDataStore("RodeoExplorer"..(Run:IsStudio() and "_Test_v1" or "_v1")) end)
+ local ok,value=pcall(function()
+  local ds=game:GetService("DataStoreService")
+  local suffix=Run:IsStudio() and "_Test_v1" or "_v1"
+  collection=ds:GetOrderedDataStore("RodeoCollection"..suffix)
+  return ds:GetDataStore("RodeoExplorer"..suffix)
+ end)
  enabled=ok store=value
 end
 local entries={}
@@ -30,7 +35,7 @@ function S.join(player)
   if ok then
    data=data or {} e.saved=data.captures or 0
    for key,v in pairs(data.seen or {}) do if v then e.seen[key]=true end end
-   e.loaded=true e.status="Progress loaded"
+   e.loaded=true e.dirty=true e.status="Progress loaded"
   else e.status="Progress temporarily unavailable" end
  end) end
 end
@@ -59,11 +64,15 @@ function S.save(player)
  if ok then
   e.saved=data.captures e.ack=count e.loaded=true e.status="Progress saved"
   for key,v in pairs(data.seen) do if v then e.seen[key]=true end end
-  e.dirty=e.count~=count
+  local indexed=pcall(function()
+   local discovered=Rules.discovered(data.seen,Catalog)
+   collection:UpdateAsync(tostring(player.UserId),function(old) return math.max(old or 0,discovered) end)
+  end)
+  e.dirty=not indexed or e.count~=count
   for key in pairs(e.seen) do if not data.seen[key] then e.dirty=true end end
  else e.status="Progress temporarily unavailable" warn("Rodeo explorer progress save failed; session checkpoint retained.") end
  e.busy=false
- return ok
+ return ok and not e.dirty
 end
 function S.leave(player)
  local e=entries[player] if not e then return end

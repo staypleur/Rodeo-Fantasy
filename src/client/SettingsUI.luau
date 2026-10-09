@@ -37,8 +37,8 @@ function UI.new(gui,audio)
  local function placeButton()
   local inset=GuiService.TopbarInset
   if inset.Width>=76 and inset.Height>=40 then
-   button.Parent=topbar button.AnchorPoint=Vector2.new(0,.5) button.Position=UDim2.new(0,10,.5,0)
-   local diameter=math.min(56,inset.Height-8) button.Size=UDim2.fromOffset(diameter,diameter)
+   button.Parent=topbar button.AnchorPoint=Vector2.new(0,.5) button.Position=UDim2.new(0,10,0,34)
+   button.Size=UDim2.fromOffset(44,44)
   else
    -- Keep settings accessible on narrow screens with no free topbar slot.
    button.Parent=gui button.AnchorPoint=Vector2.new(0,0) button.Position=UDim2.fromOffset(14,12) button.Size=UDim2.fromOffset(48,48)

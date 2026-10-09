@@ -1,4 +1,11 @@
 local R={}
+function R.discovered(seen,catalog)
+ local count=0
+ for _,id in ipairs(catalog.Order) do
+  for _,stars in ipairs({1,3,6,9}) do if seen[id..":"..stars]==true then count+=1 end end
+ end
+ return count
+end
 -- Idempotent cumulative session checkpoint; union discoveries across servers.
 function R.merge(old,session,catches,seen,time)
  old=old or {} local sessions={} local discovered={}

@@ -57,6 +57,8 @@ ui.refreshLayout() assert(stats.Position[2]==80,'HUD should follow actual settin
 assert(not ui.isOpen())
 assert(find('OpenSettings').Parent.Name=='RodeoTopbarSettings' and find('OpenSettings').Text=='')
 assert(find('Gear').Parent==find('OpenSettings'))
+assert(find('OpenSettings').Size[1]==44 and find('OpenSettings').Size[2]==44)
+assert(find('OpenSettings').Position[3]==0 and find('OpenSettings').Position[4]==34,'match core menu center and diameter')
 GuiService.TopbarInset={Width=20,Height=64} insetSignal:Fire()
 assert(find('OpenSettings').Parent==gui,'narrow topbar must keep settings accessible')
 GuiService.TopbarInset={Width=550,Height=64} insetSignal:Fire()

@@ -13,15 +13,40 @@ local function make(class,props,parent)
  for k,v in pairs(props) do node[k]=v end
  node.Parent=parent return node
 end
+function UI.iconButton(gui,kind,key,right)
+ local bag=kind=="Bag"
+ local button=make("TextButton",{Name=bag and "OpenBag" or "OpenJournal",Text="",AnchorPoint=Vector2.new(1,1),Position=UDim2.new(1,-right,1,-18),Size=UDim2.fromOffset(64,64),BackgroundColor3=Color3.fromRGB(40,65,56),BackgroundTransparency=.08,BorderSizePixel=0},gui)
+ make("UICorner",{CornerRadius=UDim.new(0,16)},button)
+ make("UIStroke",{Color=Color3.fromRGB(177,151,108),Thickness=1},button)
+ local function shape(name,x,y,w,h,color,radius)
+  local node=make("Frame",{Name=name,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundColor3=color,BorderSizePixel=0},button)
+  make("UICorner",{CornerRadius=UDim.new(0,radius or 3)},node) return node
+ end
+ if bag then
+  local leather=Color3.fromRGB(178,126,84)
+  shape("Handle",25,10,14,12,leather,5)
+  shape("Backpack",18,17,28,32,leather,8)
+  shape("Pocket",23,31,18,12,Color3.fromRGB(133,88,58),4)
+  shape("Clasp",30,28,4,5,Color3.fromRGB(250,213,131),1)
+ else
+  shape("Cover",12,15,40,32,Color3.fromRGB(178,126,84),4)
+  shape("LeftPage",15,17,16,26,Color3.fromRGB(249,239,211),2)
+  shape("RightPage",33,17,16,26,Color3.fromRGB(249,239,211),2)
+  shape("Spine",31,16,2,29,Color3.fromRGB(120,91,61),1)
+  for _,x in ipairs({18,36}) do for y=23,35,6 do shape("Ink",x,y,10,2,Color3.fromRGB(136,156,119),1) end end
+ end
+ make("TextLabel",{Name="Shortcut",Text=key,BackgroundTransparency=1,Position=UDim2.fromOffset(42,45),Size=UDim2.fromOffset(18,16),TextSize=11,TextColor3=Color3.fromRGB(246,229,193)},button)
+ return button
+end
 function UI.new(gui,remote)
  local self={area="Lobby",items={},count=-1,pen=nil,region="All",page=1,query="",evolutionMode=false,selected={}}
- local button=make("TextButton",{Name="OpenBag",Text="Bag [R]",Size=UDim2.fromOffset(110,44),Position=UDim2.new(1,-125,1,-60),BackgroundColor3=Color3.fromRGB(147,104,72),TextColor3=Color3.new(1,1,1),TextSize=18},gui)
- make("UICorner",{CornerRadius=UDim.new(0,12)},button)
- local window=make("Frame",{Name="BagWindow",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.8,.75),BackgroundColor3=Color3.fromRGB(249,242,222),ZIndex=20},gui)
- make("UISizeConstraint",{MaxSize=Vector2.new(760,580)},window)
+ local button=UI.iconButton(gui,"Bag","R",18)
+ local window=make("Frame",{Name="BagWindow",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.92,.84),BackgroundColor3=Color3.fromRGB(249,242,222),ZIndex=20},gui)
+ make("UISizeConstraint",{MaxSize=Vector2.new(1100,720)},window)
  make("UICorner",{CornerRadius=UDim.new(0,18)},window)
+ make("UIStroke",{Color=Color3.fromRGB(177,151,108),Thickness=1},window)
  local title=make("TextLabel",{Text="Bag",BackgroundTransparency=1,Position=UDim2.fromOffset(20,10),Size=UDim2.new(1,-100,0,40),TextSize=26,TextColor3=Color3.fromRGB(43,74,55),ZIndex=21},window)
- local close=make("TextButton",{Name="CloseBag",Text="Close",Position=UDim2.new(1,-90,0,12),Size=UDim2.fromOffset(75,34),ZIndex=21},window)
+ local close=make("TextButton",{Name="CloseBag",Text="×",Position=UDim2.new(1,-54,0,12),Size=UDim2.fromOffset(38,34),BackgroundTransparency=1,TextSize=26,TextColor3=Color3.fromRGB(70,58,40),ZIndex=21},window)
  local money=make("TextLabel",{Name="BagMoney",BackgroundTransparency=1,Position=UDim2.fromOffset(20,55),Size=UDim2.new(.62,-20,0,34),TextSize=20,TextColor3=Color3.fromRGB(43,74,55),TextXAlignment=Enum.TextXAlignment.Left,ZIndex=21},window)
  local evolveToggle=make("TextButton",{Name="EvolutionMode",Text=L.text("Evolve",player.LocaleId),Position=UDim2.new(1,-142,0,55),Size=UDim2.fromOffset(122,34),TextSize=16,BackgroundColor3=Color3.fromRGB(110,133,91),TextColor3=Color3.new(1,1,1),ZIndex=23},window)
  make("UICorner",{CornerRadius=UDim.new(0,9)},evolveToggle)
@@ -40,9 +65,9 @@ function UI.new(gui,remote)
  make("UICorner",{CornerRadius=UDim.new(0,8)},search)
  local tabs=make("ScrollingFrame",{Name="BagRegions",BackgroundTransparency=1,BorderSizePixel=0,Position=UDim2.fromOffset(20,136),Size=UDim2.new(1,-40,0,32),AutomaticCanvasSize=Enum.AutomaticSize.X,CanvasSize=UDim2.new(),ScrollBarThickness=0,ZIndex=23},window)
  make("UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,Padding=UDim.new(0,8)},tabs)
- local previous=make("TextButton",{Name="BagPrevious",Text="‹",Position=UDim2.new(.35,-45,1,-45),Size=UDim2.fromOffset(40,30),TextSize=24,ZIndex=23},window)
+ local previous=make("TextButton",{Name="BagPrevious",Text="‹",BackgroundTransparency=1,Position=UDim2.new(.35,-45,1,-45),Size=UDim2.fromOffset(40,30),TextSize=24,TextColor3=Color3.fromRGB(70,58,40),ZIndex=23},window)
  local pageLabel=make("TextLabel",{Name="BagPage",Text="1 / 1",BackgroundTransparency=1,Position=UDim2.new(.35,0,1,-45),Size=UDim2.new(.3,0,0,30),TextSize=15,ZIndex=23},window)
- local nextPage=make("TextButton",{Name="BagNext",Text="›",Position=UDim2.new(.65,5,1,-45),Size=UDim2.fromOffset(40,30),TextSize=24,ZIndex=23},window)
+ local nextPage=make("TextButton",{Name="BagNext",Text="›",BackgroundTransparency=1,Position=UDim2.new(.65,5,1,-45),Size=UDim2.fromOffset(40,30),TextSize=24,TextColor3=Color3.fromRGB(70,58,40),ZIndex=23},window)
  function self.filter(region,query)
   self.region,self.query,self.page=region or self.region,query or self.query,1
   self.snapshot(self.items)

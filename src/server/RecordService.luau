@@ -5,19 +5,21 @@ local Players=game:GetService("Players")
 local DSS=game:GetService("DataStoreService")
 local Http=game:GetService("HttpService")
 local Rules=require(game.ReplicatedStorage.RodeoFantasy.RecordRules)
+local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
 local enabled=RunService:IsRunning() and game.GameId>0
 local suffix=RunService:IsStudio() and "_Test_v1" or "_v1"
-local profile,distance,income
+local profile,distance,collection
 if enabled then
  local ok=pcall(function()
   profile=DSS:GetDataStore("RodeoRecords"..suffix)
   distance=DSS:GetOrderedDataStore("RodeoDistance"..suffix)
-  income=DSS:GetOrderedDataStore("RodeoProduction"..suffix)
+  collection=DSS:GetOrderedDataStore("RodeoCollection"..suffix)
  end)
  enabled=ok
 end
 local entries,names={},{}
-function Service.sample(player,produced,meters)
+function Service.sample(player,_,meters)
+ local produced=0 -- Production no longer grants a leaderboard score.
  if not enabled or player.UserId<=0 then return end
  local entry=entries[player.UserId]
  if not entry then
@@ -42,7 +44,6 @@ function Service.save(userId)
   -- Ordered indexes are monotonic; concurrent servers cannot lower a saved rank.
   local indexes=pcall(function()
    distance:UpdateAsync(tostring(userId),function(old) return math.max(old or 0,result.distance) end)
-   income:UpdateAsync(tostring(userId),function(old) return math.max(old or 0,result.income) end)
   end)
   entry.dirty=not indexes or entry.produced~=produced or entry.distance~=best
   if indexes and entry.left and not entry.dirty then entries[userId]=nil end
@@ -71,7 +72,7 @@ local function refresh(board,store)
    local found,name=pcall(function() return Players:GetNameFromUserIdAsync(id) end)
    names[id]=found and name or nil
   end
-  local value=tostring(row.value)..(board.Name=="Distance" and " m" or "")
+  local value=tostring(row.value)..(board.Name=="Distance" and " m" or " / "..#Catalog.Order*4)
   table.insert(lines,string.format("%d. %s   %s",rank,names[id] or "Player",value))
  end
  label.Text=#lines>0 and table.concat(lines,"\n") or "No records yet"
@@ -79,9 +80,10 @@ local function refresh(board,store)
 end
 function Service.start()
  local boards=workspace.RodeoLobby.Leaderboards
+ boards.Income.Ranking.Heading.Text="Collection discoveries"
  task.spawn(function()
   while true do
-   refresh(boards.Distance,distance) refresh(boards.Income,income)
+   refresh(boards.Distance,distance) refresh(boards.Income,collection)
    task.wait(60)
   end
  end)

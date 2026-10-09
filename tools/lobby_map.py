@@ -287,7 +287,7 @@ def build_lobby(workspace, item, part, prop):
         header,hp=item(gui,"TextLabel","Heading")
         prop(hp,"UDim2","Size",dict(XS=1,XO=0,YS=0,YO=90)); prop(hp,"float","BackgroundTransparency",1)
         prop(hp,"int","TextSize",38); prop(hp,"Color3","TextColor3",dict(R=1,G=.93,B=.7))
-        prop(hp,"string","Text","Farthest run" if key=="Distance" else "Total produced")
+        prop(hp,"string","Text","Farthest run" if key=="Distance" else "Collection discoveries")
     for n in range(32):
         angle=math.tau*n/32
         x,z=math.sin(angle)*145,math.cos(angle)*145
