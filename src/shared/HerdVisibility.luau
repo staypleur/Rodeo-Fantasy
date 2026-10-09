@@ -14,14 +14,21 @@ function View.visible(x,y,relativeZ,aspect,t,margin)
  return math.abs(dx*rx+dz*rz)<half*aspect and math.abs(dx*ux+dy*uy+dz*uz)<half
 end
 -- Shared deterministic shortlist: only displayed wild animals can be caught/collided with.
-function View.select(candidates,z,aspect,t,limit,previous)
+function View.select(candidates,z,aspect,t,limit,previous,preferred)
  local visible={}
  local selected={} local count=0
+ -- A rider has just left this already-visible animal. Keep it ahead of the
+ -- ordinary shortlist until it runs out of view; still obey the herd cap.
+ for _,candidate in ipairs(candidates) do
+  if preferred and preferred[candidate.key] and count<(limit or 6) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then
+   selected[candidate.key]=true count+=1
+  end
+ end
  local function entry(candidate)
   return not previous or candidate.emerging or candidate.atDen or not View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1)
  end
  for _,candidate in ipairs(candidates) do
-  if previous and previous[candidate.key] and count<(limit or 6) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then
+  if not selected[candidate.key] and previous and previous[candidate.key] and count<(limit or 6) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then
    selected[candidate.key]=true count+=1
   end
   if entry(candidate) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1.15) then

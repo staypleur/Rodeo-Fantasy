@@ -242,7 +242,13 @@ function World.step(dt)
 end
 
 local displayed=setmetatable({},{__mode="k"})
-function World.resetVisibility(viewer) displayed[viewer]=nil end
+local released=setmetatable({},{__mode="k"})
+function World.resetVisibility(viewer) displayed[viewer]=nil released[viewer]=nil end
+function World.releaseMount(model,viewer)
+ if not model or not model.Parent or not animals[model] or not viewer then return end
+ released[viewer]=released[viewer] or {}
+ released[viewer][model]=true
+end
 function World.atDen() return false end
 function World.visibleSet(z,aspect,viewer)
  local candidates={}
@@ -252,7 +258,14 @@ function World.visibleSet(z,aspect,viewer)
    table.insert(candidates,{key=model,x=p.X,y=p.Y,z=p.Z,serial=model:GetAttribute("SpawnSerial") or 0})
   end
  end
- local result=Visibility.select(candidates,z,aspect or 1,tuning,6,viewer and displayed[viewer])
+ local preferred=viewer and released[viewer]
+ if preferred then
+  for model in pairs(preferred) do
+   local p=model.Parent and model.PrimaryPart and model.PrimaryPart.Position
+   if not p or model:GetAttribute("Occupied") or not Visibility.visible(p.X,p.Y,p.Z-z,aspect or 1,tuning,1) then preferred[model]=nil end
+  end
+ end
+ local result=Visibility.select(candidates,z,aspect or 1,tuning,6,viewer and displayed[viewer],preferred)
  if viewer then displayed[viewer]=result end
  return result
 end

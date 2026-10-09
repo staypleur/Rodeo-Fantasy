@@ -161,6 +161,7 @@ local function start(player)
 end
 local function launch(player,state)
  freeMount(state)
+ worlds[player].releaseMount(state.previousMonster,player)
  state.phase,state.started="Airborne",now()
  state.launchY=state.root.Position.Y
  state.steer,state.dashUntil=0,nil

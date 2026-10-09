@@ -38,3 +38,22 @@ assert(edge) table.insert(items,edge)
 local arrivals=View.select(items,0,1,t,6,stable)
 assert(arrivals[100],"new runners enter from the camera boundary")
 print("PASS: stable herd identities and replacement after leaving the camera")
+
+-- Leaving an occupied mount must not hide an animal already seen by the rider.
+for _,aspect in ipairs({.4,1,16/9,4}) do
+ local herd={}
+ for i=1,7 do table.insert(herd,{key=i,x=0,y=2,z=-30-i,serial=i}) end
+ local prior={} for i=1,6 do prior[i]=true end
+ local released=View.select(herd,0,aspect,t,6,prior,{[7]=true})
+ assert(released[7],'former mount takes a visible slot, even when six wild animals were shown')
+ local count=0 for _ in pairs(released) do count+=1 end assert(count==6)
+ for frame=1,15 do
+  for _,item in ipairs(herd) do item.z-=.3 end
+  released=View.select(herd,0,aspect,t,6,released,{[7]=true})
+  assert(released[7],'released animal keeps running visibly without shortlist flicker')
+ end
+ herd[7].z=-600
+ local gone=View.select(herd,0,aspect,t,6,released,{[7]=true})
+ assert(not gone[7],'offscreen former mount is no longer pinned')
+end
+print('PASS: released mount stays visible while running, cap six, offscreen release on four ratios')
