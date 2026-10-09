@@ -834,3 +834,9 @@
 - 새파일 `dist/RodeoFantasy-Social-Hatchery.rbxlx`, `...-Cafe.rbxlx` 및 gitignored `dist/LocalOperator/RodeoFantasy-Social-Operator-*` 준비. 기존 열린사용자파일과 dist/RodeoFantasy-Capture.rbxlx는변경하지않았다. 카페PlaceID는사용자답변상아직없으므로0/준비안내; Roblox업로드/게시/정원/음성설정은자동완료했다고말하지않는다. 안내 docs/CAFE_HATCHERY_REVIEW.md.
 - 검증: 변경Luau22파일컴파일,SocialRules(소유/성별/4팀/알1개/프로필/거래보존),가방생산·진화,InventoryStore실패주입,Meshy실제파일·네다리리깅·선택설치기,기존8단계모델회귀,클라이언트의존성대기검사 통과. 오래된가방테스트의미소비보어수입누락기대값2→6을수정(새모스랫2+보어4). 공유Place내엔트리스크립트격리/최신소스/카페584개실제저장객체/UniqueId검사. 원본새로비파일SHA256일치검사.
 - 남은외부확인: 사용자Roblox메시·텍스처업로드와설치,Studio방향/접지/안장/카메라/충돌/여러클라이언트동시조작,모바일터치와20명성능,실제Place이동·거래복구,음성채팅계정설정. 이미지검토파일과실제게임설치완료를구분한다. 비밀번호/개인운영자설정은커밋하지않는다.
+
+
+## 2026-10-10 로비 클라이언트 초기 표시 수정
+- 사용자 스크린샷에서 로비 중앙 사냥 시작 버튼과 회색 비행선 보고. 시작 버튼 초기 Visible=false로 수정. RideAnimator 및 CreatureMesh는 MonsterId 없는 장식/NativeMeshyAirship을 처리하지 않도록 보호. 회색 텍스처와 조작 불가의 정확한 원인은 Studio 출력 추가 확인 필요.
+- 기존 설치 모델/비밀번호/사용자 Place를 덮어쓰지 않는 dist/LobbyClientRepair.commandbar.lua 작성. 편집 모드에서 세 클라이언트 소스만 교체.
+- Luau 컴파일 4파일 및 diff 검사 통과. 실제 Studio 조작/텍스처 확인 미완료. 배포하지 않으며 채팅에서 한 단계씩 적용 안내하기로 사용자 요청.

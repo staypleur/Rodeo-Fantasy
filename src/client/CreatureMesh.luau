@@ -87,6 +87,7 @@ function M.animate(model,phase,moving,angry)
  NativeMossrat.animate(model,phase,moving,angry)
 end
 function M.materialize(model)
+ if not model:GetAttribute("MonsterId") or model:GetAttribute("NativeMeshyAirship") then return end
  if NativeMossrat.isTarget(model) then NativeMossrat.apply(model) return end
  if not FacetedMouse.failed and FacetedMouse.isTarget(model) and not model:GetAttribute("FacetedMouseRevision") then task.spawn(FacetedMouse.apply,model) end
  if model:FindFirstChild("Body") or not model.PrimaryPart then return end
@@ -103,6 +104,7 @@ function M.materialize(model)
  end
 end
 function M.decorate(model)
+ if not model:GetAttribute("MonsterId") or model:GetAttribute("NativeMeshyAirship") then return end
  if NativeMossrat.isTarget(model) then NativeMossrat.apply(model) return end
  if FacetedMouse.isTarget(model) then FacetedMouse.apply(model) return end
  if model:GetAttribute("MeshDecorated") or pending[model] then return end

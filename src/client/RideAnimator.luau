@@ -104,6 +104,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
  local outlineCount=0
 	for _, model in ipairs(monsters.Name=="RodeoLobby" and monsters:GetDescendants() or monsters:GetChildren()) do
   if not model:IsA("Model") then continue end
+  if not model:GetAttribute("MonsterId") or model:GetAttribute("NativeMeshyAirship") then continue end
 		local root = model.PrimaryPart
 		if not root then continue end
   if model:GetAttribute("KnockedAway") then
