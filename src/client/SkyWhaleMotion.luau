@@ -1,4 +1,4 @@
--- Saved meshes only. No EditableMesh/Image allocation at runtime.
+-- Animate already-prepared meshes; no geometry or image allocations in the frame loop.
 local M={}
 local frames=setmetatable({},{__mode="k"})
 function M.sample(clock,group)
@@ -21,7 +21,7 @@ function M.step(ship,clock)
   for _,part in ipairs(ship:GetDescendants()) do remember(part) end
   ship.DescendantAdded:Connect(remember)
  end
- local anchor=CFrame.new(6000,55,-5)
+ local anchor=ship:GetAttribute("WhaleAnchor") or CFrame.new(6000,55,-5)
  local bob,roll=M.sample(clock,nil)
  local sway=anchor*CFrame.new(0,bob,0)*CFrame.Angles(0,0,roll)*anchor:Inverse()
  for _,entry in ipairs(parts) do

@@ -642,3 +642,13 @@
 - 후속 이름 변경 승인: MeadowMouse→모스랫, GrassBoar→브램블보어, TreeWolf→바인팽, RockElephant→엘레바인, Weedcrow→쏜크로. 저장/템플릿 ID 유지, Localization의 고유명사만 변경하고 미정 외국어 이름은 새로 만들지 않았다. 초원 pick은0<=m<1000에서만 허용하며 replenish도 새 출생 위치가1000m 이후이면 건너뛴다. 사용자 능력값은 현재 Catalog와 동일함을 확인했다. GAME_DESIGN/교배 초안/검토 이미지에 새 이름 반영.
 - meadow_species 실제 Source 인라인 검사:0/149/150/299/300/399/400/499/500/999/999.99 출현,1000/1500/음수 거절,속도/생산/길들이기/분노3회점프/성장 검증 통과. 한국어 이름5개 대조 통과. check_hunt_density에990m 부근 출생 상한 추가 후 통과. check_mount_release.py의 실제World·launch 재검증 통과.
 - 최종 HuntTextureFix 파일은 이름/출현상한을 포함하여5Source 패치이며 JournalBagReview는 추가9Source 패치다. 디자인 승인은 아직 도감/가방 답변 대기, 기존 고래 Aurora는 거절되어 Regal990면 새 안으로 교체 검토한다.
+
+
+## 2026-10-09 — 승인 고래·도감·가방 적용
+
+- 사용자 전체 적용 승인 수신. tools/embed_regal_whale.py는 승인Regal GLB38노드를4개의 움직임 그룹으로 병합하면서990면/좌표/평면법선/UV/손실 없는512RGB텍스처를 보존한다. 새 창작 디자인 변화는 없다. 최종 치수는 원본0.85배, 전체 경계 중심(6000,75,-5).4개의 기존 바구니 줄과 실제 몸통 삼각형의 수직 교차를 구해 줄 끝39.0~42.0,아래16.5로 계산했다.
+- SkyWhaleRuntime은 플레이 시 EditableImage1개/고정EditableMesh4개를 생성하고 임시 동적메시는1개씩 즉시 해제한다. 생성/색 연결이 모두 성공한 뒤 기존 로컬 비행선을 교체한다. 실패 시 임시 자원 해제/기존시각 유지, 재진입은 설치revision으로 중복 생성하지 않는다. 저장된 Roblox 자산ID를 임의 생성하거나 실제 업로드한 것으로 주장하지 않는다. 기존 수동18메시 installer는 예전 모델 전용이며 새 적용 절차에서 사용하지 않는다.
+- CaptureClient는 모스랫 준비→고래 준비→일반 생물 준비 순으로 불필요한 동시 동적메시 예약을 줄인다. SkyWhaleMotion은 모델WhaleAnchor를 사용해 완만한 상하/회전,좌우 지느러미 대칭/꼬리 움직임을 적용한다. 모션 루프에 메시·이미지 생성 없음. API 권한/모바일실메모리/FPS는 미검증이다.
+- tools/apply_approved_lobby.py로 dist/RodeoFantasy-ApprovedLobby.rbxlx 생성: 승인 UI/버그수정/이름이 포함된JournalBagReview를 기준으로2Source패치와2Module추가. 나머지속성/703저장MeshParts/목장/출발/바구니 보존 비교, referent/Ref/UniqueId 검사 통과. 핵심11Source를파일내코드와정확히 대조했다. 편집화면의 옛 비행선은 F5 후 로컬 승인고래로 대체된다.
+- tests/check_regal_whale_runtime.py 실제runtime/APIstub:990면/4fixed/1이미지/텍스처/그룹힌지/줄/중복설치방지/메시예산실패/3번째텍스처실패 때 기존유지 및자원정리 통과. tests/check_sky_whale.py20·30·60·120fps모션bounds/대칭 통과. 변경4개Luau컴파일 통과. check_journal_book.py 및 check_local_audio_settings.py 회귀 통과. 실제Studio오디오·색·움직임·터치/PC·FPS·공개게임 업로드는 미실시.
+- 사용자 수정Capture.rbxlx는 보존한다. 새 파일은 실행 가능한 적용 준비본이며 실제 게시 완료를 의미하지 않는다. 교배/돌연변이 미정기능은 구현하지 않았다.

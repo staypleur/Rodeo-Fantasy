@@ -36,10 +36,6 @@ local gui=make("ScreenGui",{Name="RodeoCaptureUI",ResetOnSpawn=false,DisplayOrde
 local function text(parent,value,pos,size,font)
  return make("TextLabel",{Text=value,Position=pos,Size=size,TextSize=font or 18,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(255,245,219),BackgroundTransparency=1,TextWrapped=true},parent)
 end
-task.spawn(function()
- require(script.Parent.FacetedMouse).prepare()
- require(script.Parent.CreatureMesh).prepare()
-end)
 local incomeFX=require(script.Parent:WaitForChild("IncomeEffects"))
 local bagUI=require(script.Parent:WaitForChild("BagUI")).new(gui,remote)
 local journalUI=require(script.Parent:WaitForChild("JournalUI")).new(gui,remote)
@@ -69,6 +65,11 @@ local function rememberShip(node)
 end
 for _,node in ipairs(airship:GetDescendants()) do rememberShip(node) end
 airship.DescendantAdded:Connect(rememberShip)
+task.spawn(function()
+ require(script.Parent.FacetedMouse).prepare()
+ require(script.Parent:WaitForChild("SkyWhaleRuntime")).install(airship)
+ require(script.Parent.CreatureMesh).prepare()
+end)
 local function animateShip(clock)
  if airship:GetAttribute("SkyWhaleRevision") then whaleMotion.step(airship,clock) return end
  local sway=shipAnchor*CFrame.new(math.sin(clock*.7)*.35,math.sin(clock*.9)*.25,0)*CFrame.Angles(0,0,math.sin(clock*.7)*.018)
