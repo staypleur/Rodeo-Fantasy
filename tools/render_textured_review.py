@@ -9,6 +9,7 @@ parser.add_argument('--model',type=Path,default=ROOT/'dist/ReviewModels/MeadowMo
 parser.add_argument('--output',type=Path,default=ROOT/'assets/previews/meadow-mouse-s1-faceted-glb.png')
 parser.add_argument('--title',default='MEADOW MOUSE A1 / FACETED 3D REVIEW')
 parser.add_argument('--airship-detail',action='store_true')
+parser.add_argument('--grand-review',action='store_true')
 args=parser.parse_args();data=args.model.read_bytes();n=struct.unpack_from('<I',data,12)[0]
 g=json.loads(data[20:20+n]);binary=data[28+n:]
 def values(index):
@@ -27,6 +28,8 @@ font=ImageFont.truetype('C:/Windows/Fonts/arial.ttf',24);small=ImageFont.truetyp
 draw.text((22,15),args.title,fill=(65,49,35),font=font)
 draw.text((22,52),f'{len(triangles)} triangles / flat normals / actual embedded color texture / NOT a Roblox screenshot',fill=(106,88,64),font=small)
 views=[('FRONT',(0,.07,-1)),('THREE-QUARTER',(.65,.70,-1) if args.airship_detail else (.65,.30,-1)),('FACE DETAIL',(.1,.08,-1)) if args.airship_detail else ('HUNT VIEW',(.36,.84,.48))]
+if args.grand_review:
+ views=[('FRONT / RAISED WINGS',(0,.25,-1)),('THREE-QUARTER',(.70,.40,-1)),('TOP / REAR',(.36,.84,.48))]
 for col,(label,eye) in enumerate(views):
  d=np.array(eye,dtype=float);d/=np.linalg.norm(d);right=np.cross(d,(0,1,0));right/=np.linalg.norm(right);up=np.cross(right,d)
  allpos=np.concatenate([t[0] for t in triangles])
@@ -55,5 +58,5 @@ for col,(label,eye) in enumerate(views):
   old[mask]=zz[mask];frame[y0:y1+1,x0:x1+1][mask]=rgb[mask]
  image.paste(Image.fromarray(frame),(col*520+5,134))
  draw.text((col*520+24,106),label,fill=(65,49,35),font=font)
-draw=ImageDraw.Draw(image);draw.text((22,621),'Static shape review only. No game installation, rigging or '+('wing' if args.airship_detail else 'walking')+' animation.',fill=(106,88,64),font=small)
+draw=ImageDraw.Draw(image);draw.text((22,621),'Static shape review only. No game installation, rigging or '+('wing' if args.airship_detail or args.grand_review else 'walking')+' animation.',fill=(106,88,64),font=small)
 args.output.parent.mkdir(parents=True,exist_ok=True);image.save(args.output);print(args.output)
