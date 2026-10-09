@@ -1,6 +1,13 @@
 local View=require("../src/shared/HerdVisibility")
 local t=require("../src/shared/Config").Prototype
 local course=require("../src/shared/CourseGeometry")
+assert(View.capacity(24)==4 and View.capacity(35)==6)
+local transition={}
+local priorTransition={}
+for i=1,6 do transition[i]={key=i,x=0,y=2,z=-35-i,serial=i} priorTransition[i]=true end
+assert(View.transitionLimit(transition,0,1,t,3,priorTransition)==6,'narrowing must not erase visible animals')
+transition[1].z=-600 transition[2].z=-600 transition[3].z=-600
+assert(View.transitionLimit(transition,0,1,t,3,priorTransition)==3,'cap drains as existing animals leave the camera')
 for _,aspect in ipairs({0.4,0.5625,1,16/9,4}) do
  for _,z in ipairs({0,-1100,-2500,-3300,-4200}) do
   local count=0

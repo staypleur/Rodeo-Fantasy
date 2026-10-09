@@ -66,6 +66,7 @@ local function sound(name,id,parent,volume,looped)
  s.Looped=looped or false s.Parent=parent return s
 end
 local profiles={
+ BookOpen={volume=.24},PageTurn={volume=.20,pitch=1.1},BagOpen={volume=.22},
  Rope={volume=.18},Success={volume=.3,pitch=1.4},Warning={volume=.12,pitch=.85},
  CrashObstacle={volume=.35,pitch=1.4},CrashMonster={volume=.3,pitch=1.2},Fall={volume=.25,pitch=.8},
  Knock={volume=.3,pitch=1.25},BreakWood={volume=.26,pitch=1.7},BreakRock={volume=.3,pitch=.85},
@@ -73,7 +74,7 @@ local profiles={
 local function initialize()
  if sounds.BGM then return end
  local preload={}
- for _,kind in ipairs({"BGM","LobbyBGM","Jump","Rope","Land","Success","Warning","CrashObstacle","CrashMonster","Fall","Knock","BreakWood","BreakRock"}) do
+ for _,kind in ipairs({"BGM","LobbyBGM","Jump","Rope","Land","Success","Warning","CrashObstacle","CrashMonster","Fall","Knock","BreakWood","BreakRock","BookOpen","PageTurn","BagOpen"}) do
   local music=kind=="BGM" or kind=="LobbyBGM"
   local profile=profiles[kind] or {}
   local s=sound("Rodeo"..kind,settings[kind],service,music and settings.MusicVolume or profile.volume or settings.EffectsVolume,music)
@@ -101,6 +102,13 @@ local function play(kind,volume,pitch)
  s.Volume=(profile.volume or settings.EffectsVolume)*(volume or 1)
  s.PlaybackSpeed=pitch or profile.pitch or 1
  s:Stop() s.TimePosition=0 s:Play()
+end
+function Audio.ui(kind)
+ if kind~="BookOpen" and kind~="PageTurn" and kind~="BagOpen" then return end
+ initialize()
+ local clock=os.clock()
+ if lastBurst[kind] and clock-lastBurst[kind]<.12 then return end
+ lastBurst[kind]=clock play(kind)
 end
 -- Remember each exact event timestamp, allowing the same obstacle to break again after respawn.
 function Audio.newTimestampEvents()

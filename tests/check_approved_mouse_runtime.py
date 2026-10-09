@@ -52,7 +52,11 @@ local function client(fail)
   end
   return o
  end
- function Asset:CreateSurfaceAppearanceAsync(content) assert(written and content.ColorMap.ClassName=='EditableImage') return object('SurfaceAppearance') end
+ function Asset:CreateSurfaceAppearanceAsync(content)
+  assert(written and content.ColorMap.ClassName=='EditableImage' and not content.ColorMap.destroyed)
+  if fail=='surface' then error('simulated surface binding failure') end
+  return object('SurfaceAppearance')
+ end
  function Asset:CreateEditableMesh()
   assert(dynamicLive==0,'only one temporary dynamic mesh may be live')
   dynamicLive+=1
@@ -68,7 +72,7 @@ local function client(fail)
  end
  function Asset:CreateEditableMeshAsync(source,options)
   assert(options.FixedSize==true and source.dynamic and not source.destroyed)
-  if fail and fixedCount==2 then error('simulated denied fixed mesh budget') end
+  if fail==true and fixedCount==2 then error('simulated denied fixed mesh budget') end
   fixedCount+=1
   local fixed=object('EditableMesh');fixed.FixedSize=true
   fixed.vertices=table.clone(source.vertices) fixed.normals=table.clone(source.normals) fixed.uvs=table.clone(source.uvs)
@@ -132,10 +136,21 @@ local silhouette=new(1,true) assert(m.apply(silhouette))
 for _,p in ipairs(silhouette:GetChildren()) do if p.ClassName=='MeshPart' then assert(#p:GetChildren()==0 and p.TextureID=='' and p.Color[1]==0) end end
 assert(metrics()==747,'portraits must reuse the shared factory')
 local second=new(2,false) assert(m.apply(second))
+for run=1,10 do
+ local replay=new(1,false) assert(m.apply(replay))
+ for _,part in ipairs(replay:GetChildren()) do if part.ClassName=='MeshPart' then
+  assert(#part:GetChildren()==1 and part:GetChildren()[1].ClassName=='SurfaceAppearance','every restarted run must bind a surface')
+ end end
+ replay:Destroy()
+end
+assert(metrics()==747,'restarting must reuse meshes and image rather than allocate new geometry')
 local third=new(3,false) assert(not m.apply(third),'unapproved growth stages must stay unchanged')
 local failed,newFailed,all=client(true) local target,prior=newFailed(1,false)
 assert(not failed.apply(target) and not prior.destroyed and target.PrimaryPart.Parent==target)
 for _,obj in ipairs(all) do if obj.ClassName=='EditableMesh' or obj.ClassName=='EditableImage' or obj.ClassName=='SurfaceAppearance' or obj.ClassName=='MeshPart' then assert(obj.destroyed,'failed factory must free resources') end end
+local surfaceFail,makeSurfaceFail=client('surface') local interrupted,previous=makeSurfaceFail(1,false)
+assert(not surfaceFail.apply(interrupted) and not previous.destroyed,'surface error must preserve original visual')
+assert(not interrupted:GetAttribute('FacetedMouseRevision'),'failed color binding must not mark installation complete')
 print('APPROVED_MOUSE_RUNTIME_PASS:747 faces/29 fixed textured meshes, single temporary builder, cache reuse, grounded paws, silhouette, growth scope and atomic failure cleanup; API stubs only')
 '''
 harness=R/'.tools/approved_mouse_runtime.luau';harness.write_text(prefix+source+suffix,encoding='utf-8')

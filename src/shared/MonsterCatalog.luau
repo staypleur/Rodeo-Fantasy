@@ -7,6 +7,7 @@ local C={
  RockElephant={RunSpeed=64,HerdSpeed=44,SizeClass="Large",Flying=false,RootHeight=5.3625,SaddleHeight=5.0325,TameSeconds=7,UnlockMeters=500,IncomeSeconds=3,IncomeAmount=3,Template="RockElephantTemplate",Visual="RockElephantVisualTemplate"},
 }
 C.Order={"MeadowMouse","GrassBoar","TreeWolf","Weedcrow","RockElephant"}
+C.MeadowEndMeters=1000 -- Meadow wildlife spawns only at 0 <= metres < 1000.
 for _,id in ipairs(C.Order) do C[id].Region=C[id].Region or (C[id].Acquisition=="Breeding" and "Breeding" or "Meadow") C[id].Acquisition=C[id].Acquisition or "Hunt" end
 C.Scales={[1]=1,[3]=1.4,[6]=1.9,[9]=2.5}
 function C.stage(stars) return stars>=9 and 9 or stars>=6 and 6 or stars>=3 and 3 or 1 end
@@ -26,6 +27,7 @@ function C.saddleHeight(id,stars)
  return height*C.scale(stars or 1)
 end
 function C.pick(meters,serial)
+ if meters<0 or meters>=C.MeadowEndMeters then return nil end
  local unlocked={}
  for _,id in ipairs(C.Order) do if meters>=C[id].UnlockMeters then table.insert(unlocked,id) end end
  return unlocked[serial%#unlocked+1]

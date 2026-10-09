@@ -1,5 +1,14 @@
 -- Same road-centred camera as the client. Numeric projection is testable offline.
 local View={}
+function View.capacity(width) return width<30 and 4 or 6 end
+-- Let animals already on screen run out naturally when the road narrows.
+function View.transitionLimit(candidates,z,aspect,t,target,previous,preferred)
+ local count=0
+ for _,candidate in ipairs(candidates) do
+  if ((previous and previous[candidate.key]) or (preferred and preferred[candidate.key])) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then count+=1 end
+ end
+ return math.max(target,count)
+end
 function View.visible(x,y,relativeZ,aspect,t,margin)
  local fx,fy,fz=-t.CameraSideStuds,-t.CameraHeightStuds,-(t.CameraBehindStuds+t.CameraLookAheadStuds)
  local length=math.sqrt(fx*fx+fy*fy+fz*fz)

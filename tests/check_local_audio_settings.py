@@ -40,6 +40,8 @@ a.update(state,monsters,nil,0,nil)
 state.area='Hunt' state.phase='Riding' state.tamed=false
 a.update(state,monsters,nil,1,nil)
 state.tamed=true a.update(state,monsters,nil,2,nil)
+for _,event in ipairs({'BookOpen','PageTurn','BagOpen'}) do a.ui(event) end
+a.ui('Bogus')
 for _,sound in ipairs(nodesA) do if sound.ClassName=='Sound' then
  local isMusic=sound.Name=='RodeoBGM' or sound.Name=='RodeoLobbyBGM'
  assert(sound.SoundGroup.Name==(isMusic and 'RodeoLocalMusic' or 'RodeoLocalEffects'))

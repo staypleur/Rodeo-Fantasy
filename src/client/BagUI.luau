@@ -7,6 +7,7 @@ local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
 local Query=require(game.ReplicatedStorage.RodeoFantasy.CollectionQuery)
 local Portrait=require(script.Parent.MonsterPortrait)
 local Income=require(script.Parent.IncomeEffects)
+local Audio=require(script.Parent.AudioPresentation)
 local function make(class,props,parent)
  local node=Instance.new(class)
  if node:IsA("TextLabel") or node:IsA("TextButton") then node.Font=Enum.Font.GothamBold end
@@ -41,7 +42,8 @@ end
 function UI.new(gui,remote)
  local self={area="Lobby",items={},count=-1,pen=nil,region="All",page=1,query="",evolutionMode=false,selected={}}
  local button=UI.iconButton(gui,"Bag","R",18)
- local window=make("Frame",{Name="BagWindow",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.92,.84),BackgroundColor3=Color3.fromRGB(249,242,222),ZIndex=20},gui)
+ local window=make("Frame",{Name="BagWindow",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.92,.84),BackgroundColor3=Color3.new(1,1,1),ZIndex=20},gui)
+ make("UIGradient",{Rotation=90,Color=ColorSequence.new({ColorSequenceKeypoint.new(0,Color3.fromRGB(240,208,143)),ColorSequenceKeypoint.new(.48,Color3.fromRGB(213,166,99)),ColorSequenceKeypoint.new(1,Color3.fromRGB(169,116,65))})},window)
  make("UISizeConstraint",{MaxSize=Vector2.new(1100,720)},window)
  make("UICorner",{CornerRadius=UDim.new(0,18)},window)
  make("UIStroke",{Color=Color3.fromRGB(177,151,108),Thickness=1},window)
@@ -127,7 +129,7 @@ function UI.new(gui,remote)
  previous.Activated:Connect(function() self.page=math.max(1,self.page-1) self.snapshot(self.items) end)
  nextPage.Activated:Connect(function() self.page+=1 self.snapshot(self.items) end)
  function self.close() window.Visible=false self.pen=nil self.setEvolutionMode(false) end
- function self.opened() if self.onOpen then self.onOpen() end end
+ function self.opened() Audio.ui("BagOpen") if self.onOpen then self.onOpen() end end
  chooser=make("Frame",{Name="RanchChooser",Visible=false,BackgroundTransparency=1,Position=UDim2.fromOffset(20,110),Size=UDim2.new(1,-40,1,-130),ZIndex=23},window)
  make("UIGridLayout",{CellSize=UDim2.new(.45,0,0,90),CellPadding=UDim2.fromOffset(18,18)},chooser)
  for index=1,4 do
@@ -157,7 +159,7 @@ function UI.new(gui,remote)
   button.Visible=state.area=="Lobby"
   if state.area~="Lobby" then window.Visible=false self.pen=nil self.setEvolutionMode(false) end
   money.Text=L.text("Uncollected coins",player.LocaleId)..": "..tostring(state.pending or 0)
-  button.Text=L.text("Bag",player.LocaleId).." [R]"
+  button.Text=""
   if state.area=="Lobby" and self.count~=state.count then self.count=state.count remote:FireServer("Bag") end
  end
  function self.openPen(index)
@@ -193,6 +195,18 @@ function UI.new(gui,remote)
    local item=filtered[index]
    local card=make("Frame",{Name="MonsterCard",Size=UDim2.fromOffset(170,245),BackgroundColor3=Color3.fromRGB(237,225,204),ZIndex=22,LayoutOrder=index},scroll)
    make("UICorner",{CornerRadius=UDim.new(0,12)},card)
+   local male=item.sex=="Male" local female=item.sex=="Female"
+   local color=male and Color3.fromRGB(72,130,180) or female and Color3.fromRGB(183,88,115) or Color3.fromRGB(119,109,91)
+   local badge=make("Frame",{Name="SexBadge",Position=UDim2.fromOffset(103,6),Size=UDim2.fromOffset(60,24),BackgroundColor3=Color3.fromRGB(255,241,213),BorderSizePixel=0,ZIndex=26},card)
+   make("UICorner",{CornerRadius=UDim.new(0,6)},badge)
+   local ring=make("Frame",{Name="SexRing",Position=UDim2.fromOffset(6,5),Size=UDim2.fromOffset(11,11),BackgroundTransparency=1,ZIndex=27},badge)
+   make("UICorner",{CornerRadius=UDim.new(1,0)},ring) make("UIStroke",{Color=color,Thickness=2},ring)
+   local function line(name,x,y,w,h,rotation)
+    make("Frame",{Name=name,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),Rotation=rotation or 0,BackgroundColor3=color,BorderSizePixel=0,ZIndex=27},badge)
+   end
+   if male then line("MaleStem",14,4,9,2,-45) line("ArrowTop",18,2,6,2) line("ArrowRight",22,2,2,6)
+   elseif female then line("FemaleStem",10,15,2,7) line("FemaleCross",7,18,8,2) end
+   make("TextLabel",{Name="SexText",Text=L.text(male and "Male" or female and "Female" or "Unknown sex",player.LocaleId),Position=UDim2.fromOffset(25,1),Size=UDim2.fromOffset(34,22),BackgroundTransparency=1,TextScaled=true,TextColor3=color,ZIndex=27},badge)
    self.cards[item.id]=card
    local preview=make("ViewportFrame",{Name="MonsterImage",BackgroundTransparency=1,Size=UDim2.new(1,0,0,140),ZIndex=23,Ambient=Color3.fromRGB(195,195,195),LightColor=Color3.new(1,1,1)},card)
    Portrait.fill(preview,item.monsterId,item.stars,false)

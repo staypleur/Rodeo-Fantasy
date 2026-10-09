@@ -269,7 +269,10 @@ function World.visibleSet(z,aspect,viewer)
  end
  -- Reserve the occupied runner's slot before launch, so releasing it cannot
  -- evict a different wild runner that is still in the middle of the screen.
- local result=Visibility.select(candidates,z,aspect or 1,tuning,riding and 5 or 6,viewer and displayed[viewer],preferred)
+ local target=Visibility.capacity(Course.width(z))-(riding and 1 or 0)
+ local previous=viewer and displayed[viewer]
+ local limit=Visibility.transitionLimit(candidates,z,aspect or 1,tuning,target,previous,preferred)
+ local result=Visibility.select(candidates,z,aspect or 1,tuning,limit,previous,preferred)
  if viewer then displayed[viewer]=result end
  return result
 end
@@ -290,11 +293,15 @@ function World.replenish(z,aspect,watchers,prime,budget)
  local created=0
  local lanes={-0.72,-0.24,0.24,0.72}
  for offset=prime and -12 or 0,220,8 do
-  if created>=(budget or 24) then break end
+  if created>=math.min(budget or 24,Course.width(z)<30 and 16 or 24) then break end
   local targetZ=z-offset
+  if -targetZ*tuning.MetersPerStud>=Catalog.MeadowEndMeters then continue end
   local id=Catalog.pick(math.max(0,-z*tuning.MetersPerStud),spawnSerial)
+  if not id then break end
   for _,range in ipairs(Course.ranges(targetZ,5)) do
-   for laneIndex,lane in ipairs(lanes) do
+   local narrow=Course.width(targetZ)<30
+   if narrow and (offset-(prime and -12 or 0))%16~=0 then continue end
+   for laneIndex,lane in ipairs(narrow and {-0.5,0.5} or lanes) do
     local x=(range[1]+range[2])/2+lane*(range[2]-range[1])/2
     local onScreen=Visibility.visible(x,Catalog[id].RootHeight,targetZ-z,aspect,tuning,1.2)
     if onScreen and not prime then continue end
@@ -311,7 +318,7 @@ function World.replenish(z,aspect,watchers,prime,budget)
      model:SetAttribute("OpeningScene",prime==true)
      created+=1
     end
-    if created>=(budget or 24) then break end
+    if created>=math.min(budget or 24,Course.width(z)<30 and 16 or 24) then break end
    end
   end
  end

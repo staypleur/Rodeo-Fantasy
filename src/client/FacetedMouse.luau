@@ -6,7 +6,9 @@ local data=require(script.Parent.FacetedMouseData)
 local cache,resources={},{}
 local preparing,ready,failed=false,false,false
 local pending=setmetatable({},{__mode="k"})
+local retryAfter=setmetatable({},{__mode="k"})
 local builder
+local texture
 function M.isTarget(model)
  return model:GetAttribute("MonsterId")=="MeadowMouse" and C.stage(model:GetAttribute("Stars") or 1)==1
 end
@@ -27,7 +29,7 @@ function M.prepare()
   end
   assert(offset==buffer.len(pixels),"Incomplete approved texture")
   image:WritePixelsBuffer(Vector2.zero,Vector2.new(data.ImageSize,data.ImageSize),pixels)
-  local surface=Asset:CreateSurfaceAppearanceAsync({ColorMap=Content.fromObject(image)}) resources[#resources+1]=surface
+  texture=image
   for _,entry in ipairs(data.Parts) do
    local mesh=assert(Asset:CreateEditableMesh(),"No mesh budget for "..entry.Name)
    builder=mesh
@@ -51,7 +53,6 @@ function M.prepare()
    part.Name=entry.Name part.Color=Color3.new(1,1,1) part.Anchored=true
    part.CanCollide,part.CanTouch,part.CanQuery=false,false,false
    part.DoubleSided=true
-   surface:Clone().Parent=part
    cache[#cache+1]={part=part,center=Vector3.new(unpack(entry.Center))}
   end
  end)
@@ -67,6 +68,7 @@ function M.prepare()
 end
 function M.apply(model)
  if not M.isTarget(model) or model:GetAttribute("FacetedMouseRevision")==data.Revision or pending[model] then return false end
+ if retryAfter[model] and os.clock()<retryAfter[model] then return false end
  pending[model]=true
  if not M.prepare() or not model.Parent or not model.PrimaryPart then pending[model]=nil return false end
  local root=model.PrimaryPart local scale=C.scale(model:GetAttribute("Stars") or 1)
@@ -83,21 +85,35 @@ function M.apply(model)
   end)
  end
  local silhouette=model:GetAttribute("PortraitSilhouette")==true local staged={}
- for _,entry in ipairs(cache) do
+ local ok,err=pcall(function() for _,entry in ipairs(cache) do
   local part=entry.part:Clone() part.Size*=scale
+  staged[#staged+1]=part
   local rest=CFrame.new((entry.center+Vector3.new(0,-data.GroundY-C.MeadowMouse.RootHeight,0))*scale)
   part:SetAttribute("ApprovedRest",rest)
   part.CFrame=root.CFrame*rest
   if silhouette then
    for _,child in ipairs(part:GetChildren()) do if child:IsA("SurfaceAppearance") then child:Destroy() end end
    part.TextureID="" part.Color=Color3.new(0,0,0)
+  else
+   -- Bind the retained image directly for each displayed part, avoiding a
+   -- dependency on cloned engine-generated texture-pack state across runs.
+   local surface=Asset:CreateSurfaceAppearanceAsync({ColorMap=Content.fromObject(texture)})
+   if not model.Parent then surface:Destroy() error("Mouse removed during texture preparation") end
+   surface.Parent=part
   end
-  staged[#staged+1]=part
+ end end)
+ if not ok or not model.Parent then
+  for _,part in ipairs(staged) do part:Destroy() end
+  pending[model]=nil
+  retryAfter[model]=os.clock()+5
+  if not ok then warn("Approved mouse texture binding failed; existing visual retained: "..tostring(err)) end
+  return false
  end
  model:SetAttribute("ImportedA",true)
  for _,old in ipairs(model:GetDescendants()) do if old:IsA("BasePart") and old~=root then old:Destroy() end end
  for _,part in ipairs(staged) do part.Parent=model end
  model:SetAttribute("MeshDecorated",true) model:SetAttribute("FacetedMouseRevision",data.Revision)
+ retryAfter[model]=nil
  pending[model]=nil return true
 end
 return M

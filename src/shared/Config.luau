@@ -4,6 +4,9 @@ Config.LobbyWalkSpeed=32 -- Faster walking across the expanded lobby (originally
 
 -- Creator Store music/hoof recording plus Roblox bundled action sounds.
 Config.Audio = {
+ BookOpen="rbxassetid://9118835414", -- ProSoundEffects: Scrapbook Open And Turn Pages 2
+ PageTurn="rbxassetid://9118835637", -- ProSoundEffects: Scrapbook Open And Turn Pages 5
+ BagOpen="rbxassetid://9121003611", -- ProSoundEffects: Zipper Fly On Jeans Various Speeds 5
  LobbyBGM="rbxassetid://9044539308", -- APMOfficial Fashion Lobby, replaceable trial
  BGM="rbxassetid://1839048285",
  Hooves="rbxassetid://118636555040923",

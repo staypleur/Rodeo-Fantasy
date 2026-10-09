@@ -7,8 +7,9 @@ end
 
 function BagRules.grant(session, monsterId, clock, incomeSeconds, incomeAmount)
 	session.serial=(session.serial or 0)+1
-	table.insert(session.monsters, { id=session.serial, monsterId = monsterId, stars = 1, lastIncome = clock, incomeSeconds=incomeSeconds, incomeAmount=incomeAmount })
+	table.insert(session.monsters, { id=session.serial, monsterId = monsterId, stars = 1, lastIncome = clock, incomeSeconds=incomeSeconds, incomeAmount=incomeAmount,sex=BagRules.sexForRoll(math.random()) })
 end
+function BagRules.sexForRoll(roll) return roll<.5 and "Male" or "Female" end
 
 function BagRules.income(monster, fallback)
  return (monster.incomeAmount or fallback or 1)*2^(math.clamp(math.floor(monster.stars or 1),1,10)-1)

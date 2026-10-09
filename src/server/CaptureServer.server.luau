@@ -57,7 +57,7 @@ local function sendBag(player)
  if not bag or states[player] then return end
  local items={}
  for _,item in ipairs(bag.monsters) do
-  table.insert(items,{id=item.id,assignedPen=item.assignedPen,monsterId=item.monsterId,stars=item.stars,incomeSeconds=item.incomeSeconds or Config.BagIncome.IncomeSeconds,incomeAmount=BagRules.income(item,Config.BagIncome.IncomeAmount)})
+  table.insert(items,{id=item.id,assignedPen=item.assignedPen,monsterId=item.monsterId,stars=item.stars,sex=item.sex,incomeSeconds=item.incomeSeconds or Config.BagIncome.IncomeSeconds,incomeAmount=BagRules.income(item,Config.BagIncome.IncomeAmount)})
  end
  remote:FireClient(player,"Bag",items)
 end

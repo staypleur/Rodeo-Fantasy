@@ -621,3 +621,24 @@
 - docs/LOBBY_COMPLETION_CHECKLIST.md에 남은 항목을 기록했다. 우선 새 고래 최종 디자인/설치, 가방·코인·목장 배치의 영구 저장(현재 session-only), 실제8명/모바일/PC 이동·카메라·UI·성능·저장 확인, 상점 상품/가격 결정이 필요하다. 로비8857Part 규모는 실제 성능 측정/장식 및 충돌 최적화 검토가 필요하며 낮은 몬스터 폴리곤만으로 모바일 성능을 보장하지 않는다. 아직 로비 출시 완료가 아니다.
 
 - 같은 작업 중 최신 후속 요청으로 추가 입구·외곽 정원을 제거했다. 적용기와 배치본에서 OuterGatewayGarden177개 Part를 제거하고 기존 담장/목장 입구/중앙 정원/상점/게시판을 유지했다. 최종 배치 이미지를 제거 상태로 재생성했다. 고래만 남았다는 해석은 기능 완료와 다르므로 session-only 저장과 실제 기기 검증이 남았음을 다시 설명했다.
+
+
+## 2026-10-09 — 책 도감/가방 검토, 교배 초안, 고래 재수정, 사냥 색/밀도 수정
+
+- JournalUI를 책/좌측 지역 포스트잇/각 종1·3·6·9성2×2/실루엣 중앙? /아래 고정 정보 영역으로 재구성했다. PC8개, 좁은 화면4개. T tap toggle, A/D와 클릭 넘김, .26초 넘김 연출, 입력 중 T 무시, 이동 복원. 돌연변이/교배 오른쪽 탭은 기능 확정 뒤 표시 요청에 따라 미구현이다. 미공개 지역은 빈 안내다.
+- BagUI는 황토색3stop 그라데이션과 수컷/암컷 도형 배지. 새 포획에 서버50/50 성별을 부여하며 이전 개체/진화 결과의 미정 성별은 미확인. 진화/교배의 성별 승계는 임의 확정하지 않았다. 가방은 기존 session-only다.
+- BookOpen9118835414, PageTurn9118835637, BagOpen9121003611을 기존 Effects SoundGroup에 연결했다. Roblox 공개 marketplace metadata API로 자산 유형3/ProSoundEffects/공개 메타데이터 확인. 실제 청취·Studio 자산 접근·모바일 재생은 미검증. 참고: https://create.roblox.com/docs/audio/assets 및 https://create.roblox.com/store/asset/9121003611/Zipper-Fly-On-Jeans-Various-Speeds-5-SFX . shell 공개 API 조회는 기본 DNS 실패 후 승인된 네트워크 호출로 확인했다.
+- ProgressService.caught의 누적 count 누락을 수정하고 종·별별 포획 수를 기존 저장 체크포인트에 추가했다. 재시도/동시 세션/낡은 체크포인트/기존 저장 호환 검사 통과. 과거 종별 포획 숫자를 만들어 복원하지 않는다. 실제 DataStore 재접속 검증은 남았다.
+- 교배 시간은 사용자가 나중에 지정하므로 이전 시간표 미승인/보류. docs/BREEDING_COMBINATIONS_DRAFT.md에 초원5종의15개 조합 외형 방향만 초안으로 기록했다. 새 결과종 이름/모델/별 결과/시간/확률/알 동작은 구현하지 않았다. 우선순위 고래·도감→다른 몬스터를 유지한다.
+- whale AuroraReview626삼각형18노드512atlas 검토 후 사용자가 거절하고 화려한 금빛 장식 참고를 제시했다. RegalReview를 새로 작성: 최종990삼각형38노드, 열린 초승달 장식/사파이어 이마 장식/마름모 등 무늬/넓은 주 지느러미/보조 꼬리 흐름. 단일512atlas/재질, 평면 법선/유한 좌표/UV 범위/면 방향/2천 미만 검사 통과. 실제GLB 렌더를 열어 검토했다. 생성기 import의 기존 CRefinement 출력은 기존 결과와 동일. 고래는 정지3D검토이며 설치·애니메이션·승객 연결 미완료다.
+- tools/render_journal_book_review.py는 실제 JournalUI/BagUI 생성 속성을 API mock으로 덤프해 PNG를 만든다. 실제 승인 꼬마쥐 GLB의 UV/깊이 렌더, 다른 성장단계는 기존 모델 실루엣. UIStroke·검색placeholder·돈 라벨을 수정한 뒤 직접 열어 확인했다. Studio screenshot이 아니며 글꼴/조명/그라데이션은 근사다. 예시 포획9/성별2개는 사용자 실제 기록이 아니다.
+- 새 사용자 제보: 다시 사냥 중 쥐가 흰색으로 보임. FacetedMouse의 생성 SurfaceAppearance 복제를 제거하고, 유지한 동일 EditableImage에 표시 부품마다 새 SurfaceAppearance를 직접 연결했다. 고정 메시/이미지는 계속 공유, 중간 색 연결 실패 시 기존 시각물 유지·임시물 정리·5초 재시도 간격. 원인은 엔진에서 재현하지 못해 확정하지 않는다. 공식 API 계약 확인: https://create.roblox.com/docs/reference/engine/classes/AssetService 및 /SurfaceAppearance . 기존 생성 텍스처 복제 경로를 배제하는 수정이다.
+- 좁은길 표시 목표는 탑승 포함4, 넓은길6. 이미 화면에 있던 개체는 자연스럽게 나갈 때 감축해 중앙 실종 방지. 좁은길 생성은2열/16studs간격/16예산, 넓은길4열/8studs/24예산. 첫 회귀 검사에서 opening offset=-12에 절대 mod16을 적용해 생성0이 되는 문제를 발견했고 시작 offset 기준 상대 modulo로 수정 후 통과했다.
+- tests/check_approved_mouse_runtime.py: 실제 factory/apply를 API stub으로 실행,747면/29고정메시,10회 생성·파괴 뒤 원본 이미지 연결, 재사용/실루엣/실패 정리 통과. tests/check_hunt_density.py: 실제 replenish의 넓은24/좁은16,2열/16간격/경계/maintenance12제한 통과. herd_visibility 실제 소스를 CLI에 인라인하여5화면비/기존 가시성/이전 탑승 유지/좁은길 자연감축 통과. 직접 require 실행은 .luau 경로 해석 실패였다.
+- tests/check_journal_book.py: T/A/D/클릭/분류/넘김 debounce/입력창/모바일4개/이동복원, 포획 체크포인트/성별50% 경계 통과. check_progress_service.py, check_local_audio_settings.py(UI소리 mute 포함), check_audio_events.py 통과. 변경12개 Luau Source 컴파일 통과.
+- tools/prepare_journal_bag_review.py: dist/RodeoFantasy-HuntTextureFix.rbxlx는 승인 로비배치본에 버그 관련3Source만 패치. dist/RodeoFantasy-JournalBagReview.rbxlx는 거기에 UI/소리/기록/성별9Source를 추가한 디자인 검토용 파일. 각각 모든 다른 속성/703MeshParts/참조/UniqueId 보존 검사 통과. 사용자 변경 dist/RodeoFantasy-Capture.rbxlx는 덮어쓰거나 커밋하지 않는다. 고래는 어느 파일에도 새로 설치하지 않았다.
+- 미완료: 디자인 승인, 실제 Studio의 반복 재사냥 색/밀도/효과음 확인, PC/모바일 글자·터치·FPS 확인, 공개게임 저장·업로드. API stub 통과를 실기기 검증 또는 흰색 현상 해결 확정으로 표현하지 않는다.
+
+- 후속 이름 변경 승인: MeadowMouse→모스랫, GrassBoar→브램블보어, TreeWolf→바인팽, RockElephant→엘레바인, Weedcrow→쏜크로. 저장/템플릿 ID 유지, Localization의 고유명사만 변경하고 미정 외국어 이름은 새로 만들지 않았다. 초원 pick은0<=m<1000에서만 허용하며 replenish도 새 출생 위치가1000m 이후이면 건너뛴다. 사용자 능력값은 현재 Catalog와 동일함을 확인했다. GAME_DESIGN/교배 초안/검토 이미지에 새 이름 반영.
+- meadow_species 실제 Source 인라인 검사:0/149/150/299/300/399/400/499/500/999/999.99 출현,1000/1500/음수 거절,속도/생산/길들이기/분노3회점프/성장 검증 통과. 한국어 이름5개 대조 통과. check_hunt_density에990m 부근 출생 상한 추가 후 통과. check_mount_release.py의 실제World·launch 재검증 통과.
+- 최종 HuntTextureFix 파일은 이름/출현상한을 포함하여5Source 패치이며 JournalBagReview는 추가9Source 패치다. 디자인 승인은 아직 도감/가방 답변 대기, 기존 고래 Aurora는 거절되어 Regal990면 새 안으로 교체 검토한다.

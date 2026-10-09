@@ -5,9 +5,10 @@ for id,v in pairs(expected) do
  assert(C[id].UnlockMeters==v[1] and C[id].RunSpeed==v[2] and C[id].TameSeconds==v[3])
  assert(C[id].IncomeSeconds==3 and C[id].IncomeAmount==v[4])
 end
-for _,meters in ipairs({0,149,150,299,300,399,400,499,500,1000}) do
+for _,meters in ipairs({0,149,150,299,300,399,400,499,500,999,999.99}) do
  for serial=1,30 do assert(C[C.pick(meters,serial)].UnlockMeters<=meters) end
 end
+assert(C.pick(1000,1)==nil and C.pick(1500,1)==nil and C.pick(-1,1)==nil,'meadow spawning is restricted to 0..999m')
 for _,a in ipairs({'Small','Medium','Large'}) do
  for _,b in ipairs({'Small','Medium','Large'}) do
   for _,dash in ipairs({false,true}) do

@@ -1,15 +1,27 @@
 local L={}
 L.entries={
+ ["Ocean"]={ko="바다",ja="海"},
+ ["Swamp"]={ko="늪지",ja="沼地"},
+ ["Forest"]={ko="숲",ja="森"},
+ ["Total caught"]={ko="총 포획",ja="総捕獲"},
+ ["Caught"]={ko="포획 수",ja="捕獲数"},
+ ["Found at"]={ko="발견 위치",ja="発見場所"},
+ ["Taming (1 star)"]={ko="1성 길들이기",ja="1つ星の捕獲"},
+ ["Seconds"]={ko="초",ja="秒"},
+ ["Region not released yet"]={ko="아직 공개되지 않은 지역이에요",ja="まだ公開されていない地域です"},
+ ["Male"]={ko="수컷",ja="オス"},
+ ["Female"]={ko="암컷",ja="メス"},
+ ["Unknown sex"]={ko="미확인",ja="不明"},
  ["Collection discoveries"]={ko="도감 수집 랭킹",ja="図鑑収集ランキング"},
  ["Settings"]={ko="설정",ja="設定"},
  ["Sound settings"]={ko="소리 설정",ja="サウンド設定"},
  ["Background music"]={ko="배경 음악",ja="背景音楽"},
  ["Sound effects"]={ko="효과음",ja="効果音"},
  ["Hunting continues while settings are open"]={ko="설정을 열어도 사냥은 계속 진행돼요",ja="設定中も狩りは続きます"},
- ["MeadowMouse"]={ko="꼬마쥐",ja="草原ネズミ"},
- ["GrassBoar"]={ko="풀멧돼지",ja="草イノシシ"},
- ["TreeWolf"]={ko="나무늑대강아지",ja="木オオカミの子"},
- ["RockElephant"]={ko="바위코끼리",ja="岩ゾウ"},
+ ["MeadowMouse"]={ko="모스랫",en="모스랫",ja="모스랫"},
+ ["GrassBoar"]={ko="브램블보어",en="브램블보어",ja="브램블보어"},
+ ["TreeWolf"]={ko="바인팽",en="바인팽",ja="바인팽"},
+ ["RockElephant"]={ko="엘레바인",en="엘레바인",ja="엘레바인"},
  ["Farthest run"]={ko="최장 거리 랭킹",ja="最長距離ランキング"},
  ["Total produced"]={ko="누적 생산액 랭킹",ja="累計生産ランキング"},
  ["Loading records..."]={ko="기록 불러오는 중…",ja="記録を読み込み中…"},
@@ -23,7 +35,7 @@ L.entries={
  ["Records temporarily unavailable"]={ko="기록을 잠시 불러올 수 없어요",ja="記録を一時的に読み込めません"},
  ["Manage ranch"]={ko="목장 관리",ja="牧場を管理"},
  ["Choose ranch"]={ko="관리할 목장 선택",ja="管理する牧場を選ぶ"},
- ["Weedcrow"]={ko="잡초까마귀",ja="クサガラス"},
+ ["Weedcrow"]={ko="쏜크로",en="쏜크로",ja="쏜크로"},
  ["Monster tamed! Added to your bag."]={ko="길들이기 성공! 가방에 추가됐어요.",ja="仲間にしました！バッグに追加。"},
  ["Place monsters"]={ko="몬스터 배치",ja="モンスターを配置"},
  ["Ranch"]={ko="목장",ja="牧場"},
@@ -94,7 +106,7 @@ L.entries={
 function L.text(source,locale)
  local lang=string.lower(string.sub(locale or "en",1,2))
  local row=L.entries[source]
- return row and row[lang] or source
+ return row and (row[lang] or row.en) or source
 end
 function L.stats(count,money,locale)
  local lang=string.sub(locale or "en",1,2)

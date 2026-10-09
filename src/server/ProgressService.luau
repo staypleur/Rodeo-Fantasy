@@ -26,14 +26,14 @@ local function hideNameplate(player)
 end
 
 function S.join(player)
- local e={session=game:GetService("HttpService"):GenerateGUID(false),count=0,ack=0,saved=0,seen={},dirty=false,loading=enabled,loaded=not enabled,status=enabled and "Loading progress" or "Session progress"}
+ local e={session=game:GetService("HttpService"):GenerateGUID(false),count=0,ack=0,saved=0,caught={},savedCaught={},ackCaught={},seen={},dirty=false,loading=enabled,loaded=not enabled,status=enabled and "Loading progress" or "Session progress"}
  entries[player]=e
  if enabled then task.spawn(function()
   local ok,data=pcall(function() return store:GetAsync(tostring(player.UserId)) end)
   if entries[player]~=e then return end
   e.loading=false
   if ok then
-   data=data or {} e.saved=data.captures or 0
+   data=data or {} e.saved=data.captures or 0 e.savedCaught=data.caught or {}
    for key,v in pairs(data.seen or {}) do if v then e.seen[key]=true end end
    e.loaded=true e.dirty=true e.status="Progress loaded"
   else e.status="Progress temporarily unavailable" end
@@ -45,24 +45,31 @@ function S.discover(player,id,stars)
  if not e.seen[key] then e.seen[key]=true e.dirty=true end
 end
 function S.caught(player,id,stars)
- local e=entries[player] if not e then return end
+ local e=entries[player] if not e or not Catalog[id] then return end
+ local key=id..":"..Catalog.stage(stars or 1)
+ e.count+=1 e.caught[key]=(e.caught[key] or 0)+1 e.dirty=true
  S.discover(player,id,stars)
 end
 function S.snapshot(player,includeSeen)
  local e=entries[player]
  hideNameplate(player)
- return {status=e and e.status or "Loading progress",seen=includeSeen and e and table.clone(e.seen) or nil}
+ local caught={}
+ if includeSeen and e then
+  for key,value in pairs(e.savedCaught) do caught[key]=value end
+  for key,value in pairs(e.caught) do caught[key]=(caught[key] or 0)+value-(e.ackCaught[key] or 0) end
+ end
+ return {status=e and e.status or "Loading progress",seen=includeSeen and e and table.clone(e.seen) or nil,caught=includeSeen and caught or nil,captures=e and e.saved+e.count-e.ack or 0}
 end
 function S.save(player)
  local e=entries[player]
  if not enabled or not e or e.loading or e.busy or not e.dirty then return false end
  e.busy=true
- local count,seen=e.count,table.clone(e.seen)
+ local count,seen,caught=e.count,table.clone(e.seen),table.clone(e.caught)
  local ok,data=pcall(function()
-  return store:UpdateAsync(tostring(player.UserId),function(old) return Rules.merge(old,e.session,count,seen,os.time()) end)
+  return store:UpdateAsync(tostring(player.UserId),function(old) return Rules.merge(old,e.session,count,seen,os.time(),caught) end)
  end)
  if ok then
-  e.saved=data.captures e.ack=count e.loaded=true e.status="Progress saved"
+  e.saved=data.captures e.ack=count e.savedCaught=data.caught or {} e.ackCaught=caught e.loaded=true e.status="Progress saved"
   for key,v in pairs(data.seen) do if v then e.seen[key]=true end end
   local indexed=pcall(function()
    local discovered=Rules.discovered(data.seen,Catalog)
