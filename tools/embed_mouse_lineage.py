@@ -7,8 +7,8 @@ R=Path(__file__).resolve().parents[1]
 fmt=lambda a:'{'+','.join(f'{float(x):.8g}' for x in a)+'}'
 stages=[]
 parser=argparse.ArgumentParser();parser.add_argument('--boar',action='store_true');args=parser.parse_args()
-for stage in ((1,) if args.boar else (1,3,6,9)):
- path=R/'dist/ReviewModels'/('BrambleBoar_S1_FacetedReview.glb' if args.boar else 'MeadowMouse_A_S1_FacetedReview.glb' if stage==1 else f'Mossrat_S{stage}_FacetedReview.glb')
+for stage in (1,3,6,9):
+ path=R/'dist/ReviewModels'/(f'BrambleBoar_S{stage}_FacetedReview.glb' if args.boar else 'MeadowMouse_A_S1_FacetedReview.glb' if stage==1 else f'Mossrat_S{stage}_FacetedReview.glb')
  b=path.read_bytes();n=struct.unpack_from('<I',b,12)[0];g=json.loads(b[20:20+n]);binary=b[28+n:]
  def val(i):
   a=g['accessors'][i];v=g['bufferViews'][a['bufferView']];d={'VEC3':3,'VEC2':2,'SCALAR':1}[a['type']]
@@ -47,7 +47,7 @@ lines=[item for line in lines for item in (line if isinstance(line,list) else [l
 for stage,groups,ground,nodes,im in stages:
  count=sum(len(a)//3 for arrays in groups.values() for a in arrays)
  revision='BrambleBoar-Connected-v1' if args.boar else 'Mossrat-Lineage-v1'
- lines.append(f'[{stage}]={{Revision="{revision}-S{stage}",ImageKey={1 if stage==1 else 3},GroundY={ground:.9g},Triangles={count},Parts={{')
+ lines.append(f'[{stage}]={{Revision="{revision}-S{stage}",ImageKey={1 if args.boar or stage==1 else 3},GroundY={ground:.9g},Triangles={count},Parts={{')
  for name,arrays in groups.items():
   a=np.concatenate(arrays);low=a[:,:3].min(axis=0);high=a[:,:3].max(axis=0);center=(low+high)/2
   pivot=center.copy()

@@ -1,5 +1,5 @@
 {
-  "sharedPixelsPerUnit": 36.13797010474069,
+  "sharedPixelsPerUnit": 34.98064045072271,
   "stages": [
     {
       "stage": 1,
@@ -15,7 +15,7 @@
     },
     {
       "stage": 9,
-      "height": 16.13180160522461
+      "height": 16.629789352416992
     }
   ]
 }

@@ -94,7 +94,7 @@ local function client(fail)
  end
  local catalog={MeadowMouse={RootHeight=2.05},stage=function(stars) return stars>=3 and 3 or 1 end,scale=function(stars) return stars==2 and 1.2 or 1 end}
  for _,star in ipairs({3,6,9}) do
-  local back={[3]=2.212572,[6]=3.232653,[9]=6.561222}
+  local back={[3]=2.212572,[6]=3.232653,[9]=7.460891}
   assert(math.abs(catalog.saddleHeight('MeadowMouse',star)+2.05*catalog.scale(star)-back[star]-1.36)<.00001,'seat must use back rather than crown height')
  end
  for _,star in ipairs({1,2}) do assert(math.abs(catalog.saddleHeight('GrassBoar',star)+3.0625*catalog.scale(star)-2.804463*catalog.scale(star)-1.36)<.00001,'boar seat uses new back') end
@@ -174,7 +174,7 @@ for _,stars in ipairs({3,6,9,4,7,10}) do
   end
  end end
  assert(legs==4,'four separately animated legs')
- local heights={[3]=4,[6]=6.62043285,[9]=16.1318016}
+ local heights={[3]=4,[6]=6.62043285,[9]=16.62978935}
  assert(math.abs(top-heights[stage]*scale/scales[stage])<.0001,'growth must not scale twice')
  local black=new(stars,true) assert(m.apply(black))
  for _,part in ipairs(black:GetChildren()) do if part.ClassName=='MeshPart' then assert(part.Color[1]==0 and part.TextureID=='') end end
@@ -196,14 +196,29 @@ end end
 assert(pigParts==8 and metrics()==747+1075+1399+1671+1064,'boar must have separate cached factory')
 local pig2=new(2,true,'GrassBoar') assert(m.apply(pig2))
 for _,part in ipairs(pig2:GetChildren()) do if part.ClassName=='MeshPart' then assert(part.Color[1]==0 and part.TextureID=='') end end
-local pig3,prior=new(3,false,'GrassBoar') assert(not m.apply(pig3) and not prior.destroyed,'unapproved boar growth must remain unchanged')
+local catalog=(function()\n'''+(R/'src/shared/MonsterCatalog.luau').read_text(encoding='utf-8')+'''\nend)()\nfor _,star in ipairs({3,4,6,8,9,10}) do
+ local growth=new(star,false,'GrassBoar') assert(m.apply(growth),'approved boar stage must install')
+ local stage=catalog.stage(star) local scale=catalog.scale(star)/catalog.Scales[stage]
+ local top=-math.huge local legs=0
+ for _,part in ipairs(growth:GetChildren()) do if part.ClassName=='MeshPart' then
+  local rest=part:GetAttribute('ApprovedRest').Position
+  top=math.max(top,rest.Y+part.Size.Y/2+3.0625*catalog.scale(star))
+  if part.Name:find('Leg') then legs+=1 assert(math.abs(rest.Y-part.Size.Y/2+3.0625*catalog.scale(star))<.0001,'boar growth grounded') end
+ end end
+ assert(legs==4 and math.abs(top-({[3]=5,[6]=10,[9]=15})[stage]*scale)<.0001,'boar size must not scale twice')
+ local back=({[3]=3.880880,[6]=7.230789,[9]=11.021101})[stage]
+ assert(math.abs(catalog.saddleHeight('GrassBoar',star)+3.0625*catalog.scale(star)-back*scale-1.36)<.0001,'boar seat uses back instead of plants')
+ local hidden=new(star,true,'GrassBoar') assert(m.apply(hidden))
+ for _,part in ipairs(hidden:GetChildren()) do if part.ClassName=='MeshPart' then assert(part.Color[1]==0 and part.TextureID=='') end end
+end
+assert(metrics()==747+1075+1399+1671+1064+1168+1432+1952,'growth caches must be reused')
 local failed,newFailed,all=client(true) local target,prior=newFailed(1,false)
 assert(not failed.apply(target) and not prior.destroyed and target.PrimaryPart.Parent==target)
 for _,obj in ipairs(all) do if obj.ClassName=='EditableMesh' or obj.ClassName=='SurfaceAppearance' or obj.ClassName=='MeshPart' then assert(obj.destroyed,'failed factory must free mesh resources') end end
 local surfaceFail,makeSurfaceFail=client('texture') local interrupted,previous=makeSurfaceFail(1,false)
 assert(not surfaceFail.apply(interrupted) and not previous.destroyed,'surface error must preserve original visual')
 assert(not interrupted:GetAttribute('FacetedMouseRevision'),'failed color binding must not mark installation complete')
-print('APPROVED_MOUSE_RUNTIME_PASS: four mouse stages plus approved boar 1/2, species-isolated caches/atlases, four animated legs/ears/tail pivots, grounding/interpolated scale/silhouettes/replay/cache/failure fallback; API stubs only')
+print('APPROVED_MOUSE_RUNTIME_PASS: four mouse stages plus four approved boar stages/intermediate stars, species-isolated caches/atlases, four animated legs/ears/tail pivots, grounding/interpolated scale/silhouettes/replay/cache/failure fallback; API stubs only')
 '''
 prefix=prefix.replace("local catalog={MeadowMouse={RootHeight=2.05},stage=function(stars) return stars>=3 and 3 or 1 end,scale=function(stars) return stars==2 and 1.2 or 1 end}","local catalog=(function()\n"+(R/'src/shared/MonsterCatalog.luau').read_text(encoding='utf-8')+"\nend)()")
 harness=R/'.tools/approved_mouse_runtime.luau';harness.write_text(prefix+source+suffix,encoding='utf-8')

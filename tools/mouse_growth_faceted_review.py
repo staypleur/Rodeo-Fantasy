@@ -56,7 +56,7 @@ if STAGE>=6:
  face_patch('ClosedMouth',[(-.14,.22),(-.06,.18),(0,.20),(.06,.18),(.14,.22),(.06,.20),(0,.22),(-.06,.20)],'Dark',.055)
 params={3:dict(headY=1.36,headSize=.83,headWidth=.92,depth=1.06,bodyY=.10,bodyWidth=.72,length=1.85,legTop=.15,ear=.87,mane=.70),
         6:dict(headY=2.18,headSize=.76,headWidth=.82,depth=1.18,bodyY=.53,bodyWidth=.90,length=2.10,legTop=.64,ear=.80,mane=1.65),
-        9:dict(headY=3.18,headSize=.78,headWidth=.72,depth=1.32,bodyY=.85,bodyWidth=1.00,length=2.44,legTop=1.04,ear=.73,mane=3.36)}[STAGE]
+        9:dict(headY=2.50,headSize=.78,headWidth=.72,depth=1.32,bodyY=.85,bodyWidth=1.00,length=2.44,legTop=1.04,ear=.73,mane=3.36)}[STAGE]
 head_z=-1.18 if STAGE==3 else -1.44 if STAGE==6 else -1.62
 for m in meshes:
  p=np.asarray(m['p'],float);name=m['name']
@@ -66,6 +66,12 @@ for m in meshes:
  if name.endswith('Eye'):
   sg=-1 if name.startswith('Left') else 1
   p[:,1]=.77+(p[:,1]-.77)*{3:.97,6:.86,9:.80}[STAGE]+sg*(p[:,0]-sg*.49)*.05
+ if STAGE==9 and 'Ear' not in name:
+  # Taper cheeks/chin and project the lower front into a short angular muzzle.
+  p[:,0]*=np.clip(.84+.10*(p[:,1]-.10),.80,.98)
+  front=np.clip((-p[:,2]-1.10)/.65,0,1)
+  lower=np.clip((.65-p[:,1])/.55,0,1)
+  p[:,2]-=.22*front*lower
  p-=np.array((0,.62,-1.18));p[:,0]*=params['headWidth'];p[:,2]*=params['depth']
  p*=params['headSize'];p+=np.array((0,params['headY'],head_z));m['p']=p.tolist()
 by=params['bodyY'];bw=params['bodyWidth'];length=params['length']
