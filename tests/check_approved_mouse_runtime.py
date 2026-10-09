@@ -3,6 +3,7 @@ from pathlib import Path
 import subprocess
 R=Path(__file__).resolve().parents[1]
 prefix='''local data=(function()\n'''+(R/'src/client/FacetedMouseData.luau').read_text(encoding='utf-8')+'''\nend)()
+local boar=(function()\n'''+(R/'src/client/FacetedBoarData.luau').read_text(encoding='utf-8')+'''\nend)()
 local function client(fail)
  local vec={}
  local function V(x,y,z) return setmetatable({X=x,Y=y,Z=z},vec) end
@@ -96,9 +97,10 @@ local function client(fail)
   local back={[3]=2.212572,[6]=3.232653,[9]=6.561222}
   assert(math.abs(catalog.saddleHeight('MeadowMouse',star)+2.05*catalog.scale(star)-back[star]-1.36)<.00001,'seat must use back rather than crown height')
  end
- local package={MonsterCatalog='catalog'} local script={Parent={FacetedMouseData='data'}}
+ for _,star in ipairs({1,2}) do assert(math.abs(catalog.saddleHeight('GrassBoar',star)+3.0625*catalog.scale(star)-2.804463*catalog.scale(star)-1.36)<.00001,'boar seat uses new back') end
+ local package={MonsterCatalog='catalog'} local script={Parent={FacetedMouseData='data',FacetedBoarData='boar'}}
  local game={ReplicatedStorage={RodeoFantasy=package},GetService=function() return Asset end}
- local require=function(which) return which=='data' and data or catalog end
+ local require=function(which) return which=='data' and data or which=='boar' and boar or catalog end
  local task={wait=function() error('unexpected concurrent wait') end,defer=function(fn) fn() end} local warn=function() end
  function script.Parent:WaitForChild(name) return self[name] end\n local module=(function()\n'''
 source=(R/'src/client/FacetedMouse.luau').read_text(encoding='utf-8')
@@ -108,8 +110,8 @@ suffix='''\nend)()
  Catalog.visual=function() return 'visual' end
  function package:WaitForChild() return {WaitForChild=function() return {CFrame=F()} end} end
  local function remember(model, existing)'''+remember+'''
- local function model(stars,silhouette)
-  local m=object('Model');m.DescendantAdded={callbacks={},Connect=function(self,fn) self.callbacks[#self.callbacks+1]=fn return {} end};m.Parent={} m:SetAttribute('MonsterId','MeadowMouse') m:SetAttribute('Stars',stars)
+ local function model(stars,silhouette,species)
+  local m=object('Model');m.DescendantAdded={callbacks={},Connect=function(self,fn) self.callbacks[#self.callbacks+1]=fn return {} end};m.Parent={} m:SetAttribute('MonsterId',species or 'MeadowMouse') m:SetAttribute('Stars',stars)
   m:SetAttribute('PortraitSilhouette',silhouette)
   local root=object('Part');root.Name='MountRoot' root.CFrame=F(0,2.05,0) root.Parent=m m.PrimaryPart=root
   local old=object('Part');old.Name='Body' old.Parent=m
@@ -184,13 +186,24 @@ for _,obj in ipairs(objects) do
  if obj.ClassName=='EditableMesh' and not obj.dynamic then meshCount+=1 end
 end
 assert(imageCount==2 and meshCount==32,'two atlases/eight animation batches per stage')
+local pig=new(1,false,'GrassBoar') assert(m.apply(pig))
+assert(pig:GetAttribute('FacetedMouseRevision')=='BrambleBoar-Connected-v1-S1')
+local pigParts=0
+for _,part in ipairs(pig:GetChildren()) do if part.ClassName=='MeshPart' then
+ pigParts+=1
+ if part.Name:find('Leg') then local rest=part:GetAttribute('ApprovedRest').Position assert(math.abs(rest.Y-part.Size.Y/2+3.0625)<.00001,'boar legs grounded') end
+end end
+assert(pigParts==8 and metrics()==747+1075+1399+1671+1064,'boar must have separate cached factory')
+local pig2=new(2,true,'GrassBoar') assert(m.apply(pig2))
+for _,part in ipairs(pig2:GetChildren()) do if part.ClassName=='MeshPart' then assert(part.Color[1]==0 and part.TextureID=='') end end
+local pig3,prior=new(3,false,'GrassBoar') assert(not m.apply(pig3) and not prior.destroyed,'unapproved boar growth must remain unchanged')
 local failed,newFailed,all=client(true) local target,prior=newFailed(1,false)
 assert(not failed.apply(target) and not prior.destroyed and target.PrimaryPart.Parent==target)
 for _,obj in ipairs(all) do if obj.ClassName=='EditableMesh' or obj.ClassName=='SurfaceAppearance' or obj.ClassName=='MeshPart' then assert(obj.destroyed,'failed factory must free mesh resources') end end
 local surfaceFail,makeSurfaceFail=client('texture') local interrupted,previous=makeSurfaceFail(1,false)
 assert(not surfaceFail.apply(interrupted) and not previous.destroyed,'surface error must preserve original visual')
 assert(not interrupted:GetAttribute('FacetedMouseRevision'),'failed color binding must not mark installation complete')
-print('APPROVED_MOUSE_RUNTIME_PASS: four stages, 32 fixed meshes/two atlases, four animated legs/ears/tail pivots, grounding/interpolated scale/silhouettes/replay/cache/failure fallback; API stubs only')
+print('APPROVED_MOUSE_RUNTIME_PASS: four mouse stages plus approved boar 1/2, species-isolated caches/atlases, four animated legs/ears/tail pivots, grounding/interpolated scale/silhouettes/replay/cache/failure fallback; API stubs only')
 '''
 prefix=prefix.replace("local catalog={MeadowMouse={RootHeight=2.05},stage=function(stars) return stars>=3 and 3 or 1 end,scale=function(stars) return stars==2 and 1.2 or 1 end}","local catalog=(function()\n"+(R/'src/shared/MonsterCatalog.luau').read_text(encoding='utf-8')+"\nend)()")
 harness=R/'.tools/approved_mouse_runtime.luau';harness.write_text(prefix+source+suffix,encoding='utf-8')

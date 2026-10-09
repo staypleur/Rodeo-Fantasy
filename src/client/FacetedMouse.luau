@@ -3,27 +3,33 @@ local M={}
 local Asset=game:GetService("AssetService")
 local C=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
 local data=require(script.Parent:WaitForChild("FacetedMouseData"))
+local approved={MeadowMouse=data,GrassBoar=require(script.Parent:WaitForChild("FacetedBoarData"))}
 local stages,textures,imagePreparing={},{},{}
 local pending=setmetatable({},{__mode="k"})
 local retryAfter=setmetatable({},{__mode="k"})
 function M.isTarget(model)
- return model:GetAttribute("MonsterId")=="MeadowMouse"
+ local selected=approved[model:GetAttribute("MonsterId")]
+ return selected~=nil and selected.Stages[C.stage(model:GetAttribute("Stars") or 1)]~=nil
 end
-function M.prepare(stage)
+function M.prepare(stage,species)
  stage=stage or 1
- local state=stages[stage]
- if not state then state={cache={},resources={}} stages[stage]=state end
+ species=species or "MeadowMouse"
+ local data=approved[species]
+ local key=species..":"..stage
+ local state=stages[key]
+ if not state then state={cache={},resources={}} stages[key]=state end
  while state.preparing do task.wait() end
  if state.ready or state.failed then return state.ready end
  state.preparing=true
  local definition=data.Stages[stage]
+ local imageKey=species..":"..definition.ImageKey
  local cache,resources=state.cache,state.resources
  local builder
  local ok,err=pcall(function()
-  while imagePreparing[definition.ImageKey] do task.wait() end
-  local texture=textures[definition.ImageKey]
+  while imagePreparing[imageKey] do task.wait() end
+  local texture=textures[imageKey]
   if not texture then
-  imagePreparing[definition.ImageKey]=true
+  imagePreparing[imageKey]=true
   local image
   local imageOK,imageError=pcall(function()
   image=assert(Asset:CreateEditableImage({Size=Vector2.new(data.ImageSize,data.ImageSize)}),"No image budget")
@@ -39,9 +45,9 @@ function M.prepare(stage)
   assert(offset==buffer.len(pixels),"Incomplete approved texture")
   image:WritePixelsBuffer(Vector2.zero,Vector2.new(data.ImageSize,data.ImageSize),pixels)
   end)
-  imagePreparing[definition.ImageKey]=nil
+  imagePreparing[imageKey]=nil
   if not imageOK then if image then image:Destroy() end error(imageError) end
-  texture=image textures[definition.ImageKey]=image
+  texture=image textures[imageKey]=image
   end
   state.texture=texture
   for _,entry in ipairs(definition.Parts) do
@@ -75,21 +81,22 @@ function M.prepare(stage)
   if builder then builder:Destroy() builder=nil end
   state.cache={}
   for _,resource in ipairs(resources) do resource:Destroy() end resources={}
-  warn("Approved mouse failed to load; existing visual retained. Actual error: "..tostring(err))
+  warn("Approved "..species.." failed to load; existing visual retained. Actual error: "..tostring(err))
  end
  return state.ready
 end
 function M.apply(model)
  if not M.isTarget(model) then return false end
  local stars=model:GetAttribute("Stars") or 1
+ local species=model:GetAttribute("MonsterId") local data=approved[species]
  local stage=C.stage(stars) local definition=data.Stages[stage]
  if model:GetAttribute("FacetedMouseRevision")==definition.Revision or pending[model] then return false end
  if retryAfter[model] and os.clock()<retryAfter[model] then return false end
  pending[model]=true
- if not M.prepare(stage) or not model.Parent or not model.PrimaryPart then pending[model]=nil return false end
- local state=stages[stage]
+ if not M.prepare(stage,species) or not model.Parent or not model.PrimaryPart then pending[model]=nil return false end
+ local state=stages[species..":"..stage]
  local root=model.PrimaryPart local scale=C.scale(stars)/C.Scales[stage]
- local rootHeight=C.MeadowMouse.RootHeight*C.scale(stars)
+ local rootHeight=C[species].RootHeight*C.scale(stars)
  local silhouette=model:GetAttribute("PortraitSilhouette")==true local staged={}
  local ok,err=pcall(function() for _,entry in ipairs(state.cache) do
   local part=entry.part:Clone() part.Size*=scale
@@ -112,7 +119,7 @@ function M.apply(model)
   for _,part in ipairs(staged) do part:Destroy() end
   pending[model]=nil
   retryAfter[model]=os.clock()+5
-  if not ok then warn("Approved mouse texture binding failed; existing visual retained: "..tostring(err)) end
+  if not ok then warn("Approved "..species.." texture binding failed; existing visual retained: "..tostring(err)) end
   return false
  end
  if not model:GetAttribute("ApprovedVisualGuard") then

@@ -23,6 +23,9 @@ function C.visual(id,stars) local stage=C.stage(stars or 1) return C[id].Visual.
 function C.template(id,stars) local stage=C.stage(stars or 1) return C[id].Template..(stage==1 and "" or "_S"..stage) end
 function C.saddleHeight(id,stars)
  stars=stars or 1
+ if id=="GrassBoar" and C.stage(stars)==1 then
+  return (2.804463-C[id].RootHeight)*C.scale(stars)+1.36
+ end
  if id=="MeadowMouse" then
   local stage=C.stage(stars)
   if stage==1 then return 1.2*C.scale(stars) end

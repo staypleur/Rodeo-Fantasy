@@ -22,7 +22,7 @@ root=E.parse(out).getroot();before=copy.deepcopy(root)
 client=next(n for n in root.iter('Item') if n.findtext("Properties/string[@name='Name']")=='CaptureClient')
 parent=next(n for n in root.iter('Item') if client in list(n))
 added=[]
-for name in ('SkyWhaleData','SkyWhaleRuntime','OperatorPrompt'):
+for name in ('SkyWhaleData','SkyWhaleRuntime','OperatorPrompt','FacetedBoarData'):
  assert not any(n.findtext("Properties/string[@name='Name']")==name for n in parent.findall('Item'))
  node=E.SubElement(parent,'Item',{'class':'ModuleScript','referent':'ApprovedRegal'+name})
  props=E.SubElement(node,'Properties');E.SubElement(props,'string',name='Name').text=name
