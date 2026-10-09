@@ -1,6 +1,7 @@
 """Patch the open Studio place without reimporting or moving installed models."""
 from pathlib import Path
 import xml.etree.ElementTree as E
+from model_export import export_model
 R=Path(__file__).resolve().parents[1]
 code=['assert(not game:GetService("RunService"):IsRunning(),"■ 정지 후 실행하세요.")',
  'local server=game:GetService("ServerScriptService")',
@@ -34,10 +35,7 @@ if saved.exists():
  assert detail.get('class')=='Model' and any(n.get('class')=='MeshPart' for n in detail.iter('Item'))
  assert not any(n.get('class') in ('Script','LocalScript','ModuleScript') for n in detail.iter('Item'))
  detail.find("Properties/string[@name='Name']").text='RecoveryMossratDetailTemplate'
- document=E.Element('roblox',{'version':'4'})
- E.SubElement(document,'External').text='null'
- E.SubElement(document,'External').text='nil'
- document.append(detail)
+ document=export_model(tree.getroot(),detail,'RecoveryMossratDetailTemplate')
  E.ElementTree(document).write(R/'dist/ModelRecovery/Mossrat_S1_Detail_Restore.rbxmx',encoding='utf-8',xml_declaration=True)
  print('DETAIL_TEMPLATE_EXPORTED: approved native mesh, bones and PBR only')
 # Update only shared review files. Never rewrite the user's private working place.
