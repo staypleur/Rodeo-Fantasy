@@ -17,7 +17,10 @@ local function client(fail)
  local Enum={CollisionFidelity={Box=1},RenderFidelity={Precise=1}}
  local objects={} local meshes={} local triangles=0 local written
  local function object(kind)
-  local o={ClassName=kind,attrs={}}
+  local o=setmetatable({ClassName=kind,attrs={}},{__newindex=function(t,k,v)
+   if kind=='MeshPart' and k=='RenderFidelity' then error("The current thread cannot write 'RenderFidelity' (lacking capability PluginOrOpenCloud)") end
+   rawset(t,k,v)
+  end})
   function o:IsA(k) return k==self.ClassName or (k=='BasePart' and (kind=='Part' or kind=='MeshPart')) end
   function o:GetChildren() local list={} for _,item in ipairs(objects) do if item.Parent==self then list[#list+1]=item end end return list end
   function o:GetAttribute(k) return self.attrs[k] end
@@ -52,7 +55,8 @@ local function client(fail)
   function m:SetFaceUVs(face,ids) assert(#ids==3 and self.uvs[ids[3]]) end
   meshes[#meshes+1]=m return m
  end
- function Asset:CreateMeshPartAsync(mesh)
+ function Asset:CreateMeshPartAsync(mesh,options)
+  assert(options.RenderFidelity==Enum.RenderFidelity.Precise,'fidelity must be set in creation options')
   local p=object('MeshPart') local low=V(math.huge,math.huge,math.huge) local high=V(-math.huge,-math.huge,-math.huge)
   for _,v in ipairs(mesh.vertices) do for _,a in ipairs({'X','Y','Z'}) do low[a]=math.min(low[a],v[a]) high[a]=math.max(high[a],v[a]) end end
   p.Size=V(high.X-low.X,high.Y-low.Y,high.Z-low.Z) return p

@@ -39,10 +39,10 @@ function M.prepare()
     end
     local face=mesh:AddTriangle(ids[1],ids[2],ids[3]) mesh:SetFaceNormals(face,{normal,normal,normal}) mesh:SetFaceUVs(face,uvs)
    end
-   local part=Asset:CreateMeshPartAsync(Content.fromObject(mesh),{CollisionFidelity=Enum.CollisionFidelity.Box})
+   local part=Asset:CreateMeshPartAsync(Content.fromObject(mesh),{CollisionFidelity=Enum.CollisionFidelity.Box,RenderFidelity=Enum.RenderFidelity.Precise})
    part.Name=entry.Name part.Color=Color3.new(1,1,1) part.Anchored=true
    part.CanCollide,part.CanTouch,part.CanQuery=false,false,false
-   part.DoubleSided=true part.RenderFidelity=Enum.RenderFidelity.Precise
+   part.DoubleSided=true
    surface:Clone().Parent=part
    cache[#cache+1]={part=part,center=Vector3.new(unpack(entry.Center))}
   end
@@ -52,7 +52,7 @@ function M.prepare()
  if not ok then
   for _,entry in ipairs(cache) do entry.part:Destroy() end cache={}
   for _,resource in ipairs(resources) do resource:Destroy() end resources={}
-  warn("Approved mouse failed to load. Enable Mesh / Image APIs in Game Settings > Security or import the approved GLB. Existing visual retained. "..tostring(err))
+  warn("Approved mouse failed to load; existing visual retained. Actual error: "..tostring(err))
  end
  return ready
 end

@@ -457,3 +457,11 @@
 - 설정 버튼을56px 어두운 원형/직접 그린 흰 톱니바퀴로 변경하고 별도 TopbarSafeInsets ScreenGui로 Roblox 메뉴 옆에 둔다. TopbarInset 변경을 추적하고 좁으면 기존 HUD 아래 왼쪽48px 버튼으로 표시한다. 열린 소리 패널은 버튼 근처에서 화면 폭 안으로 배치한다. 기존 개인 볼륨과 입력 취소 동작은 유지한다.
 - 검증: 실제 FacetedMouse 모듈을 API 모의 환경에서 실행하여747면/29텍스처 부분, 캐시 재사용, 발바닥 지면, 검은 실루엣,2성 보간/3성 제외, 생성 중 예산 실패 시 기존 모델 보존·자원 정리 검사 통과. 이 검사는 실제 Roblox 렌더링/권한/성능을 증명하지 않는다. 실제 SettingsUI 콜백으로 상단 여유 공간/좁은 화면 이동 및 기존 열기/드래그/볼륨 입력 검사 통과. 변경9개 Luau 소스 컴파일 통과.
 - AudioSettings 파일에서7개 소스만 변경하고 FacetedMouse/FacetedMouseData 두 모듈을 추가한 RodeoFantasy-ApprovedMouse.rbxlx 작성. XML 속성 비교로 다른 저장 속성 및 기존703 MeshPart 보존을 검사한다. 사용자 Capture 파일은 그대로 유지한다. 실제 Studio F5 메시/텍스처/주행/표시/UI 검사는 미실행이며 Roblox 게시도 하지 않았다.
+
+
+## 2026-10-09 — 실제 Studio 로그의 RenderFidelity 권한 오류 수정
+
+- 사용자 새 화면에서 원형 설정 버튼은 반영됐지만 몬스터가 이전 구체 모델로 남음을 확인했다. 사용자 PC의 Roblox Studio 로그 중 이 프로젝트 오류 문장만 읽어 `Approved mouse failed to load ... The current thread cannot write RenderFidelity (lacking capability PluginOrOpenCloud)`를 확인했다. 같은 오류가 기존 CreatureMesh에도 있다. 이번 실패 원인은 Mesh/Image API 설정으로 확정된 것이 아니라 에이전트 코드의 런타임 제한 속성 직접 쓰기다. 사용자에게 요청했던 Output 복사는 더 이상 필요 없다고 안내했다.
+- FacetedMouse/CreatureMesh에서 part.RenderFidelity 대입을 제거하고 공식 API에 맞춰 CreateMeshPartAsync의 RenderFidelity 옵션으로 Precise를 지정했다. 일반 오류 문구도 무조건 권한 설정 변경을 지시하지 않고 실제 오류를 표시한다. 디자인·텍스처·충돌/속도 규칙은 바꾸지 않는다.
+- 실제 모듈 검사에서 MeshPart.RenderFidelity 직접 쓰기를 Studio처럼 거부하는 스텁과 생성 옵션 검증을 추가했다.747면/29부분/캐시/지면/실루엣/단계 범위/실패 시 보존 검사는 통과, 두 모듈 Luau 컴파일 통과. API 스텁 검사이므로 수정 후 실제 Roblox 엔진 화면은 아직 확인하지 못했다.
+- ApprovedMouse의 해당 두 Source만 바꾼 RodeoFantasy-MouseRuntimeFix.rbxlx를 생성했다. 다른 모든 저장 속성/703 MeshPart 보존 및 소스 일치 검사 통과. 사용자 Capture/이전 적용본은 덮어쓰지 않았으며 Roblox에 게시하지 않았다.

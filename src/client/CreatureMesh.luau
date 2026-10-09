@@ -57,9 +57,9 @@ local function build(kind)
    end
   end
  end
- local part=Asset:CreateMeshPartAsync(Content.fromObject(mesh),{CollisionFidelity=Enum.CollisionFidelity.Box})
+ local part=Asset:CreateMeshPartAsync(Content.fromObject(mesh),{CollisionFidelity=Enum.CollisionFidelity.Box,RenderFidelity=Enum.RenderFidelity.Precise})
  part.Anchored=true part.CanCollide=false part.CanTouch=false part.CanQuery=false
- part.RenderFidelity=Enum.RenderFidelity.Precise part.DoubleSided=true
+ part.DoubleSided=true
  contents[kind]=mesh cache[kind]=part
  return part
 end
