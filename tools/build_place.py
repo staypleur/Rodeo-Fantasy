@@ -168,6 +168,7 @@ script(starter_scripts, "ModuleScript", "HuntIsolation", "src/client/HuntIsolati
 script(starter_scripts, "ModuleScript", "CreatureMesh", "src/client/CreatureMesh.luau")
 script(starter_scripts, "ModuleScript", "FacetedMouse", "src/client/FacetedMouse.luau")
 script(starter_scripts, "ModuleScript", "FacetedMouseData", "src/client/FacetedMouseData.luau")
+script(starter_scripts, "ModuleScript", "SkyWhaleMotion", "src/client/SkyWhaleMotion.luau")
 script(starter_scripts, "ModuleScript", "IncomeEffects", "src/client/IncomeEffects.luau")
 script(starter_scripts, "ModuleScript", "MonsterPortrait", "src/client/MonsterPortrait.luau")
 script(starter_scripts, "ModuleScript", "JournalUI", "src/client/JournalUI.luau")

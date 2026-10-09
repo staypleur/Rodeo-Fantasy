@@ -585,3 +585,14 @@
 - SkyWhale_BodyReview.glb와 OBJ/MTL/PNG 소스 저장. 584삼각형/18노드/512×512 텍스처 하나/재질 하나. 모든 정점/법선 유한성·UV 범위·면 방향·평면 법선과2,000미만 예산 검사 및 금지 형상 이름 검사 통과. 기존 아틀라스/핀/튜브 구성 재사용 시 초기 이전 검토도 동일하게 재생성하지만 Place는 수정하지 않는다.
 - render_textured_review.py의 sky-whale 옵션으로 실제 GLB의 사선/측면/위꼬리 렌더 assets/previews/sky-whale-body-review.png를 생성하고 직접 열어 확인했다. 원래 렌더 기본값은 유지했다.
 - 정지 본체 디자인 검토 단계다. 바구니는 기존 승인 방향을 유지하되 이 검토 GLB에는 아직 결합하지 않았다. 모델 승인 뒤 고래 유영 리깅/애니메이션, 바구니와 줄/등반/출발 연결, 최종 크기와 충돌을 통합 검증한다. 실제 Studio/모바일/PC 성능과 조작은 미검증이며 낮은 삼각형 수만으로 실행 성능을 보장하지 않는다. 이름/포획 능력/지역/진화 콘텐츠는 임의로 정하지 않았다.
+
+## 2026-10-09 — 승인 하늘고래의 설치 준비·저장 메시 방식·유영 코드
+
+- 사용자가 실제 고래 검토안을 승인했다. GAME_DESIGN.md에 기록하고 게임 연결 코드를 작성했다. 현재 도구에는 Studio UI/Roblox 자산 업로드 기능이 없어 실제 메시 가져오기는 사용자가 Studio에서 한 번 실행해야 한다. 적용 완료라고 보고하지 않는다.
+- dist/SkyWhale_BodyReview.gltf는 승인 GLB의 같은 정점/법선/UV/재질/내장512텍스처를 단일 self-contained GLTF로 내보낸 파일이다. 로컬 검토18객체/584삼각형을 그대로 유지한다. 존재하지 않는 Roblox asset ID나 임시메시를 넣지 않는다. 고래는 저장 MeshPart/SurfaceAppearance를 가져와 사용하며 추가 EditableMesh/EditableImage 할당은 없다.
+- src/server/SkyWhaleInstaller.luau는 Studio 편집 상태·선택 Model·18개 승인 메시 이름·중복/누락/스크립트/색 텍스처 유무를 확인한 뒤 클론을 배치한다. 최종 길이116.45studs/시각 bounds 중심6000,55,-5로 정렬하고18개를 비충돌·고정·양면 꺼짐으로 설치한다. 이전 Airship 및 가져온 원본은 ServerStorage.SkyWhaleBackup에 보관한다. 바구니/사다리/Departure는 건드리지 않는다.
+- src/server/SkyWhaleInstallData.luau를 실제 고래 정점과 기존4개 Cable에서 생성했다. 몸통 삼각형에 수직 교차하는 위치를 구해 줄 상단을 몸 안1.1studs까지 넣고 하단16.5는 유지한다. 이는 몸의 유영 진폭/작은 회전에도 줄 끝이 떨어져 보이지 않게 여유를 둔 값이다. 실제 Studio 화면은 확인 전이다.
+- src/client/SkyWhaleMotion.luau는 저장 프레임/고정 힌지에서 매 프레임 절대 자세를 계산해 누적 오차를 방지한다. 몸 상하0.45studs/기울기0.008rad, 가슴지느러미0.055rad, 꼬리0.075rad의 느린 유영을 연결한다. 지느러미 금색 장식도 같은 힌지로 움직인다. 뒤늦게 도착하는 MeshPart도 등록한다. CaptureClient는 고래 revision 때 이 경로를 쓰며 설치 전 기존 동작은 유지한다. build_place에 motion 모듈도 추가해 새 require 누락을 막았다.
+- tools/prepare_sky_whale_place.py는 dist/RodeoFantasy-LobbyBoardingFixed.rbxlx에서 CaptureClient Source 하나와 motion/installer/data 모듈3개만 추가한 dist/RodeoFantasy-SkyWhaleReady.rbxlx를 생성했다. 준비 파일에는 가져오기 전 기존 비행선이 남아 있다. 변경 스크립트를 제외한 전체 XML 정확한 동일성, 저장 파일 referent/UniqueId/Ref 검사 통과. 사용자 Capture와 이전 시험 파일은 덮어쓰지 않았다.
+- Luau 컴파일 통과. tests/check_sky_whale.py는 실제 motion 함수를20/30/60/120fps 간격으로 실행해 진폭/좌우 대칭/비지느러미 정지 및 잘못된 가져오기(누락/알 수 없는 메시/무색/중복)/시험 중 설치 거절과 기존 비행선 보존을 검사했다. 최초 테스트 실행은 Luau CLI의 한국어 절대 경로 처리 실패였으며 cwd 기준 상대 경로로 바꿔 통과했다. 이 테스트는 실제 기기 FPS 측정이나 실제 성공 설치/엔진 조작 검증이 아니다.
+- docs/SKY_WHALE_INSTALL.md에 정확한 파일 위치/파일→가져오기 옵션/모델 선택/한 줄 명령/저장·시험/성공 출력 확인을 기록했다. Roblox 공식 importer https://create.roblox.com/docs/studio/importer 의 지원GLTF/색재질/Forward·Up/Studs/메시 병합 옵션을 확인했다. 실제 가져오기/텍스처 업로드·권한/유영/등반/출발/모바일·PC 실기기 검증 및 이후 Roblox 게시는 남아 있다.

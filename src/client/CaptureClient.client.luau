@@ -61,6 +61,7 @@ for _,plot in ipairs(workspace.RodeoLobby.Plots:GetChildren()) do
  updatePrompts()
 end
 local airship=workspace.RodeoLobby.Airport.Airship
+local whaleMotion=require(script.Parent:WaitForChild("SkyWhaleMotion"))
 local shipAnchor=CFrame.new(6000,24,-5)
 local shipParts={}
 local function rememberShip(node)
@@ -69,6 +70,7 @@ end
 for _,node in ipairs(airship:GetDescendants()) do rememberShip(node) end
 airship.DescendantAdded:Connect(rememberShip)
 local function animateShip(clock)
+ if airship:GetAttribute("SkyWhaleRevision") then whaleMotion.step(airship,clock) return end
  local sway=shipAnchor*CFrame.new(math.sin(clock*.7)*.35,math.sin(clock*.9)*.25,0)*CFrame.Angles(0,0,math.sin(clock*.7)*.018)
  for node,rest in pairs(shipParts) do
   if not node.Parent then shipParts[node]=nil continue end
