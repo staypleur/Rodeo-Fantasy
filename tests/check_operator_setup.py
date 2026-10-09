@@ -14,7 +14,13 @@ with tempfile.TemporaryDirectory(dir=R/'.tools') as temp:
  digest=re.search(r'PasswordHash="([a-f0-9]+)"',content).group(1)
  assert len(salt)==32 and hashlib.sha256((salt+password).encode()).hexdigest()==digest
  assert password not in target.read_text(encoding='utf-8')
+ # Updating the public place must retain the existing private password verifier.
+ original=content
+ source.write_text('<roblox><Item class="ModuleScript"><Properties><string name="Name">OperatorSettings</string><ProtectedString name="Source">return {}</ProtectedString></Properties></Item><Item class="Folder"><Properties><string name="Name">UpdatedPlace</string></Properties></Item></roblox>',encoding='utf-8')
+ setup.reuse(source,target)
+ assert E.parse(target).find('.//ProtectedString').text==original
+ assert E.parse(target).find(".//string[@name='Name'][.='UpdatedPlace']") is not None
  try:setup.configure('short',source,target)
  except ValueError:pass
  else:raise AssertionError('short password accepted')
-print('OPERATOR_SETUP_PASS: private salt/verifier injection, no plaintext password saved, short password rejected')
+print('OPERATOR_SETUP_PASS: private verifier injection/reuse, latest place preserved, no plaintext password saved, short password rejected')
