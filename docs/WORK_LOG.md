@@ -501,3 +501,11 @@
 - CollectionUI의 FacetedMouse Source 하나만 교체한 dist/RodeoFantasy-RanchVisualFix.rbxlx 생성.703 MeshPart와 나머지 모든 저장 속성 보존 검사 통과. 사용자 Capture는 덮어쓰지 않았다.
 - 로비 제작은 먼저 검토 가능한 실제 건축으로 준비: tools/lobby_garden_review.py가 크림색 석조 아치 회랑/청록 돔·계단 지붕/입구 탑/정원·수로/목장 쉼터 및 안뜰4개를 만든다. dist/ReviewModels/LobbyGardenAReview.rbxmx는974개 native Part로 만든 정지 모델이고 스크립트가 없다. 게임에 넣는 로비는 아직 아니며 중앙 비행선/8개 구역/광장/서비스 연결은 포함하지 않는다. 새 건축의 사용자 승인 대기.
 - assets/previews/lobby-garden-a-native-review.png는 해당 모델과 같은 실제 위치/크기/회전을 깊이 버퍼로 렌더링한 검토 이미지다. 모델 크기 양수/유한 좌표/회전 정규직교 및4개 목장/스크립트 없음 검사 통과. 이미지를 열어 건물·4개 목장·나무·아치/쉼터 표시를 확인했다. Studio 실제 조명/충돌/주행/성능은 미검증이며 모델974개를 그대로8번 적용하는 성능 결정을 아직 하지 않았다. 사용자가 새 로비 건축 디자인 적용 전에 확인을 요청했으므로 검토안을 게임에 임의로 적용하지 않았다.
+
+## 2026-10-09 — 승인한 개인 목장 건물8개와 그라데이션 적용
+
+- 사용자가 실제 건물 검토안 적용을 승인하고 색 그라데이션을 요청했다. tools/lobby_garden_review.py --gradient로 같은 형태에 짙은 청록→밝은 민트 청록 지붕층, 따뜻한 석조/목재 높이별 색을 만들었다. native Part 색을 단계적으로 바꾸는 방식이며 텍스처 내 부드러운 그라데이션이라고 주장하지 않는다. 원본 승인 검토안/이미지는 별도 보존했다.
+- tools/apply_lobby_garden.py는 RanchVisualFix에서 로비의 개인 건물8개를 승인 형태로 교체한다. Pens/Pen_1~4/PenGrass, ManagePoint, OwnerBoard와 원래 구역 이름을 유지해8인 소유/목장 배치 로직에 연결한다. 안쪽 울타리에 통로를 열고 지붕 장식/꽃/수로는 비충돌로 둔다. native 색 단계가 그대로 저장돼 런타임 EditableMesh를 추가하지 않는다.
+- 승인한 원래22×28 목장 및 건물83×99 크기를 유지하면서 구역 겹침을 피하기 위해 반경175/섬500×500으로 넓혔다. 길을12stud 폭으로 입구까지 연결하고 담장과 절벽·폭포의 가장자리 위치를 바꿨다. 중앙 광장/기존 비행선/상점/랭킹/출발점과 서버·클라이언트 코드는 유지했다. 중앙 비행선 디자인을 새로 제작한 것은 아니다.
+- dist/RodeoFantasy-LobbyGarden.rbxlx에 저장.32개 PenGrass 및 관리/소유 간판 경로,8개 건물의 OBB 분리/지면 안 배치, 참조 고유/끊김 없음, 모든 로비 바깥 저장 속성·스크립트 및703 MeshPart 보존 검증 통과. 총 native Part15129개인 장소이며 아직 Studio 부하/실제 이동·목장 선택·배치·그라데이션 조명은 검증하지 못했다. 사용자 Capture/기존 시험 장소를 덮어쓰거나 Roblox에 게시하지 않았다.
+- dist/ReviewModels/LobbyGardenAGradient.rbxmx와 assets/previews/lobby-garden-a-gradient.png를 별도 저장. assets/maps/lobby-garden-layout.png는 새 테스트 장소의 실제 부품을 위에서 투영한 전체 배치도다. 두 이미지 직접 확인으로 색 변화·4개 안뜰·8개 방사형 건물 배치를 점검했다. Studio 스크린샷은 아니다. preview_lobby.py는 source/output/wide 옵션을 받아 사용자 저장본을 읽어 덮어쓰지 않고 새 장소를 확인한다.

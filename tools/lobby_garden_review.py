@@ -5,6 +5,10 @@ from pathlib import Path
 import math,itertools,xml.etree.ElementTree as E
 import numpy as np
 from PIL import Image,ImageDraw,ImageFont
+import argparse
+args=argparse.ArgumentParser(description=__doc__)
+args.add_argument('--gradient',action='store_true')
+gradient=args.parse_args().gradient
 R=Path(__file__).resolve().parents[1]
 parts=[]
 cream=(228,216,181);stone=(193,178,144);teal=(32,111,113);gold=(197,151,64);grass=(116,151,103);wood=(128,95,66)
@@ -112,6 +116,19 @@ for x in (-6,6):
  for z in (-36,0,38):
   block('FlowerBed',(x,.8,z),(2,1,4),stone)
   for dz in (-1,0,1):block('Flowers',(x,1.4,z+dz),(.75,.4,.6),(190,141,146))
+if gradient:
+ def blend(low,high,t):
+  t=max(0,min(1,t));return tuple(round(a+(b-a)*t) for a,b in zip(low,high))
+ colored=[]
+ for name,pos,size,color,matrix in parts:
+  if color==teal:
+   bottom,top=(24.8,29.7) if name.startswith('GateDome') else (14,17.9) if name.startswith('Dome') else (5.6,8.2) if abs(pos[0])==19 else (11.6,14.2)
+   color=blend((24,83,99),(83,171,158),(pos[1]-bottom)/(top-bottom))
+  elif color==cream:color=blend((205,189,156),(249,236,205),pos[1]/25)
+  elif color==stone:color=blend((174,158,128),(221,206,173),pos[1]/25)
+  elif color==wood:color=blend((104,76,54),(159,121,83),pos[1]/6)
+  colored.append((name,pos,size,color,matrix))
+ parts=colored
 # Export the same native parts used by the renderer.
 root=E.Element('roblox',version='4');model=E.SubElement(root,'Item',{'class':'Model','referent':'LobbyGardenAReview'})
 props=E.SubElement(model,'Properties');E.SubElement(props,'string',name='Name').text='LobbyGardenAReview'
@@ -127,7 +144,7 @@ for index,(name,pos,size,color,matrix) in enumerate(parts):
  for i in range(3):
   for j in range(3):E.SubElement(cf,f'R{i}{j}').text=str(matrix[i,j])
 folder=R/'dist/ReviewModels';folder.mkdir(parents=True,exist_ok=True)
-E.ElementTree(root).write(folder/'LobbyGardenAReview.rbxmx',encoding='utf-8',xml_declaration=True)
+E.ElementTree(root).write(folder/('LobbyGardenAGradient.rbxmx' if gradient else 'LobbyGardenAReview.rbxmx'),encoding='utf-8',xml_declaration=True)
 # Orthographic render of actual geometry, no generated concept art.
 image=Image.new('RGB',(1500,1020),(234,237,226));draw=ImageDraw.Draw(image)
 eye=np.array((.72,.85,-1.1));eye/=np.linalg.norm(eye);right=np.cross((0,1,0),eye);right/=np.linalg.norm(right);up=np.cross(eye,right)
@@ -164,8 +181,9 @@ for _,q,col in faces:
 image=Image.fromarray(pixels);draw=ImageDraw.Draw(image)
 font=ImageFont.truetype('C:/Windows/Fonts/malgun.ttf',29);small=ImageFont.truetype('C:/Windows/Fonts/malgun.ttf',18)
 draw.text((30,18),'청록 석조 정원 A · 건물 하나 / 안뜰 목장 4개',font=font,fill=(37,74,68))
-draw.text((30,60),f'실제 Roblox Part 모델 {len(parts)}개를 그린 검토안 · Studio 화면 아님 · 게임 미적용',font=small,fill=(73,94,83))
-out=R/'assets/previews/lobby-garden-a-native-review.png';out.parent.mkdir(parents=True,exist_ok=True);image.save(out)
+subtitle='그라데이션 적용 건축 · 신규 테스트 파일용' if gradient else '게임 미적용 검토안'
+draw.text((30,60),f'실제 Roblox Part 모델 {len(parts)}개 · Studio 화면 아님 · {subtitle}',font=small,fill=(73,94,83))
+out=R/'assets/previews'/('lobby-garden-a-gradient.png' if gradient else 'lobby-garden-a-native-review.png');out.parent.mkdir(parents=True,exist_ok=True);image.save(out)
 assert len([p for p in parts if p[0].startswith('RanchGrass')])==4
 for _,pos,size,_,rotation in parts:
  assert np.isfinite(pos).all() and (size>0).all()

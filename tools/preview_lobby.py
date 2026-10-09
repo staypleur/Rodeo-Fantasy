@@ -2,21 +2,28 @@
 from pathlib import Path
 import itertools
 import math
+import argparse
 import xml.etree.ElementTree as ET
 from PIL import Image, ImageDraw, ImageFont
 
 ROOT = Path(__file__).resolve().parents[1]
-tree = ET.parse(ROOT / 'dist/RodeoFantasy-Capture.rbxlx')
+parser=argparse.ArgumentParser(description=__doc__)
+parser.add_argument('--source',type=Path,default=ROOT/'dist/RodeoFantasy-Capture.rbxlx')
+parser.add_argument('--output',type=Path,default=ROOT/'assets/maps/lobby-layout-preview.png')
+parser.add_argument('--wide',action='store_true')
+args=parser.parse_args()
+tree = ET.parse(args.source)
 lobby = next(n for n in tree.iter('Item') if n.findtext("Properties/string[@name='Name']") == 'RodeoLobby')
-image = Image.new('RGB', (1200, 1320), (249, 245, 235))
+image = Image.new('RGB', (1500,1500) if args.wide else (1200,1320), (249, 245, 235))
 draw = ImageDraw.Draw(image)
 font = ImageFont.truetype('C:/Windows/Fonts/malgun.ttf', 26)
 small = ImageFont.truetype('C:/Windows/Fonts/malgun.ttf', 19)
 draw.text((40, 24), 'RODEO PLANETURE · 석조 정원 A안 배치도', font=font, fill=(44, 72, 61))
 draw.text((40, 64), '실제 맵 부품 위쪽 배치 · 8인 로비 / 건물 안뜰 목장 32개', font=small, fill=(74, 94, 84))
-scale = 2.7
+scale = 2.5 if args.wide else 2.7
+originX,originZ=(750,770) if args.wide else (600,720)
 def project(x, z):
-    return (600 + (x - 6000)*scale, 720 + z*scale)
+    return (originX + (x - 6000)*scale, originZ + z*scale)
 
 parts = []
 for n in lobby.iter('Item'):
@@ -57,13 +64,13 @@ for n in next(p for p in lobby.findall("Item") if p.findtext("Properties/string[
     board=next(p for p in n.findall('Item') if p.findtext("Properties/string[@name='Name']")=='OwnerBoard')
     cf=board.find("Properties/CoordinateFrame[@name='CFrame']")
     x,z=project(float(cf.findtext('X')),float(cf.findtext('Z')))
-    dx,dz=x-600,z-720
+    dx,dz=x-originX,z-originZ
     distance=max(1,math.hypot(dx,dz))
     x+=dx/distance*90
     z+=dz/distance*90
     draw.text((x,z), f'개인 구역 {idx}',font=small,fill=(40,67,55),anchor='mm')
-draw.text((40,1240),'중앙 바닥 로고 · 거대 바다코끼리 비행선 · 각 건물 안뜰 목장 4개',font=small,fill=(44,72,61))
-out=ROOT/'assets/maps/lobby-layout-preview.png'
+draw.text((40,1440 if args.wide else 1240),'중앙 바닥 로고 · 거대 바다코끼리 비행선 · 각 건물 안뜰 목장 4개',font=small,fill=(44,72,61))
+out=args.output
 out.parent.mkdir(parents=True,exist_ok=True)
 image.save(out)
 print(out)
