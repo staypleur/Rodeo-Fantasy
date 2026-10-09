@@ -10,6 +10,7 @@ parser.add_argument('--output',type=Path,default=ROOT/'assets/previews/meadow-mo
 parser.add_argument('--title',default='MEADOW MOUSE A1 / FACETED 3D REVIEW')
 parser.add_argument('--airship-detail',action='store_true')
 parser.add_argument('--grand-review',action='store_true')
+parser.add_argument('--forward-face',action='store_true')
 args=parser.parse_args();data=args.model.read_bytes();n=struct.unpack_from('<I',data,12)[0]
 g=json.loads(data[20:20+n]);binary=data[28+n:]
 def values(index):
@@ -30,10 +31,13 @@ draw.text((22,52),f'{len(triangles)} triangles / flat normals / actual embedded 
 views=[('FRONT',(0,.07,-1)),('THREE-QUARTER',(.65,.70,-1) if args.airship_detail else (.65,.30,-1)),('FACE DETAIL',(.1,.08,-1)) if args.airship_detail else ('HUNT VIEW',(.36,.84,.48))]
 if args.grand_review:
  views=[('FRONT / RAISED WINGS',(0,.25,-1)),('THREE-QUARTER',(.70,.40,-1)),('TOP / REAR',(.36,.84,.48))]
+if args.forward_face:
+ views=[('FRONT', (0,.16,-1)),('HEAD / SIDE',(.85,.30,-1)),('FACE DETAIL',(.55,.20,-1))]
 for col,(label,eye) in enumerate(views):
  d=np.array(eye,dtype=float);d/=np.linalg.norm(d);right=np.cross(d,(0,1,0));right/=np.linalg.norm(right);up=np.cross(right,d)
  allpos=np.concatenate([t[0] for t in triangles])
  if args.airship_detail and col==2:allpos=allpos[(allpos[:,2]<-24)&(np.abs(allpos[:,0])<10)&(allpos[:,1]<10)]
+ if args.forward_face and col==2:allpos=allpos[(allpos[:,2]<-40)&(np.abs(allpos[:,0])<20)]
  project=np.stack((allpos@right,allpos@up),axis=-1)
  low=project.min(axis=0);high=project.max(axis=0);center=(low+high)/2;scale=min(455/(high[0]-low[0]),440/(high[1]-low[1]))
  frame=np.full((480,510,3),(249,242,226),dtype=np.uint8);depth=np.full((480,510),-np.inf)
@@ -58,5 +62,5 @@ for col,(label,eye) in enumerate(views):
   old[mask]=zz[mask];frame[y0:y1+1,x0:x1+1][mask]=rgb[mask]
  image.paste(Image.fromarray(frame),(col*520+5,134))
  draw.text((col*520+24,106),label,fill=(65,49,35),font=font)
-draw=ImageDraw.Draw(image);draw.text((22,621),'Static shape review only. No game installation, rigging or '+('wing' if args.airship_detail or args.grand_review else 'walking')+' animation.',fill=(106,88,64),font=small)
+draw=ImageDraw.Draw(image);draw.text((22,621),'Static shape review only. No game installation, rigging or '+('wing' if args.airship_detail or args.grand_review or args.forward_face else 'walking')+' animation.',fill=(106,88,64),font=small)
 args.output.parent.mkdir(parents=True,exist_ok=True);image.save(args.output);print(args.output)
