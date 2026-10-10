@@ -4,6 +4,8 @@ import subprocess
 ROOT=Path(__file__).resolve().parents[1]
 source=(ROOT/'src/authoring/StudBlockMapGenerator.luau').read_text(encoding='utf-8')
 layout=(ROOT/'src/authoring/StudHuntLayout.luau').read_text(encoding='utf-8')
+scenery=(ROOT/'src/authoring/ForestSceneryLayout.luau').read_text(encoding='utf-8')
+layout=layout.replace('local Scenery = require(script.Parent.ForestSceneryLayout)','local Scenery = (function()\n'+scenery+'\nend)()')
 source=source.replace('local Layout = require(script.Parent.StudHuntLayout)', 'local Layout = (function()\n'+layout+'\nend)()')
 prefix='''
 local created={}
@@ -48,7 +50,8 @@ local function inspect(origin)
    assert(p.Material==Enum.Material.Plastic and p.TopSurface==Enum.SurfaceType.Studs)
    assert(p.BottomSurface==Enum.SurfaceType.Inlet)
    for _,face in ipairs({"FrontSurface","BackSurface","LeftSurface","RightSurface"}) do assert(p[face]==Enum.SurfaceType.Studs) end
-   assert(p.Anchored and p.CanCollide and not p.CanTouch)
+   assert(p.Anchored and not p.CanTouch)
+   if p.Name:match("^Water") or p.Name:match("^Fern") then assert(not p.CanCollide) else assert(p.CanCollide) end
    for _,axis in ipairs({"X","Y","Z"}) do
     local position,size=p.Position[axis],p.Size[axis]
     local grid=axis=="Y" and 2 or 4

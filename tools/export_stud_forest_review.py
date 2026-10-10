@@ -7,6 +7,8 @@ from native_part_review import save_review
 
 ROOT=Path(__file__).resolve().parents[1]
 source=(ROOT/'src/authoring/StudHuntLayout.luau').read_text(encoding='utf-8')
+scenery=(ROOT/'src/authoring/ForestSceneryLayout.luau').read_text(encoding='utf-8')
+source=source.replace('local Scenery = require(script.Parent.ForestSceneryLayout)','local Scenery = (function()\n'+scenery+'\nend)()')
 harness=ROOT/'.tools/export_stud_layout.luau'
 harness.write_text('local Layout=(function()\n'+source+'\nend)()\n'+'''
 for _,b in ipairs(Layout.build()) do

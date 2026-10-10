@@ -36,7 +36,7 @@ function Generator.create(parent, origin, backupParent)
  local model = Instance.new("Model")
  model.Name = "HuntStudBlockReview"
  model:SetAttribute("StudMapGenerator",true)
- model:SetAttribute("StudMapRevision",6)
+ model:SetAttribute("StudMapRevision",7)
  model:SetAttribute("TerrainSeed",Layout.Seed)
  model:SetAttribute("LengthMeters",Layout.LengthMeters)
  model:SetAttribute("LengthStuds",Layout.LengthStuds)
@@ -71,9 +71,9 @@ function Generator.create(parent, origin, backupParent)
   part.LeftSurface = Enum.SurfaceType.Studs
   part.RightSurface = Enum.SurfaceType.Studs
   part.Anchored = true
-  part.CanCollide = true
+  part.CanCollide = not (name=="Waterfall" or name=="WaterPool" or name=="WaterFoam" or name=="WaterStream" or name=="FernBase" or name=="FernTip")
   part.CanTouch = false
-  part.CanQuery = true
+  part.CanQuery = part.CanCollide
   part.Size = size
   part.Position = position + origin
   part.Color = color

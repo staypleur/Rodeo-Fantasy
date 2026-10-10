@@ -4,6 +4,7 @@ local Layout = {WidthStuds=192,LengthStuds=4800,LengthMeters=1000,MetersPerStud=
 -- Tune against the rear-follow camera after the user supplies new monster models.
 Layout.ScreenComposition = {Empty=0.40,Obstacles=0.20,Monsters=0.40}
 Layout.Seed = 317
+local Scenery = require(script.Parent.ForestSceneryLayout)
 
 -- Coherent, seeded height variation, also reproducible outside Studio.
 local function relief(index, channel)
@@ -80,6 +81,7 @@ function Layout.build()
   elseif pattern==5 then tree(-64,z,false) tree(0,z,false) tree(64,z,false)
   else rock(-64,z,false) tree(40,z,true) end
  end
+ for _,block in ipairs(Scenery.build(blocks)) do table.insert(blocks,block) end
  return blocks
 end
 

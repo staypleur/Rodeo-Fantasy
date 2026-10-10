@@ -1,0 +1,147 @@
+{
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v4.4.55",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "output_unwrapped"
+    }
+  ],
+  "materials": [
+    {
+      "doubleSided": true,
+      "name": "BakedMaterial",
+      "pbrMetallicRoughness": {
+        "baseColorTexture": {
+          "index": 0
+        },
+        "metallicRoughnessTexture": {
+          "index": 1
+        }
+      }
+    }
+  ],
+  "meshes": [
+    {
+      "name": "output_unwrapped",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3,
+          "material": 0
+        }
+      ]
+    }
+  ],
+  "textures": [
+    {
+      "sampler": 0,
+      "source": 0
+    },
+    {
+      "sampler": 0,
+      "source": 1
+    }
+  ],
+  "images": [
+    {
+      "mimeType": "image/png",
+      "name": "texture_0",
+      "uri": "RocketTexture0.png"
+    },
+    {
+      "mimeType": "image/png",
+      "name": "texture_0_metallic_roughness",
+      "uri": "RocketTexture1.png"
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 19915,
+      "max": [
+        5.679975509643555,
+        18,
+        3.1412363052368164
+      ],
+      "min": [
+        -5.6938581466674805,
+        0,
+        -3.149951934814453
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 19915,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 19915,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5123,
+      "count": 44403,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 238980,
+      "byteOffset": 0,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 238980,
+      "byteOffset": 238980,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 159320,
+      "byteOffset": 477960,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 88806,
+      "byteOffset": 637280,
+      "target": 34963
+    }
+  ],
+  "samplers": [
+    {
+      "magFilter": 9729,
+      "minFilter": 9987
+    }
+  ],
+  "buffers": [
+    {
+      "uri": "Rocket.bin",
+      "byteLength": 726086
+    }
+  ]
+}
