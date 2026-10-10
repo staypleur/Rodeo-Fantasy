@@ -1053,3 +1053,9 @@
 - 로컬MossratTexture0/1은PNG서명/4096²RGB/Pillowverify및load정상,원본파일/참조존재. Studio내부상대경로해석이나파일권한원인은아직확정하지않음. 사용자UI의폴더버튼으로실제PNG를직접선택하는단계별안내준비.
 - glTF공식채널규칙에맞춰원본packedMap의G=거칠기/B=금속성을각각MossratRoughness.png(2,771,317bytes)/MossratMetalness.png(1,394,211bytes)로손실없이분리. 4096²L/원본채널픽셀완전일치검사통과. 색상원본19,564,591bytes및기존PNG/리그/GLTF/UV미변경. 별도AI재생성/리사이즈없음.
 - MOSSRAT_S1_RIG_REVIEW에폴더경로/3행선택파일/비워둘맵/느낌표소멸과초록모델성공확인/34관절보존옵션기록. 실제사용자Studio에서직접선택후해결여부는미확인. 기존미커밋장소/서버파일은이번변경에포함하지않음.
+
+## 2026-10-10 로켓 재질 가져오기 동일 증상 대응
+
+- 사용자 '로켓도 모스랫이랑 같은 증상' 보고. UserRocket의재질이미지참조/PNG서명/4096²RGB검사정상. PNG외부파일읽기원인및직접선택해결여부는실제Studio미확인.
+- 기존채널분리도구에--model rocket 옵션추가. RocketTexture1의G/B를RocketRoughness.png(2,563,843bytes)/RocketMetalness.png(1,557,645bytes)로손실없이분리하고원본채널픽셀완전일치검사통과. RocketTexture0도디코드검사통과. 원본PNG/로켓GLTF·bin/형상/UV/설치스크립트미변경.
+- 로켓안내문에BakedMaterial선택/폴더버튼/실제폴더주소/3항목파일/성공확인순서추가. 기존미커밋CaptureServer/장소파일은변경/스테이징하지않음. 이번완료범위는로컬파일·검사·안내준비이며실제Studio설치나모바일성능검증이아님.

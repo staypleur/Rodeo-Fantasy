@@ -2,6 +2,17 @@
 
 이번 파일은 Roblox 게시나 현재 작업 장소 변경을 자동 실행하지 않습니다. 최신 로켓은 `Meshy_AI_Voxel_Space_Rocket_Re_1010053359_texture.glb`이며 아래 준비 파일을 새 모델로 교체했습니다. 사용자가 받은 Downloads 파일은 수정하지 않습니다.
 
+## 로켓 색이 없고 텍스처 파일 읽기 오류가 나올 때
+
+사용자가 모스랫과 동일한 증상을 보고했다. 로컬 RocketTexture0/1은 유효한4096×4096 RGB PNG이고 재질 참조도 존재한다. Studio에서 실제 오류가 해결됐는지는 아직 확인하지 않았다.
+
+1. 로켓 가져오기 미리보기의 왼쪽 모델 목록을 펼쳐 **BakedMaterial**을 클릭한다.
+2. 오른쪽 각 파일 경로의 **폴더 아이콘**을 누른다. 파일 선택창 주소 표시줄에 `C:\Users\wucha\OneDrive\바탕 화면\Project\Rodeo Fantasy\assets\models\UserRocket`을 붙여넣고Enter한다.
+3. **색상 파일 경로 → RocketTexture0.png**, **금속성 파일 경로 → RocketMetalness.png**, **거칠기 파일 경로 → RocketRoughness.png**를 각각 선택한다. 일반(Normal)/이미시브는 원본에 없으므로 비워둔다.
+4. 빨간 느낌표가 사라지고 로켓 모델 미리보기에 원래 빨강/흰색/파란색이 보이면 **가져오기**를 누른다. 이후 아래 기존 로켓 설치 순서를 진행한다. 직접 선택해도 오류가 남으면 해당 오류 문구를 확인한다.
+
+금속성/거칠기는원본packedTexture의B/G채널을손실없이분리한PNG다. `tools/prepare_mossrat_material_maps.py --model rocket`에서생성하며원본파일/색/UV/형상은변경하지않고픽셀동일성을검사한다. 모바일최적화를위한축소나실제Studio검증완료로취급하지않는다.
+
 ## 숲의 실제 Stud·빛·물·바람 확인
 
 1. Roblox Studio를 실행하고 **New → Baseplate**로 별도 빈 장소를 엽니다.
