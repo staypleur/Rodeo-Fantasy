@@ -4,6 +4,7 @@ local DS=game:GetService("DataStoreService")
 local Http=game:GetService("HttpService")
 local Run=game:GetService("RunService")
 local Rules=require(game.ReplicatedStorage.RodeoFantasy.BagRules)
+local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
 local localOnly=Run:IsStudio() and (game.GameId==0 or game.PlaceId==0)
 local suffix=Run:IsStudio() and "_Studio_v1" or "_v1"
 local store,transactions
@@ -13,6 +14,16 @@ if not localOnly then
  transactions=DS:GetDataStore("RodeoTrades"..suffix)
 end
 local entries={}
+local function freshBag()
+ local bag=Rules.new()
+ local model=game:GetService("ServerStorage"):FindFirstChild("RodeoMonsterTemplate")
+ if model and model:GetAttribute("MossratUserRigRevision")=="ApprovedS1-v1" then
+  local species=Catalog.MeadowMouse
+  Rules.grant(bag,"MeadowMouse",workspace:GetServerTimeNow(),species.IncomeSeconds,species.IncomeAmount)
+  bag.profile.starterMossratGranted=true
+ end
+ return bag
+end
 local function copy(value)
  if type(value)~="table" then return value end
  local out={} for k,v in pairs(value) do out[k]=copy(v) end return out
@@ -27,10 +38,10 @@ local function normalize(data)
 end
 function S.open(player)
  local token=Http:GenerateGUID(false)
- if localOnly then local data=Rules.new() entries[player]={token=token,data=data} return data end
+ if localOnly then local data=freshBag() entries[player]={token=token,data=data} player:SetAttribute("StarterMossratGranted",data.profile.starterMossratGranted==true) return data end
  local ok,result=pcall(function()
   return store:UpdateAsync(tostring(player.UserId),function(old)
-   old=old or {data=Rules.new()}
+   old=old or {data=freshBag()}
    if old.lock and old.lock.expires>os.time() then return nil end
    old.lock={token=token,expires=os.time()+120} return old
   end)
@@ -50,6 +61,7 @@ function S.open(player)
   if not resolved or not saved then return nil,"거래 복구 중입니다. 잠시 후 다시 접속해주세요." end
  end
  local data=normalize(result.data)
+ player:SetAttribute("StarterMossratGranted",data.profile.starterMossratGranted==true)
  entries[player]={token=token,data=data} return data
 end
 function S.busy(player) local e=entries[player] return not e or e.busy or e.closed end

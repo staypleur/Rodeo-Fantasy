@@ -59,5 +59,5 @@ for view in external['bufferViews']:assert view['byteOffset']+view['byteLength']
 assert len(ids)==meta['riggedTriangles'] and len(g['skins'][0]['joints'])==34
 assert not any('Lid' in name for name in names) and meta['blinkEnabled'] is False
 assert len(ids)==meta['sourceTriangles'] and meta['addedEyelidTriangles']==0
-assert meta['rigReviewApproved'] is False and meta['installedInGame'] is False
+assert meta['rigReviewApproved'] is True and meta['installedInGame'] is False
 print(f"MOSSRAT_RIG_PASS: {len(ids)} triangles, 34 bones, four clips; source/texture preserved; rest pose, welds, weights, loop endpoints and finite skinning checked; 99th percentile max edge ratio {max_stretch:.3f}")

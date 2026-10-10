@@ -50,7 +50,7 @@ def prepare(source,prefix):
    # Preserve private operator credentials/configuration embedded by the user.
    if 'Operator' in key:continue
    files[key]=(path,folder)
- additions={'SocialConfig','SocialRules','InventoryStore','SocialService','PlaceTravel','SocialUI','NativeMossrat','CafeLayout','CafeWorld','CafeServer','CafeClient'}
+ additions={'SocialConfig','SocialRules','InventoryStore','SocialService','PlaceTravel','SocialUI','NativeMossrat','UserMossratRigData','UserMossratRigAnimator','CafeLayout','CafeWorld','CafeServer','CafeClient'}
  for key,(path,folder) in files.items():
   if key not in scripts and key not in additions:continue
   kind='Script' if path.name.endswith('.server.luau') else 'LocalScript' if path.name.endswith('.client.luau') else 'ModuleScript'

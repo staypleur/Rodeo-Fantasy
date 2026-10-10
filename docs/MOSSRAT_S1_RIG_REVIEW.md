@@ -12,7 +12,7 @@
 - `assets/models/MossratS1UserRig/MossratS1Rigged.gltf`: Studio에서 가져올 파일. 같은 폴더의 `.bin`/PNG2장을 함께 유지한다.
 - `assets/models/MossratS1UserRig/Source.glb`: 받은 원본 사본. SHA256 `488598762339c44959cef95e1803a3ead9bff32fd864b54afadb241380474bec`.
 
-4개 검토 클립은 Idle/Walk/LookAround/RigRange다. 게임 상황별 달리기·점프·착지 및 속도별 전환, 탑승 위치, 무료 지급, 가방/도감/사냥 연결은 이번 리깅 결과 승인 뒤 연결할 후속 작업이다. 걷기 미리보기는 제자리 동작이며 지면 접촉/이동 속도와의 동기화 검증이 아니다.
+4개 검토 클립은 Idle/Walk/LookAround/RigRange다. 사용자가 눈 감기 없는 결과를 승인했다. 게임 코드는 승인한 Idle/Walk의24fps 데이터를 직접 보간하고34관절을 최대30Hz로 갱신하며 전환을0.18초 동안 혼합한다. LookAround/RigRange는 가져오기 파일의 검토 클립으로 남긴다. 별도 달리기/점프/착지 리그 클립, 실제 탑승 위치·지면 접촉/속도 동기화 검증은 남아 있다.
 
 ## 별도 Studio 검토를 할 때
 
@@ -24,4 +24,17 @@
 
 게임 설치 높이는 기존 기획대로2.5studs로 따로 맞춘다. 90cm를 Importer가 자동으로2.5studs로 변환한다고 가정하지 않는다. 원본4K텍스처를 보존한 상세 검토본이며 사냥용약3K/텍스처 축소,모바일 실제 FPS/메모리 측정은 별도다. 동일 모델의 여러 마리가 보일 때 텍스처가 공유될 수 있으므로 텍스처 메모리를 단순히 마릿수만큼 곱해 성능을 확정하지 않는다.
 
-현재 상태: 파일 검사 통과, 실제 메시 동작 미리보기 제작. 사용자 리깅 승인/Studio 가져오기/PC·모바일 실행/게임 적용은 미완료. 사용자가 요청한 **리깅 승인 후 게임 적용** 순서를 유지한다.
+현재 상태: 사용자 리깅 승인 완료, 게임 연결 코드/설치 파일 준비 및 코드 검사 통과. Studio 가져오기·설치 실행과 PC·모바일 실행은 미완료다. metadata의installedInGame/studioVerified/mobilePerformanceMeasured는 실제 설치/측정 전까지false로 유지한다.
+
+## 승인 모델을 현재 게임에 설치
+
+1. Studio에서 현재 로비 장소를 열고 **Stop**을 눌러 Play를 중지한다. **File → Save to File**로 장소 사본을 저장한다.
+2. **File → Import**에서 프로젝트의 `assets/models/MossratS1UserRig/MossratS1Rigged.gltf`를 선택한다. `.bin`과PNG2장을 같은 폴더에 둔다. Rig Type은Custom, 뼈 보존 옵션을 사용한다. Importer의 오류·경고는 확인한다.
+3. Explorer의Workspace 아래에 생긴 모스랫 전체 **Model** 이름을 `MossratImport`로 변경한다. 원본 정적Source.glb를 가져오는 단계가 아니다.
+4. 프로젝트 `dist/ReviewModels/InstallUserMossrat.commandbar.lua`를 메모장으로 열어 전체 복사한다. Studio **View → Command Bar**에서 붙여넣고 Enter한다.
+5. Output에서 `MOSSRAT_RIG_INSTALLED` 또는 이미 설치했다면 `MOSSRAT_RIG_ALREADY_CURRENT`를 확인한다. 코드 버전 불일치/관절 없음 오류는 설치를 중단한다. 성공 시 Ctrl+S로 저장한다.
+6. 서버템플릿RodeoMonsterTemplate 및ReplicatedStorage.RodeoFantasy의VisualTemplate/MeshyMossratHuntTemplate에Body와34Bone이 있는지 확인한다. 기존 모델/가져온 원본/수정 전 스크립트는ServerStorage.MossratRigBackup_*에 보관한다.
+7. **Play**에서 가방/도감의 모스랫 외형을 확인한다. 새 계정/미게시 새 세션은 무료1성을 받으며, 기존 저장 가방은 유지한다. 카페에서 보유 모스랫을 소환하고 이동/정지하여 걷기/숨쉬기, 꼬리·귀 움직임, 발 위치를 확인한다. 눈은 계속 열린다. 카페20명/모바일·PC실제 부하는 별도 측정한다.
+8. 로켓E1초→Green Star→보유 개체 선택을 확인한다. 새 숲 런타임이 준비되지 않았다면 출발은 준비 중 안내로 막히는 것이 현재 정상이다. 이번 모델 설치는GreenStarRuntimeReady를 켜지 않는다. 로비 동행 기능/새 숲 설치는 별도 남아 있다.
+
+검사:34관절의 런타임 Idle/Walk 지역 변환을 glTF 키와 직접 비교, 루프/전환 시작 확인. 새 가방 지급·저장/재접속·삭제 후 중복 방지·기존 가방 보존 확인. 모형Instance로 설치의34관절 계층 검사/코드 버전 거부/템플릿3개 교체/백업/재실행 무변경/쓰기 실패 복구 확인. 이 검사들은Studio Importer·실제 Bone 렌더·물리·모바일 성능 검증을 대체하지 않는다.

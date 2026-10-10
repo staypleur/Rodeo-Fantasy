@@ -216,7 +216,7 @@ def build():
                 riggedTriangles=len(indices)//3,vertices=len(v),bones=len(bones),maxInfluences=4,clips=[a['name'] for a in g['animations']],
                 originalGeometryNormalsUVPreserved=True,originalTextureBytesPreserved=True,addedEyelidTriangles=0,blinkEnabled=False,
                 eyeMotion='Restrained textured eye-patch translation; eyes remain open, no eyelid geometry or blink animation',
-                heightMetres=.9,targetHeightStuds=2.5,frontAxis='+Z',rigReviewApproved=False,installedInGame=False,
+                heightMetres=.9,targetHeightStuds=2.5,frontAxis='+Z',rigReviewApproved=True,installedInGame=False,
                 studioVerified=False,mobilePerformanceMeasured=False)
     (ASSETS/'metadata.json').write_text(json.dumps(report,ensure_ascii=False,indent=2)+'\n',encoding='utf-8')
     (ASSETS/'bone_landmarks.json').write_text(json.dumps([dict(name=b['name'],parent=b['parent'],worldPosition=anchors[i].tolist()) for i,b in enumerate(bones)],indent=2)+'\n',encoding='utf-8')

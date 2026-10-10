@@ -2,6 +2,7 @@
 local M={}
 local package=game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy")
 local C=require(package:WaitForChild("MonsterCatalog"))
+local rigAnimator
 local boneCache=setmetatable({},{__mode="k"})
 function M.isTarget(model)
  local visual=package:FindFirstChild("VisualTemplate")
@@ -46,6 +47,8 @@ function M.apply(model)
  model:SetAttribute("NativeMeshyStars",stars)
  model:SetAttribute("NativeMeshyFacingRevision",facingRevision)
  model:SetAttribute("MeshDecorated",true)
+ model:SetAttribute("MossratUserRigRevision",source:GetAttribute("MossratUserRigRevision"))
+ model:SetAttribute("MossratRigTranslationScale",(source:GetAttribute("MossratRigTranslationScale") or 2.5/.9)*scale)
  return true
 end
 -- Hunt presentation faces the course while the authoritative root still avoids obstacles.
@@ -58,6 +61,11 @@ function M.huntFrame(model,frame)
 end
 function M.animate(model,phase,moving,angry)
  if not M.isTarget(model) then return end
+ if model:GetAttribute("MossratUserRigRevision")=="ApprovedS1-v1" then
+  rigAnimator=rigAnimator or require(script.Parent:WaitForChild("UserMossratRigAnimator"))
+  rigAnimator.animate(model,moving)
+  return
+ end
  local body=model:FindFirstChild("Body")
  if not body then return end
  local cached=boneCache[model]

@@ -28,6 +28,7 @@ end
 function S.join(player)
  local e={session=game:GetService("HttpService"):GenerateGUID(false),count=0,ack=0,saved=0,caught={},savedCaught={},ackCaught={},seen={},dirty=false,loading=enabled,loaded=not enabled,status=enabled and "Loading progress" or "Session progress"}
  entries[player]=e
+ if player:GetAttribute("StarterMossratGranted")==true then S.discover(player,"MeadowMouse",1) end
  if enabled then task.spawn(function()
   local ok,data=pcall(function() return store:GetAsync(tostring(player.UserId)) end)
   if entries[player]~=e then return end

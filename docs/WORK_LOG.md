@@ -1036,3 +1036,13 @@
 - 폭포4곳의 너비32/16/40/24와 좌우/구간 간격에 차이. 실제3단 절벽 상단 물→단차별 낙수→지면 연못→방향이 꺾이는 물길을48개 비충돌StudPart로 연결. 전체2,179Part. 실제 물리유체나 사냥 규칙을 추가하지 않음.
 - 실제 생성기 검사에서4크기 거품 조각의 모서리 격자 및 나무뿌리/상단물 윗면 겹침을 발견해 수정. 최종격자/5면Studs/얇은판지지/중첩없음/1km전폭바닥/보수적주행경로/백업·생성실패복구 통과. 추가 검사에서4개 독립 물길 각각이 실제절벽 상단과 낙수·아래물길까지 면으로 이어짐을 확인. Luau bundle 컴파일 통과. 형상PNG/JSON/검토CommandBar/안내의수량 갱신.
 - Studio의 Stud/조명/안개/물흐름/잎흔들림 및 실제PC·모바일 조작·FPS·메모리는 여전히 미검증. 사용자 원본 로켓과 앞선 출발 준비 코드는 이 수정에서 변경 없음. 새 수정안 최종 외형 승인/실제 사냥 런타임 설치는 남아 있음.
+
+## 2026-10-10 승인한 모스랫1성 게임 연결 준비
+
+- 사용자 '승인, 게임 연결 진행' 수령. 리깅 승인 metadata=true, 실제 설치/Studio/모바일 검증=false 유지. 눈 감기 제외 및 원본 형상/텍스처 유지. 3성126cm/3.5studs,6성171cm/4.75studs 제작 높이는 기존1성90cm와Catalog1.4/1.9배를 기준으로 안내.
+- UserMossratRigData는 승인 glTF의24fps4클립과34관절 목록을 추출. UserMossratRigAnimator는Idle/Walk를Bone.Transform으로 재생, 최대30Hz/0.18초전환/약한참조모델캐시. NativeMossrat의 기존4다리 전용 처리를 새 승인 리그 분기로 연결하고 템플릿별 이동량 스케일 전달. 별도Run/점프/착지클립·발IK·실제지면/탑승위치 검증은 남음.
+- 새 InventoryStore 레코드만 승인 템플릿을 확인하여 무료1성1개 지급,profile.starterMossratGranted 영속 플래그. ProgressService에서 해당도감종류 등록(포획횟수는 증가시키지 않음). 기존빈가방/제거후재접속에는 재지급하지 않음. 카페/로비는 동일저장기준 유지. 도감 저장·세션잠금·교환 데이터 구조 유지.
+- InstallUserMossrat.commandbar.lua: Edit전용/정적원본거부/메시1개/34관절 이름·계층/기존코드정확버전 검사. 모델3개 높이2.5studs/정면+Z→게임-Z, 텍스처 유지. 수정전스크립트·모델·입력모델ServerStorage백업, 재실행no-op 및실패롤백. 기존CaptureServer/장소파일전체덮어쓰기 없이NativeMossrat/InventoryStore/ProgressService만 준비. GreenStarRuntimeReady는 변경하지 않음.
+- check_user_mossrat_connection: 실제Luau 런타임34관절 변환이 glTF Idle/Walk 샘플·루프에서 일치, 전환 시작포즈 유지. 지급/저장/제거후중복방지/기존계정보존/미승인모델지급차단 통과. check_user_mossrat_installer: 모형Instance에서3템플릿·백업·계층누락/모르는코드거부·재실행무변경·Source쓰기실패롤백 통과. 새모듈/수정소스/CommandBar Luau컴파일 및 기존원본/스키닝검사, 로켓출발 회귀검사 통과.
+- 위 검사는파일/코드/모형환경 검증이다. Studio실제가져오기/메시업로드/설치·Bone렌더·PC/모바일·실제성능/탑승접촉 검증 미완료. 10,294삼각형/4K상세원본 그대로며 사냥약3K간소화/텍스처축소 미완료. 로비동행·숲런타임은별도남음. 사용자메뉴/파일/순서/성공메시지/테스트방법을 MOSSRAT_S1_RIG_REVIEW에 기록.
+- 원래부터미커밋상태인 CaptureServer.server.luau 및 RodeoFantasy-Capture.rbxlx는 수정/재빌드/커밋하지 않음. 이번 변경은 로컬연결코드와적용스크립트 준비이며 실제Roblox게시가 아님.

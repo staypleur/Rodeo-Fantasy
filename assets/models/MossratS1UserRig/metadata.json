@@ -20,7 +20,7 @@
   "heightMetres": 0.9,
   "targetHeightStuds": 2.5,
   "frontAxis": "+Z",
-  "rigReviewApproved": false,
+  "rigReviewApproved": true,
   "installedInGame": false,
   "studioVerified": false,
   "mobilePerformanceMeasured": false
