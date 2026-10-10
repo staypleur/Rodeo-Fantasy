@@ -1,18 +1,18 @@
 {
-  "sourceFilename": "Meshy_AI_Lego_Rocket_15k_Remes_1010041827_texture.glb",
-  "sha256": "176b07b182e24d3f18d05961e457e355560980b733163eb40473d425f3bb357d",
-  "fileBytes": 20420108,
-  "triangles": 14801,
-  "vertices": 19915,
+  "sourceFilename": "Meshy_AI_Voxel_Space_Rocket_Re_1010053359_texture.glb",
+  "sha256": "458fe773d5b29cf4b90979d8990334dad62344c3ed917b729cad7a387e1f91a8",
+  "fileBytes": 23784212,
+  "triangles": 9217,
+  "vertices": 14322,
   "boundsMin": [
-    -5.6938581466674805,
+    -5.066669940948486,
     0,
-    -3.149951934814453
+    -4.494170188903809
   ],
   "boundsMax": [
-    5.679975509643555,
+    5.056302070617676,
     18,
-    3.1412363052368164
+    4.55569314956665
   ],
   "heightModelUnits": 18,
   "targetHeightStuds": 64.28571428571428,
@@ -21,14 +21,14 @@
       "name": "texture_0",
       "width": 4096,
       "height": 4096,
-      "encodedBytes": 12785811,
+      "encodedBytes": 15162756,
       "uncompressedRGBABytes": 67108864
     },
     {
       "name": "texture_0_metallic_roughness",
       "width": 4096,
       "height": 4096,
-      "encodedBytes": 6906649,
+      "encodedBytes": 8106295,
       "uncompressedRGBABytes": 67108864
     }
   ],

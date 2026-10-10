@@ -1,6 +1,6 @@
 # 로켓과 숲 검토 안내
 
-이번 파일은 Roblox 게시나 현재 작업 장소 변경을 자동 실행하지 않습니다. 원본 로켓은 Downloads에 그대로 있습니다.
+이번 파일은 Roblox 게시나 현재 작업 장소 변경을 자동 실행하지 않습니다. 최신 로켓은 `Meshy_AI_Voxel_Space_Rocket_Re_1010053359_texture.glb`이며 아래 준비 파일을 새 모델로 교체했습니다. 사용자가 받은 Downloads 파일은 수정하지 않습니다.
 
 ## 숲의 실제 Stud·빛·물·바람 확인
 
@@ -20,14 +20,14 @@
 1. Studio에서 현재 게임 장소를 열고 **File → Save to File**로 사본을 저장한 뒤 Play를 정지합니다.
 2. **File → Import**를 열고 저장소의 `assets/models/UserRocket/Rocket.gltf`를 선택합니다. 구버전 메뉴에서는 **Import 3D**로 표시될 수 있습니다. `Rocket.bin`과 PNG2장은 같은 폴더에 그대로 둡니다. 원본 GLB의 메시·UV·법선·재질·PNG바이트를 그대로 풀어 준비한 파일이며 색/형상을 변경하지 않았습니다. 미리보기에서 빨간 꼭대기/흰 몸체/원형 창/돌기가 보이는지 확인하고 가져옵니다. Roblox 자산 업로드 권한 확인은 본인 계정에서 진행합니다. [Roblox 공식 Importer 안내](https://create.roblox.com/docs/studio/importer)
 3. Explorer에서 가져온 로켓의 최상위 **Model** 이름을 `RocketImport`로 바꾸고 `Workspace` 바로 아래에 둡니다. 파일 안의 개별 MeshPart 이름을 바꾸는 것이 아닙니다.
-4. `dist/ReviewModels/InstallUserRocket.commandbar.lua` 전체를 Command Bar에서 실행합니다. 현재 스크립트 버전의 연결 지점이 다르면 기존 코드를 유지하고 중단합니다. Output의 `ROCKET_DEPARTURE_PREPARED`가 성공 표시입니다.
+4. `dist/ReviewModels/InstallUserRocket.commandbar.lua` 전체를 Command Bar에서 실행합니다. 첫 설치는 현재 스크립트 버전의 연결 지점이 다르면 기존 코드를 유지하고 중단합니다. Output의 `ROCKET_DEPARTURE_PREPARED`가 첫 연결 성공 표시입니다. 이미 이 스크립트로 로켓을 설치했다면 새 입력을 기존 로켓 자리로 교체하고 `ROCKET_MODEL_REPLACED`를 표시합니다. 동일 모델이면 `ROCKET_MODEL_ALREADY_CURRENT`를 표시하며 중복 생성하지 않습니다. 기존 로켓은 `ServerStorage.RocketModelReplacementBackup_시간`에 보관합니다. 출발 코드·받침·상호작용 지점은 교체 분기에서 수정하지 않습니다.
 5. 중앙 로켓은 높이약64.3studs로 배치됩니다. 기존 비행선 구역과 수정 전 스크립트, 가져온 원본은 `ServerStorage.RocketDepartureBackup_시간`에 남깁니다. 로켓 메시 자체의 복잡한 물리 충돌은 끄고 Stud 받침 바닥만 충돌시킵니다.
 6. **Play**에서 중앙 로켓의 앞쪽 가까이 가서 **E를1초** 누릅니다. 모바일은 근처에서 나타나는 기본 상호작용 버튼을 길게 누릅니다. **Green Star → 다음 → 보유 몬스터** 창이 나오는지 확인합니다. X로 취소합니다.
 7. 새 몬스터 모델/숲 런타임이 연결되기 전에는 **준비 중** 안내가 정상입니다. 빈 가방에는 옛 모스랫을 임의 지급하지 않습니다. 무료1성 모스랫은 사용자 새 모델을 받은 뒤 연결합니다.
 
 개발 연결 표식 `UserApprovedHuntModel`(서버 보관 승인 모델) 및 `GreenStarRuntimeReady`(새 숲 런타임)는 에이전트가 실제 모델·맵 연결을 끝낸 후 설정할 내부 표식입니다. 사용자가 준비되지 않은 기존 모델/맵에 직접 켜서 출발 검사를 우회하는 절차가 아닙니다.
 
-원본 로켓은 텍스처4K2장/파일약20MB입니다. 모바일에 적합한 최종 텍스처 크기와 실제 메모리는 기기에서 확인해야 합니다. 현재 원본 텍스처를 임의 축소하지 않았습니다.
+원본 로켓은9,217삼각형/텍스처4K2장/파일약23.8MB입니다. 모바일에 적합한 최종 텍스처 크기와 실제 메모리는 기기에서 확인해야 합니다. 현재 원본 텍스처를 임의 축소하지 않았습니다.
 
 ## 검증 범위
 

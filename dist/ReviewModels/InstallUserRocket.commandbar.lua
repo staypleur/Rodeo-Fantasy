@@ -8,8 +8,7 @@ local lobby=workspace:FindFirstChild("RodeoLobby")
 assert(package and lobby,"기존 Rodeo Fantasy 장소에서 실행하세요.")
 local airport=assert(lobby:FindFirstChild("Airport"),"Airport 없음")
 local installed=airport:FindFirstChild("Rocket")
-if installed and installed:GetAttribute("UserRocketDepartureV1") then print("ROCKET_DEPARTURE_ALREADY_INSTALLED") return end
-assert(not installed,"기존 Rocket을 덮어쓰지 않습니다.")
+assert(not installed or installed:GetAttribute("UserRocketDepartureV1"),"알 수 없는 기존 Rocket을 덮어쓰지 않습니다.")
 local imported=assert(workspace:FindFirstChild("RocketImport"),"가져온 로켓 Model 이름을 RocketImport로 바꿔 주세요.")
 assert(imported:IsA("Model"),"RocketImport는 Model이어야 합니다.")
 local meshes=0
@@ -18,6 +17,35 @@ for _,node in ipairs(imported:GetDescendants()) do
  if node:IsA("MeshPart") then meshes+=1 end
 end
 assert(meshes>0,"가져온 로켓에 MeshPart가 없습니다.")
+if installed then
+ if installed:GetAttribute("UserRocketSourceSha256")==[====[458fe773d5b29cf4b90979d8990334dad62344c3ed917b729cad7a387e1f91a8]====] then print("ROCKET_MODEL_ALREADY_CURRENT") return end
+ local rocket=assert(imported:Clone(),"새 로켓 복제 실패")
+ rocket.Name="Rocket" rocket:SetAttribute("UserRocketDepartureV1",true) rocket:SetAttribute("UserRocketSourceSha256",[====[458fe773d5b29cf4b90979d8990334dad62344c3ed917b729cad7a387e1f91a8]====])
+ rocket:PivotTo(rocket:GetPivot()*CFrame.Angles(0,math.pi,0))
+ local _,size=rocket:GetBoundingBox()
+ assert(size.Y>0 and size.Y<math.huge,"새 로켓 높이 오류")
+ rocket:ScaleTo(rocket:GetScale()*(18/.28)/size.Y)
+ local oldBox,oldSize=installed:GetBoundingBox()
+ local box,scaled=rocket:GetBoundingBox()
+ local center=Vector3.new(oldBox.Position.X,oldBox.Position.Y-oldSize.Y/2+scaled.Y/2,oldBox.Position.Z)
+ rocket:PivotTo(CFrame.new(center-box.Position)*rocket:GetPivot())
+ for _,p in ipairs(rocket:GetDescendants()) do
+  if p:IsA("BasePart") then p.Anchored=true p.CanCollide=false p.CanTouch=false p.CanQuery=false end
+ end
+ local backup=Instance.new("Folder") backup.Name="RocketModelReplacementBackup_"..tostring(os.time())
+ local originalParent=imported.Parent
+ game:GetService("ChangeHistoryService"):SetWaypoint("Before rocket model replacement")
+ local ok,err=pcall(function()
+  backup.Parent=storage installed.Parent=backup imported.Parent=backup rocket.Parent=airport
+ end)
+ if not ok then
+  installed.Parent=airport imported.Parent=originalParent rocket:Destroy() backup:Destroy() error(err,0)
+ end
+ game:GetService("ChangeHistoryService"):SetWaypoint("After rocket model replacement")
+ game:GetService("Selection"):Set({rocket})
+ print("ROCKET_MODEL_REPLACED: 새 로켓 교체 완료. 기존 E 출발 연결과 Stud 받침은 유지했습니다.")
+ return
+end
 local airship=assert(airport:FindFirstChild("Airship"),"Airship 호환 노드 없음")
 local point=assert(airport:FindFirstChild("Departure"),"Departure 없음")
 local updates={}
@@ -276,7 +304,8 @@ remote.OnClientEvent:Connect(function(action,data)
 end)
 ]====])
 local rocket=assert(imported:Clone(),"로켓 복제 실패")
-rocket.Name="Rocket" rocket:SetAttribute("UserRocketDepartureV1",true)
+rocket.Name="Rocket" rocket:SetAttribute("UserRocketDepartureV1",true) rocket:SetAttribute("UserRocketSourceSha256",[====[458fe773d5b29cf4b90979d8990334dad62344c3ed917b729cad7a387e1f91a8]====])
+rocket:PivotTo(rocket:GetPivot()*CFrame.Angles(0,math.pi,0))
 local _,size=rocket:GetBoundingBox()
 assert(size.Y>0 and size.Y<math.huge,"로켓 높이를 계산할 수 없습니다.")
 rocket:ScaleTo(rocket:GetScale()*(18/.28)/size.Y)

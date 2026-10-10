@@ -13,7 +13,7 @@ for image in doc['images']:
  assert (folder/image['uri']).read_bytes().startswith(b'\x89PNG\r\n\x1a\n')
 for accessor in doc['accessors']:
  assert 0<=accessor['bufferView']<len(doc['bufferViews'])
-assert sum(doc['accessors'][p['indices']]['count']//3 for mesh in doc['meshes'] for p in mesh['primitives'])==14801
+assert sum(doc['accessors'][p['indices']]['count']//3 for mesh in doc['meshes'] for p in mesh['primitives'])==report['triangles']
 original=Path('C:/Users/wucha/Downloads')/report['sourceFilename']
 if original.exists():
  raw=original.read_bytes();assert hashlib.sha256(raw).hexdigest()==report['sha256']
@@ -28,4 +28,4 @@ if original.exists():
  for a,b in zip(source['images'],doc['images']):
   view=source['bufferViews'][a['bufferView']];start=view.get('byteOffset',0)
   assert (folder/b['uri']).read_bytes()==source_binary[start:start+view['byteLength']]
-print('ROCKET_ASSETS_PASS: valid glTF resources; 14801 triangles; original mesh/material/UV/normal/PNG bytes preserved')
+print(f"ROCKET_ASSETS_PASS: valid glTF resources; {report['triangles']} triangles; original mesh/material/UV/normal/PNG bytes preserved")

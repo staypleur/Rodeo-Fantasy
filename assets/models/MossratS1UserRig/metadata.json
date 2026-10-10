@@ -1,0 +1,27 @@
+{
+  "source": "Meshy_AI_Mossrat_1Star_Remesh__1010052217_texture.glb",
+  "sourceSha256": "488598762339c44959cef95e1803a3ead9bff32fd864b54afadb241380474bec",
+  "sourceTriangles": 10294,
+  "riggedTriangles": 10294,
+  "vertices": 17341,
+  "bones": 34,
+  "maxInfluences": 4,
+  "clips": [
+    "Idle",
+    "Walk",
+    "LookAround",
+    "RigRange"
+  ],
+  "originalGeometryNormalsUVPreserved": true,
+  "originalTextureBytesPreserved": true,
+  "addedEyelidTriangles": 0,
+  "blinkEnabled": false,
+  "eyeMotion": "Restrained textured eye-patch translation; eyes remain open, no eyelid geometry or blink animation",
+  "heightMetres": 0.9,
+  "targetHeightStuds": 2.5,
+  "frontAxis": "+Z",
+  "rigReviewApproved": false,
+  "installedInGame": false,
+  "studioVerified": false,
+  "mobilePerformanceMeasured": false
+}
