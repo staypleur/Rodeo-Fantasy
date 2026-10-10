@@ -1207,3 +1207,12 @@
 - RetryLobbyTextures는 Workspace 전체의 지정 Import 및 UserIncubator/UserDoorFrame/UserDoorConsole/CeilingPlanet을 찾는다. 중첩된 설치 모델을 지원하고 SurfaceAppearance 중복 조회와 공유 콘텐츠 요청을 제거. 원래 rbxassetid 및 HTTPS 맵 URL을 유지하고 임시 rbxtemp 맵은 따로 집계. 모델/재질/업로드/임시 맵 진단 후, 모델 없음과 업로드 맵 없음 오류를 구분한다. 백업은 ServerStorage에 있어 대상에서 제외된다.
 - Luau 컴파일 및 실제 재시도 본문 모의 실행: PlanetImport/CeilingPlanet/UserIncubator, 중복 조회, 원래 ID 복원 및 단일 preload 배치 통과. 인덱스 모의 검사도 통과. HTTP 502 해결·실제 재질 표시·Studio 조작은 미확인.
 - 사용자가 Studio에서 저장한 dist/RodeoFantasy-New.rbxlx 변경은 이번 수정에서 재빌드하거나 커밋하지 않는다. 텍스처 재시도 파일·검사·안내·작업 기록만 커밋한다.
+
+
+## 2026-10-10 사용자 업로드 버튼·모스랫 얼굴 ID 연결
+
+- 사용자 이미지 목록에서 PawButton 8596625063532 / EggButton 87551432940862 / IndexButton 135277525783308 / ShopButton 84295507284264 / MossratFace 98296663869747 확인. 모스랫 얼굴 미적용 요청에 따라 네 버튼뿐 아니라 MossratFaceImage 속성도 설정하는 ApplyHudImages 파일 작성.
+- HudIcons의 기본 업로드 ID 목록과 imageId 선택 함수를 추가하고 HudStats 얼굴에 같은 선택 함수를 사용. 기존 숫자 0 예시나 빈 속성이 기본 업로드 ID를 가리지 않도록 처리하며 사용자가 설정한 유효한 다른 ID는 유지. InstallIndex에 HudStats 포함 및 직전 설치 소스 호환 추가. 실행 중 Studio에는 직접 적용하지 않음.
+- 사용자가 저장한 장소 파일은 재빌드/커밋하지 않으며 원본 그대로 유지. 소스, 적용 파일, 검증 및 안내만 저장한다. 실제 PNG 표시, Roblox 에셋 타입·승인·서버 로딩 성공은 아직 확인하지 않았다.
+
+- 검증: check_hud_images 실제 적용 본문으로 속성 5개 설정·0 예시 무시·사용자 지정 ID 우선 확인, 관련 Luau 컴파일 및 check_index 통과. check_lobby_entries의 장소 좌표 정확 일치 검사는 Studio 저장 후 -16→-16.0000019 / 2.04→2.03999996 float 정밀도 변화로 실패하여 0.0001stud 허용 오차로 수정 후 재검사 통과. 실제 배치 목표나 장소 파일은 수정하지 않았다.

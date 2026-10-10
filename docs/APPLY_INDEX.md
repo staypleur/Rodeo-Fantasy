@@ -14,6 +14,19 @@
 
 ## 제공 버튼 이미지
 
+사용자가 제공한 업로드 ID 다섯 개를 기록했습니다. 기본 버튼 및 모스랫 얼굴 연결은 `dist/ApplyHudImages.commandbar.lua`를 메모장으로 열고 전체 복사 → Play 중지 상태의 Studio 명령 모음 → Enter로 적용합니다. `HUD_IMAGES_CONFIGURED` 확인 후 Ctrl+S → Play. 왼쪽 상점/인덱스, 오른쪽 알/발자국, 왼쪽 아래 몬스터 수 옆 모스랫 얼굴을 확인합니다. 기존 인덱스 설치 성공 상태에서는 큰 설치 파일을 다시 실행하지 않아도 됩니다. 아래의 0 입력 예시는 실제 ID가 없는 경우의 이전 안내입니다.
+
+| 이미지 | 사용자 제공 ID |
+|---|---|
+| ShopButton | 84295507284264 |
+| IndexButton | 135277525783308 |
+| EggButton | 87551432940862 |
+| PawButton | 8596625063532 |
+| MossratFace | 98296663869747 |
+
+ID 값은 기록했으며 실제 Roblox 에셋 타입/승인/로딩 성공은 아직 확인하지 않았습니다. 실제 이미지가 표시되지 않으면 출력의 이미지 로딩 오류로 확인합니다.
+
+
 `assets/ui/ShopButton.png`, `IndexButton.png`, `EggButton.png`, `PawButton.png`를 원본 그대로 저장했습니다. Roblox가 로컬 PNG 경로를 게임 이미지로 읽지는 못하므로 업로드된 **이미지 콘텐츠 ID**가 필요합니다.
 
 1. Studio의 **에셋 관리자 → 이미지 → 가져오기**에서 네 PNG를 업로드합니다.

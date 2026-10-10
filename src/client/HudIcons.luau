@@ -1,5 +1,13 @@
 -- Small native shapes: no external images are required for the menu symbols.
 local I={}
+-- IDs supplied by the user from their uploaded image list.
+I.ImageIds={ShopButtonImage="rbxassetid://84295507284264",IndexButtonImage="rbxassetid://135277525783308",
+ EggButtonImage="rbxassetid://87551432940862",PawButtonImage="rbxassetid://8596625063532",MossratFaceImage="rbxassetid://98296663869747"}
+function I.imageId(package,key)
+ local id=package:GetAttribute(key)
+ if type(id)=="string" and id~="rbxassetid://0" and id:match("^rbxassetid://%d+$") then return id end
+ return I.ImageIds[key] or ""
+end
 -- User-supplied PNGs become Roblox image assets only after upload. Keep the
 -- native controls usable until their content IDs are configured.
 function I.bindArtwork(button,key)
@@ -14,7 +22,7 @@ function I.bindArtwork(button,key)
   elseif n:IsA("UIStroke") then strokes[n]=n.Enabled end
  end
  local function refresh()
-  local id=package:GetAttribute(key)
+  local id=I.imageId(package,key)
   local ready=type(id)=="string" and id:match("^rbxassetid://%d+$")~=nil
   image.Image=ready and id or "" image.Visible=ready
   button.BackgroundTransparency=ready and 1 or background

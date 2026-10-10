@@ -1,0 +1,11 @@
+-- Paste only this file's contents into the Studio Command Bar.
+assert(not game:GetService("RunService"):IsRunning(),"Play를 중지하세요.")
+local p=assert(game.ReplicatedStorage:FindFirstChild("RodeoFantasy"),"RodeoFantasy 시스템 없음")
+game:GetService("ChangeHistoryService"):SetWaypoint("Before uploaded HUD images")
+p:SetAttribute("ShopButtonImage","rbxassetid://84295507284264")
+p:SetAttribute("IndexButtonImage","rbxassetid://135277525783308")
+p:SetAttribute("EggButtonImage","rbxassetid://87551432940862")
+p:SetAttribute("PawButtonImage","rbxassetid://8596625063532")
+p:SetAttribute("MossratFaceImage","rbxassetid://98296663869747")
+game:GetService("ChangeHistoryService"):SetWaypoint("Uploaded HUD images configured")
+print("HUD_IMAGES_CONFIGURED — 이미지 5개 연결. Ctrl+S 저장 후 Play로 확인하세요.")

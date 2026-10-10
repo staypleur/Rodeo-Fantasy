@@ -4,9 +4,9 @@ import json,subprocess
 R=Path(__file__).resolve().parents[1]
 long=lambda s:'[========['+s+']========]'
 rows=[]
-for name in ['JournalUI','MonsterPortrait','CreatureMesh','NativeMossrat','UserMossratRigAnimator','HudIcons','LobbyMenus']:
+for name in ['JournalUI','MonsterPortrait','CreatureMesh','NativeMossrat','UserMossratRigAnimator','HudIcons','LobbyMenus','HudStats']:
  path='src/client/'+name+'.luau';after=(R/path).read_text(encoding='utf-8');allowed=[after]
- for rev in ['bb07b75','0c0f1db','57d4c74','78cb6bc','cbbb822','b0c9be0']:
+ for rev in ['178ee8a','65aaf04','bb07b75','0c0f1db','57d4c74','78cb6bc','cbbb822','b0c9be0']:
   old=subprocess.run(['git','show',rev+':'+path],cwd=R,capture_output=True)
   if old.returncode==0:allowed.append(old.stdout.decode('utf-8'))
  rows.append('{name='+json.dumps(name)+',after='+long(after)+',allowed={'+','.join(long(s) for s in allowed)+'}}')

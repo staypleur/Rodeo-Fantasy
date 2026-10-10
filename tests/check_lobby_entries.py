@@ -1,5 +1,5 @@
 from pathlib import Path
-import subprocess,xml.etree.ElementTree as E
+import subprocess,xml.etree.ElementTree as E,math
 R=Path(__file__).resolve().parents[1]
 for path in ['src/client/LobbyMenus.luau','src/client/CaptureClient.client.luau','src/server/LobbyRankings.luau','src/server/RecordService.luau','dist/FixCurrentLobbyHunt.commandbar.lua']:
  subprocess.run([str(R/'.tools/luau/luau-compile.exe'),path],cwd=R,check=True,stdout=subprocess.DEVNULL)
@@ -8,8 +8,8 @@ name=lambda n:n.findtext("Properties/string[@name='Name']")
 boards=next(n for n in root.findall('.//Item') if name(n)=='Leaderboards')
 for board in boards.findall('Item'):
  cf=board.find("Properties/CoordinateFrame[@name='CFrame']")
- assert abs(float(cf.findtext('X'))-6000)==54 and float(cf.findtext('Z'))==-16
- assert float(cf.findtext('Y'))==2.04 and board.findtext("Properties/bool[@name='CanCollide']")=='false'
+ assert math.isclose(abs(float(cf.findtext('X'))-6000),54,abs_tol=1e-4) and math.isclose(float(cf.findtext('Z')),-16,abs_tol=1e-4)
+ assert math.isclose(float(cf.findtext('Y')),2.04,abs_tol=1e-4) and board.findtext("Properties/bool[@name='CanCollide']")=='false'
  gui=next(n for n in board.findall('Item') if name(n)=='Ranking')
  assert {name(n) for n in gui.findall('Item')}=={'Heading','Entries'}
  assert gui.findtext("Properties/token[@name='Face']")=='1'

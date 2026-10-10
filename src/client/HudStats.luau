@@ -10,8 +10,8 @@ function H.new(gui)
  local count=label("BagCount",0,Color3.new(1,1,1));local money=label("MoneyCount",42,Color3.fromRGB(54,255,9))
  local cash=Icons.draw(root,"Money",40) cash.Position=UDim2.fromOffset(0,42)
  local face=Instance.new("ImageLabel") face.Name="MossratFace" face.Size=UDim2.fromOffset(40,40) face.BackgroundTransparency=1 face.Parent=root
- local asset=game.ReplicatedStorage.RodeoFantasy:GetAttribute("MossratFaceImage")
- face.Image=type(asset)=="string" and asset or ""
+ local package=game.ReplicatedStorage.RodeoFantasy
+ face.Image=Icons.imageId(package,"MossratFaceImage")
  -- Native fallback until the prepared transparent PNG is uploaded once.
  local fallback=Instance.new("Frame") fallback.Name="FaceFallback" fallback.BackgroundTransparency=1 fallback.Size=UDim2.fromScale(1,1) fallback.Visible=face.Image=="" fallback.Parent=face
  for _,v in ipairs({{.02,.03,.32,.6},{.66,.03,.32,.6},{.2,.28,.6,.65}}) do
@@ -20,7 +20,7 @@ function H.new(gui)
  end
  for _,x in ipairs({.33,.6}) do local eye=Instance.new("Frame") eye.Position=UDim2.fromScale(x,.5) eye.Size=UDim2.fromScale(.12,.17) eye.BackgroundColor3=Color3.fromRGB(36,30,21) eye.BorderSizePixel=0 eye.Parent=fallback end
  game.ReplicatedStorage.RodeoFantasy:GetAttributeChangedSignal("MossratFaceImage"):Connect(function()
-  face.Image=game.ReplicatedStorage.RodeoFantasy:GetAttribute("MossratFaceImage") or "" fallback.Visible=face.Image==""
+  face.Image=Icons.imageId(package,"MossratFaceImage") fallback.Visible=face.Image==""
  end)
  local function short(n)
   n=math.max(0,tonumber(n) or 0)
