@@ -1117,3 +1117,10 @@
 - 사용자 실제 화면에서 기존 메시 복제 표시 성공, 색상 미표시 확인. ColorMap null 상태를 명확히 보고.
 - RepairMossratColor.commandbar.lua: 기존 웹 색상 데칼에서 이미지 참조를 해석하여 실제 모스랫 MeshId에 한정해 템플릿과 확인용 복제의 ColorMap 연결. 업로드·형상·뼈대 변경 없음. 변경 전 waypoint/실패 시 주소 복원.
 - Luau 컴파일 통과. 실제 계정 InsertService 로드와 이미지 표시 검증은 사용자 실행 후 남음.
+
+## 2026-10-10 색상 로딩 검사 및 제공 로켓 제거
+
+- 사용자가 색상 복구 후에도 회색이라고 보고. PBR/텍스처팩과 실제 이미지 로딩을 구분하기 위해 Decal을 통한 PreloadAsync 검사 후 일반 TextureID 우회 준비. SurfaceAppearance 직접 Preload는 지원되지 않으므로 검사하지 않음(공식 ContentProvider 문서).
+- 이미지 로딩 실패 시 기존 모델 변경 없음. 성공 시 동일 MeshId의 설치 템플릿/확인용 복제만 변경, 원본 UV/메시/뼈 유지. PBR과 이전 TextureID/색은 ServerStorage 백업. 실제 Studio 실행은 미검증.
+- 사용자 요청으로 UserRocket 파일 7개 제거. 삭제 전 .local-backup/removed-user-rocket.zip 보관. 로켓 설치 분기 및 재생성/복구 묶음에서 로켓 제거. 중앙 E 출발 규칙 유지. 다운로드 원본은 건드리지 않음.
+- 기존 문서의 로켓 가져오기 안내는 최신 결정으로 폐기.

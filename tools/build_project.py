@@ -102,14 +102,11 @@ lobby.Airport.Airship:SetAttribute("RocketDepartureActive",true)
   if old_ss is not None:
    for saved in old_ss.findall('Item'):
     key=saved.findtext("Properties/string[@name='Name']") or ''
-    if key.startswith(('MossratRigBackup_','RocketImportBackup_')):ss.append(preserve(saved))
+    if key.startswith(('MossratRigBackup_',)):ss.append(preserve(saved))
   if old_ws is not None:
-   for key in ('MossratImport','RocketImport'):
+   for key in ('MossratImport',):
     saved=named(old_ws,key)
     if saved is not None:ws.append(preserve(saved))
-   old_lobby=named(old_ws,'RodeoLobby');old_airport=named(old_lobby,'Airport') if old_lobby is not None else None
-   saved=named(old_airport,'Rocket') if old_airport is not None else None
-   if saved is not None:named(lobby,'Airport').append(preserve(saved))
  assert_unique_ids(root)
  out=R/'dist/RodeoFantasy-New.rbxlx';out.parent.mkdir(exist_ok=True)
  E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)

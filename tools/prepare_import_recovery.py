@@ -4,7 +4,7 @@ import json,shutil,zipfile,copy
 R=Path(__file__).resolve().parents[1]
 def build():
  out=R/'dist/ImportRecovery';out.mkdir(parents=True,exist_ok=True)
- for label,folder,file in [('Mossrat','MossratS1UserRig','MossratS1Rigged.gltf'),('Rocket','UserRocket','Rocket.gltf')]:
+ for label,folder,file in [('Mossrat','MossratS1UserRig','MossratS1Rigged.gltf')]:
   source=R/'assets/models'/folder;dest=out/label;dest.mkdir(exist_ok=True)
   g=json.loads((source/file).read_text());g.pop('animations',None)
   for i,buf in enumerate(g['buffers']):
@@ -34,7 +34,7 @@ def build():
   for i,img in enumerate(g['images']):assert (dest/img['uri']).read_bytes()==(source/original['images'][i]['uri']).read_bytes()
  archive=out/'RodeoImport.zip'
  with zipfile.ZipFile(archive,'w',compression=zipfile.ZIP_DEFLATED,compresslevel=1) as z:
-  for folder in ('Mossrat','Rocket'):
+  for folder in ('Mossrat',):
    for path in sorted((out/folder).iterdir()):z.write(path,path.relative_to(out).as_posix())
  print('IMPORT_RECOVERY_PREPARED',archive.stat().st_size,'bytes; exact geometry/skin/textures, model-only import, ASCII extraction recommended')
  return archive

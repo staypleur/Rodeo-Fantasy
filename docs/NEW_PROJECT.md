@@ -115,3 +115,9 @@ print("METALNESS_CONNECTED", image)
 ### 회색 모스랫의 색상 복구
 
 확인용 복제가 회색인 사용자 화면 확인. 저장 XML에서 ColorMap=null이고 TexturePack만 남아 있어 색상 표시 완료로 판단하지 않습니다. Play 중지 후 dist/RepairMossratColor.commandbar.lua를 전체 복사하여 Command Bar에 실행합니다. 웹에 이미 올린 색상 데칼 88970410075115에서 실제 이미지 주소를 읽고 설치 템플릿 3개와 확인용 복제의 ColorMap을 연결합니다. MOSSRAT_COLOR_CONNECTED 출력 후 초록색·크림색이 보이면 Ctrl+S로 저장합니다. 주소 연결 성공과 실제 이미지 로딩 성공은 구분합니다. 실패 시 새 오류를 확인하며 재업로드하지 않습니다.
+
+## 최신 안내: 회색 모스랫과 로켓 모델 제거
+
+기존 로켓 메시 가져오기 절차는 더 이상 사용하지 않습니다. 사용자가 맵으로 새로 제작하기로 변경했습니다. 중앙 출발 기능은 유지합니다.
+
+회색 모스랫은 Play 중지 후 dist/MossratTextureFallback.commandbar.lua 전체를 Command Bar에 실행합니다. 기존 웹 업로드 색상 이미지의 로딩 상태를 MOSSRAT_IMAGE_FETCH로 출력합니다. 실패하면 모델을 변경하지 않습니다. 성공하면 원래 UV를 사용하는 MeshPart.TextureID로 색상을 연결하고 기존 PBR은 ServerStorage의 MossratTextureBackup에 보관합니다. 초록색·크림색 표시를 확인한 뒤 Ctrl+S. 주소만 연결된 메시지는 실제 표시 완료를 뜻하지 않습니다. 실패 시 MOSSRAT_IMAGE_FETCH 문장과 이어지는 오류가 진단 근거입니다.
