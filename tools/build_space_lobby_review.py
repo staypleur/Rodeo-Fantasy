@@ -16,7 +16,7 @@ bundle+='local doors=Instance.new("Script") doors.Name="ReviewAutomaticDoors" do
 bundle+='local spawn=Instance.new("SpawnLocation") spawn.Name="ReviewSpawn" spawn.Size=Vector3.new(8,1,8) spawn.CFrame=CFrame.new(0,9,-52) spawn.Anchored=true spawn.CanCollide=false spawn.Transparency=1 spawn.Neutral=true spawn.Duration=0 spawn.Parent=model\n'
 bundle+='game:GetService("Selection"):Set({model.Dock.DockTop})\n'
 bundle+='game:GetService("ChangeHistoryService"):SetWaypoint("After spaceship lobby review")\n'
-bundle+='print("SPACE_LOBBY_REVIEW_CREATED", "8 rooms / 32 egg slots; airship reserved; game inventory not connected")\n'
+bundle+='print("SPACE_LOBBY_REVIEW_CREATED", "8 rooms / 32 egg slots; central rocket; game inventory not connected")\n'
 (ROOT/'dist/ReviewModels/CreateSpaceLobby.commandbar.lua').write_text(bundle,encoding='utf-8')
 harness=ROOT/'.tools/export_space_lobby.luau'
 harness.write_text('local L=(function()\n'+layout+'\nend)()\n'+'''
@@ -31,7 +31,7 @@ blocks=[]
 for row in out.stdout.splitlines():
  c=row.split('|');v=list(map(float,c[2:]));blocks.append(dict(name=c[0],group=c[1],yaw=v[0],pos=v[1:4],size=v[4:7],color=list(map(int,v[7:10]))))
 folder=ROOT/'assets/courses/SpaceLobby';folder.mkdir(parents=True,exist_ok=True)
-(folder/'layout.json').write_text(json.dumps(dict(reviewOnly=True,rooms=8,eggSlots=32,airshipReservation=True,blocks=blocks),indent=2),encoding='utf-8')
+(folder/'layout.json').write_text(json.dumps(dict(reviewOnly=True,rooms=8,eggSlots=32,departureFacility='Rocket',blocks=blocks),indent=2),encoding='utf-8')
 def parts(selection):
  result=[]
  for b in selection:
@@ -40,7 +40,10 @@ def parts(selection):
  return result
 cutaway=[b for b in blocks if b['group'] not in ('Roof','Hull') and b['name'] not in ('Ceiling','DoorSensor')]
 save_review(parts(cutaway),'SpaceLobbyCutaway','우주선 로비 — 8인 부화실과 중앙 출발 광장',
-            '지붕·선체를 숨긴 실제 형상 검토 · 기존 비행선 자리 확보 · Stud는 Studio에서 확인',eye_direction=(.4,1.8,1.1),export_model=False)
+            '지붕·선체를 숨긴 실제 형상 검토 · 중앙 로켓 출발 시설 · Stud는 Studio에서 확인',eye_direction=(.4,1.8,1.1),export_model=False)
+save_review(parts([b for b in blocks if b['group'] in ('Rocket','Dock')]),'SpaceLobbyRocket',
+            '중앙 출발 로켓 — Stud 블록 형상 검토',
+            '계단형 기수·청록 날개·금색 창틀 · 실제 Stud 표면은 Studio에서 확인',eye_direction=(.7,.55,-1.2),export_model=False)
 room=[dict(b) for b in blocks if b['group']=='Room_1' and b['name'] not in ('Ceiling','DoorSensor','BackWall','SideWall')]
 for b in room:
  if b['name'] in ('DoorLeft','DoorRight'):
@@ -50,7 +53,7 @@ save_review(parts(room),'SpaceLobbyIncubatorRoom','개인 부화실 — 자동�
 im=Image.new('RGB',(1100,1100),(19,29,44));draw=ImageDraw.Draw(im)
 font=ImageFont.truetype('C:/Windows/Fonts/malgun.ttf',24);small=ImageFont.truetype('C:/Windows/Fonts/malgun.ttf',18)
 draw.text((30,22),'우주선 로비 · 8인 / 개인 부화소 총 32칸',font=font,fill=(224,234,230))
-draw.text((30,62),'중앙 비행선 → E 길게 → Green Star → 보유 몬스터 선택 → 출발',font=small,fill=(109,208,204))
+draw.text((30,62),'중앙 로켓 → E 길게 → Green Star → 보유 몬스터 선택 → 출발',font=small,fill=(109,208,204))
 scale=2;ox=550;oy=600
 for b in blocks:
  if b['name'] not in ('Deck','RoomDeck','DockBase','DockTop','EggSocket_1','EggSocket_2','EggSocket_3','EggSocket_4','DoorLeft','DoorRight','StationCounter'):continue
@@ -60,7 +63,7 @@ for b in blocks:
 for slot in range(1,9):
  a=np.radians((slot-1)*45);x=ox+np.sin(a)*160*scale;z=oy+np.cos(a)*160*scale
  draw.text((x-27,z-48),f'{slot}번',font=small,fill=(30,45,59))
-draw.text((ox-40,oy-20),'비행선',font=small,fill=(238,243,228))
+draw.text((ox-20,oy-20),'로켓',font=small,fill=(238,243,228))
 labels={'Shop_1':'상점1','Shop_2':'상점2','DistanceRanking':'거리 랭킹','JournalRanking':'도감 랭킹','Roulette':'룰렛','BattlePass':'배틀패스'}
 for b in blocks:
  if b['name']=='StationCounter':

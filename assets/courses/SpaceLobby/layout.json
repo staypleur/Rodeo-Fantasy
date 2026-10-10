@@ -2,7 +2,7 @@
   "reviewOnly": true,
   "rooms": 8,
   "eggSlots": 32,
-  "airshipReservation": true,
+  "departureFacility": "Rocket",
   "blocks": [
     {
       "name": "Deck",
@@ -10409,8 +10409,8 @@
       "group": "Dock",
       "yaw": 90.0,
       "pos": [
-        28.0,
-        10.0,
+        40.0,
+        6.0,
         0.0
       ],
       "size": [
@@ -10425,8 +10425,8 @@
       ]
     },
     {
-      "name": "AirshipReservation",
-      "group": "Dock",
+      "name": "RocketEngine",
+      "group": "Rocket",
       "yaw": 0.0,
       "pos": [
         0.0,
@@ -10434,14 +10434,334 @@
         0.0
       ],
       "size": [
-        32.0,
+        24.0,
         8.0,
-        8.0
+        24.0
+      ],
+      "color": [
+        30,
+        42,
+        61
+      ]
+    },
+    {
+      "name": "RocketBody",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        0.0,
+        32.0,
+        0.0
+      ],
+      "size": [
+        32.0,
+        32.0,
+        32.0
       ],
       "color": [
         218,
         224,
         224
+      ]
+    },
+    {
+      "name": "RocketBand",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        0.0,
+        50.0,
+        0.0
+      ],
+      "size": [
+        32.0,
+        4.0,
+        32.0
+      ],
+      "color": [
+        69,
+        167,
+        172
+      ]
+    },
+    {
+      "name": "RocketShoulder",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        0.0,
+        56.0,
+        0.0
+      ],
+      "size": [
+        24.0,
+        8.0,
+        24.0
+      ],
+      "color": [
+        218,
+        224,
+        224
+      ]
+    },
+    {
+      "name": "RocketNose",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        0.0,
+        64.0,
+        0.0
+      ],
+      "size": [
+        16.0,
+        8.0,
+        16.0
+      ],
+      "color": [
+        69,
+        167,
+        172
+      ]
+    },
+    {
+      "name": "RocketTip",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        0.0,
+        72.0,
+        0.0
+      ],
+      "size": [
+        8.0,
+        8.0,
+        8.0
+      ],
+      "color": [
+        208,
+        172,
+        96
+      ]
+    },
+    {
+      "name": "RocketWindowFrame",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        0.0,
+        32.0,
+        -16.0
+      ],
+      "size": [
+        24.0,
+        20.0,
+        8.0
+      ],
+      "color": [
+        208,
+        172,
+        96
+      ]
+    },
+    {
+      "name": "RocketWindow",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        0.0,
+        32.0,
+        -20.0
+      ],
+      "size": [
+        16.0,
+        12.0,
+        4.0
+      ],
+      "color": [
+        69,
+        167,
+        172
+      ]
+    },
+    {
+      "name": "RocketNameplate",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        0.0,
+        20.0,
+        -16.0
+      ],
+      "size": [
+        12.0,
+        4.0,
+        8.0
+      ],
+      "color": [
+        30,
+        42,
+        61
+      ]
+    },
+    {
+      "name": "RocketFin",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        -20.0,
+        16.0,
+        0.0
+      ],
+      "size": [
+        8.0,
+        16.0,
+        16.0
+      ],
+      "color": [
+        69,
+        167,
+        172
+      ]
+    },
+    {
+      "name": "RocketFinFoot",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        -24.0,
+        12.0,
+        0.0
+      ],
+      "size": [
+        8.0,
+        8.0,
+        8.0
+      ],
+      "color": [
+        30,
+        42,
+        61
+      ]
+    },
+    {
+      "name": "RocketFin",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        0.0,
+        16.0,
+        -20.0
+      ],
+      "size": [
+        16.0,
+        16.0,
+        8.0
+      ],
+      "color": [
+        69,
+        167,
+        172
+      ]
+    },
+    {
+      "name": "RocketFinFoot",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        0.0,
+        12.0,
+        -24.0
+      ],
+      "size": [
+        8.0,
+        8.0,
+        8.0
+      ],
+      "color": [
+        30,
+        42,
+        61
+      ]
+    },
+    {
+      "name": "RocketFin",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        20.0,
+        16.0,
+        0.0
+      ],
+      "size": [
+        8.0,
+        16.0,
+        16.0
+      ],
+      "color": [
+        69,
+        167,
+        172
+      ]
+    },
+    {
+      "name": "RocketFinFoot",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        24.0,
+        12.0,
+        0.0
+      ],
+      "size": [
+        8.0,
+        8.0,
+        8.0
+      ],
+      "color": [
+        30,
+        42,
+        61
+      ]
+    },
+    {
+      "name": "RocketFin",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        0.0,
+        16.0,
+        20.0
+      ],
+      "size": [
+        16.0,
+        16.0,
+        8.0
+      ],
+      "color": [
+        69,
+        167,
+        172
+      ]
+    },
+    {
+      "name": "RocketFinFoot",
+      "group": "Rocket",
+      "yaw": 0.0,
+      "pos": [
+        0.0,
+        12.0,
+        24.0
+      ],
+      "size": [
+        8.0,
+        8.0,
+        8.0
+      ],
+      "color": [
+        30,
+        42,
+        61
       ]
     },
     {

@@ -66,8 +66,24 @@ function L.build()
  end end
  put("DockBase",0,2,0,64,4,64,hull,0,"Dock")
  put("DockTop",0,6,0,48,4,48,teal,0,"Dock")
- put("Departure",28,10,0,8,12,16,gold,90,"Dock","Green Star")
- put("AirshipReservation",0,12,0,32,8,8,cream,0,"Dock","AIRSHIP DOCK",false)
+ put("Departure",40,6,0,8,12,16,gold,90,"Dock","Green Star")
+ -- Central departure rocket: stepped block nose, four fins and a framed window.
+ -- The highest point stays below the enclosed lobby ceiling.
+ put("RocketEngine",0,12,0,24,8,24,navy,0,"Rocket")
+ put("RocketBody",0,32,0,32,32,32,cream,0,"Rocket")
+ put("RocketBand",0,50,0,32,4,32,teal,0,"Rocket")
+ put("RocketShoulder",0,56,0,24,8,24,cream,0,"Rocket")
+ put("RocketNose",0,64,0,16,8,16,teal,0,"Rocket")
+ put("RocketTip",0,72,0,8,8,8,gold,0,"Rocket")
+ put("RocketWindowFrame",0,32,-16,24,20,8,gold,0,"Rocket")
+ put("RocketWindow",0,32,-20,16,12,4,teal,0,"Rocket")
+ put("RocketNameplate",0,20,-16,12,4,8,navy,0,"Rocket","Green Star")
+ for _,side in ipairs({-1,1}) do
+  put("RocketFin",side*20,16,0,8,16,16,teal,0,"Rocket")
+  put("RocketFinFoot",side*24,12,0,8,8,8,navy,0,"Rocket")
+  put("RocketFin",0,16,side*20,16,16,8,teal,0,"Rocket")
+  put("RocketFinFoot",0,12,side*24,8,8,8,navy,0,"Rocket")
+ end
  -- Six stations fit between the inner ring and the eight doors.
  local stations={
   {name="Shop_1",angle=22.5,text="SHOP 01",color=teal},
