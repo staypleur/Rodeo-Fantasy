@@ -9,6 +9,9 @@ def name(n):return n.findtext("Properties/string[@name='Name']")
 def child(n,k):return next(c for c in n.findall('Item') if name(c)==k)
 ws=next(n for n in root.findall('Item') if n.get('class')=='Workspace')
 lobby=child(ws,'RodeoLobby');forest=child(ws,'GreenStar')
+doors=child(lobby,'SpaceLobbyDoors')
+assert doors.get('class')=='Script'
+assert doors.findtext("Properties/ProtectedString[@name='Source']")== (R/'src/server/SpaceLobbyDoors.server.luau').read_text(encoding='utf-8')
 assert not any(name(n)=='RodeoCafe' for n in ws.iter('Item'))
 assert len(forest.findall('Item'))==2179
 plots=child(lobby,'Plots');assert len(plots.findall('Item'))==8

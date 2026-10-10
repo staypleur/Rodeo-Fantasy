@@ -11,10 +11,19 @@ def build():
  code='''-- Install into RodeoFantasy-New only, in Edit mode. Inputs: MossratImport / RocketImport.
 assert(not game:GetService("RunService"):IsRunning(),"Play를 중지하세요.")
 local map=assert(workspace:FindFirstChild("RodeoLobby"),"새 로비 없음")
-assert(map:FindFirstChild("SpaceLobbyDoors") and workspace:FindFirstChild("GreenStar"),"RodeoFantasy-New 맵을 먼저 여세요.")
+assert(workspace:FindFirstChild("GreenStar") and map:FindFirstChild("Plots") and map:FindFirstChild("Airport"),"RodeoFantasy-New 맵을 먼저 여세요.")
+local package=game:GetService("ReplicatedStorage"):FindFirstChild("RodeoFantasy")
+assert(package and package:FindFirstChild("MonsterCatalog") and package:FindFirstChild("UserMossratRigAnimator"),"새 프로젝트 시스템이 없습니다.")
 local hasMossrat=workspace:FindFirstChild("MossratImport")~=nil
 local hasRocket=workspace:FindFirstChild("RocketImport")~=nil
 assert(hasMossrat or hasRocket,"가져온 전체 Model 이름을 MossratImport 또는 RocketImport로 바꾸세요.")
+'''
+ code+='''if not map:FindFirstChild("SpaceLobbyDoors") then
+ local doors=Instance.new("Script") doors.Name="SpaceLobbyDoors"
+ doors.Source='''+long((R/'src/server/SpaceLobbyDoors.server.luau').read_text(encoding='utf-8'))+'''
+ doors.Parent=map
+ print("SPACE_LOBBY_DOORS_REPAIRED")
+end
 '''
  code+='if hasMossrat then local M=(function()\n'+installer+'\nend)() M.run({},{}) end\n'
  code+='''if hasRocket then

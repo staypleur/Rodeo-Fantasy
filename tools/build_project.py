@@ -46,7 +46,7 @@ def build():
  ss=node(root,'ServerStorage','ServerStorage');server=node(root,'ServerScriptService','ServerScriptService')
  player=node(root,'StarterPlayer','StarterPlayer');client=node(player,'StarterPlayerScripts','StarterPlayerScripts');node(root,'StarterGui','StarterGui');node(root,'Lighting','Lighting')
  node(package,'RemoteEvent','CaptureRemote')
- lobby=E.parse(R/'assets/maps/SpaceLobby.rbxmx').getroot().find('Item');ws.append(copy.deepcopy(lobby))
+ lobby=copy.deepcopy(E.parse(R/'assets/maps/SpaceLobby.rbxmx').getroot().find('Item'));ws.append(lobby)
  prototype=node(ws,'Folder','RodeoPrototype');node(prototype,'Folder','Monsters')
  forest=node(ws,'Model','GreenStar')
  for b in data['blocks']:

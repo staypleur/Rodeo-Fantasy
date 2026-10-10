@@ -67,3 +67,7 @@ print("METALNESS_CONNECTED", image)
 ```
 
 [Decal 맵 속성](https://create.roblox.com/docs/reference/engine/classes/Decal)과 [InsertService](https://create.roblox.com/docs/reference/engine/classes/InsertService)는 Roblox 공식 문서를 기준으로 합니다. ColorMap과 RoughnessMap도 각각의 데칼 안 이미지 참조를 사용해야 합니다.
+
+## 새 맵을 먼저 열라는 설치 오류 수정
+
+초기 새 맵에서 자동문 스크립트 누락으로 설치기가 새 맵을 거부하던 버그를 수정했습니다. 이미 모델과 재질을 연결한 경우 현재 Studio 맵을 다시 열지 마세요. Play를 중지하고, 현재 맵을 별도 사본으로 저장한 뒤 갱신된 InstallModels.commandbar.lua 전체를 다시 복사하여 Command Bar에서 실행합니다. SPACE_LOBBY_DOORS_REPAIRED는 누락 자동문 복구, MOSSRAT_RIG_INSTALLED는 모델 연결 완료 메시지입니다. Ctrl+S로 저장 후 실제 자동문·가방·도감·모델 모션을 확인합니다.

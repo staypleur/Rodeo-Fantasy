@@ -1,10 +1,53 @@
 -- Install into RodeoFantasy-New only, in Edit mode. Inputs: MossratImport / RocketImport.
 assert(not game:GetService("RunService"):IsRunning(),"Play를 중지하세요.")
 local map=assert(workspace:FindFirstChild("RodeoLobby"),"새 로비 없음")
-assert(map:FindFirstChild("SpaceLobbyDoors") and workspace:FindFirstChild("GreenStar"),"RodeoFantasy-New 맵을 먼저 여세요.")
+assert(workspace:FindFirstChild("GreenStar") and map:FindFirstChild("Plots") and map:FindFirstChild("Airport"),"RodeoFantasy-New 맵을 먼저 여세요.")
+local package=game:GetService("ReplicatedStorage"):FindFirstChild("RodeoFantasy")
+assert(package and package:FindFirstChild("MonsterCatalog") and package:FindFirstChild("UserMossratRigAnimator"),"새 프로젝트 시스템이 없습니다.")
 local hasMossrat=workspace:FindFirstChild("MossratImport")~=nil
 local hasRocket=workspace:FindFirstChild("RocketImport")~=nil
 assert(hasMossrat or hasRocket,"가져온 전체 Model 이름을 MossratImport 또는 RocketImport로 바꾸세요.")
+if not map:FindFirstChild("SpaceLobbyDoors") then
+ local doors=Instance.new("Script") doors.Name="SpaceLobbyDoors"
+ doors.Source=[====[-- Eight automatic door pairs. Inventory permissions stay in LobbyWorld.
+local model=script.Parent
+local Players=game:GetService("Players")
+local Run=game:GetService("RunService")
+local Tween=game:GetService("TweenService")
+local doors={}
+for slot=1,8 do
+ local room=model.Plots:WaitForChild("Plot_"..slot)
+ local left,right,sensor=room.DoorLeft,room.DoorRight,room.DoorSensor
+ left.CanCollide=false right.CanCollide=false
+ table.insert(doors,{left=left,right=right,sensor=sensor,lc=left.CFrame,rc=right.CFrame,open=false,tweens={}})
+end
+local elapsed=0
+local connection=Run.Heartbeat:Connect(function(dt)
+ elapsed+=dt if elapsed<.2 then return end elapsed=0
+ local roots={}
+ for _,player in ipairs(Players:GetPlayers()) do
+  local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+  local h=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+  if root and h and h.Health>0 then table.insert(roots,root.Position) end
+ end
+ for _,door in ipairs(doors) do
+  local near=false
+  for _,pos in ipairs(roots) do if (pos-door.sensor.Position).Magnitude<=(door.open and 20 or 16) then near=true break end end
+  if near~=door.open then
+   door.open=near
+   for _,t in ipairs(door.tweens) do t:Cancel() end door.tweens={}
+   for _,item in ipairs({{door.left,door.lc,-16},{door.right,door.rc,16}}) do
+    local t=Tween:Create(item[1],TweenInfo.new(.35),{CFrame=item[2]*CFrame.new(near and item[3] or 0,0,0)})
+    table.insert(door.tweens,t) t:Play()
+   end
+  end
+ end
+end)
+model.Destroying:Connect(function() connection:Disconnect() for _,d in ipairs(doors) do for _,t in ipairs(d.tweens) do t:Cancel() end end end)
+]====]
+ doors.Parent=map
+ print("SPACE_LOBBY_DOORS_REPAIRED")
+end
 if hasMossrat then local M=(function()
 -- Reviewed user rig installation. Existing objects survive in ServerStorage backups.
 local M={}
