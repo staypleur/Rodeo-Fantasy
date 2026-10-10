@@ -85,6 +85,9 @@ local bones,list={},{}
 for _,n in ipairs(data.bones) do local b={Name=n,Transform=CFrame.identity,IsA=function(_,k) return k=="Bone" end} bones[n]=b table.insert(list,b) end
 local body={GetDescendants=function() return list end}
 local model={FindFirstChild=function(_,n) return n=="Body" and body end,GetAttribute=function() return nil end}
+A.poseFront(model)
+assert(math.abs(bones.Head.Transform.ry-math.rad(-8.2))<1e-6,"Portrait neutral head correction")
+assert(bones.LeftFrontUpper.Transform.rx==0,"Portrait does not walk")
 A.animate(model,true) clock=.26 A.animate(model,true)
 assert(math.abs(bones.LeftFrontUpper.Transform.rx)>.2,"Foreleg must move")
 assert(math.abs(bones.LeftFrontUpper.Transform.rx+bones.RightFrontUpper.Transform.rx)<1e-6,"Opposite forelegs alternate")

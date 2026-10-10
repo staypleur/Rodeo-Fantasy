@@ -19,7 +19,7 @@ local nodes={}
 local Enum={Font={GothamBold=1,Gotham=2,GothamBlack=3},TextXAlignment={Left=1}}
 local script={Parent={WaitForChild=function() return {} end}}
 local workspace={}
-local require=function() return {draw=function() return {} end} end
+local require=function() return {draw=function() return {} end,bindArtwork=function() end} end
 local Vector2={new=function(...) return {...} end}
 local UDim={new=function(...) return {...} end}
 local UDim2={new=function(...) return {...} end,fromScale=function(...) return {...} end,fromOffset=function(...) return {...} end}

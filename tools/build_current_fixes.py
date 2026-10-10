@@ -4,9 +4,9 @@ import subprocess,json
 R=Path(__file__).resolve().parents[1]
 def long(s):return '[========['+s+']========]'
 rows=[]
-for path,parent,new in [('src/server/LobbyWorld.luau','server',False),('src/server/CaptureServer.server.luau','server',False),('src/client/NativeMossrat.luau','clients',False),('src/client/UserMossratRigAnimator.luau','clients',False),('src/server/LobbyPresentation.server.luau','server',True),('src/server/LobbyRankings.luau','server',True),('src/server/RecordService.luau','server',False),('src/client/LobbyMenus.luau','clients',True),('src/client/CaptureClient.client.luau','clients',False),('src/client/HudIcons.luau','clients',True),('src/client/HudStats.luau','clients',True),('src/client/SettingsUI.luau','clients',False),('src/client/BagUI.luau','clients',False),('src/client/SocialUI.luau','clients',False)]:
+for path,parent,new in [('src/server/LobbyWorld.luau','server',False),('src/server/CaptureServer.server.luau','server',False),('src/client/NativeMossrat.luau','clients',False),('src/client/UserMossratRigAnimator.luau','clients',False),('src/server/LobbyPresentation.server.luau','server',True),('src/server/LobbyRankings.luau','server',True),('src/server/RecordService.luau','server',False),('src/client/LobbyMenus.luau','clients',True),('src/client/CaptureClient.client.luau','clients',False),('src/client/HudIcons.luau','clients',True),('src/client/HudStats.luau','clients',True),('src/client/SettingsUI.luau','clients',False),('src/client/BagUI.luau','clients',False),('src/client/SocialUI.luau','clients',False),('src/client/JournalUI.luau','clients',False),('src/client/MonsterPortrait.luau','clients',False),('src/client/CreatureMesh.luau','clients',False)]:
  p=R/path;after=p.read_text(encoding='utf-8');allowed=[after]
- for rev in ['0c0f1db','57d4c74','78cb6bc','cbbb822','b0c9be0']:
+ for rev in ['bb07b75','0c0f1db','57d4c74','78cb6bc','cbbb822','b0c9be0']:
   old=subprocess.run(['git','show',rev+':'+path],cwd=R,capture_output=True)
   if old.returncode==0:allowed.append(old.stdout.decode('utf-8'))
  kind='Script' if p.name.endswith('.server.luau') else 'LocalScript' if p.name.endswith('.client.luau') else 'ModuleScript'

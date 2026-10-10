@@ -3,6 +3,19 @@ local A={}
 local data=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigData"))
 local cache=setmetatable({},{__mode="k"})
 local torsoCenterX={Pelvis=-.04,Spine=.02,Chest=.035,Neck=.025,Head=.015}
+-- Portraits do not run the walking animation loop. Apply the same neutral
+-- torso/head correction immediately so their first frame matches the game.
+function A.poseFront(model)
+ local body=model:FindFirstChild("Body") if not body then return end
+ local scale=model:GetAttribute("MossratRigTranslationScale") or 2.5/data.height
+ for _,b in ipairs(body:GetDescendants()) do
+  if b:IsA("Bone") then
+   local x=torsoCenterX[b.Name]
+   b.Transform=CFrame.new((x or 0)*scale,0,0)
+   if b.Name=="Head" then b.Transform=b.Transform*CFrame.Angles(0,math.rad(-8.2),0) end
+  end
+ end
+end
 local function rotation(v)
  local x,y,z,w=v[1],v[2],v[3],v[4]
  local n=math.sqrt(x*x+y*y+z*z+w*w) x,y,z,w=x/n,y/n,z/n,w/n

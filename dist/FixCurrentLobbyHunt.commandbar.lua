@@ -303,6 +303,146 @@ centerDeparture()
 function Lobby.prepareCharacter(character)
  if not character then return end
  local root=character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart",10)
+ if root then
+  root.Anchored=true
+  character:PivotTo(Lobby.Spawn) root.AssemblyLinearVelocity=Vector3.zero root.AssemblyAngularVelocity=Vector3.zero
+  local owner=game:GetService("Players"):GetPlayerFromCharacter(character)
+  if owner and workspace.StreamingEnabled then pcall(function() owner:RequestStreamAroundAsync(Lobby.Spawn.Position,3) end) end
+ end
+ local humanoid=character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid",10)
+ if humanoid then humanoid.WalkSpeed=require(game.ReplicatedStorage.RodeoFantasy.Config).LobbyWalkSpeed humanoid.PlatformStand=false humanoid.AutoRotate=true end
+ if root then
+  task.delay(.35,function()
+   if character.Parent and root.Parent then
+    character:PivotTo(Lobby.Spawn) root.AssemblyLinearVelocity=Vector3.zero root.AssemblyAngularVelocity=Vector3.zero
+    root.Anchored=false
+    if humanoid and humanoid.Health>0 then humanoid:ChangeState(Enum.HumanoidStateType.GettingUp) end
+   end
+  end)
+ end
+ local head=character:FindFirstChild("Head") or character:WaitForChild("Head",10)
+ if head and not character:FindFirstChild("AstronautHelmet") then
+  local helmet=Instance.new("Accessory") helmet.Name="AstronautHelmet"
+  local bubble=Instance.new("Part") bubble.Name="Handle" bubble.Shape=Enum.PartType.Ball
+  bubble.Size=Vector3.one*math.max(2.8,head.Size.Magnitude*1.5)
+  bubble.Material=Enum.Material.Glass bubble.Color=Color3.fromRGB(196,232,245) bubble.Transparency=.78
+  bubble.CanCollide=false bubble.CanTouch=false bubble.CanQuery=false bubble.Massless=true bubble.CastShadow=false
+  bubble.CFrame=head.CFrame bubble.Parent=helmet
+  local weld=Instance.new("WeldConstraint") weld.Part0=head weld.Part1=bubble weld.Parent=bubble
+  helmet.Parent=character
+ end
+end
+for index=1,8 do
+ local plot=plots["Plot_"..index]
+ plot:SetAttribute("Slot",index)
+ for _,pen in ipairs(plot.Pens:GetChildren()) do pen:SetAttribute("Capacity",1) end
+end
+local function label(index,name)
+ local board=plots["Plot_"..index].OwnerBoard
+ for _,gui in ipairs(board:GetChildren()) do
+  if gui:IsA("SurfaceGui") then gui.Text.Text=name end
+ end
+end
+for index=1,8 do label(index,"") end
+function Lobby.assign(player)
+ if owned[player] then return owned[player] end
+ for index=1,8 do
+  if not occupants[index] then
+   occupants[index]=player owned[player]=index
+   plots["Plot_"..index]:SetAttribute("OwnerUserId",player.UserId)
+   player:SetAttribute("LobbySlot",index)
+   label(index,player.DisplayName or player.Name)
+   return index
+  end
+ end
+ return nil
+end
+function Lobby.release(player)
+ local index=owned[player]
+ if not index then return end
+ occupants[index]=nil owned[player]=nil
+ player:SetAttribute("LobbySlot",nil)
+ plots["Plot_"..index]:SetAttribute("OwnerUserId",nil)
+ for _,pen in ipairs(plots["Plot_"..index].Pens:GetChildren()) do
+  for _,name in ipairs({"DisplayMonsters","DisplayEggs"}) do
+   local display=pen:FindFirstChild(name) if display then display:Destroy() end
+  end
+ end
+ label(index,"")
+end
+function Lobby.canDepart(player)
+ local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+ return owned[player]~=nil and root and (root.Position-Lobby.Departure.Position).Magnitude<=departureRadius
+end
+function Lobby.getPen(player,index)
+ if index~=1 or not owned[player] then return nil end
+ return plots["Plot_"..owned[player]].Pens["Pen_"..index]
+end
+function Lobby.canManage(player)
+ local index=owned[player]
+ local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+ return index and root and (root.Position-plots["Plot_"..index].ManagePoint.Position).Magnitude<=36
+end
+function Lobby.canSummon(player)
+ local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+ return owned[player]~=nil and root and math.abs(root.Position.X-6000)<=256 and math.abs(root.Position.Z)<=256
+end
+function Lobby.canUsePen(player,index)
+ return Lobby.getPen(player,index) and Lobby.canManage(player)
+end
+function Lobby.display(player,index,items)
+ local pen=Lobby.getPen(player,index) if not pen then return end
+ for _,name in ipairs({"DisplayMonsters","DisplayEggs"}) do local old=pen:FindFirstChild(name) if old then old:Destroy() end end
+ local folder=Instance.new("Folder") folder.Name="DisplayEggs" folder.Parent=pen
+ for _,egg in ipairs(items) do
+  if egg.assignedPen==index then
+   local shell=Instance.new("Part") shell.Name="IncubatingEgg" shell.Shape=Enum.PartType.Ball shell.Size=Vector3.new(2.6,3.4,2.6)
+   shell.CFrame=pen.PenGrass.CFrame*CFrame.new(0,pen.PenGrass.Size.Y/2+1.7,0) shell.Color=Color3.fromRGB(246,234,196) shell.Material=Enum.Material.SmoothPlastic shell.Anchored=true shell.Parent=folder
+   break
+  end
+ end
+end
+function Lobby.connectPens(callback)
+ for plotIndex=1,8 do
+  local plot=plots["Plot_"..plotIndex]
+  local prompt=Instance.new("ProximityPrompt")
+  prompt.Name="ManageRanch" prompt.ActionText="알 관리" prompt.ObjectText=""
+  prompt.HoldDuration=1 prompt.MaxActivationDistance=10 prompt.RequiresLineOfSight=false
+  prompt.KeyboardKeyCode=Enum.KeyCode.E prompt.Parent=plot.ManagePoint
+  prompt.Triggered:Connect(function(player)
+   if owned[player]==plotIndex and Lobby.canManage(player) then callback(player) end
+  end)
+ end
+end
+function Lobby.connect(callback)
+ local prompt=Instance.new("ProximityPrompt")
+ prompt.Name="FlyToHunt" prompt.ActionText="행성 선택" prompt.ObjectText="로켓"
+ prompt.HoldDuration=1 prompt.MaxActivationDistance=departureRadius prompt.RequiresLineOfSight=false
+ prompt.KeyboardKeyCode=Enum.KeyCode.E
+ prompt.Parent=Lobby.Departure
+ prompt.Triggered:Connect(function(player) if Lobby.canDepart(player) then callback(player) end end)
+end
+return Lobby
+]========],[========[local Lobby={}
+local map=workspace:WaitForChild("RodeoLobby")
+local plots=map:WaitForChild("Plots")
+local owned,occupants={},{}
+Lobby.Departure=map.Airport.Departure
+Lobby.Spawn=CFrame.new(6000,14,-72)
+local departureRadius=38
+local function centerDeparture()
+ local rocket=map.Airport:FindFirstChild("Rocket")
+ if rocket and rocket:IsA("Model") then
+  local box=rocket:GetBoundingBox()
+  Lobby.Departure.Position=Vector3.new(box.Position.X,Lobby.Departure.Position.Y,box.Position.Z)
+ end
+ Lobby.Departure.Transparency=1
+ Lobby.Departure.CanCollide=false
+end
+centerDeparture()
+function Lobby.prepareCharacter(character)
+ if not character then return end
+ local root=character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart",10)
  if root then character:PivotTo(Lobby.Spawn) root.AssemblyLinearVelocity=Vector3.zero end
  local humanoid=character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid",10)
  if humanoid then humanoid.WalkSpeed=require(game.ReplicatedStorage.RodeoFantasy.Config).LobbyWalkSpeed end
@@ -1309,6 +1449,481 @@ for _,player in ipairs(Players:GetPlayers()) do added(player) end
 
 if RunService:IsRunning() then Records.start() Progress.start() end
 ]========],allowed={[========[local Players=game:GetService("Players")
+local RS=game:GetService("ReplicatedStorage")
+local RunService=game:GetService("RunService")
+local PhysicsService=game:GetService("PhysicsService")
+local package=RS:WaitForChild("RodeoFantasy")
+local Config=require(package.Config)
+local Catalog=require(package.MonsterCatalog)
+local Rules=require(package.HuntRules)
+local BagRules=require(package.BagRules)
+local World=require(script.Parent.HuntWorld)
+local Lobby=require(script.Parent.LobbyWorld)
+local Records=require(script.Parent.RecordService)
+local Progress=require(script.Parent.ProgressService)
+local Course=require(package.CourseGeometry)
+local Store=require(script.Parent.InventoryStore)
+local Social=require(script.Parent.SocialService)
+local Travel=require(script.Parent.PlaceTravel)
+local SocialRules=require(package.SocialRules)
+local remote=package.CaptureRemote
+local tuning=Config.Prototype
+-- ROCKET_DEPARTURE_V1
+local rocketLaunchPermit={}
+local startingMounts={}
+local function rocketModelReady(id,stars)
+ local name=Catalog.template(id,stars)
+ local model=game:GetService("ServerStorage"):FindFirstChild(name)
+ return model and model:IsA("Model") and model.PrimaryPart~=nil and model:GetAttribute("UserApprovedHuntModel")==true
+end
+local states,bags,limits,views={},{},{},{}
+local worlds,worldRoots={},{}
+local companions=require(script.Parent.LobbyCompanions).new({
+ bag=function(p) return bags[p] end,
+ canAct=function(p) return bags[p] and not states[p] and not Store.busy(p) and not Social.trading(p) and not p:GetAttribute("Travelling") end,
+ canSummon=function(p) return Lobby.canSummon(p) end,
+})
+local runs=Instance.new("Folder") runs.Name="PrivateHunts" runs.Parent=game:GetService("Workspace")
+local lastSync,lastCleanup,lastHerd=0,0,0
+local huntGroups={}
+for index=1,8 do
+ local name="RodeoHunt"..index
+ pcall(function() PhysicsService:RegisterCollisionGroup(name) end)
+ PhysicsService:CollisionGroupSetCollidable(name,name,true)
+ PhysicsService:CollisionGroupSetCollidable(name,"Default",true)
+ huntGroups[index]=name
+end
+for a=1,8 do for b=1,8 do if a~=b then PhysicsService:CollisionGroupSetCollidable(huntGroups[a],huntGroups[b],false) end end end
+local function setCharacterGroup(player,groupName)
+ local character=player.Character
+ if not character then return end
+ for _,part in ipairs(character:GetDescendants()) do if part:IsA("BasePart") then part.CollisionGroup=groupName end end
+end
+local function isolateRoot(folder,groupName)
+ local function assign(instance) if instance:IsA("BasePart") then instance.CollisionGroup=groupName end end
+ for _,instance in ipairs(folder:GetDescendants()) do assign(instance) end
+ folder.DescendantAdded:Connect(assign)
+end
+
+for _,name in ipairs({"PreviewMonster","PreviewGround"}) do local preview=workspace.RodeoPrototype:FindFirstChild(name) if preview then preview:Destroy() end end
+local function now() return workspace:GetServerTimeNow() end
+local function baseSpeed(state)
+ return state and state.monster and state.monster:GetAttribute("RideSpeed") or tuning.ForwardStudsPerSecond
+end
+local function send(player,message)
+ local state,bag=states[player],bags[player]
+ if not bag or Store.busy(player) or player:GetAttribute("Travelling") then return end
+ local gains=BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
+ Records.sample(player,bag.totalProduced or 0,state and state.distance or 0)
+ local wildIds={}
+ if state and worlds[player] then for model in pairs(worlds[player].visibleSet(state.root.Position.Z,views[player],player)) do table.insert(wildIds,model:GetAttribute("SpawnSerial")) end end
+ remote:FireClient(player,"State",{summonedId=player:GetAttribute("SummonedId"),huntRoot=worldRoots[player],initialLanding=state and state.initialLanding,income=not state and gains or nil,progress=Progress.snapshot(player),wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,tameSeconds=state and state.monster and Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds or 5,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,balance=bag.balance,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
+end
+local function sendBag(player)
+ local bag=bags[player]
+ if not bag or states[player] then return end
+ local items={}
+ for _,item in ipairs(bag.monsters) do
+  table.insert(items,{id=item.id,breedingTeam=item.breedingTeam,assignedPen=item.assignedPen,monsterId=item.monsterId,stars=item.stars,sex=item.sex,incomeSeconds=item.incomeSeconds or Config.BagIncome.IncomeSeconds,incomeAmount=BagRules.income(item,Config.BagIncome.IncomeAmount)})
+ end
+ remote:FireClient(player,"Bag",items)
+end
+local function clearRope(state)
+ for _,item in ipairs(state.rope or {}) do item:Destroy() end
+ state.rope=nil
+end
+local function attachRope(state)
+ local from,to=Instance.new("Attachment"),Instance.new("Attachment")
+ from.Parent,to.Parent=state.root,state.monster.PrimaryPart
+ local rope=Instance.new("Beam")
+ rope.Name="CaptureRope"
+ rope.Attachment0,rope.Attachment1=from,to
+ rope.Width0,rope.Width1,rope.FaceCamera=0.1,0.1,true
+ rope.Color,rope.Parent=ColorSequence.new(Color3.fromRGB(230,181,72)),state.root
+ state.rope={from,to,rope}
+end
+local function freeMount(state)
+ if state.monster and state.monster.Parent then
+  state.monster:SetAttribute("Occupied",false)
+  state.monster:SetAttribute("Running",true)
+  state.monster:SetAttribute("Steering",0)
+  state.monster:SetAttribute("Angry",false)
+  state.monster:SetAttribute("DashUntil",nil)
+  state.monster:SetAttribute("AngerWarning",false)
+  state.monster:SetAttribute("AngerStarted",nil)
+  local p=state.monster.PrimaryPart.Position
+  state.monster.PrimaryPart.CFrame=CFrame.new(p.X,(state.monster:GetAttribute("RootHeight") or 2)+World.groundHeight(state.monster.PrimaryPart.Position.X,state.monster.PrimaryPart.Position.Z),p.Z)
+ end
+ state.previousMonster,state.monster=state.monster,nil
+ clearRope(state)
+end
+local function restoreAvatar(state)
+ if not state then return end
+ for part,alpha in pairs(state.hiddenParts or {}) do
+  if part.Parent then part.Transparency=alpha part:SetAttribute("CrashAlpha",nil) end
+ end
+ for gui,enabled in pairs(state.hiddenLabels or {}) do if gui.Parent then gui.Enabled=enabled gui:SetAttribute("CrashEnabled",nil) end end
+ state.hiddenParts=nil state.hiddenLabels=nil
+end
+local function finish(player,reason,crashKind)
+ local state=states[player]
+ if not state or state.phase=="GameOver" then return end
+ state.crash=crashKind~=nil
+ state.endReason=crashKind
+ local brokenMount=(crashKind=="Wall" or crashKind=="Obstacle") and state.monster
+ if brokenMount and brokenMount.Parent then state.monsterCrashFrame=brokenMount.PrimaryPart.CFrame state.monsterCrashId=brokenMount:GetAttribute("MonsterId") end
+ freeMount(state)
+ if brokenMount and brokenMount.Parent then brokenMount:Destroy() end
+ state.phase="GameOver"
+ if state.crash and state.root.Parent then
+  state.hiddenParts={} state.hiddenLabels={}
+  for _,part in ipairs(state.root.Parent:GetDescendants()) do
+   if part:IsA("BasePart") then state.hiddenParts[part]=part.Transparency part:SetAttribute("CrashAlpha",part.Transparency) part.Transparency=1
+   elseif part:IsA("BillboardGui") then state.hiddenLabels[part]=part.Enabled part:SetAttribute("CrashEnabled",part.Enabled) part.Enabled=false end
+  end
+ end
+ if state.root.Parent then
+  state.root.Anchored=state.wasAnchored
+  state.root.AssemblyLinearVelocity=Vector3.zero
+  state.humanoid.AutoRotate,state.humanoid.PlatformStand=state.autoRotate,state.platformStand
+ end
+ send(player,reason)
+end
+local function huntTemplate()
+ local storage=game:GetService("ServerStorage")
+ local existing=storage:FindFirstChild("RodeoMonsterTemplate")
+ if existing then return existing end
+ local approved=package:FindFirstChild("MeshyMossratHuntTemplate")
+ assert(approved and approved:IsA("Model") and approved.PrimaryPart and approved:GetAttribute("NativeMeshyMossrat"),"사냥터 모스랫 템플릿이 없습니다. 모델 복구 코드를 적용하세요.")
+ approved.Archivable=true
+ local restored=assert(approved:Clone(),"모스랫 템플릿 복제 실패")
+ restored.Name="RodeoMonsterTemplate" restored.Parent=storage
+ warn("HUNT_TEMPLATE_RESTORED: approved Mossrat hunt model")
+ return restored
+end
+local function start(player)
+ local previous=states[player]
+ if previous and previous.phase~="GameOver" and previous.phase~="CourseEnd" then return end
+ local character=player.Character
+ local root=character and character:FindFirstChild("HumanoidRootPart")
+ local humanoid=character and character:FindFirstChildOfClass("Humanoid")
+ if not root or not humanoid or humanoid.Health<=0 then return end
+ if not previous and not rocketLaunchPermit[player] then return end
+ local picked,reason=require(package.DepartureSelectionRules).validate(bags[player],"GreenStar",startingMounts[player],Catalog,rocketModelReady)
+ if not picked or workspace.RodeoLobby:GetAttribute("GreenStarRuntimeReady")~=true then
+  send(player,"새 사냥터와 선택한 몬스터를 연결할 준비 중입니다.") return
+ end
+ if not previous and not Lobby.canDepart(player) then send(player,"Approach the airship to start.") return end
+ local rootFolder=Instance.new("Folder") rootFolder.Name=tostring(player.UserId) rootFolder:SetAttribute("OwnerUserId",player.UserId)
+ local slot=player:GetAttribute("LobbySlot")
+ local collisionGroup=huntGroups[slot]
+ local herd=Instance.new("Folder") herd.Name="Monsters" herd.Parent=rootFolder
+ rootFolder.Parent=runs
+ if collisionGroup then isolateRoot(rootFolder,collisionGroup) end
+ local nextWorld=World.new()
+ local ok,model=pcall(function()
+  nextWorld.init(rootFolder,huntTemplate(),Config,Rules)
+  nextWorld.ensure(0) nextWorld.replenish(0,views[player] or 1,nil,true,40)
+  return nextWorld.spawn(Vector3.new(0,2,-8),picked.monsterId,picked.stars)
+ end)
+ if not ok then
+  rootFolder:Destroy()
+  warn("HUNT_START_FAILED: "..tostring(model))
+  send(player,"사냥터를 준비하지 못했습니다. 다시 시도해 주세요.")
+  return
+ end
+ if previous then
+  restoreAvatar(previous)
+  freeMount(previous)
+  if previous.phase=="CourseEnd" and previous.root==root then
+   root.Anchored=previous.wasAnchored
+   humanoid.AutoRotate,humanoid.PlatformStand=previous.autoRotate,previous.platformStand
+  end
+ end
+ if worldRoots[player] then worldRoots[player]:Destroy() end
+ if collisionGroup then setCharacterGroup(player,collisionGroup) end
+ worlds[player]=nextWorld worldRoots[player]=rootFolder
+ model:SetAttribute("Occupied",true)
+ model:SetAttribute("Angry",false) model:SetAttribute("InitialLanding",true)
+ model:SetAttribute("StartingOwnedMount",true)
+ model:SetAttribute("Tamed_"..player.UserId,true)
+ states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,initialLanding=true,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),distance=0,tamed=true}
+ companions.clear(player)
+ root.Anchored,humanoid.AutoRotate,humanoid.PlatformStand=true,false,true
+ root.CFrame=model:GetPivot()*CFrame.new(0,model:GetAttribute("SaddleHeight") or tuning.RideHeightStuds,8)
+ states[player].origin=root.CFrame
+ attachRope(states[player])
+ send(player)
+end
+local function launch(player,state)
+ freeMount(state)
+ worlds[player].releaseMount(state.previousMonster,player)
+ state.phase,state.started="Airborne",now()
+ state.launchY=state.root.Position.Y
+ state.steer,state.dashUntil=0,nil
+ state.tamed,state.angerAt=false,nil
+ send(player)
+end
+local function lasso(player,state)
+ local World=worlds[player]
+ local model=World.nearest(state.root.Position,state.previousMonster,World.visibleSet(state.root.Position.Z,views[player],player))
+ if not model then return end
+ local params=RaycastParams.new()
+ params.FilterType=Enum.RaycastFilterType.Exclude
+ local excluded={state.root.Parent,worldRoots[player].Monsters}
+ for other,folder in pairs(worldRoots) do if other~=player then table.insert(excluded,folder) end end
+ params.FilterDescendantsInstances=excluded
+ if workspace:Raycast(state.root.Position,model.PrimaryPart.Position-state.root.Position,params) then return end
+ model:SetAttribute("Occupied",true)
+ state.monster,state.phase,state.started=model,"Lassoing",now()
+ state.origin=state.root.CFrame
+ state.landingSeconds=tuning.JumpSeconds
+ state.pendingDash=true
+ attachRope(state)
+ send(player)
+end
+Social.start(bags,function(p) return bags[p] and not states[p] and not p:GetAttribute("Travelling") end,sendBag,companions.clear)
+local departure=require(script.Parent.RocketDepartureService).new({
+ catalog=Catalog,now=now,token=function() return game:GetService("HttpService"):GenerateGUID(false) end,
+ bag=function(p) return bags[p] end,
+ canOpen=function(p)
+  local humanoid=p.Character and p.Character:FindFirstChildOfClass("Humanoid")
+  return bags[p] and not states[p] and humanoid and humanoid.Health>0 and not Store.busy(p) and not Social.trading(p)
+   and not p:GetAttribute("Travelling") and Lobby.canDepart(p)
+ end,
+ modelReady=rocketModelReady,
+ courseReady=function() return workspace.RodeoLobby:GetAttribute("GreenStarRuntimeReady")==true end,
+ send=function(p,action,value) remote:FireClient(p,action,value) end,
+ launch=function(p,id)
+  local before,old=states[p],startingMounts[p]
+  startingMounts[p]=id rocketLaunchPermit[p]=true
+  local ok,err=pcall(start,p)
+  rocketLaunchPermit[p]=nil
+  local launched=ok and states[p]~=before and states[p]~=nil
+  if not launched then startingMounts[p]=old if not ok then warn("ROCKET_LAUNCH_FAILED: "..tostring(err)) end end
+  return launched
+ end,
+})
+Lobby.connect(function(p) departure.open(p) end)
+remote.OnServerEvent:Connect(function(p,action,value)
+ if action=="LaunchSelection" then departure.submit(p,value)
+ elseif action=="CancelDeparture" then departure.cancel(p) end
+end)
+Players.PlayerRemoving:Connect(function(p) departure.remove(p) rocketLaunchPermit[p]=nil startingMounts[p]=nil companions.clear(p) end)
+Lobby.connectPens(function(player)
+ if not states[player] then sendBag(player) remote:FireClient(player,"RanchMenu") end
+end)
+remote.OnServerEvent:Connect(function(player,action,value)
+ if type(action)~="string" or not bags[player] or Store.busy(player) or player:GetAttribute("Travelling") then return end
+ if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" and action~="PlaceEgg" and action~="RemoveEgg" and action~="Summon" then return end
+ local stamps=limits[player]
+ if not stamps then stamps={} limits[player]=stamps end
+ -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
+ local interval=action=="Jump" and 0.08 or action=="Steer" and 0.04 or 0.25
+ if now()-(stamps[action] or -math.huge)<interval then return end
+ stamps[action]=now()
+ if action=="Summon" then
+  if not states[player] then companions.summon(player,value) send(player) end
+  return
+ end
+ if action=="View" then
+  if type(value)=="number" and value==value and value>=0.4 and value<=4 then views[player]=value end
+  return
+ end
+ if action=="Manage" then
+  if not states[player] and Lobby.canUsePen(player,value) then remote:FireClient(player,"Eggs",{pen=value,eggs=bags[player].eggs or {}})
+  elseif not states[player] then remote:FireClient(player,"SocialMessage","알 배치는 내 부화실 안에서 이용해주세요.") end
+  return
+ end
+ if action=="Place" or action=="Remove" then return end -- Monster pens were replaced by egg incubators.
+ if action=="PlaceEgg" or action=="RemoveEgg" then
+  if states[player] or type(value)~="table" or not Lobby.canUsePen(player,value.pen) then return end
+  if SocialRules.egg(bags[player],value.id,value.pen,action=="RemoveEgg") then
+   Lobby.display(player,value.pen,bags[player].eggs)
+   remote:FireClient(player,"Eggs",{pen=value.pen,eggs=bags[player].eggs})
+  end return
+ end
+ if action=="Evolve" then
+  if states[player] or Social.trading(player) or type(value)~="table" then return end
+  -- Credit every completed income tick before consuming source monsters.
+  local gains=BagRules.accrue(bags[player],now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
+  local evolved,affected=BagRules.evolve(bags[player],value,now())
+  if not evolved then
+   remote:FireClient(player,"EvolutionResult",{ok=false,reason=affected})
+   sendBag(player)
+   return
+  end
+  companions.clear(player)
+  for pen in pairs(affected) do Lobby.display(player,pen,bags[player].monsters) end
+  remote:FireClient(player,"EvolutionResult",{ok=true,monsterId=evolved.monsterId,stars=evolved.stars})
+  send(player)
+  if #gains>0 then remote:FireClient(player,"BagIncome",gains) end
+  sendBag(player)
+  return
+ end
+ if action=="Journal" then if not states[player] then remote:FireClient(player,"Journal",Progress.snapshot(player,true)) end return end
+ if action=="Bag" then sendBag(player) return end
+ if action=="Sync" then send(player) sendBag(player) return end
+ if action=="Start" then start(player) return end
+ if action=="ReturnLobby" then
+  local state=states[player]
+  if (not state or state.phase=="GameOver" or state.phase=="CourseEnd") and not player:GetAttribute("ReturningLobby") then
+   player:SetAttribute("ReturningLobby",true)
+   restoreAvatar(state)
+   states[player]=nil
+   if worldRoots[player] then worldRoots[player]:Destroy() end
+   worlds[player],worldRoots[player]=nil,nil
+   local character=player.Character
+   local humanoid=character and character:FindFirstChildOfClass("Humanoid")
+   if not humanoid or humanoid.Health<=0 or (state and (state.phase=="GameOver" or state.phase=="CourseEnd")) then
+    local ok,err=pcall(function() player:LoadCharacterAsync() end)
+    if not ok then states[player]=state player:SetAttribute("ReturningLobby",nil) warn("LOBBY_RESPAWN_FAILED: "..tostring(err)) send(player,"다시 로비로 돌아가기를 눌러 주세요.") return end
+    character=player.Character
+   end
+   local root=character and character:FindFirstChild("HumanoidRootPart")
+   if root then root.Anchored=false root.AssemblyLinearVelocity=Vector3.zero character:PivotTo(Lobby.Spawn) end
+   humanoid=character and character:FindFirstChildOfClass("Humanoid")
+   if humanoid then humanoid.PlatformStand=false humanoid.AutoRotate=true end
+   setCharacterGroup(player,"Default")
+   Lobby.prepareCharacter(character)
+   player:SetAttribute("ReturningLobby",nil)
+   send(player,"로비로 돌아왔습니다.") sendBag(player)
+  end
+  return
+ end
+ local state=states[player]
+ if not state or state.phase=="GameOver" then return end
+ if action=="Steer" and state.phase=="Riding" and type(value)=="number" and value==value and value>=-1 and value<=1 then
+  state.steer,state.steerAt=value,now()
+ elseif action=="Jump" and value==nil then
+  if state.phase=="Riding" then launch(player,state)
+  elseif state.phase=="Airborne" then lasso(player,state) end
+ end
+end)
+RunService.Heartbeat:Connect(function(delta)
+ local clock,dt=now(),math.min(delta,0.1)
+ for _,world in pairs(worlds) do world.step(dt) end
+ local nearZ={0}
+ local watchers={}
+ for player,state in pairs(states) do
+  local World=worlds[player]
+  if (state.phase=="GameOver" or state.phase=="CourseEnd") then
+   if state.root.Parent then table.insert(nearZ,state.root.Position.Z) end
+   continue
+  end
+  if not state.root.Parent or player.Character~=state.root.Parent or state.humanoid.Health<=0 then finish(player,"Hunt ended") continue end
+  local steer=state.phase=="Riding" and clock-state.steerAt<0.5 and state.steer or 0
+  local buckHeight,buckDrift=0,0
+  if state.phase=="Riding" and Config.Hunt.AngerEnabled and clock-state.started>=Config.Hunt.AngerSeconds then
+   state.angerAt=state.angerAt or clock
+   local elapsed=clock-state.angerAt-tuning.AngerWarningSeconds
+   if elapsed>=0 then
+    buckHeight,buckDrift=Rules.buck(elapsed,tuning.BuckCycleSeconds,tuning.BuckHeightStuds,Catalog[state.monster:GetAttribute("MonsterId")].TripleHop)
+    steer*=tuning.AngrySteerMultiplier
+   end
+  end
+  local old=state.phase=="Riding" and state.monster and state.monster.PrimaryPart.Position or state.root.Position
+  local speed=state.phase=="Airborne" and tuning.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,baseSpeed(state),tuning.SwitchDashMultiplier)
+  local position=Vector3.new(math.clamp(old.X+(steer*tuning.SidewaysStudsPerSecond+buckDrift*tuning.BuckSidewaysStudsPerSecond)*dt,-tuning.RoadHalfWidth,tuning.RoadHalfWidth),old.Y,old.Z-speed*dt)
+  if state.distance+speed*dt*tuning.MetersPerStud>=Course.LengthMeters then
+   state.distance=Course.LengthMeters
+   state.phase="CourseEnd" state.dashUntil=nil
+   if state.monster then state.monster:SetAttribute("Running",false) state.monster:SetAttribute("DashUntil",nil) state.monster:SetAttribute("Angry",false) state.monster:SetAttribute("AngerWarning",false) end
+   if state.monster then
+    local p=state.monster.PrimaryPart.Position
+    state.monster.PrimaryPart.CFrame=CFrame.new(p.X,(state.monster:GetAttribute("RootHeight") or 2)+World.groundHeight(state.monster.PrimaryPart.Position.X,state.monster.PrimaryPart.Position.Z),p.Z)
+    state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,state.monster:GetAttribute("SaddleHeight") or tuning.RideHeightStuds,tuning.RideForwardStuds)
+   end
+   clearRope(state)
+   send(player,"Next region coming soon")
+   continue
+  end
+  state.distance+=speed*dt*tuning.MetersPerStud
+  World.ensure(position.Z)
+  table.insert(nearZ,position.Z)
+  if state.phase=="Airborne" then
+   position=Vector3.new(position.X,state.launchY+Rules.jumpHeight(clock-state.started,tuning.FlightSeconds,tuning.JumpArcStuds),position.Z)
+   state.root.CFrame=CFrame.new(position)
+   if World.hit(old,position) then finish(player,"You hit an obstacle.","Obstacle") continue end
+   if state.phase=="Airborne" and clock-state.started>=tuning.FlightSeconds then finish(player,"You missed the next monster.","Fall") end
+  elseif state.phase=="Lassoing" then
+   if not state.monster or not state.monster.Parent then finish(player,"You lost your mount.") continue end
+   local p=state.monster.PrimaryPart.Position
+   state.monster.PrimaryPart.CFrame=CFrame.new(p.X,(state.monster:GetAttribute("RootHeight") or 2)+World.groundHeight(state.monster.PrimaryPart.Position.X,state.monster.PrimaryPart.Position.Z),p.Z-(state.initialLanding and 0 or baseSpeed(state)*dt))
+   local saddle=state.monster:GetPivot()*CFrame.new(0,state.monster:GetAttribute("SaddleHeight") or tuning.RideHeightStuds,tuning.RideForwardStuds)
+   local landingSeconds=state.landingSeconds or tuning.JumpSeconds
+   local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
+   state.root.CFrame=state.origin:Lerp(saddle,landingProgress)*CFrame.new(0,math.sin(math.pi*landingProgress)*tuning.JumpArcStuds*0.5,0)
+   if World.hit(p,state.monster.PrimaryPart.Position,state.monster:GetAttribute("Flying")) then finish(player,"You hit an obstacle.","Obstacle") continue end
+   if clock-state.started>=landingSeconds then
+    clearRope(state)
+    state.initialLanding=nil state.monster:SetAttribute("InitialLanding",nil)
+    state.phase,state.started,state.tamed="Riding",clock,state.monster:GetAttribute("Tamed_"..player.UserId)==true
+    state.dashUntil=state.pendingDash and clock+tuning.SwitchDashSeconds or nil
+    state.pendingDash=nil
+    state.monster:SetAttribute("DashUntil",state.dashUntil)
+    state.monster:SetAttribute("RunStarted",clock)
+    state.monster:SetAttribute("Angry",false)
+    state.monster:SetAttribute("AngerWarning",false)
+    state.monster:SetAttribute("AngerStarted",nil)
+    send(player)
+    -- Space presses during landing are not queued as a new jump.
+   end
+  elseif state.phase=="Riding" then
+   if not state.monster or not state.monster.Parent then finish(player,"You lost your mount.") continue end
+   position=Vector3.new(position.X,((state.monster:GetAttribute("RootHeight") or 2)+World.groundHeight(state.monster.PrimaryPart.Position.X,state.monster.PrimaryPart.Position.Z))+buckHeight,position.Z)
+   local before=state.monster.PrimaryPart.Position
+   state.monster.PrimaryPart.CFrame=CFrame.new(position)
+   state.monster:SetAttribute("Steering",steer)
+   state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,state.monster:GetAttribute("SaddleHeight") or tuning.RideHeightStuds,tuning.RideForwardStuds)
+   local dashing=state.dashUntil~=nil and clock<state.dashUntil
+   if World.crateHit(before,position,state.monster,state.monster:GetAttribute("SizeClass") or Config.Monster.SizeClass,dashing) then finish(player,"This monster cannot break crates.","Obstacle") continue end
+   local contact=World.mountedHit(before,position,state.monster,World.visibleSet(position.Z,views[player],player),dashing)
+   if contact then finish(player,contact=="Wall" and "You hit a wall." or "You hit another monster.",contact) continue end
+   if World.hit(before,position,state.monster:GetAttribute("Flying"),state.monster,dashing) then finish(player,"You hit an obstacle.","Obstacle") continue end
+   if not state.tamed and clock-state.started>=Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds then
+    local id=state.monster:GetAttribute("MonsterId") or Config.Monster.Id
+    local species=Catalog[id]
+    state.tamed=true BagRules.grant(bags[player],id,clock,species.IncomeSeconds,species.IncomeAmount) Progress.caught(player,id,1) send(player,"Monster tamed! Added to your bag.")
+    state.monster:SetAttribute("Tamed_"..player.UserId,true)
+   end
+   if Config.Hunt.AngerEnabled and clock-state.started>=Config.Hunt.AngerSeconds then
+    state.angerAt=state.angerAt or clock
+    state.monster:SetAttribute("AngerWarning",true)
+    state.monster:SetAttribute("AngerStarted",state.angerAt+tuning.AngerWarningSeconds)
+    state.monster:SetAttribute("Angry",clock-state.angerAt>=tuning.AngerWarningSeconds)
+    -- Anger persists until the rider chooses to jump or a real collision ends the run.
+   end
+  end
+  table.insert(watchers,{z=state.root.Position.Z,aspect=views[player] or 1})
+ end
+ if clock-lastHerd>=0.25 then lastHerd=clock for player,state in pairs(states) do if state.phase~="GameOver" and state.phase~="CourseEnd" then worlds[player].maintain({{z=state.root.Position.Z,aspect=views[player] or 1}}) end end end
+ if clock-lastSync>=0.25 then lastSync=clock for _,player in ipairs(Players:GetPlayers()) do send(player) end end
+ if clock-lastCleanup>=3 then lastCleanup=clock for player,world in pairs(worlds) do world.cleanup({states[player] and states[player].root.Position.Z or 0}) end end
+end)
+local function added(player)
+ if not Lobby.assign(player) then player:Kick("This server holds up to 8 players.") return end
+ player.CharacterAdded:Connect(function(character) task.defer(function() if not states[player] then setCharacterGroup(player,"Default") Lobby.prepareCharacter(character) end end) end)
+ if player.Character then setCharacterGroup(player,"Default") task.spawn(Lobby.prepareCharacter,player.Character) end
+ player.CanLoadCharacterAppearance=true
+ if player.UserId>0 then player.CharacterAppearanceId=player.UserId end
+ local bag,message=Store.open(player)
+ if not bag then Lobby.release(player) player:Kick(message) return end
+ bags[player]=bag player:SetAttribute("Area","Lobby") Progress.join(player)
+ require(game.ReplicatedStorage.RodeoFantasy.LobbyIncubatorRules).migrate(bag)
+ Lobby.display(player,1,bag.eggs or {})
+ player.CharacterRemoving:Connect(function()
+  companions.clear(player) finish(player,"Hunt ended") states[player]=nil
+  if worldRoots[player] then worldRoots[player]:Destroy() end
+  worlds[player],worldRoots[player]=nil,nil
+ end)
+end
+Players.PlayerAdded:Connect(added)
+Players.PlayerRemoving:Connect(function(player) send(player) if worlds[player] then worlds[player].resetVisibility(player) end Records.leave(player) Progress.leave(player) Store.close(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil if worldRoots[player] then worldRoots[player]:Destroy() end worlds[player],worldRoots[player]=nil,nil end)
+for _,player in ipairs(Players:GetPlayers()) do added(player) end
+
+if RunService:IsRunning() then Records.start() Progress.start() end
+]========],[========[local Players=game:GetService("Players")
 local RS=game:GetService("ReplicatedStorage")
 local RunService=game:GetService("RunService")
 local PhysicsService=game:GetService("PhysicsService")
@@ -4131,6 +4746,11 @@ function M.apply(model)
  return true
 end
 -- Hunt presentation faces the course while the authoritative root still avoids obstacles.
+function M.posePortrait(model)
+ if not M.isTarget(model) then return end
+ rigAnimator=rigAnimator or require(script.Parent:WaitForChild("UserMossratRigAnimator"))
+ rigAnimator.poseFront(model)
+end
 function M.huntFrame(model,frame)
  local hunt=package:FindFirstChild("MeshyMossratHuntTemplate")
  if model:GetAttribute("VisualDeferred") and M.isTarget(model) and hunt and hunt:GetAttribute("FaceCourseForward") then
@@ -4165,6 +4785,104 @@ function M.animate(model,phase,moving,angry)
 end
 return M
 ]========],allowed={[========[-- User-authored Meshy assets: shared native MeshParts, no EditableMesh allocation.
+local M={}
+local package=game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy")
+local C=require(package:WaitForChild("MonsterCatalog"))
+local rigAnimator
+local boneCache=setmetatable({},{__mode="k"})
+function M.isTarget(model)
+ local visual=package:FindFirstChild("VisualTemplate")
+ return model:GetAttribute("MonsterId")=="MeadowMouse" and C.stage(model:GetAttribute("Stars") or 1)==1 and visual~=nil and visual:GetAttribute("NativeMeshyMossrat")==true
+end
+function M.apply(model)
+ if not M.isTarget(model) or not model.PrimaryPart then return false end
+ local stars=model:GetAttribute("Stars") or 1
+ local source=model:GetAttribute("VisualDeferred") and package:FindFirstChild("MeshyMossratHuntTemplate") or package.VisualTemplate
+ if not source then return false end
+ local facingRevision=source:GetAttribute("MeshyFacingRevision") or "Original"
+ local yaw=source:GetAttribute("MeshyVisualYawDegrees") or 0
+ -- Correct the installed S1 mesh facing opposite the forward (-Z) run direction.
+ -- Fixed revision keeps this idempotent; never rotate the authoritative root.
+ if source:GetAttribute("MossratUserRigRevision")=="ApprovedS1-v1" then
+  yaw+=180
+  facingRevision..="-ForwardV2"
+ end
+ if model:GetAttribute("NativeMeshyReady") and model:GetAttribute("NativeMeshyStars")==stars and model:GetAttribute("NativeMeshyFacingRevision")==facingRevision and model:FindFirstChild("Body") then return true end
+ local scale=C.scale(model:GetAttribute("Stars") or 1)
+ local staged={}
+ for _,original in ipairs(source:GetChildren()) do
+  if original:IsA("MeshPart") then
+   local part=original:Clone()
+   local rest=source.PrimaryPart.CFrame:ToObjectSpace(original.CFrame)
+   rest=CFrame.new(rest.Position*scale)*CFrame.Angles(0,math.rad(yaw),0)*rest.Rotation
+   part.Size*=scale
+   if scale~=1 then
+    for _,bone in ipairs(part:GetDescendants()) do
+     if bone:IsA("Bone") then bone.CFrame=CFrame.new(bone.CFrame.Position*scale)*bone.CFrame.Rotation end
+    end
+   end
+   part.CFrame=model.PrimaryPart.CFrame*rest
+   part:SetAttribute("ApprovedRest",rest)
+   part:SetAttribute("ApprovedPivot",rest.Position)
+   if model:GetAttribute("PortraitSilhouette") then
+    for _,child in ipairs(part:GetChildren()) do if child:IsA("SurfaceAppearance") then child:Destroy() end end
+    part.TextureID="" part.Color=Color3.new(0,0,0)
+   end
+   table.insert(staged,part)
+  end
+ end
+ if #staged==0 then return false end
+ for _,part in ipairs(model:GetChildren()) do if part:IsA("BasePart") and part~=model.PrimaryPart then part:Destroy() end end
+ for _,part in ipairs(staged) do part.Parent=model end
+ model:SetAttribute("ImportedA",true)
+ model:SetAttribute("NativeMeshyReady",true)
+ model:SetAttribute("NativeMeshyStars",stars)
+ model:SetAttribute("NativeMeshyFacingRevision",facingRevision)
+ model:SetAttribute("MeshDecorated",true)
+ model:SetAttribute("MossratUserRigRevision",source:GetAttribute("MossratUserRigRevision"))
+ model:SetAttribute("MossratRigTranslationScale",(source:GetAttribute("MossratRigTranslationScale") or 2.5/.9)*scale)
+ return true
+end
+-- Hunt presentation faces the course while the authoritative root still avoids obstacles.
+function M.posePortrait(model)
+ if not M.isTarget(model) then return end
+ rigAnimator=rigAnimator or require(script.Parent:WaitForChild("UserMossratRigAnimator"))
+ rigAnimator.poseFront(model)
+end
+function M.huntFrame(model,frame)
+ local hunt=package:FindFirstChild("MeshyMossratHuntTemplate")
+ if model:GetAttribute("VisualDeferred") and M.isTarget(model) and hunt and hunt:GetAttribute("FaceCourseForward") then
+  return CFrame.new(frame.Position),true
+ end
+ return frame,false
+end
+function M.animate(model,phase,moving,angry)
+ if not M.isTarget(model) then return end
+ local body=model:FindFirstChild("Body")
+ if body and body:FindFirstChild("LeftFrontUpper",true) and body:FindFirstChild("Head",true) then
+  rigAnimator=rigAnimator or require(script.Parent:WaitForChild("UserMossratRigAnimator"))
+  rigAnimator.animate(model,moving)
+  return
+ end
+ body=model:FindFirstChild("Body")
+ if not body then return end
+ local cached=boneCache[model]
+ if not cached or cached.body~=body then
+  cached={body=body,bones={}}
+  for _,bone in ipairs(body:GetDescendants()) do
+   if bone:IsA("Bone") and bone.Name:match("^Moss.+Leg$") then
+    table.insert(cached.bones,{bone=bone,opposite=(bone.Name:find("Left")~=nil)~=(bone.Name:find("Front")~=nil)})
+   end
+  end
+  boneCache[model]=cached
+ end
+ for _,entry in ipairs(cached.bones) do
+  local angle=moving and math.sin(phase+(entry.opposite and math.pi or 0))*(angry and .55 or .45) or 0
+  entry.bone.Transform=CFrame.Angles(angle,0,0)
+ end
+end
+return M
+]========],[========[-- User-authored Meshy assets: shared native MeshParts, no EditableMesh allocation.
 local M={}
 local package=game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy")
 local C=require(package:WaitForChild("MonsterCatalog"))
@@ -4705,6 +5423,19 @@ local A={}
 local data=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigData"))
 local cache=setmetatable({},{__mode="k"})
 local torsoCenterX={Pelvis=-.04,Spine=.02,Chest=.035,Neck=.025,Head=.015}
+-- Portraits do not run the walking animation loop. Apply the same neutral
+-- torso/head correction immediately so their first frame matches the game.
+function A.poseFront(model)
+ local body=model:FindFirstChild("Body") if not body then return end
+ local scale=model:GetAttribute("MossratRigTranslationScale") or 2.5/data.height
+ for _,b in ipairs(body:GetDescendants()) do
+  if b:IsA("Bone") then
+   local x=torsoCenterX[b.Name]
+   b.Transform=CFrame.new((x or 0)*scale,0,0)
+   if b.Name=="Head" then b.Transform=b.Transform*CFrame.Angles(0,math.rad(-8.2),0) end
+  end
+ end
+end
 local function rotation(v)
  local x,y,z,w=v[1],v[2],v[3],v[4]
  local n=math.sqrt(x*x+y*y+z*z+w*w) x,y,z,w=x/n,y/n,z/n,w/n
@@ -4763,6 +5494,81 @@ function A.animate(model,moving)
 end
 return A
 ]========],allowed={[========[-- Plays the exact approved glTF samples through Bone.Transform; never blinks.
+local A={}
+local data=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigData"))
+local cache=setmetatable({},{__mode="k"})
+local torsoCenterX={Pelvis=-.04,Spine=.02,Chest=.035,Neck=.025,Head=.015}
+-- Portraits do not run the walking animation loop. Apply the same neutral
+-- torso/head correction immediately so their first frame matches the game.
+function A.poseFront(model)
+ local body=model:FindFirstChild("Body") if not body then return end
+ local scale=model:GetAttribute("MossratRigTranslationScale") or 2.5/data.height
+ for _,b in ipairs(body:GetDescendants()) do
+  if b:IsA("Bone") then
+   local x=torsoCenterX[b.Name]
+   b.Transform=CFrame.new((x or 0)*scale,0,0)
+   if b.Name=="Head" then b.Transform=b.Transform*CFrame.Angles(0,math.rad(-8.2),0) end
+  end
+ end
+end
+local function rotation(v)
+ local x,y,z,w=v[1],v[2],v[3],v[4]
+ local n=math.sqrt(x*x+y*y+z*z+w*w) x,y,z,w=x/n,y/n,z/n,w/n
+ return CFrame.new(0,0,0,1-2*(y*y+z*z),2*(x*y-z*w),2*(x*z+y*w),2*(x*y+z*w),1-2*(x*x+z*z),2*(y*z-x*w),2*(x*z-y*w),2*(y*z+x*w),1-2*(x*x+y*y))
+end
+function A.animate(model,moving)
+ local body=model:FindFirstChild("Body") if not body then return end
+ local c=cache[model]
+ if not c or c.body~=body then
+  c={body=body,bones={},last=0,started=os.clock()}
+  for _,b in ipairs(body:GetDescendants()) do if b:IsA("Bone") then c.bones[b.Name]=b end end
+  cache[model]=c
+ end
+ local now=os.clock()
+ if c.mode and now-c.last<1/30 then return end c.last=now
+ local mode=moving and "Walk" or "Idle"
+ if c.mode~=mode then c.mode=mode c.started=now c.blendStarted=now c.previous={}
+  for name,b in pairs(c.bones) do c.previous[name]=b.Transform end
+ end
+ local clip=data.clips[mode]
+ local sample=((now-c.started)%clip.duration)*clip.fps
+ local index=math.floor(sample)+1 local alpha=sample-math.floor(sample)
+ local poses={}
+ local scale=(model:GetAttribute("MossratRigTranslationScale") or 2.5/data.height)
+ for _,ch in ipairs(clip.channels) do
+  local a,b=ch.values[index],ch.values[index+1] local v={}
+  for i=1,#a do v[i]=a[i]*(1-alpha)+b[i]*alpha end
+  local p=poses[ch.bone] or {} poses[ch.bone]=p
+  if ch.path=="rotation" then p.rotation=rotation(v) else p.translation=Vector3.new(v[1],v[2],v[3])*scale end
+ end
+ local blend=math.clamp((now-c.blendStarted)/.18,0,1)
+ for _,name in ipairs(data.bones) do
+  local b=c.bones[name]
+  if b then
+   local p=poses[name] or {}
+   local frame=CFrame.new(p.translation or Vector3.zero)*(p.rotation or CFrame.identity)
+   -- Keep the face forward; retain body, legs, ears and tail motion.
+   -- Center the original offset torso chain without changing the uploaded mesh/UVs.
+   local centerX=torsoCenterX[name]
+   if name=="Head" or name=="Neck" then frame=CFrame.identity end
+   if centerX then frame=CFrame.new(centerX*scale,0,0)*frame end
+   if name=="Head" then frame=frame*CFrame.Angles(0,math.rad(-8.2),0) end
+   -- Explicit four-leg stride also covers imported rigs whose revision attribute is absent.
+   local legSide=name:sub(1,4)=="Left" and "Left" or name:sub(1,5)=="Right" and "Right" or nil
+   local legLimb=name:find("Front",1,true) and "Front" or name:find("Rear",1,true) and "Rear" or nil
+   if legSide and legLimb and moving then
+    local opposite=(legSide=="Left")~=(legLimb=="Front")
+    local beat=math.sin((now-c.started)*math.pi*6+(opposite and math.pi or 0))
+    if name:find("Upper",1,true) then frame=CFrame.Angles(beat*.65,0,0)
+    elseif name:find("Lower",1,true) then frame=CFrame.Angles(math.max(0,-beat)*.65,0,0)
+    elseif name:find("Paw",1,true) then frame=CFrame.Angles(-beat*.25,0,0) end
+   end
+   b.Transform=(c.previous[name] or CFrame.identity):Lerp(frame,blend)
+  end
+ end
+end
+return A
+]========],[========[-- Plays the exact approved glTF samples through Bone.Transform; never blinks.
 local A={}
 local data=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigData"))
 local cache=setmetatable({},{__mode="k"})
@@ -5154,6 +5960,45 @@ for _,part in ipairs(lobby:GetDescendants()) do
 end
 ]========],[========[-- Applies the requested smooth surfaces to the installed lobby only.
 local lobby=workspace:WaitForChild("RodeoLobby")
+local safety=lobby:FindFirstChild("LobbyCollisionFloor")
+if not safety then
+ safety=Instance.new("Part") safety.Name="LobbyCollisionFloor" safety.Size=Vector3.new(512,4,512) safety.Position=Vector3.new(6000,0,0)
+ safety.Anchored=true safety.Transparency=1 safety.CanCollide=true safety.CanTouch=false safety.CollisionGroup="Default" safety.Parent=lobby
+end
+local decor=lobby:FindFirstChild("SpaceDiorama")
+if decor then for _,p in ipairs(decor:GetDescendants()) do if p.Name=="PlanetLayer" or p.Name=="PlanetRing" then p:Destroy() end end end
+local sign=lobby.Airport:FindFirstChild("DepartureSign") if sign then sign:Destroy() end
+local roof=lobby:FindFirstChild("Roof") or Instance.new("Model")
+roof.Name="Roof" roof.Parent=lobby
+for _,p in ipairs(roof:GetChildren()) do if p.Name=="Ceiling" or p.Name=="FullOpaqueCeiling" then p:Destroy() end end
+if not roof:FindFirstChild("FullGlassCeiling") then
+ local cap=Instance.new("Part") cap.Name="FullGlassCeiling"
+ cap.Size=Vector3.new(512,2,512) cap.Position=Vector3.new(6000,102,0)
+ cap.Anchored=true cap.CanTouch=false cap.Material=Enum.Material.Glass cap.Transparency=.65
+ cap.Color=Color3.fromRGB(173,212,232) cap.Parent=roof
+end
+for _,p in ipairs(lobby.ShipShell:GetDescendants()) do if p:IsA("BasePart") and p.Name=="WindowSpace" then p.Material=Enum.Material.Metal p.Transparency=0 p.CanCollide=true p.Color=Color3.fromRGB(62,78,103) end end
+if not lobby:FindFirstChild("OverheadSpace") then
+ local space=Instance.new("Model") space.Name="OverheadSpace" space.Parent=lobby
+ local back=Instance.new("Part") back.Name="SpaceBackdrop" back.Size=Vector3.new(1200,2,1200) back.Position=Vector3.new(6000,500,0)
+ back.Anchored=true back.CanCollide=false back.CanTouch=false back.CanQuery=false back.CastShadow=false back.Color=Color3.fromRGB(8,11,29) back.Parent=space
+ local random=Random.new(731)
+ for i=1,70 do
+  local star=Instance.new("Part") star.Name="Star" star.Shape=Enum.PartType.Ball star.Size=Vector3.one*random:NextNumber(.8,2)
+  star.Position=Vector3.new(6000+random:NextNumber(-470,470),495,random:NextNumber(-470,470)) star.Color=Color3.fromRGB(193,217,255) star.Material=Enum.Material.Neon
+  star.Anchored=true star.CanCollide=false star.CanTouch=false star.CanQuery=false star.CastShadow=false star.Parent=space
+ end
+end
+for _,part in ipairs(lobby:GetDescendants()) do
+ if part:IsA("Part") then
+  part.TopSurface=Enum.SurfaceType.Smooth part.BottomSurface=Enum.SurfaceType.Smooth
+  part.FrontSurface=Enum.SurfaceType.Smooth part.BackSurface=Enum.SurfaceType.Smooth
+  part.LeftSurface=Enum.SurfaceType.Smooth part.RightSurface=Enum.SurfaceType.Smooth
+  if part.Material==Enum.Material.Plastic then part.Material=Enum.Material.SmoothPlastic end
+ end
+end
+]========],[========[-- Applies the requested smooth surfaces to the installed lobby only.
+local lobby=workspace:WaitForChild("RodeoLobby")
 local roof=lobby:FindFirstChild("Roof") or Instance.new("Model")
 roof.Name="Roof" roof.Parent=lobby
 if not roof:FindFirstChild("FullOpaqueCeiling") then
@@ -5204,6 +6049,39 @@ function M.ensure(lobby)
 end
 return M
 ]========],allowed={[========[local M={}
+function M.ensure(lobby)
+ local boards=lobby:FindFirstChild("Leaderboards")
+ if not boards then boards=Instance.new("Folder") boards.Name="Leaderboards" boards.Parent=lobby end
+ local center=Vector3.new(6000,0,0)
+ local airport=lobby:FindFirstChild("Airport")
+ local rocket=airport and airport:FindFirstChild("Rocket")
+ if rocket and rocket:IsA("Model") then local cf=rocket:GetBoundingBox() center=Vector3.new(cf.X,0,cf.Z) end
+ for i,entry in ipairs({{"Distance","최고 거리"},{"Income","도감 수집"}}) do
+  local board=boards:FindFirstChild(entry[1])
+  if not board then
+   board=Instance.new("Part") board.Name=entry[1] board.Size=Vector3.new(26,30,2)
+   board.Anchored=true board.Material=Enum.Material.SmoothPlastic board.Color=Color3.fromRGB(24,38,64)
+   board.TopSurface=Enum.SurfaceType.Smooth board.BottomSurface=Enum.SurfaceType.Smooth board.Parent=boards
+  end
+  local target=CFrame.new(center+Vector3.new(i==1 and -54 or 54,2.04,-16))
+  if board:IsA("BasePart") then board.Size=Vector3.new(26,.08,30) board.CanCollide=false board.CanTouch=false board.CanQuery=false end
+  if board:IsA("BasePart") then board.CFrame=target elseif board:IsA("Model") then board:PivotTo(target) end
+  local gui=board:FindFirstChild("Ranking")
+  if not gui then
+   gui=Instance.new("SurfaceGui") gui.Name="Ranking" gui.Face=Enum.NormalId.Front gui.CanvasSize=Vector2.new(780,900) gui.Parent=board
+   for _,spec in ipairs({{"Heading",0,120,entry[2],52},{"Entries",140,740,"기록을 불러오는 중입니다.",34}}) do
+    local text=Instance.new("TextLabel") text.Name=spec[1] text.Position=UDim2.fromOffset(24,spec[2]) text.Size=UDim2.new(1,-48,0,spec[3])
+    text.Text=spec[4] text.TextSize=spec[5] text.TextWrapped=true text.Font=Enum.Font.GothamBold text.BackgroundTransparency=1
+    text.TextColor3=spec[1]=="Heading" and Color3.fromRGB(126,219,255) or Color3.fromRGB(229,240,255)
+    text.TextYAlignment=Enum.TextYAlignment.Top text.Parent=gui
+   end
+  end
+  gui.Face=Enum.NormalId.Top
+ end
+ return boards
+end
+return M
+]========],[========[local M={}
 function M.ensure(lobby)
  local boards=lobby:FindFirstChild("Leaderboards")
  if not boards then boards=Instance.new("Folder") boards.Name="Leaderboards" boards.Parent=lobby end
@@ -5383,6 +6261,121 @@ function Service.start()
 end
 return Service
 ]========],allowed={[========[-- Global records only. Bag contents and spendable balance are still session-only.
+local Service={}
+local RunService=game:GetService("RunService")
+local Players=game:GetService("Players")
+local DSS=game:GetService("DataStoreService")
+local Http=game:GetService("HttpService")
+local Rules=require(game.ReplicatedStorage.RodeoFantasy.RecordRules)
+local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
+local enabled=RunService:IsRunning() and game.GameId>0
+local suffix=RunService:IsStudio() and "_Test_v1" or "_v1"
+local profile,distance,collection
+if enabled then
+ local ok=pcall(function()
+  profile=DSS:GetDataStore("RodeoRecords"..suffix)
+  distance=DSS:GetOrderedDataStore("RodeoDistance"..suffix)
+  collection=DSS:GetOrderedDataStore("RodeoCollection"..suffix)
+ end)
+ enabled=ok
+end
+local entries,names={},{}
+function Service.sample(player,_,meters)
+ local produced=0 -- Production no longer grants a leaderboard score.
+ if not enabled or player.UserId<=0 then return end
+ local entry=entries[player.UserId]
+ if not entry then
+  entry={id=Http:GenerateGUID(false),produced=0,distance=0,dirty=true}
+  entries[player.UserId]=entry
+ end
+ entry.dirty=entry.dirty or produced>entry.produced or meters>entry.distance
+ entry.produced=math.max(entry.produced,produced)
+ entry.distance=math.max(entry.distance,meters)
+end
+function Service.save(userId)
+ local entry=entries[userId]
+ if not entry or entry.busy or not entry.dirty then return false end
+ entry.busy=true
+ local produced,best=entry.produced,entry.distance
+ local ok,result=pcall(function()
+  return profile:UpdateAsync(tostring(userId),function(old)
+   return Rules.merge(old,entry.id,produced,best,os.time())
+  end)
+ end)
+ if ok then
+  -- Ordered indexes are monotonic; concurrent servers cannot lower a saved rank.
+  local indexes=pcall(function()
+   distance:UpdateAsync(tostring(userId),function(old) return math.max(old or 0,result.distance) end)
+  end)
+  entry.dirty=not indexes or entry.produced~=produced or entry.distance~=best
+  if indexes and entry.left and not entry.dirty then entries[userId]=nil end
+ else
+  warn("Rodeo records save failed; checkpoint retained for retry.")
+ end
+ entry.busy=false
+ return ok and not entry.dirty
+end
+function Service.leave(player)
+ local entry=entries[player.UserId]
+ if entry then entry.left=true Service.save(player.UserId) end
+end
+local function refresh(board,store)
+ local label=board.Ranking.Entries
+ if not enabled then label.Text="Publish to enable rankings" return end
+ local ok,pages=pcall(function() return store:GetSortedAsync(false,10,1) end)
+ if not ok then
+  if not board:GetAttribute("HasRecords") then label.Text="Records temporarily unavailable" end
+  return -- retain the last successful board during an outage
+ end
+ local lines={}
+ for rank,row in ipairs(pages:GetCurrentPage()) do
+  local id=tonumber(row.key)
+  if not names[id] then
+   local found,name=pcall(function() return Players:GetNameFromUserIdAsync(id) end)
+   names[id]=found and name or nil
+  end
+  local value=tostring(row.value)..(board.Name=="Distance" and " m" or " / "..#Catalog.Order*4)
+  table.insert(lines,string.format("%d. %s   %s",rank,names[id] or "Player",value))
+ end
+ label.Text=#lines>0 and table.concat(lines,"\n") or "No records yet"
+ board:SetAttribute("HasRecords",true)
+end
+function Service.start()
+ local boards=require(script.Parent.LobbyRankings).ensure(workspace.RodeoLobby)
+ boards.Income.Ranking.Heading.Text="도감 수집"
+ task.spawn(function()
+  while true do
+   refresh(boards.Distance,distance) refresh(boards.Income,collection)
+   task.wait(60)
+  end
+ end)
+ if not enabled then return end
+ task.spawn(function()
+  while true do
+   task.wait(60)
+   for id in pairs(entries) do task.spawn(Service.save,id) end
+  end
+ end)
+ game:BindToClose(function()
+  local remaining=0
+  for id in pairs(entries) do
+   remaining+=1
+   task.spawn(function()
+    local deadline=os.clock()+23
+    repeat
+     Service.save(id)
+     if not entries[id] or not entries[id].dirty then break end
+     task.wait(1)
+    until os.clock()>deadline
+    remaining-=1
+   end)
+  end
+  local deadline=os.clock()+25
+  while remaining>0 and os.clock()<deadline do task.wait(.1) end
+ end)
+end
+return Service
+]========],[========[-- Global records only. Bag contents and spendable balance are still session-only.
 local Service={}
 local RunService=game:GetService("RunService")
 local Players=game:GetService("Players")
@@ -6100,6 +7093,7 @@ function M.new(gui,bag,journal,remote)
   make("UIGradient",{Color=ColorSequence.new(Color3.new(1,1,1),Color3.fromRGB(150,214,135)),Rotation=90},button)
   local icon=Icons.draw(button,i==1 and "Shop" or "Roulette",38) icon.Position=UDim2.fromOffset(8,9)
   make("TextLabel",{Text=entry[2],BackgroundTransparency=1,Position=UDim2.fromOffset(54,0),Size=UDim2.new(1,-58,1,0),Font=Enum.Font.GothamBlack,TextSize=24,TextColor3=Color3.new(1,1,1),TextStrokeColor3=Color3.new(0,0,0),TextStrokeTransparency=0},button)
+  Icons.bindArtwork(button,i==1 and "ShopButtonImage" or "RouletteButtonImage")
   button.Activated:Connect(function()
    if not button.Visible then return end
    if api.onOpen then api.onOpen() end
@@ -6114,12 +7108,14 @@ function M.new(gui,bag,journal,remote)
   journalButton.BackgroundColor3=Color3.fromRGB(15,216,255) journalButton.BackgroundTransparency=0
   make("UICorner",{CornerRadius=UDim.new(0,5)},journalButton) make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},journalButton)
   local icon=Icons.draw(journalButton,"Journal",38) icon.Position=UDim2.fromOffset(8,9)
-  make("TextLabel",{Text="도감",BackgroundTransparency=1,Position=UDim2.fromOffset(54,0),Size=UDim2.new(1,-58,1,0),Font=Enum.Font.GothamBlack,TextSize=24,TextColor3=Color3.new(1,1,1),TextStrokeColor3=Color3.new(0,0,0),TextStrokeTransparency=0},journalButton)
+  make("TextLabel",{Text="인덱스",BackgroundTransparency=1,Position=UDim2.fromOffset(54,0),Size=UDim2.new(1,-58,1,0),Font=Enum.Font.GothamBlack,TextSize=24,TextColor3=Color3.new(1,1,1),TextStrokeColor3=Color3.new(0,0,0),TextStrokeTransparency=0},journalButton)
+  Icons.bindArtwork(journalButton,"IndexButtonImage")
  end
  for i,kind in ipairs({"Egg","Paw"}) do
   local button=make("TextButton",{Name="Open"..kind,Text="",AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-8,.42,i==1 and -26 or 38),Size=UDim2.fromOffset(56,56),BorderSizePixel=0,BackgroundColor3=i==1 and Color3.fromRGB(255,83,80) or Color3.fromRGB(255,160,54),Visible=false},gui)
   make("UICorner",{CornerRadius=UDim.new(0,5)},button) make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},button)
   local icon=Icons.draw(button,kind,42) icon.Position=UDim2.fromOffset(7,7)
+  Icons.bindArtwork(button,kind.."ButtonImage")
   button.Activated:Connect(function()
    if not button.Visible then return end
    if api.onOpen then api.onOpen() end
@@ -6155,6 +7151,91 @@ function M.new(gui,bag,journal,remote)
 end
 return M
 ]========],allowed={[========[-- Lobby entries only; products, odds and rewards remain undecided.
+local M={}
+function M.new(gui,bag,journal,remote)
+ local api={}
+ local function make(kind,props,parent)
+  local n=Instance.new(kind) for k,v in pairs(props) do n[k]=v end n.Parent=parent return n
+ end
+ local panel=make("Frame",{Name="LobbyMenus",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.9,.65),BackgroundColor3=Color3.fromRGB(23,35,58),BorderSizePixel=0,ZIndex=30},gui)
+ make("UISizeConstraint",{MaxSize=Vector2.new(520,330)},panel)
+ make("UICorner",{CornerRadius=UDim.new(0,16)},panel)
+ make("UIStroke",{Color=Color3.fromRGB(98,202,255),Thickness=2},panel)
+ make("UIGradient",{Color=ColorSequence.new(Color3.fromRGB(47,66,105),Color3.fromRGB(17,25,45)),Rotation=90},panel)
+ local title=make("TextLabel",{Size=UDim2.new(1,-88,0,56),Position=UDim2.fromOffset(20,8),BackgroundTransparency=1,Text="",TextSize=26,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(232,245,255),TextXAlignment=Enum.TextXAlignment.Left,ZIndex=31},panel)
+ local body=make("TextLabel",{Size=UDim2.new(1,-40,1,-90),Position=UDim2.fromOffset(20,76),BackgroundTransparency=1,Text="",TextSize=20,TextWrapped=true,Font=Enum.Font.Gotham,TextColor3=Color3.fromRGB(205,223,245),ZIndex=31},panel)
+ local close=make("TextButton",{Name="Close",Text="×",TextSize=30,Size=UDim2.fromOffset(48,48),Position=UDim2.new(1,-56,0,8),BackgroundColor3=Color3.fromRGB(49,69,99),TextColor3=Color3.new(1,1,1),ZIndex=31},panel)
+ make("UICorner",{CornerRadius=UDim.new(0,10)},close)
+ function api.close() panel.Visible=false end
+ close.Activated:Connect(api.close)
+ local buttons={}
+ local Icons=require(script.Parent:WaitForChild("HudIcons"))
+ for i,entry in ipairs({{"OpenShop","상점","상점 1 · 상점 2\n상품은 준비 중입니다."},{"OpenRoulette","룰렛","룰렛 규칙과 보상은 준비 중입니다."}}) do
+  local color=i==1 and Color3.fromRGB(100,255,12) or Color3.fromRGB(255,191,31)
+  local button=make("TextButton",{Name=entry[1],Text="",Position=UDim2.new(0,8,.42,i==1 and -26 or -90),Size=UDim2.fromOffset(144,56),BackgroundColor3=color,BorderSizePixel=0,Visible=false},gui)
+  make("UICorner",{CornerRadius=UDim.new(0,5)},button)
+  make("UIStroke",{Color=Color3.fromRGB(0,0,0),Thickness=2},button)
+  make("UIGradient",{Color=ColorSequence.new(Color3.new(1,1,1),Color3.fromRGB(150,214,135)),Rotation=90},button)
+  local icon=Icons.draw(button,i==1 and "Shop" or "Roulette",38) icon.Position=UDim2.fromOffset(8,9)
+  make("TextLabel",{Text=entry[2],BackgroundTransparency=1,Position=UDim2.fromOffset(54,0),Size=UDim2.new(1,-58,1,0),Font=Enum.Font.GothamBlack,TextSize=24,TextColor3=Color3.new(1,1,1),TextStrokeColor3=Color3.new(0,0,0),TextStrokeTransparency=0},button)
+  Icons.bindArtwork(button,i==1 and "ShopButtonImage" or "RouletteButtonImage")
+  button.Activated:Connect(function()
+   if not button.Visible then return end
+   if api.onOpen then api.onOpen() end
+   title.Text=entry[2] body.Text=entry[3] panel.Visible=true
+  end)
+  table.insert(buttons,button)
+ end
+ local journalButton=gui:FindFirstChild("OpenJournal")
+ if journalButton then
+  for _,n in ipairs(journalButton:GetChildren()) do n:Destroy() end
+  journalButton.AnchorPoint=Vector2.zero journalButton.Position=UDim2.new(0,8,.42,38) journalButton.Size=UDim2.fromOffset(144,56)
+  journalButton.BackgroundColor3=Color3.fromRGB(15,216,255) journalButton.BackgroundTransparency=0
+  make("UICorner",{CornerRadius=UDim.new(0,5)},journalButton) make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},journalButton)
+  local icon=Icons.draw(journalButton,"Journal",38) icon.Position=UDim2.fromOffset(8,9)
+  make("TextLabel",{Text="인덱스",BackgroundTransparency=1,Position=UDim2.fromOffset(54,0),Size=UDim2.new(1,-58,1,0),Font=Enum.Font.GothamBlack,TextSize=24,TextColor3=Color3.new(1,1,1),TextStrokeColor3=Color3.new(0,0,0),TextStrokeTransparency=0},journalButton)
+  Icons.bindArtwork(journalButton,"IndexButtonImage")
+ end
+ for i,kind in ipairs({"Egg","Paw"}) do
+  local button=make("TextButton",{Name="Open"..kind,Text="",AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-8,.42,i==1 and -26 or 38),Size=UDim2.fromOffset(56,56),BorderSizePixel=0,BackgroundColor3=i==1 and Color3.fromRGB(255,83,80) or Color3.fromRGB(255,160,54),Visible=false},gui)
+  make("UICorner",{CornerRadius=UDim.new(0,5)},button) make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},button)
+  local icon=Icons.draw(button,kind,42) icon.Position=UDim2.fromOffset(7,7)
+  Icons.bindArtwork(button,kind.."ButtonImage")
+  button.Activated:Connect(function()
+   if not button.Visible then return end
+   if api.onOpen then api.onOpen() end
+   if kind=="Egg" then bag.openRanchMenu() else bag.openCompanionMenu() end
+  end)
+  table.insert(buttons,button)
+ end
+ local function layout()
+  local camera=workspace.CurrentCamera
+  local compact=camera and camera.ViewportSize.Y<420
+  local factor=compact and .8 or 1
+  for _,button in ipairs(buttons) do
+   local scale=button:FindFirstChild("ResponsiveScale")
+   if not scale then scale=make("UIScale",{Name="ResponsiveScale"},button) end
+   scale.Scale=factor
+   local left=button.Name=="OpenShop" or button.Name=="OpenRoulette"
+   local offset=button.Name=="OpenRoulette" and -90 or button.Name=="OpenPaw" and 38 or -26
+   button.Position=UDim2.new(left and 0 or 1,left and 8 or -8,compact and .36 or .42,offset*factor)
+  end
+  if journalButton then
+   local scale=journalButton:FindFirstChild("ResponsiveScale") or make("UIScale",{Name="ResponsiveScale"},journalButton)
+   scale.Scale=factor journalButton.Position=UDim2.new(0,8,compact and .36 or .42,38*factor)
+  end
+ end
+ if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout) end
+ layout()
+ function api.state(data)
+  local lobby=data.phase=="Idle" or data.phase=="Lobby"
+  for _,button in ipairs(buttons) do button.Visible=lobby end
+  if not lobby then api.close() end
+ end
+ return api
+end
+return M
+]========],[========[-- Lobby entries only; products, odds and rewards remain undecided.
 local M={}
 function M.new(gui,bag,journal,remote)
  local api={}
@@ -6605,6 +7686,336 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
 end)
 remote:FireServer("Sync")
 ]========],allowed={[========[local Players=game:GetService("Players")
+local RS=game:GetService("ReplicatedStorage")
+local RunService=game:GetService("RunService")
+local UIS=game:GetService("UserInputService")
+local CAS=game:GetService("ContextActionService")
+local player=Players.LocalPlayer
+local package=RS:WaitForChild("RodeoFantasy")
+local Config=require(package:WaitForChild("Config"))
+local Rules=require(package:WaitForChild("HuntRules"))
+local remote=package:WaitForChild("CaptureRemote")
+local animator=require(script.Parent:WaitForChild("RideAnimator"))
+local rider=require(script.Parent:WaitForChild("RiderPresentation"))
+local gauge=require(script.Parent:WaitForChild("TamingGauge"))
+local crashEffect=require(script.Parent:WaitForChild("CrashEffect"))
+local audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local catch=require(script.Parent:WaitForChild("CatchPresentation"))
+local atmosphere=require(script.Parent:WaitForChild("HuntEffects"))
+local dash=require(script.Parent:WaitForChild("DashPresentation"))
+local markers=require(script.Parent:WaitForChild("DistanceMarkers"))
+local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
+monsters.DescendantAdded:Connect(function(part) if part:IsA("BasePart") then part.LocalTransparencyModifier=1 end end)
+local isolation=require(script.Parent:WaitForChild("HuntIsolation"))
+local state={phase="Idle",started=0,count=0,pending=0,distance=0}
+local held,left,right=false,false,false
+local pointerOrigin,pointerX,lastSteer=nil,nil,0
+local notice,noticeUntil="",0
+local menuBound=false local returnHeld=nil local suppressJumpUntilRelease=false
+local flightFrame=nil
+local savedType,savedSubject,savedFieldOfView=nil,nil,nil
+local function make(kind,props,parent)
+ local node=Instance.new(kind)
+ for k,v in pairs(props) do node[k]=v end
+ node.Parent=parent
+ return node
+end
+local gui=make("ScreenGui",{Name="RodeoCaptureUI",ResetOnSpawn=false,DisplayOrder=10},player:WaitForChild("PlayerGui"))
+local function text(parent,value,pos,size,font)
+ return make("TextLabel",{Text=value,Position=pos,Size=size,TextSize=font or 18,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(255,245,219),BackgroundTransparency=1,TextWrapped=true},parent)
+end
+local incomeFX=require(script.Parent:WaitForChild("IncomeEffects"))
+local bagUI=require(script.Parent:WaitForChild("BagUI")).new(gui,remote)
+local journalUI=require(script.Parent:WaitForChild("JournalUI")).new(gui,remote)
+local socialUI=require(script.Parent:WaitForChild("SocialUI")).new(gui,remote,bagUI,journalUI)
+local settingsUI=require(script.Parent:WaitForChild("SettingsUI")).new(gui,audio)
+local lobbyMenus=require(script.Parent:WaitForChild("LobbyMenus")).new(gui,bagUI,journalUI,remote)
+settingsUI.onOpen=function() bagUI.close() journalUI.close() socialUI.close() lobbyMenus.close() held=false pointerOrigin,pointerX=nil,nil end
+bagUI.onOpen=function() journalUI.close() settingsUI.close() socialUI.close() lobbyMenus.close() end
+journalUI.onOpen=function() bagUI.close() settingsUI.close() socialUI.close() lobbyMenus.close() end
+lobbyMenus.onOpen=function() bagUI.close() journalUI.close() settingsUI.close() socialUI.close() held=false pointerOrigin,pointerX=nil,nil end
+socialUI.onOpen=function() lobbyMenus.close() settingsUI.close() end
+local locale=require(script.Parent:WaitForChild("LocalizationController"))
+locale.watch(gui) locale.watch(workspace.RodeoLobby)
+game:GetService("ProximityPromptService").PromptShown:Connect(function(prompt)
+ if prompt.Name=="PetOwnCompanion" then
+  local model=prompt:FindFirstAncestorOfClass("Model")
+  prompt.Enabled=model and model:GetAttribute("OwnerUserId")==player.UserId or false
+ end
+end)
+-- Only the owner sees a ranch interaction. The server separately checks ownership/distance.
+for _,plot in ipairs(workspace.RodeoLobby.Plots:GetChildren()) do
+ local function updatePrompts()
+  for _,node in ipairs(plot:GetDescendants()) do
+   if node:IsA("ProximityPrompt") and node.Name=="ManageRanch" then node.Enabled=plot:GetAttribute("OwnerUserId")==player.UserId end
+  end
+ end
+ plot:GetAttributeChangedSignal("OwnerUserId"):Connect(updatePrompts)
+ plot.DescendantAdded:Connect(function(node) if node:IsA("ProximityPrompt") then updatePrompts() end end)
+ updatePrompts()
+end
+task.spawn(function() require(script.Parent:WaitForChild("CreatureMesh")).prepare() end)
+local function T(value) return locale.text(value) end
+local distance=text(gui,"0m",UDim2.new(0.5,-80,0,12),UDim2.fromOffset(160,48),32)
+distance.Name="DistanceCounter"
+distance.TextColor3=Color3.fromRGB(255,232,151)
+distance.TextStrokeColor3=Color3.fromRGB(26,46,35) distance.TextStrokeTransparency=0
+distance.BackgroundColor3=Color3.fromRGB(31,55,42) distance.BackgroundTransparency=0.12
+make("UICorner",{CornerRadius=UDim.new(0,14)},distance)
+make("UIStroke",{Color=Color3.fromRGB(113,148,95),Thickness=2},distance)
+local lastAspect=nil
+local hudStats=require(script.Parent:WaitForChild("HudStats")).new(gui)
+local bag=gui:FindFirstChild("LobbyStats")
+local panel=make("Frame",{Name="HuntHelp",AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,94),BackgroundColor3=Color3.fromRGB(43,67,49),BackgroundTransparency=0.22,BorderSizePixel=0},gui)
+make("UISizeConstraint",{MaxSize=Vector2.new(510,94)},panel)
+make("UICorner",{CornerRadius=UDim.new(0,14)},panel)
+local status=text(panel,"Rodeo Fantasy",UDim2.fromOffset(12,4),UDim2.new(1,-24,0,28),18)
+local instruction=text(panel,"A/D to steer · Space to jump / again to lasso",UDim2.fromOffset(12,34),UDim2.new(1,-24,0,28),13)
+local startButton=make("TextButton",{Name="StartHunt",Visible=false,AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.52),Size=UDim2.fromOffset(230,64),Text="Start hunt",TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(219,103,41)},gui)
+make("UICorner",{CornerRadius=UDim.new(0,16)},startButton)
+local returnButton=make("TextButton",{Name="ReturnLobby",AnchorPoint=Vector2.new(0.5,0.5),Position=UDim2.fromScale(0.5,0.64),Size=UDim2.fromOffset(230,48),Text="Return to lobby",TextSize=18,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundColor3=Color3.fromRGB(78,132,114),Visible=false},gui)
+make("UICorner",{CornerRadius=UDim.new(0,14)},returnButton)
+returnButton.Activated:Connect(function() remote:FireServer("ReturnLobby") end)
+local highlight=make("Highlight",{Enabled=false,FillTransparency=0.82,OutlineColor=Color3.fromRGB(255,222,91)},gui)
+local ring=make("Part",{Name="LocalLassoRange",Anchored=true,CanCollide=false,CanTouch=false,CanQuery=false,Transparency=1,Size=Vector3.new(1,1,1)},workspace)
+local ringPoints={} local shadowPoints={}
+for i=1,32 do
+ local a=make("Attachment",{},ring)
+ local angle=(i-1)/32*math.pi*2
+ a.Position=Vector3.new(math.cos(angle)*Config.Prototype.LassoRangeStuds,.08,math.sin(angle)*Config.Prototype.LassoRangeStuds)
+ local shadow=make("Attachment",{},ring) shadow.Position=a.Position-Vector3.new(0,.08,0) shadowPoints[i]=shadow
+ ringPoints[i]=a
+end
+local beams={}
+for i=1,32 do
+ beams[i]=make("Beam",{Attachment0=ringPoints[i],Attachment1=ringPoints[i%32+1],Width0=0.12,Width1=0.12,FaceCamera=true,Color=ColorSequence.new(Color3.fromRGB(94,248,255)),Enabled=false},ring)
+ beams[32+i]=make("Beam",{Name="RangeOutline",Attachment0=shadowPoints[i],Attachment1=shadowPoints[i%32+1],Width0=.32,Width1=.32,FaceCamera=true,Color=ColorSequence.new(Color3.fromRGB(24,40,58)),Enabled=false},ring)
+end
+local function active() return state.phase~="Idle" and state.phase~="GameOver" and state.phase~="CourseEnd" end
+local function steering()
+ if settingsUI.isOpen() then return 0 end
+ if state.phase~="Riding" then return 0 end
+ local keyLeft=not UIS:GetFocusedTextBox() and UIS:IsKeyDown(Enum.KeyCode.A)
+ local keyRight=not UIS:GetFocusedTextBox() and UIS:IsKeyDown(Enum.KeyCode.D)
+ if keyRight or keyLeft then return (keyRight and 1 or 0)-(keyLeft and 1 or 0) end
+ if held and pointerOrigin and pointerX then
+  local dx=pointerX-pointerOrigin
+  return math.abs(dx)<14 and 0 or math.clamp(dx/120,-1,1)
+ end
+ return 0
+end
+local function keyAction(_,inputState,input)
+ if UIS:GetFocusedTextBox() then return Enum.ContextActionResult.Pass end
+ if state.phase~="Riding" then left,right=false,false return Enum.ContextActionResult.Sink end
+ local down=inputState==Enum.UserInputState.Begin
+ if inputState==Enum.UserInputState.Cancel then left,right=false,false else
+  if input.KeyCode==Enum.KeyCode.A then left=down end
+  if input.KeyCode==Enum.KeyCode.D then right=down end
+ end
+ return Enum.ContextActionResult.Sink
+end
+local function jumpAction(_,inputState)
+ if settingsUI.isOpen() then return Enum.ContextActionResult.Sink end
+ if UIS:GetFocusedTextBox() or not active() then return Enum.ContextActionResult.Pass end
+ if suppressJumpUntilRelease then
+  if inputState==Enum.UserInputState.End or inputState==Enum.UserInputState.Cancel then suppressJumpUntilRelease=false end
+  return Enum.ContextActionResult.Sink
+ end
+ if inputState==Enum.UserInputState.Begin then remote:FireServer("Jump") end
+ return Enum.ContextActionResult.Sink
+end
+local function cameraMode(enabled)
+ local camera=workspace.CurrentCamera
+ if enabled and savedType==nil then
+  savedType,savedSubject,savedFieldOfView=camera.CameraType,camera.CameraSubject,camera.FieldOfView
+  CAS:BindActionAtPriority("RodeoSteer",keyAction,false,Enum.ContextActionPriority.High.Value+1,Enum.KeyCode.A,Enum.KeyCode.D,Enum.KeyCode.W,Enum.KeyCode.S)
+  CAS:BindActionAtPriority("RodeoJump",jumpAction,true,Enum.ContextActionPriority.High.Value+2,Enum.KeyCode.Space)
+  CAS:SetTitle("RodeoJump","Jump / Lasso")
+  CAS:SetPosition("RodeoJump",UDim2.new(1,-95,1,-160))
+  camera.CameraType=Enum.CameraType.Scriptable
+  camera.FieldOfView=Config.Prototype.CameraFieldOfView
+ elseif not enabled and savedType~=nil then
+  CAS:UnbindAction("RodeoSteer")
+  CAS:UnbindAction("RodeoJump")
+  camera.CameraType=savedType
+  camera.FieldOfView=savedFieldOfView
+  if savedSubject and savedSubject.Parent then camera.CameraSubject=savedSubject end
+  savedType,savedSubject,savedFieldOfView=nil,nil,nil
+  held,left,right=false,false,false
+ end
+ if not enabled and state.area=="Lobby" then
+  local humanoid=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+  if humanoid then camera.CameraSubject=humanoid camera.CameraType=Enum.CameraType.Custom end
+ end
+end
+local function menuMode(enabled)
+ if enabled==menuBound then return end menuBound=enabled returnHeld=nil
+ if not enabled then CAS:UnbindAction("RodeoRetry") CAS:UnbindAction("RodeoReturn") return end
+ CAS:BindActionAtPriority("RodeoRetry",function(_,inputState)
+  if inputState==Enum.UserInputState.Begin and not UIS:GetFocusedTextBox() then suppressJumpUntilRelease=true remote:FireServer("Start")
+  elseif inputState==Enum.UserInputState.End then suppressJumpUntilRelease=false end
+  return Enum.ContextActionResult.Sink
+ end,false,Enum.ContextActionPriority.High.Value+3,Enum.KeyCode.Space)
+ CAS:BindActionAtPriority("RodeoReturn",function(_,inputState)
+  if inputState==Enum.UserInputState.Begin and not UIS:GetFocusedTextBox() then returnHeld=os.clock()
+  elseif inputState==Enum.UserInputState.End or inputState==Enum.UserInputState.Cancel then returnHeld=nil end
+  return Enum.ContextActionResult.Sink
+ end,false,Enum.ContextActionPriority.High.Value+3,Enum.KeyCode.E)
+end
+startButton.Activated:Connect(function() remote:FireServer("Start") end)
+UIS.InputBegan:Connect(function(input,processed)
+ if processed or settingsUI.isOpen() or not active() then return end
+ if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
+  held=true pointerOrigin,pointerX=input.Position.X,input.Position.X
+ end
+end)
+UIS.InputChanged:Connect(function(input)
+ if input.UserInputType==Enum.UserInputType.MouseMovement or input.UserInputType==Enum.UserInputType.Touch then pointerX=input.Position.X end
+end)
+UIS.InputEnded:Connect(function(input)
+ if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
+  held=false
+  pointerOrigin,pointerX=nil,nil
+ end
+end)
+UIS.WindowFocusReleased:Connect(function()
+ held,left,right=false,false,false returnHeld=nil
+end)
+remote.OnClientEvent:Connect(function(kind,data)
+ if kind=="RanchMenu" then bagUI.openRanchMenu() return end
+ if kind=="Pen" then bagUI.openPen(data) return end
+ if kind=="Journal" then journalUI.snapshot(data) return end
+ if kind=="LobbyPet" then atmosphere.pet(data) return end
+ if kind=="Bag" then bagUI.snapshot(data) return end
+ if kind=="EvolutionResult" then bagUI.evolutionResult(data) return end
+ if kind=="BagIncome" then bagUI.income(data) return end
+ if kind~="State" then socialUI.event(kind,data) return end
+ if data.huntRoot and data.huntRoot:FindFirstChild("Monsters") and monsters~=data.huntRoot.Monsters then
+  monsters=data.huntRoot.Monsters
+  monsters.DescendantAdded:Connect(function(part) if part:IsA("BasePart") then part.LocalTransparencyModifier=1 end end)
+ end
+ if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow(),data.monsterCrashFrame,data.monsterCrashId) end
+ if data.phase~=state.phase then notice,noticeUntil="",0 end
+ state=data
+ bagUI.state(data) journalUI.state(data) socialUI.state(data) lobbyMenus.state(data)
+ if data.area=="Lobby" then
+  bagUI.income(data.income)
+  local slot=player:GetAttribute("LobbySlot")
+  local plot=slot and workspace.RodeoLobby.Plots:FindFirstChild("Plot_"..slot)
+  if plot and data.income and #data.income>0 then
+   local pets={}
+   for _,model in ipairs(plot.Pens:GetDescendants()) do if model:IsA("Model") and model:GetAttribute("BagItemId") then pets[model:GetAttribute("BagItemId")]=model end end
+   for _,gain in ipairs(data.income) do if pets[gain.id] then incomeFX.pet(pets[gain.id],gain.amount) end end
+  end
+ else incomeFX.clear() end
+ if data.message then notice,noticeUntil=data.message,os.clock()+3 end
+ startButton.Visible=state.phase~="Idle" and not active()
+ returnButton.Visible=state.phase=="GameOver" or state.phase=="CourseEnd"
+ startButton.Text=state.phase=="GameOver" and "Hunt again" or "Start hunt"
+ cameraMode(active() or state.phase=="CourseEnd")
+ menuMode(state.phase=="GameOver")
+ hudStats.state(state)
+end)
+player.CharacterAdded:Connect(function() state.phase="Idle" cameraMode(false) remote:FireServer("Sync") end)
+RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Camera.Value+1, function(dt)
+ if returnHeld and state.phase=="GameOver" and os.clock()-returnHeld>=1 then returnHeld=nil remote:FireServer("ReturnLobby") end
+ local clock=workspace:GetServerTimeNow()
+ if state.area=="Lobby" or state.area==nil then  end
+ local size=workspace.CurrentCamera.ViewportSize
+ local aspect=size.Y>0 and math.clamp(size.X/size.Y,0.4,4) or 1
+ if not lastAspect or math.abs(aspect-lastAspect)>0.05 then remote:FireServer("View",aspect) lastAspect=aspect end
+ local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+ local candidates={}
+ for _,model in ipairs(monsters:GetChildren()) do
+  if model.PrimaryPart and not model:GetAttribute("Occupied") then
+   local p=model.PrimaryPart.Position table.insert(candidates,{key=model,x=p.X,y=p.Y,z=p.Z,serial=model:GetAttribute("SpawnSerial") or 0,emerging=model:GetAttribute("Emerging")})
+  end
+ end
+ local selected={}
+ local ids={}
+ for _,id in ipairs(state.wildIds or {}) do ids[id]=true end
+ for _,candidate in ipairs(candidates) do
+  if ids[candidate.serial] then selected[candidate.key]=true end
+ end
+ isolation.update(player,state.area=="Hunt")
+ local frames=animator.update(monsters,clock,root and root.Position,dt,selected)
+ if state.area=="Lobby" then animator.update(workspace.RodeoLobby,clock,root and root.Position,dt) end
+ local t=Config.Prototype
+ local visualFrame=root and root.CFrame
+ if state.phase~="Airborne" then flightFrame=nil end
+ if active() and root then
+  local mount=state.monster and frames[state.monster]
+  if (state.phase=="Riding" or state.phase=="CourseEnd") and mount then
+   visualFrame=mount*CFrame.new(0,state.monster:GetAttribute("SaddleHeight") or t.RideHeightStuds,t.RideForwardStuds)
+  elseif state.phase=="Lassoing" and mount and state.origin then
+   local p=math.clamp((clock-state.started)/(state.landingSeconds or t.JumpSeconds),0,1)
+   visualFrame=state.origin:Lerp(mount*CFrame.new(0,state.monster:GetAttribute("SaddleHeight") or t.RideHeightStuds,t.RideForwardStuds),p)*CFrame.new(0,math.sin(math.pi*p)*t.JumpArcStuds*0.5,0)
+  elseif state.phase=="Airborne" and state.position and state.launchY then
+   local elapsed=math.clamp(clock-(state.sampleTime or clock),0,0.3)
+   local pos=state.position+Vector3.new(0,0,-t.AirStudsPerSecond)*elapsed
+   local target=CFrame.new(math.clamp(pos.X,-t.RoadHalfWidth,t.RoadHalfWidth),state.launchY+Rules.jumpHeight(clock-state.started,t.FlightSeconds,t.JumpArcStuds),pos.Z)
+   flightFrame=(flightFrame or root.CFrame):Lerp(target,1-math.exp(-22*dt))
+   visualFrame=flightFrame
+  end
+ end
+ atmosphere.update(state,visualFrame,clock)
+ local catchFov=catch.update(state,player.Character,visualFrame,clock)
+ rider.update(player.Character,state.phase,visualFrame,dt,clock,state.dashUntil)
+ dash.update(state.phase,visualFrame,clock,state.dashUntil,t.SwitchDashSeconds)
+ crashEffect.update(player.Character,state.phase,clock)
+ crashEffect.updateKnocks(clock,state.area=="Hunt" and monsters or nil)
+ catch.crates(state.huntRoot and state.huntRoot:FindFirstChild("Obstacles") or workspace.RodeoPrototype:FindFirstChild("Obstacles"),root and root.Position,clock,dt)
+ audio.update(state,monsters,root and root.Position,clock,selected)
+ local displayDistance=state.distance or 0
+ if active() then
+  local speed=state.phase=="Airborne" and t.AirStudsPerSecond or Rules.rideSpeed(clock,state.phase=="Riding" and state.dashUntil,(state.baseSpeed or t.ForwardStudsPerSecond),t.SwitchDashMultiplier)
+  displayDistance+=math.clamp(clock-(state.sampleTime or clock),0,0.3)*speed*t.MetersPerStud
+ end
+ markers.update(active() or state.phase=="CourseEnd",displayDistance,visualFrame,t.MetersPerStud)
+ displayDistance=math.min(displayDistance,1000)
+ distance.Visible=state.area=="Hunt"
+ bag.Visible=state.area=="Lobby" or state.phase=="Idle"
+ distance.Text=string.format("%dm",math.floor(displayDistance))
+ highlight.Enabled=false
+ panel.Visible=state.phase=="CourseEnd"
+ gauge.update(state.phase=="Riding" and state.monster and frames[state.monster] or nil,state.tamed and 1 or Rules.progress(clock-state.started,state.tameSeconds or Config.Hunt.TameSeconds),state.tamed,workspace.CurrentCamera)
+ for _,beam in ipairs(beams) do beam.Enabled=state.phase=="Airborne" end
+ if (active() or state.phase=="CourseEnd") and root then
+  -- Follow horizontal movement; jumping should not lift the whole view.
+  local groundFocus=Vector3.new(0,t.CameraGroundFocusStuds,visualFrame.Position.Z)
+  local target=CFrame.lookAt(groundFocus+Vector3.new(t.CameraSideStuds,t.CameraHeightStuds,t.CameraBehindStuds),groundFocus+Vector3.new(0,0,-t.CameraLookAheadStuds))
+  -- The followed visual position is already smoothed; a second camera lag hides jumps.
+  workspace.CurrentCamera.FieldOfView=t.CameraFieldOfView+catchFov
+  workspace.CurrentCamera.CFrame=target
+  workspace.CurrentCamera.Focus=CFrame.new(groundFocus)
+  if os.clock()-lastSteer>=0.1 then remote:FireServer("Steer",steering()) lastSteer=os.clock() end
+ end
+ if state.phase=="Airborne" and root then
+  ring.Position=Vector3.new(visualFrame.Position.X,0.15,visualFrame.Position.Z)
+  local nearest,best=nil,Config.Prototype.LassoRangeStuds^2
+  for _,model in ipairs(monsters:GetChildren()) do
+   if model.PrimaryPart and model~=state.previousMonster and not model:GetAttribute("Occupied") and not model:GetAttribute("Emerging") and selected[model] then
+    local d=model.PrimaryPart.Position-root.Position
+    if d.X*d.X+d.Z*d.Z<best then nearest,best=model,d.X*d.X+d.Z*d.Z end
+   end
+  end
+  if nearest then highlight.Adornee,highlight.Enabled=nearest,true end
+ end
+ if state.phase=="Riding" then
+  status.Text=state.angerAt and "Angry! Press Space to jump!" or state.tamed and "Tamed · Keep riding" or "Taming ♥"
+  instruction.Text="A/D to steer · Space to jump / again to lasso"
+
+ elseif state.phase=="Airborne" then
+  status.Text="Press Space to catch the next monster!"
+  instruction.Text="Lasso a monster inside the yellow ring"
+ elseif state.phase=="Lassoing" then status.Text="Flying to your next mount…" instruction.Text="Keep riding after landing"
+ elseif state.phase=="CourseEnd" then status.Text="1,000m · Next region coming soon" instruction.Text="Meadow complete · Start again or return"
+ elseif state.phase=="GameOver" then status.Text="Hunt ended" instruction.Text="Try again · Your bag income is kept"
+ else status.Text="" instruction.Text="" end
+ if os.clock()<noticeUntil and not state.angerAt then status.Text=notice end
+end)
+remote:FireServer("Sync")
+]========],[========[local Players=game:GetService("Players")
 local RS=game:GetService("ReplicatedStorage")
 local RunService=game:GetService("RunService")
 local UIS=game:GetService("UserInputService")
@@ -8618,6 +10029,29 @@ end)
 remote:FireServer("Sync")
 ]========]}},{parent=clients,name="HudIcons",kind="ModuleScript",new=true,after=[========[-- Small native shapes: no external images are required for the menu symbols.
 local I={}
+-- User-supplied PNGs become Roblox image assets only after upload. Keep the
+-- native controls usable until their content IDs are configured.
+function I.bindArtwork(button,key)
+ local package=game.ReplicatedStorage.RodeoFantasy
+ local image=Instance.new("ImageLabel") image.Name="UploadedArtwork"
+ image.BackgroundTransparency=1 image.Size=UDim2.fromScale(1,1)
+ image.ZIndex=button.ZIndex+2 image.ScaleType=Enum.ScaleType.Fit image.Parent=button
+ local background=button.BackgroundTransparency
+ local originals,strokes={},{}
+ for _,n in ipairs(button:GetChildren()) do
+  if n:IsA("GuiObject") and n~=image then originals[n]=n.Visible
+  elseif n:IsA("UIStroke") then strokes[n]=n.Enabled end
+ end
+ local function refresh()
+  local id=package:GetAttribute(key)
+  local ready=type(id)=="string" and id:match("^rbxassetid://%d+$")~=nil
+  image.Image=ready and id or "" image.Visible=ready
+  button.BackgroundTransparency=ready and 1 or background
+  for n,visible in pairs(originals) do n.Visible=not ready and visible end
+  for n,enabled in pairs(strokes) do n.Enabled=not ready and enabled end
+ end
+ package:GetAttributeChangedSignal(key):Connect(refresh) refresh()
+end
 function I.draw(parent,kind,size)
  local root=Instance.new("Frame") root.Name=kind.."Icon" root.Size=UDim2.fromOffset(size,size) root.BackgroundTransparency=1 root.Parent=parent
  local function shape(x,y,w,h,color,radius,rotation)
@@ -8649,6 +10083,61 @@ function I.draw(parent,kind,size)
 end
 return I
 ]========],allowed={[========[-- Small native shapes: no external images are required for the menu symbols.
+local I={}
+-- User-supplied PNGs become Roblox image assets only after upload. Keep the
+-- native controls usable until their content IDs are configured.
+function I.bindArtwork(button,key)
+ local package=game.ReplicatedStorage.RodeoFantasy
+ local image=Instance.new("ImageLabel") image.Name="UploadedArtwork"
+ image.BackgroundTransparency=1 image.Size=UDim2.fromScale(1,1)
+ image.ZIndex=button.ZIndex+2 image.ScaleType=Enum.ScaleType.Fit image.Parent=button
+ local background=button.BackgroundTransparency
+ local originals,strokes={},{}
+ for _,n in ipairs(button:GetChildren()) do
+  if n:IsA("GuiObject") and n~=image then originals[n]=n.Visible
+  elseif n:IsA("UIStroke") then strokes[n]=n.Enabled end
+ end
+ local function refresh()
+  local id=package:GetAttribute(key)
+  local ready=type(id)=="string" and id:match("^rbxassetid://%d+$")~=nil
+  image.Image=ready and id or "" image.Visible=ready
+  button.BackgroundTransparency=ready and 1 or background
+  for n,visible in pairs(originals) do n.Visible=not ready and visible end
+  for n,enabled in pairs(strokes) do n.Enabled=not ready and enabled end
+ end
+ package:GetAttributeChangedSignal(key):Connect(refresh) refresh()
+end
+function I.draw(parent,kind,size)
+ local root=Instance.new("Frame") root.Name=kind.."Icon" root.Size=UDim2.fromOffset(size,size) root.BackgroundTransparency=1 root.Parent=parent
+ local function shape(x,y,w,h,color,radius,rotation)
+  local n=Instance.new("Frame") n.Position=UDim2.fromScale(x,y) n.Size=UDim2.fromScale(w,h) n.BackgroundColor3=color n.BorderSizePixel=0 n.Rotation=rotation or 0 n.Parent=root
+  local c=Instance.new("UICorner") c.CornerRadius=UDim.new(radius or 0,0) c.Parent=n
+  local s=Instance.new("UIStroke") s.Color=Color3.fromRGB(15,18,20) s.Thickness=2 s.Parent=n return n
+ end
+ local white=Color3.fromRGB(255,249,229)
+ if kind=="Egg" then shape(.23,.08,.54,.82,Color3.fromRGB(255,211,145),.5)
+ elseif kind=="Paw" then
+  shape(.27,.48,.48,.4,Color3.fromRGB(255,198,124),.45)
+  for _,p in ipairs({{.08,.3},{.28,.1},{.53,.1},{.75,.3}}) do shape(p[1],p[2],.18,.28,Color3.fromRGB(255,209,151),.5) end
+ elseif kind=="Shop" then
+  shape(.2,.34,.65,.42,white,.12,-6) shape(.07,.17,.23,.09,white,.15)
+  for _,x in ipairs({.3,.68}) do shape(x,.84,.15,.15,white,.5) end
+ elseif kind=="Journal" then
+  shape(.18,.17,.64,.66,white,.07,-8)
+  for _,y in ipairs({.33,.48,.63}) do shape(.32,y,.36,.025,Color3.fromRGB(60,74,82),0) end
+ elseif kind=="Money" then
+  shape(.06,.25,.78,.52,Color3.fromRGB(92,226,39),.05,-12)
+  shape(.2,.12,.75,.5,Color3.fromRGB(130,255,59),.05,-12)
+  shape(.44,.16,.13,.51,Color3.fromRGB(240,215,35),0,-12)
+ elseif kind=="Roulette" then
+  shape(.08,.08,.84,.84,Color3.fromRGB(255,219,48),.5)
+  for i=0,5 do local a=i*math.pi/3 shape(.43+math.cos(a)*.25,.43+math.sin(a)*.25,.16,.16,i%2==0 and Color3.fromRGB(255,93,104) or white,.5) end
+  shape(.4,.4,.2,.2,Color3.fromRGB(250,250,250),.5)
+ end
+ return root
+end
+return I
+]========],[========[-- Small native shapes: no external images are required for the menu symbols.
 local I={}
 function I.draw(parent,kind,size)
  local root=Instance.new("Frame") root.Name=kind.."Icon" root.Size=UDim2.fromOffset(size,size) root.BackgroundTransparency=1 root.Parent=parent
@@ -8713,6 +10202,38 @@ function H.new(gui)
 end
 return H
 ]========],allowed={[========[local H={}
+local Icons=require(script.Parent:WaitForChild("HudIcons"))
+function H.new(gui)
+ local root=Instance.new("Frame") root.Name="LobbyStats" root:SetAttribute("BottomHud",true) root.AnchorPoint=Vector2.new(0,1)
+ root.Position=UDim2.new(0,8,1,-8) root.Size=UDim2.fromOffset(240,82) root.BackgroundTransparency=1 root.Parent=gui
+ local function label(name,y,color)
+  local n=Instance.new("TextLabel") n.Name=name n.Position=UDim2.fromOffset(48,y) n.Size=UDim2.fromOffset(186,40) n.BackgroundTransparency=1
+  n.Text="0" n.TextColor3=color n.TextStrokeColor3=Color3.new(0,0,0) n.TextStrokeTransparency=0 n.Font=Enum.Font.GothamBlack n.TextSize=30 n.TextXAlignment=Enum.TextXAlignment.Left n.Parent=root return n
+ end
+ local count=label("BagCount",0,Color3.new(1,1,1));local money=label("MoneyCount",42,Color3.fromRGB(54,255,9))
+ local cash=Icons.draw(root,"Money",40) cash.Position=UDim2.fromOffset(0,42)
+ local face=Instance.new("ImageLabel") face.Name="MossratFace" face.Size=UDim2.fromOffset(40,40) face.BackgroundTransparency=1 face.Parent=root
+ local asset=game.ReplicatedStorage.RodeoFantasy:GetAttribute("MossratFaceImage")
+ face.Image=type(asset)=="string" and asset or ""
+ -- Native fallback until the prepared transparent PNG is uploaded once.
+ local fallback=Instance.new("Frame") fallback.Name="FaceFallback" fallback.BackgroundTransparency=1 fallback.Size=UDim2.fromScale(1,1) fallback.Visible=face.Image=="" fallback.Parent=face
+ for _,v in ipairs({{.02,.03,.32,.6},{.66,.03,.32,.6},{.2,.28,.6,.65}}) do
+  local f=Instance.new("Frame") f.Position=UDim2.fromScale(v[1],v[2]) f.Size=UDim2.fromScale(v[3],v[4]) f.BackgroundColor3=Color3.fromRGB(141,201,56) f.BorderSizePixel=0 f.Parent=fallback
+  local c=Instance.new("UICorner") c.CornerRadius=UDim.new(.3,0) c.Parent=f
+ end
+ for _,x in ipairs({.33,.6}) do local eye=Instance.new("Frame") eye.Position=UDim2.fromScale(x,.5) eye.Size=UDim2.fromScale(.12,.17) eye.BackgroundColor3=Color3.fromRGB(36,30,21) eye.BorderSizePixel=0 eye.Parent=fallback end
+ game.ReplicatedStorage.RodeoFantasy:GetAttributeChangedSignal("MossratFaceImage"):Connect(function()
+  face.Image=game.ReplicatedStorage.RodeoFantasy:GetAttribute("MossratFaceImage") or "" fallback.Visible=face.Image==""
+ end)
+ local function short(n)
+  n=math.max(0,tonumber(n) or 0)
+  for _,v in ipairs({{1e9,"B"},{1e6,"M"},{1e3,"K"}}) do if n>=v[1] then return string.format("%.1f%s",n/v[1],v[2]):gsub("%.0([KMB])","%1") end end
+  return tostring(math.floor(n))
+ end
+ return {state=function(data) count.Text=short(data.count) money.Text="$"..short((data.balance or 0)+(data.pending or 0)) end}
+end
+return H
+]========],[========[local H={}
 local Icons=require(script.Parent:WaitForChild("HudIcons"))
 function H.new(gui)
  local root=Instance.new("Frame") root.Name="LobbyStats" root:SetAttribute("BottomHud",true) root.AnchorPoint=Vector2.new(0,1)
@@ -8853,6 +10374,114 @@ function UI.new(gui,audio)
 end
 return UI
 ]========],allowed={[========[local UI={}
+local UIS=game:GetService("UserInputService")
+local GuiService=game:GetService("GuiService")
+local function make(kind,props,parent)
+ local node=Instance.new(kind)
+ for k,v in pairs(props) do node[k]=v end
+ node.Parent=parent return node
+end
+local function round(node,radius)
+ make("UICorner",{CornerRadius=UDim.new(0,radius or 10)},node)
+end
+function UI.new(gui,audio)
+ local self={}
+ local ink=Color3.fromRGB(43,74,55)
+ local topbar=make("ScreenGui",{Name="RodeoTopbarSettings",ResetOnSpawn=false,DisplayOrder=30,ScreenInsets=Enum.ScreenInsets.TopbarSafeInsets,ZIndexBehavior=Enum.ZIndexBehavior.Sibling},gui.Parent)
+ local button=make("TextButton",{Name="OpenSettings",Text="",AutoButtonColor=true,BackgroundColor3=Color3.fromRGB(23,28,32),BackgroundTransparency=.12,BorderSizePixel=0,AnchorPoint=Vector2.new(0,.5),Position=UDim2.new(0,10,.5,0),Size=UDim2.fromOffset(56,56),ZIndex=30},topbar)
+ round(button,28)
+ local gear=make("Frame",{Name="Gear",BackgroundTransparency=1,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(30,30),ZIndex=31},button)
+ for i=0,7 do
+  local angle=i*math.pi/4
+  local tooth=make("Frame",{AnchorPoint=Vector2.new(.5,.5),Position=UDim2.new(.5,math.sin(angle)*12,.5,-math.cos(angle)*12),Size=UDim2.fromOffset(7,8),Rotation=i*45,BackgroundColor3=Color3.fromRGB(240,243,244),BorderSizePixel=0,ZIndex=32},gear)
+  round(tooth,1)
+ end
+ local disc=make("Frame",{AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(24,24),BackgroundColor3=Color3.fromRGB(240,243,244),BorderSizePixel=0,ZIndex=33},gear) round(disc,12)
+ local hole=make("Frame",{AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(10,10),BackgroundColor3=Color3.fromRGB(23,28,32),BorderSizePixel=0,ZIndex=34},gear) round(hole,5)
+ local window=make("Frame",{Name="AudioSettings",Visible=false,AnchorPoint=Vector2.new(0,0),Position=UDim2.fromOffset(14,12),Size=UDim2.new(.9,0,0,252),BackgroundColor3=Color3.fromRGB(249,242,222),BorderSizePixel=0,ZIndex=40,Active=true},gui)
+ make("UISizeConstraint",{MaxSize=Vector2.new(370,252)},window) round(window,16)
+ make("UIStroke",{Color=Color3.fromRGB(177,155,112),Thickness=1},window)
+ local function label(value,pos,size,font)
+  return make("TextLabel",{Text=value,Position=pos,Size=size,BackgroundTransparency=1,Font=Enum.Font.GothamBold,TextSize=font or 16,TextColor3=ink,TextXAlignment=Enum.TextXAlignment.Left,ZIndex=41},window)
+ end
+ label("Sound settings",UDim2.fromOffset(18,12),UDim2.new(1,-82,0,32),21)
+ local close=make("TextButton",{Name="CloseSettings",Text="×",Font=Enum.Font.GothamBold,TextSize=26,BackgroundTransparency=1,TextColor3=ink,Position=UDim2.new(1,-52,0,10),Size=UDim2.fromOffset(38,38),ZIndex=42},window)
+ label("Hunting continues while settings are open",UDim2.fromOffset(18,213),UDim2.new(1,-36,0,28),11)
+ local drag,connections=nil,{}
+ local function listen(signal,callback) connections[#connections+1]=signal:Connect(callback) end
+ local function placeButton()
+  local inset=GuiService.TopbarInset
+  if inset.Width>=76 and inset.Height>=40 then
+   button.Parent=topbar button.AnchorPoint=Vector2.new(0,.5) button.Position=UDim2.new(0,10,0,34)
+   button.Size=UDim2.fromOffset(44,44)
+  else
+   -- Keep settings accessible on narrow screens with no free topbar slot.
+   button.Parent=gui button.AnchorPoint=Vector2.new(0,0) button.Position=UDim2.fromOffset(14,12) button.Size=UDim2.fromOffset(48,48)
+  end
+  local stats=gui:FindFirstChild("LobbyStats")
+  if stats and stats:GetAttribute("BottomHud")~=true then stats.Position=UDim2.fromOffset(16,math.max(12,button.AbsolutePosition.Y+button.AbsoluteSize.Y-gui.AbsolutePosition.Y+8)) end
+ end
+ listen(button:GetPropertyChangedSignal("AbsolutePosition"),placeButton)
+ listen(button:GetPropertyChangedSignal("AbsoluteSize"),placeButton)
+ listen(GuiService:GetPropertyChangedSignal("TopbarInset"),placeButton) placeButton()
+ self.refreshLayout=placeButton
+ local function row(kind,title,y)
+  label(title,UDim2.fromOffset(18,y),UDim2.new(.7,0,0,28))
+  local value=label("",UDim2.new(1,-74,0,y),UDim2.fromOffset(56,28))
+  value.Name=kind.."Volume" value.TextXAlignment=Enum.TextXAlignment.Right
+  local minus=make("TextButton",{Name=kind.."Down",Text="−",Font=Enum.Font.GothamBold,TextSize=24,TextColor3=ink,BackgroundColor3=Color3.fromRGB(231,219,191),Position=UDim2.fromOffset(18,y+29),Size=UDim2.fromOffset(34,36),ZIndex=42},window) round(minus,8)
+  local plus=minus:Clone() plus.Name=kind.."Up" plus.Text="+" plus.Position=UDim2.new(1,-52,0,y+29) plus.Parent=window
+  local track=make("TextButton",{Name=kind.."Slider",Text="",AutoButtonColor=false,BackgroundTransparency=1,Position=UDim2.fromOffset(65,y+29),Size=UDim2.new(1,-130,0,36),ZIndex=42},window)
+  local base=make("Frame",{Position=UDim2.new(0,0,.5,-4),Size=UDim2.new(1,0,0,8),BackgroundColor3=Color3.fromRGB(221,207,171),BorderSizePixel=0,ZIndex=42},track) round(base,4)
+  local fill=make("Frame",{Name="Fill",Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(92,147,116),BorderSizePixel=0,ZIndex=43},base) round(fill,4)
+  local knob=make("Frame",{Name="Thumb",AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(1,.5),Size=UDim2.fromOffset(20,20),BackgroundColor3=Color3.fromRGB(255,250,237),BorderSizePixel=0,ZIndex=44},base) round(knob,10)
+  make("UIStroke",{Color=Color3.fromRGB(92,147,116),Thickness=2},knob)
+  local function set(amount)
+   audio.setVolume(kind,amount)
+   local current=audio.getVolume(kind)
+   value.Text=tostring(math.floor(current*100+.5)).."%"
+   fill.Size=UDim2.fromScale(current,1) knob.Position=UDim2.fromScale(current,.5)
+  end
+  local function pointer(x)
+   if track.AbsoluteSize.X>0 then set((x-track.AbsolutePosition.X)/track.AbsoluteSize.X) end
+  end
+  listen(minus.Activated,function() set(audio.getVolume(kind)-.05) end)
+  listen(plus.Activated,function() set(audio.getVolume(kind)+.05) end)
+  listen(track.InputBegan,function(input)
+   if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
+    drag={input=input,pointer=pointer} pointer(input.Position.X)
+   end
+  end)
+  listen(UIS.InputBegan,function(input)
+   if not window.Visible or GuiService.SelectedObject~=track then return end
+   if input.KeyCode==Enum.KeyCode.Left or input.KeyCode==Enum.KeyCode.DPadLeft then set(audio.getVolume(kind)-.05)
+   elseif input.KeyCode==Enum.KeyCode.Right or input.KeyCode==Enum.KeyCode.DPadRight then set(audio.getVolume(kind)+.05) end
+  end)
+  set(audio.getVolume(kind))
+ end
+ row("Music","Background music",54) row("Effects","Sound effects",134)
+ function self.close() window.Visible=false drag=nil end
+ function self.isOpen() return window.Visible end
+ listen(button.Activated,function()
+  if window.Visible then self.close() else
+   if self.onOpen then self.onOpen() end
+   window.Position=UDim2.fromOffset(math.max(14,math.min(button.AbsolutePosition.X,gui.AbsoluteSize.X-window.AbsoluteSize.X-14)),button.Parent==topbar and 12 or 68)
+   window.Visible=true
+  end
+ end)
+ listen(close.Activated,self.close)
+ listen(UIS.InputChanged,function(input)
+  if drag and (input==drag.input or (drag.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseMovement)) then drag.pointer(input.Position.X) end
+ end)
+ listen(UIS.InputEnded,function(input)
+  if drag and (input==drag.input or (drag.input.UserInputType==Enum.UserInputType.MouseButton1 and input.UserInputType==Enum.UserInputType.MouseButton1)) then drag=nil end
+ end)
+ listen(UIS.WindowFocusReleased,function() drag=nil end)
+ listen(window.Destroying,function() for _,connection in ipairs(connections) do connection:Disconnect() end topbar:Destroy() end)
+ return self
+end
+return UI
+]========],[========[local UI={}
 local UIS=game:GetService("UserInputService")
 local GuiService=game:GetService("GuiService")
 local function make(kind,props,parent)
@@ -9790,6 +11419,295 @@ function UI.new(gui,remote)
 end
 return UI
 ]========],allowed={[========[local UI={}
+local player=game:GetService("Players").LocalPlayer
+local UIS=game:GetService("UserInputService")
+local L=require(game.ReplicatedStorage.RodeoFantasy.Localization)
+local config=require(game.ReplicatedStorage.RodeoFantasy.Config)
+local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
+local Query=require(game.ReplicatedStorage.RodeoFantasy.CollectionQuery)
+local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
+local Income=require(script.Parent:WaitForChild("IncomeEffects"))
+local Audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local function make(class,props,parent)
+ local node=Instance.new(class)
+ if node:IsA("TextLabel") or node:IsA("TextButton") then node.Font=Enum.Font.GothamBold end
+ for k,v in pairs(props) do node[k]=v end
+ node.Parent=parent return node
+end
+function UI.iconButton(gui,kind,key,right)
+ local bag=kind=="Bag"
+ local button=make("TextButton",{Name=bag and "OpenBag" or "OpenJournal",Text="",AnchorPoint=Vector2.new(1,1),Position=UDim2.new(1,-right,1,-18),Size=UDim2.fromOffset(64,64),BackgroundColor3=Color3.fromRGB(40,65,56),BackgroundTransparency=.08,BorderSizePixel=0},gui)
+ make("UICorner",{CornerRadius=UDim.new(0,16)},button)
+ make("UIStroke",{Color=Color3.fromRGB(177,151,108),Thickness=1},button)
+ local function shape(name,x,y,w,h,color,radius)
+  local node=make("Frame",{Name=name,Position=UDim2.fromOffset(x,y),Size=UDim2.fromOffset(w,h),BackgroundColor3=color,BorderSizePixel=0},button)
+  make("UICorner",{CornerRadius=UDim.new(0,radius or 3)},node) return node
+ end
+ if bag then
+  local leather=Color3.fromRGB(178,126,84)
+  shape("Handle",25,10,14,12,leather,5)
+  shape("Backpack",18,17,28,32,leather,8)
+  shape("Pocket",23,31,18,12,Color3.fromRGB(133,88,58),4)
+  shape("Clasp",30,28,4,5,Color3.fromRGB(250,213,131),1)
+ else
+  shape("Cover",12,15,40,32,Color3.fromRGB(178,126,84),4)
+  shape("LeftPage",15,17,16,26,Color3.fromRGB(249,239,211),2)
+  shape("RightPage",33,17,16,26,Color3.fromRGB(249,239,211),2)
+  shape("Spine",31,16,2,29,Color3.fromRGB(120,91,61),1)
+  for _,x in ipairs({18,36}) do for y=23,35,6 do shape("Ink",x,y,10,2,Color3.fromRGB(136,156,119),1) end end
+ end
+ make("TextLabel",{Name="Shortcut",Text=key,BackgroundTransparency=1,Position=UDim2.fromOffset(42,45),Size=UDim2.fromOffset(18,16),TextSize=11,TextColor3=Color3.fromRGB(246,229,193)},button)
+ return button
+end
+function UI.new(gui,remote)
+ local self={area="Lobby",items={},count=-1,pen=nil,region="All",page=1,query="",evolutionMode=false,selected={}}
+ local button=UI.iconButton(gui,"Bag","R",18)
+ local window=make("Frame",{Name="BagWindow",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.92,.84),BackgroundColor3=Color3.new(1,1,1),ZIndex=20},gui)
+ make("UIGradient",{Rotation=90,Color=ColorSequence.new({ColorSequenceKeypoint.new(0,Color3.fromRGB(240,208,143)),ColorSequenceKeypoint.new(.48,Color3.fromRGB(213,166,99)),ColorSequenceKeypoint.new(1,Color3.fromRGB(169,116,65))})},window)
+ make("UISizeConstraint",{MaxSize=Vector2.new(1100,720)},window)
+ make("UICorner",{CornerRadius=UDim.new(0,18)},window)
+ make("UIStroke",{Color=Color3.fromRGB(177,151,108),Thickness=1},window)
+ local title=make("TextLabel",{Text="Bag",BackgroundTransparency=1,Position=UDim2.fromOffset(20,10),Size=UDim2.new(1,-100,0,40),TextSize=26,TextColor3=Color3.fromRGB(43,74,55),ZIndex=21},window)
+ local close=make("TextButton",{Name="CloseBag",Text="×",Position=UDim2.new(1,-54,0,12),Size=UDim2.fromOffset(38,34),BackgroundTransparency=1,TextSize=26,TextColor3=Color3.fromRGB(70,58,40),ZIndex=21},window)
+ local money=make("TextLabel",{Name="BagMoney",BackgroundTransparency=1,Position=UDim2.fromOffset(20,55),Size=UDim2.new(.56,-20,0,34),TextSize=20,TextColor3=Color3.fromRGB(43,74,55),TextXAlignment=Enum.TextXAlignment.Left,ZIndex=21},window)
+ local evolveToggle=make("TextButton",{Name="EvolutionMode",Text=L.text("Evolve",player.LocaleId),Position=UDim2.new(.81,0,0,55),Size=UDim2.new(.17,0,0,34),TextSize=16,BackgroundColor3=Color3.fromRGB(110,133,91),TextColor3=Color3.new(1,1,1),ZIndex=23},window)
+ make("UICorner",{CornerRadius=UDim.new(0,9)},evolveToggle)
+ local evolveControls=make("Frame",{Name="EvolutionControls",Visible=false,BackgroundColor3=Color3.fromRGB(235,222,194),Position=UDim2.fromOffset(16,174),Size=UDim2.new(1,-32,0,58),ZIndex=22},window)
+ make("UICorner",{CornerRadius=UDim.new(0,10)},evolveControls)
+ local evolveStatus=make("TextLabel",{Name="EvolutionStatus",Text=L.text("Select three matching monsters",player.LocaleId),BackgroundTransparency=1,Position=UDim2.fromOffset(10,0),Size=UDim2.new(1,-258,1,0),TextSize=14,TextColor3=Color3.fromRGB(70,58,40),TextXAlignment=Enum.TextXAlignment.Left,ZIndex=23},evolveControls)
+ local evolvePreview=make("ViewportFrame",{Name="EvolutionPreview",BackgroundColor3=Color3.fromRGB(249,242,222),BackgroundTransparency=.12,Position=UDim2.new(1,-248,0,5),Size=UDim2.fromOffset(48,48),ZIndex=23},evolveControls)
+ make("UICorner",{CornerRadius=UDim.new(0,8)},evolvePreview)
+ local evolveCancel=make("TextButton",{Name="CancelEvolution",Text=L.text("Cancel",player.LocaleId),Position=UDim2.new(1,-194,0,12),Size=UDim2.fromOffset(80,34),TextSize=13,BackgroundColor3=Color3.fromRGB(164,139,107),TextColor3=Color3.new(1,1,1),ZIndex=24},evolveControls)
+ local evolveConfirm=make("TextButton",{Name="ConfirmEvolution",Text=L.text("Evolve",player.LocaleId),Position=UDim2.new(1,-108,0,12),Size=UDim2.fromOffset(100,34),TextSize=13,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},evolveControls)
+ make("UICorner",{CornerRadius=UDim.new(0,8)},evolveCancel) make("UICorner",{CornerRadius=UDim.new(0,8)},evolveConfirm)
+ local scroll=make("ScrollingFrame",{Name="BagCards",BackgroundTransparency=1,BorderSizePixel=0,Position=UDim2.fromOffset(16,175),Size=UDim2.new(1,-32,1,-230),CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y,ScrollBarThickness=6,ZIndex=21},window)
+ make("UIGridLayout",{CellSize=UDim2.fromOffset(170,245),CellPadding=UDim2.fromOffset(12,12),SortOrder=Enum.SortOrder.LayoutOrder},scroll)
+ local empty=make("TextLabel",{Name="EmptyBag",Text="No monsters caught yet",BackgroundTransparency=1,Position=UDim2.fromScale(.1,.45),Size=UDim2.fromScale(.8,.15),TextSize=20,TextWrapped=true,ZIndex=22},window)
+ local search=make("TextBox",{Name="BagSearch",PlaceholderText=L.text("Search monsters",player.LocaleId),Text="",ClearTextOnFocus=false,Position=UDim2.fromOffset(20,95),Size=UDim2.new(1,-40,0,34),BackgroundColor3=Color3.fromRGB(255,250,237),TextColor3=Color3.fromRGB(71,58,40),TextSize=17,ZIndex=23},window)
+ make("UICorner",{CornerRadius=UDim.new(0,8)},search)
+ local tabs=make("ScrollingFrame",{Name="BagRegions",BackgroundTransparency=1,BorderSizePixel=0,Position=UDim2.fromOffset(20,136),Size=UDim2.new(1,-40,0,32),AutomaticCanvasSize=Enum.AutomaticSize.X,CanvasSize=UDim2.new(),ScrollBarThickness=0,ZIndex=23},window)
+ make("UIListLayout",{FillDirection=Enum.FillDirection.Horizontal,Padding=UDim.new(0,8)},tabs)
+ local previous=make("TextButton",{Name="BagPrevious",Text="‹",BackgroundTransparency=1,Position=UDim2.new(.35,-45,1,-45),Size=UDim2.fromOffset(40,30),TextSize=24,TextColor3=Color3.fromRGB(70,58,40),ZIndex=23},window)
+ local pageLabel=make("TextLabel",{Name="BagPage",Text="1 / 1",BackgroundTransparency=1,Position=UDim2.new(.35,0,1,-45),Size=UDim2.new(.3,0,0,30),TextSize=15,ZIndex=23},window)
+ local nextPage=make("TextButton",{Name="BagNext",Text="›",BackgroundTransparency=1,Position=UDim2.new(.65,5,1,-45),Size=UDim2.fromOffset(40,30),TextSize=24,TextColor3=Color3.fromRGB(70,58,40),ZIndex=23},window)
+ function self.filter(region,query)
+  self.region,self.query,self.page=region or self.region,query or self.query,1
+  self.snapshot(self.items)
+ end
+ for _,region in ipairs(Query.regions(Catalog)) do
+  local tab=make("TextButton",{Name="Region_"..region,Text=L.text(region,player.LocaleId),Size=UDim2.fromOffset(112,30),BackgroundColor3=Color3.fromRGB(213,193,159),TextColor3=Color3.fromRGB(65,53,37),TextSize=15,ZIndex=24},tabs)
+  make("UICorner",{CornerRadius=UDim.new(0,8)},tab)
+  tab.Activated:Connect(function() self.filter(region,nil) end)
+ end
+ local breed=make("TextButton",{Name="Breed",Text="교배",Position=UDim2.new(.62,0,0,55),Size=UDim2.new(.17,0,0,34),TextSize=16,BackgroundColor3=Color3.fromRGB(110,133,91),TextColor3=Color3.new(1,1,1),ZIndex=23},window)
+ breed.Activated:Connect(function() if self.onBreed then self.onBreed() end end)
+ local hovered,hold
+ UIS.InputBegan:Connect(function(input,processed) if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.E and hovered and window.Visible and (self.area=="Cafe" or self.area=="Lobby") then hold={id=hovered,at=os.clock()} end end)
+ UIS.InputEnded:Connect(function(input) if input.KeyCode==Enum.KeyCode.E then hold=nil end end)
+ game:GetService("RunService").RenderStepped:Connect(function() if hold and window.Visible and hovered==hold.id and os.clock()-hold.at>=1 then remote:FireServer("Summon",hold.id) hold=nil end end)
+ local chooser
+ local revision=0
+ local function selectedCount() local n=0 for _ in pairs(self.selected) do n+=1 end return n end
+ local function selectionAnchor()
+  for id in pairs(self.selected) do
+   for _,item in ipairs(self.items) do if item.id==id then return item end end
+  end
+ end
+ local function updateEvolutionControls()
+  local count=selectedCount()
+  local anchor=selectionAnchor()
+  if anchor then
+   evolveStatus.Text=L.text(anchor.monsterId,player.LocaleId).." · "..anchor.stars.."★  →  "..(anchor.stars+1).."★    "..count.." / 3"
+   for _,child in ipairs(evolvePreview:GetChildren()) do child:Destroy() end
+   if anchor.stars<10 then Portrait.fill(evolvePreview,anchor.monsterId,anchor.stars+1,false) end
+  else
+   evolveStatus.Text=L.text("Select three matching monsters",player.LocaleId).."    "..count.." / 3"
+   for _,child in ipairs(evolvePreview:GetChildren()) do child:Destroy() end
+  end
+  evolveConfirm.Active=count==3 and anchor~=nil and anchor.stars<10
+  evolveConfirm.AutoButtonColor=evolveConfirm.Active
+  evolveConfirm.BackgroundColor3=evolveConfirm.Active and Color3.fromRGB(80,134,104) or Color3.fromRGB(151,159,143)
+ end
+ function self.setEvolutionMode(enabled)
+  self.evolutionMode=enabled==true
+  if not self.evolutionMode then self.selected={} end
+  self.mode=nil self.pen=nil chooser.Visible=false scroll.Visible=true
+  evolveControls.Visible=self.evolutionMode
+  scroll.Position=UDim2.fromOffset(16,self.evolutionMode and 240 or 175)
+  scroll.Size=UDim2.new(1,-32,1,self.evolutionMode and -295 or -230)
+  evolveToggle.Text=self.evolutionMode and L.text("Cancel",player.LocaleId) or L.text("Evolve",player.LocaleId)
+  self.snapshot(self.items)
+ end
+ evolveToggle.Activated:Connect(function()
+  if self.area~="Hunt" and not self.pen then self.setEvolutionMode(not self.evolutionMode) end
+ end)
+ evolveCancel.Activated:Connect(function() self.setEvolutionMode(false) end)
+ evolveConfirm.Activated:Connect(function()
+  if not evolveConfirm.Active or self.area=="Hunt" then return end
+  local ids={} for id in pairs(self.selected) do table.insert(ids,id) end
+  table.sort(ids)
+  if #ids==3 then remote:FireServer("Evolve",ids) end
+ end)
+ search:GetPropertyChangedSignal("Text"):Connect(function()
+  revision+=1 local current=revision
+  task.delay(.12,function() if revision==current then self.filter(nil,search.Text) end end)
+ end)
+ previous.Activated:Connect(function() self.page=math.max(1,self.page-1) self.snapshot(self.items) end)
+ nextPage.Activated:Connect(function() self.page+=1 self.snapshot(self.items) end)
+ function self.close() window.Visible=false self.pen=nil self.setEvolutionMode(false) end
+ function self.opened() Audio.ui("BagOpen") if self.onOpen then self.onOpen() end end
+ chooser=make("Frame",{Name="RanchChooser",Visible=false,BackgroundTransparency=1,Position=UDim2.fromOffset(20,110),Size=UDim2.new(1,-40,1,-130),ZIndex=23},window)
+ make("UIGridLayout",{CellSize=UDim2.new(.45,0,0,90),CellPadding=UDim2.fromOffset(18,18)},chooser)
+ for index=1,1 do
+  local choice=make("TextButton",{Name="RanchChoice"..index,Text="부화소".." "..index,BackgroundColor3=Color3.fromRGB(147,182,154),TextColor3=Color3.fromRGB(37,61,46),TextSize=22,ZIndex=24},chooser)
+  make("UICorner",{CornerRadius=UDim.new(0,14)},choice)
+  choice.Activated:Connect(function() if self.area=="Lobby" then remote:FireServer("Manage",index) end end)
+ end
+ local babies=make("TextButton",{Name="BabyCapsules",Text="새끼 캡슐 4칸 · 설정 준비 중",BackgroundColor3=Color3.fromRGB(147,182,154),TextColor3=Color3.fromRGB(37,61,46),TextSize=18,TextWrapped=true,ZIndex=24},chooser)
+ make("UICorner",{CornerRadius=UDim.new(0,14)},babies)
+ function self.openCompanionMenu()
+  if self.area=="Hunt" then return end
+  self.mode="Companion" self.pen=nil self.setEvolutionMode(false) chooser.Visible=false scroll.Visible=true
+  self.snapshot(self.items) window.Visible=true self.opened() title.Text="동행 몬스터 · 1마리 선택" remote:FireServer("Bag")
+ end
+ function self.openRanchMenu()
+  if self.area=="Hunt" then return end
+  self.setEvolutionMode(false) self.mode="RanchMenu" self.pen=nil self.snapshot(self.items) window.Visible=true self.opened() chooser.Visible=true scroll.Visible=false empty.Visible=false
+  title.Text="알 관리 · 개인 부화소"
+ end
+ function self.toggle()
+  if self.area=="Hunt" then return end
+  self.mode=nil self.pen=nil self.setEvolutionMode(false) chooser.Visible=false scroll.Visible=true
+  self.snapshot(self.items)
+  window.Visible=not window.Visible
+  if window.Visible then self.opened() remote:FireServer("Bag") end
+ end
+ button.Activated:Connect(self.toggle)
+ close.Activated:Connect(self.close)
+ UIS.InputBegan:Connect(function(input,processed)
+  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.R then self.toggle() end
+ end)
+ function self.state(state)
+  self.area=state.area
+  local nextSummoned=state.summonedId
+  if self.summonedId~=nextSummoned then self.summonedId=nextSummoned self.snapshot(self.items) end
+  button.Visible=state.area~="Hunt"
+  if state.area=="Hunt" then window.Visible=false self.pen=nil self.setEvolutionMode(false) end
+  money.Text="코인: "..tostring((state.pending or 0)+(state.balance or 0))
+  button.Text=""
+  if state.area~="Hunt" and self.count~=state.count then self.count=state.count remote:FireServer("Bag") end
+ end
+ function self.openPen(index)
+  if self.area=="Hunt" then return end
+  self.setEvolutionMode(false) self.mode=nil chooser.Visible=false scroll.Visible=true
+  self.pen=index self.snapshot(self.items) window.Visible=true self.opened()
+ end
+ function self.snapshot(items)
+  self.items=items self.cards={} hovered=nil hold=nil
+  local present={} for _,item in ipairs(items) do present[item.id]=true end
+  for id in pairs(self.selected) do if not present[id] then self.selected[id]=nil end end
+  local placed=0
+  for _,item in ipairs(items) do if item.assignedPen==self.pen and self.pen then placed+=1 end end
+  title.Text=L.text(self.mode=="Companion" and "동행 몬스터 · 1마리 선택" or self.mode=="RanchMenu" and "Choose ranch" or self.pen and "Ranch" or "Bag",player.LocaleId)..(self.pen and (" "..self.pen.." · "..placed.."/2") or "")
+  for _,node in ipairs(scroll:GetChildren()) do if node:IsA("Frame") then node:Destroy() end end
+  local filtered=Query.filter(items,Catalog,self.region,self.query,function(id) return L.text(id,player.LocaleId) end)
+  local pages=math.max(1,math.ceil(#filtered/12)) self.page=math.clamp(self.page,1,pages)
+  pageLabel.Text=self.page.." / "..pages
+  local show=self.mode~="RanchMenu"
+  search.Visible=show tabs.Visible=show previous.Visible=show nextPage.Visible=show pageLabel.Visible=show
+  evolveToggle.Visible=show and not self.pen breed.Visible=show and not self.pen
+  evolveControls.Visible=show and self.evolutionMode and not self.pen
+  if self.evolutionMode then
+   scroll.Position=UDim2.fromOffset(16,240) scroll.Size=UDim2.new(1,-32,1,-295)
+  else
+   scroll.Position=UDim2.fromOffset(16,175) scroll.Size=UDim2.new(1,-32,1,-230)
+  end
+  empty.Visible=show and #filtered==0
+  empty.Text=L.text(#items==0 and "No monsters caught yet" or "No matching monsters",player.LocaleId)
+  for _,tab in ipairs(tabs:GetChildren()) do if tab:IsA("TextButton") then tab.BackgroundColor3=tab.Name=="Region_"..self.region and Color3.fromRGB(167,127,79) or Color3.fromRGB(213,193,159) end end
+  scroll.CanvasPosition=Vector2.zero
+  for index=(self.page-1)*12+1,math.min(self.page*12,#filtered) do
+   local item=filtered[index]
+   local card=make("Frame",{Name="MonsterCard",Size=UDim2.fromOffset(170,245),BackgroundColor3=Color3.fromRGB(237,225,204),ZIndex=22,LayoutOrder=index},scroll)
+   make("UICorner",{CornerRadius=UDim.new(0,12)},card)
+   local male=item.sex=="Male" local female=item.sex=="Female"
+   local color=male and Color3.fromRGB(72,130,180) or female and Color3.fromRGB(183,88,115) or Color3.fromRGB(119,109,91)
+   local badge=make("Frame",{Name="SexBadge",AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-7,0,6),Size=UDim2.fromOffset(30,26),Visible=male or female,BackgroundColor3=Color3.fromRGB(255,241,213),BorderSizePixel=0,ZIndex=26},card)
+   make("UICorner",{CornerRadius=UDim.new(0,6)},badge)
+   local offset=male and 0 or 3
+   local ring=make("Frame",{Name="SexRing",Position=UDim2.fromOffset(6+offset,5),Size=UDim2.fromOffset(11,11),BackgroundTransparency=1,ZIndex=27},badge)
+   make("UICorner",{CornerRadius=UDim.new(1,0)},ring) make("UIStroke",{Color=color,Thickness=2},ring)
+   local function line(name,x,y,w,h,rotation)
+    make("Frame",{Name=name,Position=UDim2.fromOffset(x+offset,y),Size=UDim2.fromOffset(w,h),Rotation=rotation or 0,BackgroundColor3=color,BorderSizePixel=0,ZIndex=27},badge)
+   end
+   if male then line("MaleStem",14,4,9,2,-45) line("ArrowTop",18,2,6,2) line("ArrowRight",22,2,2,6)
+   elseif female then line("FemaleStem",10,15,2,7) line("FemaleCross",7,18,8,2) end
+   self.cards[item.id]=card
+   local preview=make("ViewportFrame",{Name="MonsterImage",BackgroundTransparency=1,Size=UDim2.new(1,0,0,140),ZIndex=23,Ambient=Color3.fromRGB(195,195,195),LightColor=Color3.new(1,1,1)},card)
+   Portrait.fill(preview,item.monsterId,item.stars,false)
+   make("TextLabel",{Text=L.text(item.monsterId,player.LocaleId).." · "..tostring(item.stars).."★",BackgroundTransparency=1,Position=UDim2.fromOffset(4,140),Size=UDim2.new(1,-8,0,28),TextSize=18,TextColor3=Color3.fromRGB(43,74,55),ZIndex=23},card)
+   make("TextLabel",{Name="Income",Text=L.income(item.incomeAmount,item.incomeSeconds,player.LocaleId),BackgroundTransparency=1,Position=UDim2.fromOffset(4,172),Size=UDim2.new(1,-8,0,30),TextSize=14,TextWrapped=true,TextColor3=Color3.fromRGB(43,74,55),ZIndex=23},card)
+   if self.mode=="Companion" then
+    local choose=make("TextButton",{Name="ChooseCompanion",Text=self.summonedId==item.id and "소환 해제" or "동행 선택",Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,32),TextSize=16,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},card)
+    choose.Activated:Connect(function() if self.area=="Lobby" then remote:FireServer("Summon",item.id) end end)
+   elseif self.pen then
+    local mine=item.assignedPen==self.pen
+    local allowed=mine or (not item.assignedPen and placed<2)
+    local label=mine and "Return to bag" or item.assignedPen and "Placed" or placed>=2 and "Full" or "Place"
+    local choose=make("TextButton",{Name="ChooseMonster",Text=L.text(label,player.LocaleId),Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,29),TextSize=14,BackgroundColor3=allowed and Color3.fromRGB(80,134,104) or Color3.fromRGB(154,167,151),TextColor3=Color3.new(1,1,1),ZIndex=24},card)
+    make("UICorner",{CornerRadius=UDim.new(0,8)},choose)
+    choose.Activated:Connect(function()
+     if allowed and self.pen and self.area=="Lobby" then remote:FireServer(mine and "Remove" or "Place",{id=item.id,pen=self.pen}) end
+    end)
+   elseif self.evolutionMode then
+    local anchor=selectionAnchor()
+    local compatible=not anchor or (anchor.monsterId==item.monsterId and anchor.stars==item.stars)
+    local selected=self.selected[item.id]==true
+    local choose=make("TextButton",{Name="SelectForEvolution",Text=selected and L.text("Selected",player.LocaleId) or L.text("Select",player.LocaleId),Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,29),TextSize=14,BackgroundColor3=selected and Color3.fromRGB(80,134,104) or compatible and Color3.fromRGB(147,182,154) or Color3.fromRGB(184,181,168),TextColor3=Color3.new(1,1,1),Active=compatible and (selected or selectedCount()<3),ZIndex=24},card)
+    make("UICorner",{CornerRadius=UDim.new(0,8)},choose)
+    choose.Activated:Connect(function()
+     if self.selected[item.id] then self.selected[item.id]=nil
+     elseif compatible and selectedCount()<3 and self.area~="Hunt" then self.selected[item.id]=true end
+     self.snapshot(self.items)
+    end)
+   elseif self.area=="Cafe" or self.area=="Lobby" then
+    if item.id==self.summonedId and self.area=="Cafe" then
+     make("TextLabel",{Text="소환 중",BackgroundTransparency=1,Position=UDim2.fromOffset(4,208),Size=UDim2.new(1,-8,0,29),TextSize=14,ZIndex=23},card)
+    elseif not item.breedingTeam then
+     local summon=make("TextButton",{Text=item.id==self.summonedId and "E 꾹 · 소환 해제" or "E 꾹 · 소환",Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,29),TextSize=14,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},card)
+     card.MouseEnter:Connect(function() hovered=item.id end) card.MouseLeave:Connect(function() if hovered==item.id then hovered=nil hold=nil end end)
+     summon.InputBegan:Connect(function(input) if input.UserInputType==Enum.UserInputType.Touch or input.UserInputType==Enum.UserInputType.MouseButton1 then hovered=item.id hold={id=item.id,at=os.clock()} end end)
+     summon.InputEnded:Connect(function() hold=nil end)
+    end
+   elseif item.assignedPen then
+    make("TextLabel",{Text=L.text("Placed",player.LocaleId).." · "..item.assignedPen,BackgroundTransparency=1,Position=UDim2.fromOffset(4,208),Size=UDim2.new(1,-8,0,29),TextSize=14,ZIndex=23},card)
+   end
+
+  end
+  updateEvolutionControls()
+ end
+ function self.evolutionResult(result)
+  if type(result)~="table" then return end
+  if result.ok then
+   self.selected={} self.evolutionMode=false evolveControls.Visible=false
+   scroll.Position=UDim2.fromOffset(16,175) scroll.Size=UDim2.new(1,-32,1,-230)
+   evolveToggle.Text=L.text("Evolve",player.LocaleId)
+  else
+   local key=result.reason=="MaxStars" and "Already at max stars" or "Evolution failed"
+   evolveStatus.Text=L.text(key,player.LocaleId)
+  end
+ end
+ function self.income(gains)
+  if self.area=="Hunt" or not window.Visible then return end
+  for _,gain in ipairs(gains or {}) do
+   local card=self.cards and self.cards[gain.id]
+   if card and card.Parent then Income.card(card,gain.amount) end
+  end
+ end
+ return self
+end
+return UI
+]========],[========[local UI={}
 local player=game:GetService("Players").LocalPlayer
 local UIS=game:GetService("UserInputService")
 local L=require(game.ReplicatedStorage.RodeoFantasy.Localization)
@@ -11706,8 +13624,10 @@ function S.new(gui,remote,bag,journal)
  local mode,selected,other,trade=nil,{},nil,nil
  local function clear(parent) for _,n in ipairs(parent:GetChildren()) do if not n:IsA("UIGridLayout") then n:Destroy() end end end
  local function open(name)
+  if self.onOpen then self.onOpen() end
   bag.close() journal.close() window.Visible=true title.Text=name clear(content) clear(controls) clear(footer)
  end
+ function self.close() window.Visible=false end
  local function ids() local out={} for id in pairs(selected) do table.insert(out,id) end table.sort(out) return out end
  local function card(m,fn)
   local frame=make("Frame",{BackgroundColor3=selected[m.id] and Color3.fromRGB(183,208,155) or Color3.fromRGB(251,243,224),Size=UDim2.fromOffset(170,205),ZIndex=62},content)
@@ -12177,6 +14097,2012 @@ function S.new(gui,remote,bag,journal)
  return self
 end
 return S
+]========],[========[local S={}
+local Players=game:GetService("Players")
+local player=Players.LocalPlayer
+local UIS=game:GetService("UserInputService")
+local Run=game:GetService("RunService")
+local L=require(game.ReplicatedStorage.RodeoFantasy.Localization)
+local Portrait=require(script.Parent.MonsterPortrait)
+function S.new(gui,remote,bag,journal)
+ local self={}
+ local function make(class,props,parent)
+  local n=Instance.new(class) for k,v in pairs(props) do n[k]=v end n.Parent=parent return n
+ end
+ local window=make("Frame",{Name="SocialWindow",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.9,.82),BackgroundColor3=Color3.fromRGB(239,227,203),ZIndex=60},gui)
+ make("UISizeConstraint",{MaxSize=Vector2.new(1050,720)},window) make("UICorner",{CornerRadius=UDim.new(0,20)},window)
+ local title=make("TextLabel",{BackgroundTransparency=1,Position=UDim2.fromOffset(20,10),Size=UDim2.new(1,-80,0,40),TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(48,77,55),ZIndex=61},window)
+ local function button(text,x,y,w,parent,fn)
+  local b=make("TextButton",{Text=text,Position=UDim2.new(x,0,0,y),Size=UDim2.new(w,-10,0,38),BackgroundColor3=Color3.fromRGB(78,116,86),TextColor3=Color3.new(1,1,1),TextSize=15,TextWrapped=true,ZIndex=64},parent)
+  make("UICorner",{CornerRadius=UDim.new(0,8)},b) b.Activated:Connect(fn) return b
+ end
+ local content=make("ScrollingFrame",{Position=UDim2.fromOffset(18,110),Size=UDim2.new(1,-36,1,-178),BackgroundTransparency=1,BorderSizePixel=0,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ScrollBarThickness=6,ZIndex=61},window)
+ make("UIGridLayout",{CellSize=UDim2.fromOffset(170,205),CellPadding=UDim2.fromOffset(12,12)},content)
+ local message=make("TextLabel",{Text="",Visible=false,AnchorPoint=Vector2.new(.5,0),Position=UDim2.fromScale(.5,.08),Size=UDim2.new(.84,0,0,70),BackgroundColor3=Color3.fromRGB(44,70,52),TextColor3=Color3.fromRGB(255,242,204),TextSize=18,TextWrapped=true,ZIndex=100},gui)
+ local noticeVersion=0
+ function self.message(text) noticeVersion+=1 local v=noticeVersion message.Text=text message.Visible=true task.delay(5,function() if v==noticeVersion then message.Visible=false end end) end
+ local controls=make("Frame",{Position=UDim2.fromOffset(18,63),Size=UDim2.new(1,-36,0,40),BackgroundTransparency=1,ZIndex=62},window)
+ local footer=make("Frame",{Position=UDim2.new(0,18,1,-56),Size=UDim2.new(1,-36,0,42),BackgroundTransparency=1,ZIndex=62},window)
+ local mode,selected,other,trade=nil,{},nil,nil
+ local function clear(parent) for _,n in ipairs(parent:GetChildren()) do if not n:IsA("UIGridLayout") then n:Destroy() end end end
+ local function open(name)
+  bag.close() journal.close() window.Visible=true title.Text=name clear(content) clear(controls) clear(footer)
+ end
+ local function ids() local out={} for id in pairs(selected) do table.insert(out,id) end table.sort(out) return out end
+ local function card(m,fn)
+  local frame=make("Frame",{BackgroundColor3=selected[m.id] and Color3.fromRGB(183,208,155) or Color3.fromRGB(251,243,224),Size=UDim2.fromOffset(170,205),ZIndex=62},content)
+  make("UICorner",{CornerRadius=UDim.new(0,12)},frame)
+  local v=make("ViewportFrame",{Size=UDim2.new(1,0,0,140),BackgroundTransparency=1,ZIndex=63},frame)
+  Portrait.fill(v,m.monsterId,m.stars,false)
+  make("TextLabel",{Text=(mode=="Trade" and not fn and "상대 · " or "")..L.text(m.monsterId,player.LocaleId).." · "..m.stars.."★",Size=UDim2.new(1,0,0,24),Position=UDim2.fromOffset(0,139),BackgroundTransparency=1,TextSize=15,ZIndex=63},frame)
+  if fn then button((selected[m.id] and "✓ " or "")..(m.sex=="Male" and "♂ " or m.sex=="Female" and "♀ " or "").."선택",0,166,1,frame,fn) end
+ end
+ local renderSelection
+ renderSelection=function()
+  open(mode=="Breed" and "교배 · 최대 4팀 / 8마리" or "프로필 지정 · 최대 5마리")
+  button(mode=="Breed" and "암컷 + 수컷 · 시작 준비 중" or (#ids().." / 5 선택"),0,0,1,controls,function() end)
+  for _,m in ipairs(bag.items) do card(m,function()
+   if selected[m.id] then selected[m.id]=nil elseif #ids()<(mode=="Breed" and 2 or 5) and not m.breedingTeam then selected[m.id]=true end renderSelection()
+  end) end
+  button(mode=="Breed" and "준비 중 · 선택 조건 확인" or "프로필 저장",.5,0,.5,footer,function() remote:FireServer(mode=="Breed" and "Breed" or "ProfileSave",ids()) end)
+ end
+ function self.breed() mode="Breed" selected={} renderSelection() end
+ function self.edit() mode="Profile" selected={} for _,id in ipairs(self.profile or {}) do selected[id]=true end renderSelection() end
+ local close=button("×",.93,10,.07,window,function() window.Visible=false if trade then remote:FireServer("TradeDecline") end end)
+ close.Size=UDim2.fromOffset(38,38)
+ local function showTrade(data)
+  trade=data mode="Trade" open("거래 · "..data.name)
+  selected={} for _,id in ipairs(data.mine.ids) do selected[id]=true end
+  local coins=make("TextBox",{Text=tostring(data.mine.coins),PlaceholderText="보낼 코인",ClearTextOnFocus=false,Size=UDim2.new(.28,0,0,36),TextSize=18,ZIndex=64},controls)
+  button("제안 갱신",.3,0,.23,controls,function() remote:FireServer("TradeOffer",{ids=ids(),coins=tonumber(coins.Text)}) end)
+  button("상대: "..data.theirs.coins.."코인 / "..#data.theirs.ids.."마리",.54,0,.46,controls,function() end)
+  for _,m in ipairs(bag.items) do card(m,function()
+   if selected[m.id] then selected[m.id]=nil else selected[m.id]=true end
+   remote:FireServer("TradeOffer",{ids=ids(),coins=tonumber(coins.Text) or 0})
+  end) end
+  for _,m in ipairs(data.theirs.monsters or {}) do card(m,nil) end
+  button(data.accepted and "취소" or "거래 거절",0,0,.3,footer,function() remote:FireServer("TradeDecline") window.Visible=false end)
+  if not data.accepted then button("거래 수락",.5,0,.5,footer,function() remote:FireServer("TradeAccept") end)
+  elseif data.ready and data.otherReady then button(data.final and "상대 최종 확인 대기" or "최종 확인 · 교환 실행",.5,0,.5,footer,function() remote:FireServer("TradeConfirm",data.revision) end)
+  else button(data.ready and "상대 확인 대기" or "제안 확인",.5,0,.5,footer,function() remote:FireServer("TradeReady",data.revision) end) end
+ end
+ function self.event(kind,data)
+  if kind=="SocialMessage" then self.message(data)
+  elseif kind=="Profile" then
+   mode="View" other=data.userId open(data.name.."  @"..data.username)
+   local avatar=make("ImageLabel",{BackgroundTransparency=1,Size=UDim2.fromOffset(170,205),ZIndex=63},content)
+   task.spawn(function() local ok,url=pcall(function() return Players:GetUserThumbnailAsync(data.userId,Enum.ThumbnailType.AvatarThumbnail,Enum.ThumbnailSize.Size420x420) end) if ok and avatar.Parent then avatar.Image=url end end)
+   for _,m in ipairs(data.monsters) do card(m,nil) end
+   button("도감 보기",0,0,.5,footer,function() remote:FireServer("OtherJournal",other) end)
+   button("거래 요청",.5,0,.5,footer,function() remote:FireServer("TradeRequest",other) end)
+  elseif kind=="OtherJournal" then window.Visible=false journal.viewOther(data)
+  elseif kind=="Trade" then showTrade(data)
+  elseif kind=="TradeInvitation" then self.message(data.name.."님이 거래를 요청했습니다.")
+  elseif kind=="TradeClosed" then trade=nil if mode=="Trade" then window.Visible=false end
+  elseif kind=="Eggs" then
+   mode="Eggs" open("알 관리 · 부화소 "..data.pen.." · 한 칸에 알 1개")
+   if #data.eggs==0 then self.message("아직 알이 없습니다. 교배 시간·결과 설정 후 이용할 수 있습니다.") end
+   for _,egg in ipairs(data.eggs) do
+    button("알 "..tostring(egg.id)..(egg.assignedPen and " · 배치됨" or " · 가방"),0,0,1,content,function() remote:FireServer(egg.assignedPen==data.pen and "RemoveEgg" or "PlaceEgg",{id=egg.id,pen=data.pen}) end)
+   end
+  end
+ end
+ local tStart
+ UIS.InputBegan:Connect(function(input,processed) if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and self.area=="Cafe" then tStart=os.clock() end end)
+ UIS.InputEnded:Connect(function(input) if input.KeyCode==Enum.KeyCode.T then tStart=nil end end)
+ Run.RenderStepped:Connect(function() if tStart and os.clock()-tStart>=1 then tStart=nil self.edit() end end)
+ local edit=button("T 길게 · 프로필 지정",.02,14,.24,gui,self.edit)
+ function self.state(data) self.area=data.area self.profile=data.profile or self.profile edit.Visible=data.area=="Cafe" end
+ edit.Visible=false bag.onBreed=self.breed
+ return self
+end
+return S
+]========]}},{parent=clients,name="JournalUI",kind="ModuleScript",new=false,after=[========[-- Reference-style index; collection keys and income rules remain unchanged.
+local J={}
+local player=game:GetService("Players").LocalPlayer
+local UIS=game:GetService("UserInputService")
+local Run=game:GetService("RunService")
+local CAS=game:GetService("ContextActionService")
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Q=require(package.CollectionQuery)
+local L=require(package.Localization)
+local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
+local Buttons=require(script.Parent:WaitForChild("BagUI"))
+local Audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local function make(kind,props,parent)
+ local n=Instance.new(kind)
+ if n:IsA("TextLabel") or n:IsA("TextButton") then
+  n.Font=Enum.Font.GothamBlack n.TextColor3=Color3.new(1,1,1)
+  n.TextStrokeColor3=Color3.new(0,0,0) n.TextStrokeTransparency=0
+ end
+ for k,v in pairs(props) do n[k]=v end n.Parent=parent return n
+end
+local function label(parent,name,value,x,y,w,h,max)
+ local n=make("TextLabel",{Name=name,Text=value,Position=UDim2.fromScale(x,y),Size=UDim2.fromScale(w,h),BackgroundTransparency=1,TextScaled=true,TextWrapped=true,ZIndex=45},parent)
+ make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=max},n) return n
+end
+local function panel(parent,name,x,y,w,h,color)
+ local n=make("Frame",{Name=name,Position=UDim2.fromScale(x,y),Size=UDim2.fromScale(w,h),BackgroundColor3=color,BorderSizePixel=0,ZIndex=42},parent)
+ make("UIStroke",{Color=Color3.fromRGB(10,14,20),Thickness=2},n) return n
+end
+local function gradient(parent,a,b)
+ make("UIGradient",{Rotation=90,Color=ColorSequence.new(a,b)},parent)
+end
+local function T(v) return L.text(v,player.LocaleId) end
+function J.new(gui,remote)
+ local self={area="Lobby",page=1,seen={},data={},entries=Q.entries(C),perSpread=8,selected=1}
+ local button=Buttons.iconButton(gui,"Journal","T",92)
+ local book=make("Frame",{Name="FieldJournal",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.91,.82),BackgroundColor3=Color3.fromRGB(54,58,72),BorderSizePixel=0,ZIndex=40},gui)
+ make("UISizeConstraint",{MaxSize=Vector2.new(1000,620)},book)
+ make("UIStroke",{Color=Color3.fromRGB(8,12,19),Thickness=3},book)
+ gradient(book,Color3.fromRGB(71,77,96),Color3.fromRGB(37,39,52))
+ -- Smooth plate seams, rather than studs, carry the reference's dark framing.
+ for i=1,15 do
+  make("Frame",{Name="FrameSeam",Position=UDim2.fromScale(i/16,0),Size=UDim2.fromScale(.002,1),BackgroundColor3=Color3.fromRGB(100,108,129),BackgroundTransparency=.8,BorderSizePixel=0,ZIndex=40},book)
+ end
+ local header=panel(book,"IndexHeader",.008,.012,.984,.12,Color3.fromRGB(22,204,247))
+ gradient(header,Color3.fromRGB(117,241,255),Color3.fromRGB(0,167,228))
+ label(header,"Title","펫 인덱스",.02,.05,.7,.85,30).TextXAlignment=Enum.TextXAlignment.Left
+ local close=make("TextButton",{Name="CloseJournal",Text="X",AnchorPoint=Vector2.new(1,.5),Position=UDim2.new(1,-6,.5,0),Size=UDim2.fromOffset(44,44),BackgroundColor3=Color3.fromRGB(255,56,60),TextSize=30,BorderSizePixel=0,ZIndex=47},header)
+ make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},close)
+ gradient(close,Color3.fromRGB(255,131,129),Color3.fromRGB(241,24,34))
+ local region=panel(book,"PlanetLandscape",.02,.16,.14,.68,Color3.fromRGB(37,93,29))
+ gradient(region,Color3.fromRGB(127,186,62),Color3.fromRGB(24,73,39))
+ label(region,"PlanetName","Green Star",.04,.04,.92,.2,23)
+ label(region,"Biome","초원",.08,.66,.84,.18,22)
+ local planet=make("Frame",{Name="GreenStarPlanet",Position=UDim2.fromScale(.13,.30),Size=UDim2.fromScale(.74,.28),BackgroundColor3=Color3.fromRGB(98,209,45),BorderSizePixel=0,ZIndex=43},region)
+ make("UICorner",{CornerRadius=UDim.new(1,0)},planet)
+ make("UIAspectRatioConstraint",{AspectRatio=1},planet)
+ gradient(planet,Color3.fromRGB(166,237,66),Color3.fromRGB(19,100,55))
+ make("UIStroke",{Color=Color3.fromRGB(158,255,157),Thickness=2},planet)
+ local pages=panel(book,"JournalEntries",.18,.16,.50,.53,Color3.fromRGB(23,27,35))
+ local progress=panel(book,"CollectionProgress",.18,.72,.50,.12,Color3.fromRGB(14,18,25))
+ local progressFill=make("Frame",{Name="ProgressFill",Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(26,220,84),BorderSizePixel=0,ZIndex=43},progress)
+ gradient(progressFill,Color3.fromRGB(103,255,68),Color3.fromRGB(8,138,55))
+ local progressText=label(progress,"ProgressCount","",0,0,1,1,32)
+ local detail=panel(book,"SelectedMonster",.70,.16,.28,.42,Color3.fromRGB(14,99,181))
+ gradient(detail,Color3.fromRGB(30,148,235),Color3.fromRGB(8,31,60))
+ local info=panel(book,"MonsterInformation",.70,.61,.28,.23,Color3.fromRGB(21,68,40))
+ gradient(info,Color3.fromRGB(35,110,57),Color3.fromRGB(13,37,24))
+ local bottom=panel(book,"UnlockSummary",.02,.88,.96,.095,Color3.fromRGB(17,20,29))
+ local summary=label(bottom,"JournalCount","",.1,0,.68,1,24)
+ local previous=make("TextButton",{Name="JournalPrevious",Text="‹",Size=UDim2.fromOffset(40,40),Position=UDim2.fromOffset(2,0),BackgroundTransparency=1,TextSize=30,ZIndex=46},bottom)
+ local nextPage=make("TextButton",{Name="JournalNext",Text="›",AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-2,0,0),Size=UDim2.fromOffset(40,40),BackgroundTransparency=1,TextSize=30,ZIndex=46},bottom)
+ local pageNumber=label(bottom,"JournalPage","",.79,0,.12,1,15)
+ local planetTab=make("TextButton",{Name="Planet_GreenStar",Text="행성\nGreen Star",Position=UDim2.fromScale(1.025,.17),Size=UDim2.fromScale(.18,.18),BackgroundColor3=Color3.fromRGB(59,206,73),BorderSizePixel=0,TextScaled=true,ZIndex=46},book)
+ make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},planetTab)
+ make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=21},planetTab)
+ gradient(planetTab,Color3.fromRGB(167,250,95),Color3.fromRGB(14,127,67))
+ local compact=false
+ local lockedHumanoid,savedWalk,savedJump,savedRotate,savedHeight
+ local function freeze()
+  local h=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+  if h and h~=lockedHumanoid then
+   lockedHumanoid=h savedWalk=h.WalkSpeed savedJump=h.JumpPower savedRotate=h.AutoRotate savedHeight=h.JumpHeight
+   h.WalkSpeed=0 h.JumpPower=0 h.JumpHeight=0 h.AutoRotate=false
+  end
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid:Move(Vector3.zero) end
+ end
+ local function unlock()
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid.WalkSpeed=savedWalk lockedHumanoid.JumpPower=savedJump lockedHumanoid.JumpHeight=savedHeight lockedHumanoid.AutoRotate=savedRotate end
+  lockedHumanoid=nil CAS:UnbindAction("JournalPages")
+ end
+ function self.close() book.Visible=false unlock() end
+ local function selectedDetail()
+  for _,n in ipairs(detail:GetChildren()) do if n:IsA("GuiObject") then n:Destroy() end end
+  for _,n in ipairs(info:GetChildren()) do if n:IsA("GuiObject") then n:Destroy() end end
+  local entry=self.entries[self.selected] if not entry then return end
+  local species=C[entry.monsterId] local revealed=self.seen[entry.key]==true
+  local viewport=make("ViewportFrame",{Name="SelectedPortrait",Position=UDim2.fromScale(.1,.02),Size=UDim2.fromScale(.8,.60),BackgroundTransparency=1,Ambient=Color3.fromRGB(210,215,211),LightColor=Color3.new(1,1,1),ZIndex=44},detail)
+  Portrait.fill(viewport,entry.monsterId,entry.stars,not revealed,1)
+  label(detail,"SelectedName",revealed and T(entry.monsterId) or "???",.04,.63,.92,.16,22)
+  label(detail,"SelectedStars",entry.stars.."★",.04,.79,.92,.08,17)
+  local income=label(detail,"SelectedIncome",revealed and L.income((species.IncomeAmount or 1)*2^(entry.stars-1),species.IncomeSeconds or 3,player.LocaleId) or "???",.04,.87,.92,.12,20)
+  income.TextColor3=Color3.fromRGB(97,255,61)
+  label(info,"Acquisition",revealed and (entry.stars==1 and L.huntHint(species.UnlockMeters,species.TameSeconds,player.LocaleId) or L.evolutionHint(entry.stars,player.LocaleId)) or "수집하면 정보가 공개됩니다",.05,.05,.9,.58,16)
+  label(info,"Caught",T("Caught").." "..(self.data.caught and self.data.caught[entry.key] or 0),.05,.67,.9,.26,17)
+ end
+ function self.render()
+  for _,n in ipairs(pages:GetChildren()) do if n:IsA("GuiObject") then n:Destroy() end end
+  local max=math.max(1,math.ceil(#self.entries/self.perSpread)) self.page=math.clamp(self.page,1,max)
+  self.selected=math.clamp(self.selected,1,math.max(1,#self.entries))
+  pageNumber.Text=self.page.." / "..max
+  local discovered=0 for _,entry in ipairs(self.entries) do if self.seen[entry.key] then discovered+=1 end end
+  summary.Text="잠금 해제: "..discovered.."/"..#self.entries
+  progressText.Text=discovered.."/"..#self.entries progressFill.Size=UDim2.fromScale(#self.entries>0 and discovered/#self.entries or 0,1)
+  previous.Visible=max>1 nextPage.Visible=max>1
+  local colors={Color3.fromRGB(83,181,78),Color3.fromRGB(26,139,232),Color3.fromRGB(203,73,229),Color3.fromRGB(242,190,32)}
+  local columns=(compact or #self.entries<=4) and 2 or 4
+  for slot=1,self.perSpread do
+   local index=(self.page-1)*self.perSpread+slot local entry=self.entries[index] if not entry then break end
+   local revealed=self.seen[entry.key]==true
+   local rows=math.max(2,math.ceil(math.min(self.perSpread,#self.entries)/columns))
+   local card=make("TextButton",{Name="JournalEntry",Text="",Position=UDim2.fromScale(((slot-1)%columns)/columns+.01,math.floor((slot-1)/columns)/rows+.015),Size=UDim2.fromScale(1/columns-.02,1/rows-.03),BackgroundColor3=colors[((slot-1)%4)+1],BorderSizePixel=0,ZIndex=44},pages)
+   make("UIStroke",{Color=index==self.selected and Color3.fromRGB(232,250,255) or Color3.new(0,0,0),Thickness=index==self.selected and 3 or 2},card)
+   gradient(card,Color3.fromRGB(218,230,235),Color3.fromRGB(50,86,108))
+   local viewport=make("ViewportFrame",{Name="JournalPortrait",Position=UDim2.fromScale(.04,.17),Size=UDim2.fromScale(.92,.65),BackgroundTransparency=1,Ambient=Color3.fromRGB(205,213,200),LightColor=Color3.new(1,1,1),ZIndex=45},card)
+   Portrait.fill(viewport,entry.monsterId,entry.stars,not revealed,1)
+   label(card,"EntryName",revealed and T(entry.monsterId) or "???",.02,.01,.96,.19,17)
+   label(card,"Stars",entry.stars.."★",0,.82,1,.18,16)
+   card.Activated:Connect(function() self.selected=index self.render() end)
+  end
+  selectedDetail()
+ end
+ function self.turn(direction)
+  if not book.Visible then return end
+  local max=math.max(1,math.ceil(#self.entries/self.perSpread)) local page=math.clamp(self.page+direction,1,max)
+  if self.page==page then return end self.page=page self.render() Audio.ui("PageTurn")
+ end
+ function self.open()
+  if self.area=="Hunt" then return end
+  if book.Visible then self.close() return end
+  if self.onOpen then self.onOpen() end
+  book.Visible=true freeze() self.render() Audio.ui("BookOpen")
+  if not self.other then remote:FireServer("Journal") end
+  CAS:BindActionAtPriority("JournalPages",function(_,state,input)
+   if state==Enum.UserInputState.Begin then
+    if input.KeyCode==Enum.KeyCode.A or input.KeyCode==Enum.KeyCode.Left then self.turn(-1)
+    elseif input.KeyCode==Enum.KeyCode.D or input.KeyCode==Enum.KeyCode.Right then self.turn(1) end
+   end
+   return Enum.ContextActionResult.Sink
+  end,false,3000,Enum.KeyCode.W,Enum.KeyCode.A,Enum.KeyCode.S,Enum.KeyCode.D,Enum.KeyCode.Space,Enum.KeyCode.Up,Enum.KeyCode.Down,Enum.KeyCode.Left,Enum.KeyCode.Right,Enum.KeyCode.Thumbstick1,Enum.KeyCode.ButtonA)
+ end
+ function self.viewOther(data) self.other=true self.close() self.snapshot(data) self.open() end
+ function self.snapshot(data) self.data=data self.seen=data.seen or self.seen if book.Visible then self.render() end end
+ function self.state(data)
+  self.area=data.area button.Visible=self.area~="Hunt"
+  if self.area=="Hunt" then self.close() end
+  if book.Visible and not self.other and data.count~=self.lastCount then remote:FireServer("Journal") end self.lastCount=data.count
+ end
+ local function resize()
+  local camera=workspace.CurrentCamera
+  compact=camera and camera.ViewportSize.X<860 or false
+  if compact then
+   book.Position=UDim2.fromScale(.5,.5) book.Size=UDim2.fromScale(.92,.86)
+   region.Visible=false planetTab.Position=UDim2.fromScale(.70,.15) planetTab.Size=UDim2.fromScale(.28,.12)
+   pages.Position=UDim2.fromScale(.02,.16) pages.Size=UDim2.fromScale(.65,.52)
+   progress.Position=UDim2.fromScale(.02,.71) progress.Size=UDim2.fromScale(.65,.10)
+   detail.Position=UDim2.fromScale(.70,.30) detail.Size=UDim2.fromScale(.28,.51)
+   info.Visible=false
+  else
+   book.Position=UDim2.fromScale(.44,.5) book.Size=UDim2.fromScale(.76,.82)
+   region.Visible=true planetTab.Position=UDim2.fromScale(1.025,.17) planetTab.Size=UDim2.fromScale(.18,.18)
+   pages.Position=UDim2.fromScale(.18,.16) pages.Size=UDim2.fromScale(.50,.53)
+   progress.Position=UDim2.fromScale(.18,.72) progress.Size=UDim2.fromScale(.50,.12)
+   detail.Position=UDim2.fromScale(.70,.16) detail.Size=UDim2.fromScale(.28,.42) info.Visible=true
+  end
+  if book.Visible then self.render() end
+ end
+ -- Decide from screen width, not a size this callback itself changes.
+ local function screenLayout()
+  resize()
+ end
+ if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(screenLayout) end
+ task.defer(screenLayout)
+ planetTab.Activated:Connect(function() self.page=1 self.render() end)
+ previous.Activated:Connect(function() self.turn(-1) end) nextPage.Activated:Connect(function() self.turn(1) end)
+ close.Activated:Connect(self.close) button.Activated:Connect(function() self.other=false self.open() end)
+ UIS.InputBegan:Connect(function(input,processed)
+  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and self.area=="Lobby" then self.other=false self.open() end
+ end)
+ Run.RenderStepped:Connect(function() if book.Visible then freeze() end end)
+ return self
+end
+return J
+]========],allowed={[========[-- Reference-style index; collection keys and income rules remain unchanged.
+local J={}
+local player=game:GetService("Players").LocalPlayer
+local UIS=game:GetService("UserInputService")
+local Run=game:GetService("RunService")
+local CAS=game:GetService("ContextActionService")
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Q=require(package.CollectionQuery)
+local L=require(package.Localization)
+local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
+local Buttons=require(script.Parent:WaitForChild("BagUI"))
+local Audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local function make(kind,props,parent)
+ local n=Instance.new(kind)
+ if n:IsA("TextLabel") or n:IsA("TextButton") then
+  n.Font=Enum.Font.GothamBlack n.TextColor3=Color3.new(1,1,1)
+  n.TextStrokeColor3=Color3.new(0,0,0) n.TextStrokeTransparency=0
+ end
+ for k,v in pairs(props) do n[k]=v end n.Parent=parent return n
+end
+local function label(parent,name,value,x,y,w,h,max)
+ local n=make("TextLabel",{Name=name,Text=value,Position=UDim2.fromScale(x,y),Size=UDim2.fromScale(w,h),BackgroundTransparency=1,TextScaled=true,TextWrapped=true,ZIndex=45},parent)
+ make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=max},n) return n
+end
+local function panel(parent,name,x,y,w,h,color)
+ local n=make("Frame",{Name=name,Position=UDim2.fromScale(x,y),Size=UDim2.fromScale(w,h),BackgroundColor3=color,BorderSizePixel=0,ZIndex=42},parent)
+ make("UIStroke",{Color=Color3.fromRGB(10,14,20),Thickness=2},n) return n
+end
+local function gradient(parent,a,b)
+ make("UIGradient",{Rotation=90,Color=ColorSequence.new(a,b)},parent)
+end
+local function T(v) return L.text(v,player.LocaleId) end
+function J.new(gui,remote)
+ local self={area="Lobby",page=1,seen={},data={},entries=Q.entries(C),perSpread=8,selected=1}
+ local button=Buttons.iconButton(gui,"Journal","T",92)
+ local book=make("Frame",{Name="FieldJournal",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.91,.82),BackgroundColor3=Color3.fromRGB(54,58,72),BorderSizePixel=0,ZIndex=40},gui)
+ make("UISizeConstraint",{MaxSize=Vector2.new(1000,620)},book)
+ make("UIStroke",{Color=Color3.fromRGB(8,12,19),Thickness=3},book)
+ gradient(book,Color3.fromRGB(71,77,96),Color3.fromRGB(37,39,52))
+ -- Smooth plate seams, rather than studs, carry the reference's dark framing.
+ for i=1,15 do
+  make("Frame",{Name="FrameSeam",Position=UDim2.fromScale(i/16,0),Size=UDim2.fromScale(.002,1),BackgroundColor3=Color3.fromRGB(100,108,129),BackgroundTransparency=.8,BorderSizePixel=0,ZIndex=40},book)
+ end
+ local header=panel(book,"IndexHeader",.008,.012,.984,.12,Color3.fromRGB(22,204,247))
+ gradient(header,Color3.fromRGB(117,241,255),Color3.fromRGB(0,167,228))
+ label(header,"Title","펫 인덱스",.02,.05,.7,.85,30).TextXAlignment=Enum.TextXAlignment.Left
+ local close=make("TextButton",{Name="CloseJournal",Text="X",AnchorPoint=Vector2.new(1,.5),Position=UDim2.new(1,-6,.5,0),Size=UDim2.fromOffset(44,44),BackgroundColor3=Color3.fromRGB(255,56,60),TextSize=30,BorderSizePixel=0,ZIndex=47},header)
+ make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},close)
+ gradient(close,Color3.fromRGB(255,131,129),Color3.fromRGB(241,24,34))
+ local region=panel(book,"PlanetLandscape",.02,.16,.14,.68,Color3.fromRGB(37,93,29))
+ gradient(region,Color3.fromRGB(127,186,62),Color3.fromRGB(24,73,39))
+ label(region,"PlanetName","Green Star",.04,.04,.92,.2,23)
+ label(region,"Biome","초원",.08,.66,.84,.18,22)
+ local planet=make("Frame",{Name="GreenStarPlanet",Position=UDim2.fromScale(.13,.30),Size=UDim2.fromScale(.74,.28),BackgroundColor3=Color3.fromRGB(98,209,45),BorderSizePixel=0,ZIndex=43},region)
+ make("UICorner",{CornerRadius=UDim.new(1,0)},planet)
+ make("UIAspectRatioConstraint",{AspectRatio=1},planet)
+ gradient(planet,Color3.fromRGB(166,237,66),Color3.fromRGB(19,100,55))
+ make("UIStroke",{Color=Color3.fromRGB(158,255,157),Thickness=2},planet)
+ local pages=panel(book,"JournalEntries",.18,.16,.50,.53,Color3.fromRGB(23,27,35))
+ local progress=panel(book,"CollectionProgress",.18,.72,.50,.12,Color3.fromRGB(14,18,25))
+ local progressFill=make("Frame",{Name="ProgressFill",Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(26,220,84),BorderSizePixel=0,ZIndex=43},progress)
+ gradient(progressFill,Color3.fromRGB(103,255,68),Color3.fromRGB(8,138,55))
+ local progressText=label(progress,"ProgressCount","",0,0,1,1,32)
+ local detail=panel(book,"SelectedMonster",.70,.16,.28,.42,Color3.fromRGB(14,99,181))
+ gradient(detail,Color3.fromRGB(30,148,235),Color3.fromRGB(8,31,60))
+ local info=panel(book,"MonsterInformation",.70,.61,.28,.23,Color3.fromRGB(21,68,40))
+ gradient(info,Color3.fromRGB(35,110,57),Color3.fromRGB(13,37,24))
+ local bottom=panel(book,"UnlockSummary",.02,.88,.96,.095,Color3.fromRGB(17,20,29))
+ local summary=label(bottom,"JournalCount","",.1,0,.68,1,24)
+ local previous=make("TextButton",{Name="JournalPrevious",Text="‹",Size=UDim2.fromOffset(40,40),Position=UDim2.fromOffset(2,0),BackgroundTransparency=1,TextSize=30,ZIndex=46},bottom)
+ local nextPage=make("TextButton",{Name="JournalNext",Text="›",AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-2,0,0),Size=UDim2.fromOffset(40,40),BackgroundTransparency=1,TextSize=30,ZIndex=46},bottom)
+ local pageNumber=label(bottom,"JournalPage","",.79,0,.12,1,15)
+ local planetTab=make("TextButton",{Name="Planet_GreenStar",Text="행성\nGreen Star",Position=UDim2.fromScale(1.025,.17),Size=UDim2.fromScale(.18,.18),BackgroundColor3=Color3.fromRGB(59,206,73),BorderSizePixel=0,TextScaled=true,ZIndex=46},book)
+ make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},planetTab)
+ make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=21},planetTab)
+ gradient(planetTab,Color3.fromRGB(167,250,95),Color3.fromRGB(14,127,67))
+ local compact=false
+ local lockedHumanoid,savedWalk,savedJump,savedRotate,savedHeight
+ local function freeze()
+  local h=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+  if h and h~=lockedHumanoid then
+   lockedHumanoid=h savedWalk=h.WalkSpeed savedJump=h.JumpPower savedRotate=h.AutoRotate savedHeight=h.JumpHeight
+   h.WalkSpeed=0 h.JumpPower=0 h.JumpHeight=0 h.AutoRotate=false
+  end
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid:Move(Vector3.zero) end
+ end
+ local function unlock()
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid.WalkSpeed=savedWalk lockedHumanoid.JumpPower=savedJump lockedHumanoid.JumpHeight=savedHeight lockedHumanoid.AutoRotate=savedRotate end
+  lockedHumanoid=nil CAS:UnbindAction("JournalPages")
+ end
+ function self.close() book.Visible=false unlock() end
+ local function selectedDetail()
+  for _,n in ipairs(detail:GetChildren()) do if n:IsA("GuiObject") then n:Destroy() end end
+  for _,n in ipairs(info:GetChildren()) do if n:IsA("GuiObject") then n:Destroy() end end
+  local entry=self.entries[self.selected] if not entry then return end
+  local species=C[entry.monsterId] local revealed=self.seen[entry.key]==true
+  local viewport=make("ViewportFrame",{Name="SelectedPortrait",Position=UDim2.fromScale(.1,.02),Size=UDim2.fromScale(.8,.60),BackgroundTransparency=1,Ambient=Color3.fromRGB(210,215,211),LightColor=Color3.new(1,1,1),ZIndex=44},detail)
+  Portrait.fill(viewport,entry.monsterId,entry.stars,not revealed,1)
+  label(detail,"SelectedName",revealed and T(entry.monsterId) or "???",.04,.63,.92,.16,22)
+  label(detail,"SelectedStars",entry.stars.."★",.04,.79,.92,.08,17)
+  local income=label(detail,"SelectedIncome",revealed and L.income((species.IncomeAmount or 1)*2^(entry.stars-1),species.IncomeSeconds or 3,player.LocaleId) or "???",.04,.87,.92,.12,20)
+  income.TextColor3=Color3.fromRGB(97,255,61)
+  label(info,"Acquisition",revealed and (entry.stars==1 and L.huntHint(species.UnlockMeters,species.TameSeconds,player.LocaleId) or L.evolutionHint(entry.stars,player.LocaleId)) or "수집하면 정보가 공개됩니다",.05,.05,.9,.58,16)
+  label(info,"Caught",T("Caught").." "..(self.data.caught and self.data.caught[entry.key] or 0),.05,.67,.9,.26,17)
+ end
+ function self.render()
+  for _,n in ipairs(pages:GetChildren()) do if n:IsA("GuiObject") then n:Destroy() end end
+  local max=math.max(1,math.ceil(#self.entries/self.perSpread)) self.page=math.clamp(self.page,1,max)
+  self.selected=math.clamp(self.selected,1,math.max(1,#self.entries))
+  pageNumber.Text=self.page.." / "..max
+  local discovered=0 for _,entry in ipairs(self.entries) do if self.seen[entry.key] then discovered+=1 end end
+  summary.Text="잠금 해제: "..discovered.."/"..#self.entries
+  progressText.Text=discovered.."/"..#self.entries progressFill.Size=UDim2.fromScale(#self.entries>0 and discovered/#self.entries or 0,1)
+  previous.Visible=max>1 nextPage.Visible=max>1
+  local colors={Color3.fromRGB(83,181,78),Color3.fromRGB(26,139,232),Color3.fromRGB(203,73,229),Color3.fromRGB(242,190,32)}
+  local columns=(compact or #self.entries<=4) and 2 or 4
+  for slot=1,self.perSpread do
+   local index=(self.page-1)*self.perSpread+slot local entry=self.entries[index] if not entry then break end
+   local revealed=self.seen[entry.key]==true
+   local rows=math.max(2,math.ceil(math.min(self.perSpread,#self.entries)/columns))
+   local card=make("TextButton",{Name="JournalEntry",Text="",Position=UDim2.fromScale(((slot-1)%columns)/columns+.01,math.floor((slot-1)/columns)/rows+.015),Size=UDim2.fromScale(1/columns-.02,1/rows-.03),BackgroundColor3=colors[((slot-1)%4)+1],BorderSizePixel=0,ZIndex=44},pages)
+   make("UIStroke",{Color=index==self.selected and Color3.fromRGB(232,250,255) or Color3.new(0,0,0),Thickness=index==self.selected and 3 or 2},card)
+   gradient(card,Color3.fromRGB(218,230,235),Color3.fromRGB(50,86,108))
+   local viewport=make("ViewportFrame",{Name="JournalPortrait",Position=UDim2.fromScale(.04,.17),Size=UDim2.fromScale(.92,.65),BackgroundTransparency=1,Ambient=Color3.fromRGB(205,213,200),LightColor=Color3.new(1,1,1),ZIndex=45},card)
+   Portrait.fill(viewport,entry.monsterId,entry.stars,not revealed,1)
+   label(card,"EntryName",revealed and T(entry.monsterId) or "???",.02,.01,.96,.19,17)
+   label(card,"Stars",entry.stars.."★",0,.82,1,.18,16)
+   card.Activated:Connect(function() self.selected=index self.render() end)
+  end
+  selectedDetail()
+ end
+ function self.turn(direction)
+  if not book.Visible then return end
+  local max=math.max(1,math.ceil(#self.entries/self.perSpread)) local page=math.clamp(self.page+direction,1,max)
+  if self.page==page then return end self.page=page self.render() Audio.ui("PageTurn")
+ end
+ function self.open()
+  if self.area=="Hunt" then return end
+  if book.Visible then self.close() return end
+  if self.onOpen then self.onOpen() end
+  book.Visible=true freeze() self.render() Audio.ui("BookOpen")
+  if not self.other then remote:FireServer("Journal") end
+  CAS:BindActionAtPriority("JournalPages",function(_,state,input)
+   if state==Enum.UserInputState.Begin then
+    if input.KeyCode==Enum.KeyCode.A or input.KeyCode==Enum.KeyCode.Left then self.turn(-1)
+    elseif input.KeyCode==Enum.KeyCode.D or input.KeyCode==Enum.KeyCode.Right then self.turn(1) end
+   end
+   return Enum.ContextActionResult.Sink
+  end,false,3000,Enum.KeyCode.W,Enum.KeyCode.A,Enum.KeyCode.S,Enum.KeyCode.D,Enum.KeyCode.Space,Enum.KeyCode.Up,Enum.KeyCode.Down,Enum.KeyCode.Left,Enum.KeyCode.Right,Enum.KeyCode.Thumbstick1,Enum.KeyCode.ButtonA)
+ end
+ function self.viewOther(data) self.other=true self.close() self.snapshot(data) self.open() end
+ function self.snapshot(data) self.data=data self.seen=data.seen or self.seen if book.Visible then self.render() end end
+ function self.state(data)
+  self.area=data.area button.Visible=self.area~="Hunt"
+  if self.area=="Hunt" then self.close() end
+  if book.Visible and not self.other and data.count~=self.lastCount then remote:FireServer("Journal") end self.lastCount=data.count
+ end
+ local function resize()
+  local camera=workspace.CurrentCamera
+  compact=camera and camera.ViewportSize.X<860 or false
+  if compact then
+   book.Position=UDim2.fromScale(.5,.5) book.Size=UDim2.fromScale(.92,.86)
+   region.Visible=false planetTab.Position=UDim2.fromScale(.70,.15) planetTab.Size=UDim2.fromScale(.28,.12)
+   pages.Position=UDim2.fromScale(.02,.16) pages.Size=UDim2.fromScale(.65,.52)
+   progress.Position=UDim2.fromScale(.02,.71) progress.Size=UDim2.fromScale(.65,.10)
+   detail.Position=UDim2.fromScale(.70,.30) detail.Size=UDim2.fromScale(.28,.51)
+   info.Visible=false
+  else
+   book.Position=UDim2.fromScale(.44,.5) book.Size=UDim2.fromScale(.76,.82)
+   region.Visible=true planetTab.Position=UDim2.fromScale(1.025,.17) planetTab.Size=UDim2.fromScale(.18,.18)
+   pages.Position=UDim2.fromScale(.18,.16) pages.Size=UDim2.fromScale(.50,.53)
+   progress.Position=UDim2.fromScale(.18,.72) progress.Size=UDim2.fromScale(.50,.12)
+   detail.Position=UDim2.fromScale(.70,.16) detail.Size=UDim2.fromScale(.28,.42) info.Visible=true
+  end
+  if book.Visible then self.render() end
+ end
+ -- Decide from screen width, not a size this callback itself changes.
+ local function screenLayout()
+  resize()
+ end
+ if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(screenLayout) end
+ task.defer(screenLayout)
+ planetTab.Activated:Connect(function() self.page=1 self.render() end)
+ previous.Activated:Connect(function() self.turn(-1) end) nextPage.Activated:Connect(function() self.turn(1) end)
+ close.Activated:Connect(self.close) button.Activated:Connect(function() self.other=false self.open() end)
+ UIS.InputBegan:Connect(function(input,processed)
+  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and self.area=="Lobby" then self.other=false self.open() end
+ end)
+ Run.RenderStepped:Connect(function() if book.Visible then freeze() end end)
+ return self
+end
+return J
+]========],[========[local J={}
+local player=game:GetService("Players").LocalPlayer
+local UIS=game:GetService("UserInputService")
+local Run=game:GetService("RunService")
+local Tween=game:GetService("TweenService")
+local CAS=game:GetService("ContextActionService")
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Q=require(package.CollectionQuery)
+local L=require(package.Localization)
+local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
+local Buttons=require(script.Parent:WaitForChild("BagUI"))
+local Audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local function make(class,props,parent)
+ local node=Instance.new(class)
+ if node:IsA("TextLabel") or node:IsA("TextButton") then node.Font=Enum.Font.GothamMedium node.TextColor3=Color3.fromRGB(68,52,33) end
+ for key,value in pairs(props) do node[key]=value end
+ node.Parent=parent return node
+end
+local function T(value) return L.text(value,player.LocaleId) end
+local function gradient(parent,a,b)
+ make("UIGradient",{Rotation=90,Color=ColorSequence.new(a,b)},parent)
+end
+local function text(parent,name,value,x,y,w,h,size)
+ local n=make("TextLabel",{Name=name,Text=value,BackgroundTransparency=1,Position=UDim2.fromScale(x,y),Size=UDim2.fromScale(w,h),TextScaled=true,TextWrapped=true,ZIndex=45},parent)
+ make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=size},n) return n
+end
+function J.new(gui,remote)
+ local self={area="Lobby",page=1,region="All",seen={},data={},entries=Q.entries(C),perSpread=2}
+ local button=Buttons.iconButton(gui,"Journal","T",92)
+ local book=make("Frame",{Name="FieldJournal",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.96,.86),BackgroundColor3=Color3.fromRGB(87,54,34),BorderSizePixel=0,ZIndex=40},gui)
+ make("UISizeConstraint",{MaxSize=Vector2.new(1200,780)},book)
+ make("UICorner",{CornerRadius=UDim.new(0,12)},book)
+ make("UIStroke",{Color=Color3.fromRGB(189,143,80),Thickness=3},book)
+ gradient(book,Color3.fromRGB(129,82,47),Color3.fromRGB(59,39,29))
+ local paper=make("Frame",{Name="Parchment",Position=UDim2.fromScale(.135,.065),Size=UDim2.fromScale(.73,.87),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,ZIndex=41},book)
+ gradient(paper,Color3.fromRGB(248,237,209),Color3.fromRGB(213,191,147))
+ make("UIStroke",{Color=Color3.fromRGB(182,154,107),Thickness=2},paper)
+ local spine=make("Frame",{Name="BookSpine",Position=UDim2.fromScale(.498,.065),Size=UDim2.fromScale(.004,.87),BackgroundColor3=Color3.fromRGB(150,111,68),BorderSizePixel=0,ZIndex=42},book)
+ local summary=text(book,"JournalCount","",.14,.005,.68,.05,18)
+ summary.TextColor3=Color3.fromRGB(250,230,187)
+ for _,x in ipairs({.145,.50}) do
+  local line=make("Frame",{Name="PageHeaderRule",Position=UDim2.fromScale(x,.069),Size=UDim2.fromScale(.355,.004),BackgroundColor3=Color3.fromRGB(187,145,73),BorderSizePixel=0,ZIndex=42},book)
+ end
+ for _,x in ipairs({.137,.847}) do
+  for _,y in ipairs({.069,.91}) do
+   make("Frame",{Name="PaperCorner",Position=UDim2.fromScale(x,y),Size=UDim2.fromOffset(16,16),Rotation=45,BackgroundColor3=Color3.fromRGB(181,145,92),BackgroundTransparency=.4,BorderSizePixel=0,ZIndex=42},book)
+  end
+ end
+ local regions=make("ScrollingFrame",{Name="JournalRegions",Position=UDim2.fromScale(.005,.18),Size=UDim2.fromScale(.125,.64),BackgroundTransparency=1,BorderSizePixel=0,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ScrollBarThickness=2,ZIndex=45},book)
+ make("UIListLayout",{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},regions)
+ local pages=make("Frame",{Name="JournalEntries",BackgroundTransparency=1,Position=UDim2.fromScale(.15,.085),Size=UDim2.fromScale(.70,.83),ZIndex=43},book)
+ local close=make("TextButton",{Name="CloseJournal",Text="×",Position=UDim2.fromScale(.91,.005),Size=UDim2.fromScale(.075,.065),BackgroundTransparency=1,TextColor3=Color3.fromRGB(246,226,184),TextSize=30,ZIndex=46},book)
+ local previous=make("TextButton",{Name="JournalPrevious",Text="‹",Position=UDim2.fromScale(.145,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
+ local nextPage=make("TextButton",{Name="JournalNext",Text="›",Position=UDim2.fromScale(.735,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
+ local pageNumber=text(book,"JournalPage","",.32,.942,.36,.052,18) pageNumber.TextColor3=Color3.fromRGB(250,230,187)
+ local lockedHumanoid,savedWalk,savedJump,savedRotate,savedHeight
+ local function freeze()
+  local character=player.Character local h=character and character:FindFirstChildOfClass("Humanoid")
+  if h and h~=lockedHumanoid then
+   lockedHumanoid=h savedWalk=h.WalkSpeed savedJump=h.JumpPower savedRotate=h.AutoRotate savedHeight=h.JumpHeight
+   h.WalkSpeed=0 h.JumpPower=0 h.JumpHeight=0 h.AutoRotate=false
+  end
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid:Move(Vector3.zero) end
+ end
+ local function unlock()
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid.WalkSpeed=savedWalk lockedHumanoid.JumpPower=savedJump lockedHumanoid.JumpHeight=savedHeight lockedHumanoid.AutoRotate=savedRotate end
+  lockedHumanoid=nil CAS:UnbindAction("JournalPages")
+ end
+ local generation=0 local turning=false
+ local function flip(direction)
+  generation+=1 local token=generation turning=true Audio.ui("PageTurn")
+  local leaf=make("Frame",{Name="TurningPage",AnchorPoint=Vector2.new(direction<0 and 1 or 0,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.355,.87),BackgroundColor3=Color3.fromRGB(242,225,185),BorderSizePixel=0,ZIndex=55},book)
+  gradient(leaf,Color3.fromRGB(250,237,207),Color3.fromRGB(201,166,109))
+  Tween:Create(leaf,TweenInfo.new(.25,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Size=UDim2.fromScale(0,.87)}):Play()
+  task.delay(.26,function() leaf:Destroy() if generation==token then turning=false end end)
+ end
+ function self.close()
+  book.Visible=false generation+=1 turning=false unlock()
+  for _,n in ipairs(book:GetChildren()) do if n.Name=="TurningPage" then n:Destroy() end end
+ end
+ local function speciesList()
+  local ids={} for _,id in ipairs(C.Order) do if self.region=="All" or C[id].Region==self.region then table.insert(ids,id) end end return ids
+ end
+ function self.render()
+  for _,n in ipairs(pages:GetChildren()) do n:Destroy() end
+  local ids=speciesList() local max=math.max(1,math.ceil(#ids/self.perSpread)) self.page=math.clamp(self.page,1,max)
+  pageNumber.Text=self.page.." / "..max
+  local discovered=0 for _,entry in ipairs(self.entries) do if self.seen[entry.key] then discovered+=1 end end
+  summary.Text=T("Discovered").." "..discovered.." / "..#self.entries.."   ·   "..T("Total caught").." "..(self.data.captures or 0)
+  for _,tab in ipairs(regions:GetChildren()) do if tab:IsA("TextButton") then tab.BackgroundTransparency=tab.Name=="Region_"..self.region and 0 or .28 end end
+  previous.AutoButtonColor=self.page>1 nextPage.AutoButtonColor=self.page<max
+  if #ids==0 then text(pages,"JournalEmpty",T("Region not released yet"),0,.2,1,.5,20) return end
+  for slot=1,self.perSpread do
+   local id=ids[(self.page-1)*self.perSpread+slot] if not id then continue end
+   local species=C[id] local known=false local caught=0
+   for _,stars in ipairs({1,3,6,9}) do local key=id..":"..stars known=known or self.seen[key]==true caught+=(self.data.caught and self.data.caught[key] or 0) end
+   local page=make("Frame",{Name="SpeciesPage",BackgroundTransparency=1,Position=UDim2.fromScale((slot-1)/self.perSpread+.01,0),Size=UDim2.fromScale(1/self.perSpread-.02,1),ZIndex=44},pages)
+   text(page,"SpeciesTitle",known and T(id) or "???",0,0,1,.07,24)
+   local caughtLabel=text(page,"SpeciesCaught",T("Caught").." "..caught,0,.075,1,.055,15) caughtLabel.TextColor3=Color3.fromRGB(82,109,67)
+   local info=make("Frame",{Name="SpeciesInformation",Position=UDim2.fromScale(0,.75),Size=UDim2.fromScale(1,.25),BackgroundColor3=Color3.fromRGB(246,228,187),BorderSizePixel=0,ZIndex=44},page)
+   text(info,"FoundAt",T("Found at").." · "..T(species.Region).." "..(species.UnlockMeters or 0).."m",.03,.03,.94,.22,15)
+   text(info,"TamingTime",T("Taming (1 star)").." · "..species.TameSeconds..T("Seconds"),.03,.27,.94,.22,15)
+   local income=text(info,"Production","",.03,.51,.94,.22,15)
+   local acquisition=text(info,"Acquisition","",.03,.75,.94,.23,13)
+   local function select(stars)
+    income.Text=stars.."★ · "..L.income((species.IncomeAmount or 1)*2^(stars-1),species.IncomeSeconds or 3,player.LocaleId)
+    acquisition.Text=stars==1 and L.huntHint(species.UnlockMeters,species.TameSeconds,player.LocaleId) or L.evolutionHint(stars,player.LocaleId)
+   end
+   select(1)
+   for index,stars in ipairs({1,3,6,9}) do
+    local revealed=self.seen[id..":"..stars]==true
+    local card=make("TextButton",{Name="JournalEntry",Text="",Position=UDim2.fromScale(((index-1)%2)*.51,.14+math.floor((index-1)/2)*.30),Size=UDim2.fromScale(.49,.285),BackgroundColor3=Color3.fromRGB(216,204,170),BackgroundTransparency=.22,BorderSizePixel=0,ZIndex=44},page)
+    make("UIStroke",{Color=Color3.fromRGB(169,147,102),Thickness=1},card)
+    local viewport=make("ViewportFrame",{Name="JournalPortrait",Position=UDim2.fromScale(0,0),Size=UDim2.fromScale(1,.8),BackgroundTransparency=1,Ambient=Color3.fromRGB(205,205,185),LightColor=Color3.new(1,1,1),ZIndex=45},card)
+    Portrait.fill(viewport,id,stars,not revealed,1.65)
+    if not revealed then local q=text(card,"UndiscoveredQuestion","?",.2,.12,.6,.55,52) q.TextColor3=Color3.fromRGB(244,209,121) q.ZIndex=46 q.TextStrokeTransparency=.2 end
+    text(card,"Stars",stars.."★",0,.8,1,.2,17)
+    card.MouseEnter:Connect(function() select(stars) end)
+    card.Activated:Connect(function() select(stars) end)
+   end
+  end
+ end
+ function self.turn(direction)
+  if not book.Visible or turning then return end
+  local max=math.max(1,math.ceil(#speciesList()/self.perSpread)) local next=math.clamp(self.page+direction,1,max)
+  if next==self.page then return end
+  self.page=next self.render() flip(direction)
+ end
+ function self.open()
+  if self.area=="Hunt" then return end
+  if book.Visible then self.close() return end
+  if self.onOpen then self.onOpen() end
+  book.Visible=true freeze() self.render() Audio.ui("BookOpen") if not self.other then remote:FireServer("Journal") end
+  CAS:BindActionAtPriority("JournalPages",function(_,state,input)
+   if state==Enum.UserInputState.Begin then
+    if input.KeyCode==Enum.KeyCode.A or input.KeyCode==Enum.KeyCode.Left then self.turn(-1)
+    elseif input.KeyCode==Enum.KeyCode.D or input.KeyCode==Enum.KeyCode.Right then self.turn(1) end
+   end
+   return Enum.ContextActionResult.Sink
+  end,false,3000,Enum.KeyCode.W,Enum.KeyCode.A,Enum.KeyCode.S,Enum.KeyCode.D,Enum.KeyCode.Space,Enum.KeyCode.Up,Enum.KeyCode.Down,Enum.KeyCode.Left,Enum.KeyCode.Right,Enum.KeyCode.Thumbstick1,Enum.KeyCode.ButtonA)
+ end
+ function self.viewOther(data) self.other=true self.close() self.snapshot(data) self.open() end
+ function self.snapshot(data) self.data=data self.seen=data.seen or self.seen if book.Visible then self.render() end end
+ function self.state(data)
+   self.area=data.area button.Visible=self.area~="Hunt"
+  if self.area=="Hunt" then self.close() end
+  if book.Visible and not self.other and data.count~=self.lastCount then remote:FireServer("Journal") end self.lastCount=data.count
+ end
+ for index,region in ipairs({"All","Meadow","Forest","Swamp","Ocean"}) do
+  local colors={Color3.fromRGB(172,145,85),Color3.fromRGB(112,153,85),Color3.fromRGB(70,123,88),Color3.fromRGB(122,120,76),Color3.fromRGB(75,137,164)}
+  local tab=make("TextButton",{Name="Region_"..region,LayoutOrder=index,Text=T(region),Size=UDim2.new(1,-3,0,42),TextScaled=true,BackgroundColor3=colors[index],TextColor3=Color3.fromRGB(255,242,214),BorderSizePixel=0,ZIndex=46},regions)
+  make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=16},tab)
+  tab.Activated:Connect(function()
+   if turning or self.region==region then return end
+   self.region=region self.page=1 self.render() flip(1)
+  end)
+ end
+ -- Mutation/breeding tabs wait for confirmed content and recipe rules.
+ previous.Activated:Connect(function() self.turn(-1) end) nextPage.Activated:Connect(function() self.turn(1) end)
+ close.Activated:Connect(self.close) button.Activated:Connect(function() self.other=false self.open() end)
+ UIS.InputBegan:Connect(function(input,processed)
+  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and self.area=="Lobby" then self.other=false self.open() end
+ end)
+ local function resize()
+  local n=book.AbsoluteSize.X<700 and 1 or 2
+  if n~=self.perSpread then
+   local first=(self.page-1)*self.perSpread self.perSpread=n self.page=math.floor(first/n)+1
+   spine.Visible=n==2 if book.Visible then self.render() end
+  end
+ end
+ book:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize) resize()
+ Run.RenderStepped:Connect(function() if book.Visible then freeze() end end)
+ return self
+end
+return J
+]========],[========[local J={}
+local player=game:GetService("Players").LocalPlayer
+local UIS=game:GetService("UserInputService")
+local Run=game:GetService("RunService")
+local Tween=game:GetService("TweenService")
+local CAS=game:GetService("ContextActionService")
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Q=require(package.CollectionQuery)
+local L=require(package.Localization)
+local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
+local Buttons=require(script.Parent:WaitForChild("BagUI"))
+local Audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local function make(class,props,parent)
+ local node=Instance.new(class)
+ if node:IsA("TextLabel") or node:IsA("TextButton") then node.Font=Enum.Font.GothamMedium node.TextColor3=Color3.fromRGB(68,52,33) end
+ for key,value in pairs(props) do node[key]=value end
+ node.Parent=parent return node
+end
+local function T(value) return L.text(value,player.LocaleId) end
+local function gradient(parent,a,b)
+ make("UIGradient",{Rotation=90,Color=ColorSequence.new(a,b)},parent)
+end
+local function text(parent,name,value,x,y,w,h,size)
+ local n=make("TextLabel",{Name=name,Text=value,BackgroundTransparency=1,Position=UDim2.fromScale(x,y),Size=UDim2.fromScale(w,h),TextScaled=true,TextWrapped=true,ZIndex=45},parent)
+ make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=size},n) return n
+end
+function J.new(gui,remote)
+ local self={area="Lobby",page=1,region="All",seen={},data={},entries=Q.entries(C),perSpread=2}
+ local button=Buttons.iconButton(gui,"Journal","T",92)
+ local book=make("Frame",{Name="FieldJournal",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.96,.86),BackgroundColor3=Color3.fromRGB(87,54,34),BorderSizePixel=0,ZIndex=40},gui)
+ make("UISizeConstraint",{MaxSize=Vector2.new(1200,780)},book)
+ make("UICorner",{CornerRadius=UDim.new(0,12)},book)
+ make("UIStroke",{Color=Color3.fromRGB(189,143,80),Thickness=3},book)
+ gradient(book,Color3.fromRGB(129,82,47),Color3.fromRGB(59,39,29))
+ local paper=make("Frame",{Name="Parchment",Position=UDim2.fromScale(.135,.065),Size=UDim2.fromScale(.73,.87),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,ZIndex=41},book)
+ gradient(paper,Color3.fromRGB(248,237,209),Color3.fromRGB(213,191,147))
+ make("UIStroke",{Color=Color3.fromRGB(182,154,107),Thickness=2},paper)
+ local spine=make("Frame",{Name="BookSpine",Position=UDim2.fromScale(.498,.065),Size=UDim2.fromScale(.004,.87),BackgroundColor3=Color3.fromRGB(150,111,68),BorderSizePixel=0,ZIndex=42},book)
+ local summary=text(book,"JournalCount","",.14,.005,.68,.05,18)
+ summary.TextColor3=Color3.fromRGB(250,230,187)
+ for _,x in ipairs({.145,.50}) do
+  local line=make("Frame",{Name="PageHeaderRule",Position=UDim2.fromScale(x,.069),Size=UDim2.fromScale(.355,.004),BackgroundColor3=Color3.fromRGB(187,145,73),BorderSizePixel=0,ZIndex=42},book)
+ end
+ for _,x in ipairs({.137,.847}) do
+  for _,y in ipairs({.069,.91}) do
+   make("Frame",{Name="PaperCorner",Position=UDim2.fromScale(x,y),Size=UDim2.fromOffset(16,16),Rotation=45,BackgroundColor3=Color3.fromRGB(181,145,92),BackgroundTransparency=.4,BorderSizePixel=0,ZIndex=42},book)
+  end
+ end
+ local regions=make("ScrollingFrame",{Name="JournalRegions",Position=UDim2.fromScale(.005,.18),Size=UDim2.fromScale(.125,.64),BackgroundTransparency=1,BorderSizePixel=0,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ScrollBarThickness=2,ZIndex=45},book)
+ make("UIListLayout",{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},regions)
+ local pages=make("Frame",{Name="JournalEntries",BackgroundTransparency=1,Position=UDim2.fromScale(.15,.085),Size=UDim2.fromScale(.70,.83),ZIndex=43},book)
+ local close=make("TextButton",{Name="CloseJournal",Text="×",Position=UDim2.fromScale(.91,.005),Size=UDim2.fromScale(.075,.065),BackgroundTransparency=1,TextColor3=Color3.fromRGB(246,226,184),TextSize=30,ZIndex=46},book)
+ local previous=make("TextButton",{Name="JournalPrevious",Text="‹",Position=UDim2.fromScale(.145,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
+ local nextPage=make("TextButton",{Name="JournalNext",Text="›",Position=UDim2.fromScale(.735,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
+ local pageNumber=text(book,"JournalPage","",.32,.942,.36,.052,18) pageNumber.TextColor3=Color3.fromRGB(250,230,187)
+ local lockedHumanoid,savedWalk,savedJump,savedRotate,savedHeight
+ local function freeze()
+  local character=player.Character local h=character and character:FindFirstChildOfClass("Humanoid")
+  if h and h~=lockedHumanoid then
+   lockedHumanoid=h savedWalk=h.WalkSpeed savedJump=h.JumpPower savedRotate=h.AutoRotate savedHeight=h.JumpHeight
+   h.WalkSpeed=0 h.JumpPower=0 h.JumpHeight=0 h.AutoRotate=false
+  end
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid:Move(Vector3.zero) end
+ end
+ local function unlock()
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid.WalkSpeed=savedWalk lockedHumanoid.JumpPower=savedJump lockedHumanoid.JumpHeight=savedHeight lockedHumanoid.AutoRotate=savedRotate end
+  lockedHumanoid=nil CAS:UnbindAction("JournalPages")
+ end
+ local generation=0 local turning=false
+ local function flip(direction)
+  generation+=1 local token=generation turning=true Audio.ui("PageTurn")
+  local leaf=make("Frame",{Name="TurningPage",AnchorPoint=Vector2.new(direction<0 and 1 or 0,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.355,.87),BackgroundColor3=Color3.fromRGB(242,225,185),BorderSizePixel=0,ZIndex=55},book)
+  gradient(leaf,Color3.fromRGB(250,237,207),Color3.fromRGB(201,166,109))
+  Tween:Create(leaf,TweenInfo.new(.25,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Size=UDim2.fromScale(0,.87)}):Play()
+  task.delay(.26,function() leaf:Destroy() if generation==token then turning=false end end)
+ end
+ function self.close()
+  book.Visible=false generation+=1 turning=false unlock()
+  for _,n in ipairs(book:GetChildren()) do if n.Name=="TurningPage" then n:Destroy() end end
+ end
+ local function speciesList()
+  local ids={} for _,id in ipairs(C.Order) do if self.region=="All" or C[id].Region==self.region then table.insert(ids,id) end end return ids
+ end
+ function self.render()
+  for _,n in ipairs(pages:GetChildren()) do n:Destroy() end
+  local ids=speciesList() local max=math.max(1,math.ceil(#ids/self.perSpread)) self.page=math.clamp(self.page,1,max)
+  pageNumber.Text=self.page.." / "..max
+  local discovered=0 for _,entry in ipairs(self.entries) do if self.seen[entry.key] then discovered+=1 end end
+  summary.Text=T("Discovered").." "..discovered.." / "..#self.entries.."   ·   "..T("Total caught").." "..(self.data.captures or 0)
+  for _,tab in ipairs(regions:GetChildren()) do if tab:IsA("TextButton") then tab.BackgroundTransparency=tab.Name=="Region_"..self.region and 0 or .28 end end
+  previous.AutoButtonColor=self.page>1 nextPage.AutoButtonColor=self.page<max
+  if #ids==0 then text(pages,"JournalEmpty",T("Region not released yet"),0,.2,1,.5,20) return end
+  for slot=1,self.perSpread do
+   local id=ids[(self.page-1)*self.perSpread+slot] if not id then continue end
+   local species=C[id] local known=false local caught=0
+   for _,stars in ipairs({1,3,6,9}) do local key=id..":"..stars known=known or self.seen[key]==true caught+=(self.data.caught and self.data.caught[key] or 0) end
+   local page=make("Frame",{Name="SpeciesPage",BackgroundTransparency=1,Position=UDim2.fromScale((slot-1)/self.perSpread+.01,0),Size=UDim2.fromScale(1/self.perSpread-.02,1),ZIndex=44},pages)
+   text(page,"SpeciesTitle",known and T(id) or "???",0,0,1,.07,24)
+   local caughtLabel=text(page,"SpeciesCaught",T("Caught").." "..caught,0,.075,1,.055,15) caughtLabel.TextColor3=Color3.fromRGB(82,109,67)
+   local info=make("Frame",{Name="SpeciesInformation",Position=UDim2.fromScale(0,.75),Size=UDim2.fromScale(1,.25),BackgroundColor3=Color3.fromRGB(246,228,187),BorderSizePixel=0,ZIndex=44},page)
+   text(info,"FoundAt",T("Found at").." · "..T(species.Region).." "..(species.UnlockMeters or 0).."m",.03,.03,.94,.22,15)
+   text(info,"TamingTime",T("Taming (1 star)").." · "..species.TameSeconds..T("Seconds"),.03,.27,.94,.22,15)
+   local income=text(info,"Production","",.03,.51,.94,.22,15)
+   local acquisition=text(info,"Acquisition","",.03,.75,.94,.23,13)
+   local function select(stars)
+    income.Text=stars.."★ · "..L.income((species.IncomeAmount or 1)*2^(stars-1),species.IncomeSeconds or 3,player.LocaleId)
+    acquisition.Text=stars==1 and L.huntHint(species.UnlockMeters,species.TameSeconds,player.LocaleId) or L.evolutionHint(stars,player.LocaleId)
+   end
+   select(1)
+   for index,stars in ipairs({1,3,6,9}) do
+    local revealed=self.seen[id..":"..stars]==true
+    local card=make("TextButton",{Name="JournalEntry",Text="",Position=UDim2.fromScale(((index-1)%2)*.51,.14+math.floor((index-1)/2)*.30),Size=UDim2.fromScale(.49,.285),BackgroundColor3=Color3.fromRGB(216,204,170),BackgroundTransparency=.22,BorderSizePixel=0,ZIndex=44},page)
+    make("UIStroke",{Color=Color3.fromRGB(169,147,102),Thickness=1},card)
+    local viewport=make("ViewportFrame",{Name="JournalPortrait",Position=UDim2.fromScale(0,0),Size=UDim2.fromScale(1,.8),BackgroundTransparency=1,Ambient=Color3.fromRGB(205,205,185),LightColor=Color3.new(1,1,1),ZIndex=45},card)
+    Portrait.fill(viewport,id,stars,not revealed,1.65)
+    if not revealed then local q=text(card,"UndiscoveredQuestion","?",.2,.12,.6,.55,52) q.TextColor3=Color3.fromRGB(244,209,121) q.ZIndex=46 q.TextStrokeTransparency=.2 end
+    text(card,"Stars",stars.."★",0,.8,1,.2,17)
+    card.MouseEnter:Connect(function() select(stars) end)
+    card.Activated:Connect(function() select(stars) end)
+   end
+  end
+ end
+ function self.turn(direction)
+  if not book.Visible or turning then return end
+  local max=math.max(1,math.ceil(#speciesList()/self.perSpread)) local next=math.clamp(self.page+direction,1,max)
+  if next==self.page then return end
+  self.page=next self.render() flip(direction)
+ end
+ function self.open()
+  if self.area=="Hunt" then return end
+  if book.Visible then self.close() return end
+  if self.onOpen then self.onOpen() end
+  book.Visible=true freeze() self.render() Audio.ui("BookOpen") if not self.other then remote:FireServer("Journal") end
+  CAS:BindActionAtPriority("JournalPages",function(_,state,input)
+   if state==Enum.UserInputState.Begin then
+    if input.KeyCode==Enum.KeyCode.A or input.KeyCode==Enum.KeyCode.Left then self.turn(-1)
+    elseif input.KeyCode==Enum.KeyCode.D or input.KeyCode==Enum.KeyCode.Right then self.turn(1) end
+   end
+   return Enum.ContextActionResult.Sink
+  end,false,3000,Enum.KeyCode.W,Enum.KeyCode.A,Enum.KeyCode.S,Enum.KeyCode.D,Enum.KeyCode.Space,Enum.KeyCode.Up,Enum.KeyCode.Down,Enum.KeyCode.Left,Enum.KeyCode.Right,Enum.KeyCode.Thumbstick1,Enum.KeyCode.ButtonA)
+ end
+ function self.viewOther(data) self.other=true self.close() self.snapshot(data) self.open() end
+ function self.snapshot(data) self.data=data self.seen=data.seen or self.seen if book.Visible then self.render() end end
+ function self.state(data)
+   self.area=data.area button.Visible=self.area~="Hunt"
+  if self.area=="Hunt" then self.close() end
+  if book.Visible and not self.other and data.count~=self.lastCount then remote:FireServer("Journal") end self.lastCount=data.count
+ end
+ for index,region in ipairs({"All","Meadow","Forest","Swamp","Ocean"}) do
+  local colors={Color3.fromRGB(172,145,85),Color3.fromRGB(112,153,85),Color3.fromRGB(70,123,88),Color3.fromRGB(122,120,76),Color3.fromRGB(75,137,164)}
+  local tab=make("TextButton",{Name="Region_"..region,LayoutOrder=index,Text=T(region),Size=UDim2.new(1,-3,0,42),TextScaled=true,BackgroundColor3=colors[index],TextColor3=Color3.fromRGB(255,242,214),BorderSizePixel=0,ZIndex=46},regions)
+  make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=16},tab)
+  tab.Activated:Connect(function()
+   if turning or self.region==region then return end
+   self.region=region self.page=1 self.render() flip(1)
+  end)
+ end
+ -- Mutation/breeding tabs wait for confirmed content and recipe rules.
+ previous.Activated:Connect(function() self.turn(-1) end) nextPage.Activated:Connect(function() self.turn(1) end)
+ close.Activated:Connect(self.close) button.Activated:Connect(function() self.other=false self.open() end)
+ UIS.InputBegan:Connect(function(input,processed)
+  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and self.area=="Lobby" then self.other=false self.open() end
+ end)
+ local function resize()
+  local n=book.AbsoluteSize.X<700 and 1 or 2
+  if n~=self.perSpread then
+   local first=(self.page-1)*self.perSpread self.perSpread=n self.page=math.floor(first/n)+1
+   spine.Visible=n==2 if book.Visible then self.render() end
+  end
+ end
+ book:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize) resize()
+ Run.RenderStepped:Connect(function() if book.Visible then freeze() end end)
+ return self
+end
+return J
+]========],[========[local J={}
+local player=game:GetService("Players").LocalPlayer
+local UIS=game:GetService("UserInputService")
+local Run=game:GetService("RunService")
+local Tween=game:GetService("TweenService")
+local CAS=game:GetService("ContextActionService")
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Q=require(package.CollectionQuery)
+local L=require(package.Localization)
+local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
+local Buttons=require(script.Parent:WaitForChild("BagUI"))
+local Audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local function make(class,props,parent)
+ local node=Instance.new(class)
+ if node:IsA("TextLabel") or node:IsA("TextButton") then node.Font=Enum.Font.GothamMedium node.TextColor3=Color3.fromRGB(68,52,33) end
+ for key,value in pairs(props) do node[key]=value end
+ node.Parent=parent return node
+end
+local function T(value) return L.text(value,player.LocaleId) end
+local function gradient(parent,a,b)
+ make("UIGradient",{Rotation=90,Color=ColorSequence.new(a,b)},parent)
+end
+local function text(parent,name,value,x,y,w,h,size)
+ local n=make("TextLabel",{Name=name,Text=value,BackgroundTransparency=1,Position=UDim2.fromScale(x,y),Size=UDim2.fromScale(w,h),TextScaled=true,TextWrapped=true,ZIndex=45},parent)
+ make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=size},n) return n
+end
+function J.new(gui,remote)
+ local self={area="Lobby",page=1,region="All",seen={},data={},entries=Q.entries(C),perSpread=2}
+ local button=Buttons.iconButton(gui,"Journal","T",92)
+ local book=make("Frame",{Name="FieldJournal",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.96,.86),BackgroundColor3=Color3.fromRGB(87,54,34),BorderSizePixel=0,ZIndex=40},gui)
+ make("UISizeConstraint",{MaxSize=Vector2.new(1200,780)},book)
+ make("UICorner",{CornerRadius=UDim.new(0,12)},book)
+ make("UIStroke",{Color=Color3.fromRGB(189,143,80),Thickness=3},book)
+ gradient(book,Color3.fromRGB(129,82,47),Color3.fromRGB(59,39,29))
+ local paper=make("Frame",{Name="Parchment",Position=UDim2.fromScale(.135,.065),Size=UDim2.fromScale(.73,.87),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,ZIndex=41},book)
+ gradient(paper,Color3.fromRGB(248,237,209),Color3.fromRGB(213,191,147))
+ make("UIStroke",{Color=Color3.fromRGB(182,154,107),Thickness=2},paper)
+ local spine=make("Frame",{Name="BookSpine",Position=UDim2.fromScale(.498,.065),Size=UDim2.fromScale(.004,.87),BackgroundColor3=Color3.fromRGB(150,111,68),BorderSizePixel=0,ZIndex=42},book)
+ local summary=text(book,"JournalCount","",.14,.005,.68,.05,18)
+ summary.TextColor3=Color3.fromRGB(250,230,187)
+ for _,x in ipairs({.145,.50}) do
+  local line=make("Frame",{Name="PageHeaderRule",Position=UDim2.fromScale(x,.069),Size=UDim2.fromScale(.355,.004),BackgroundColor3=Color3.fromRGB(187,145,73),BorderSizePixel=0,ZIndex=42},book)
+ end
+ for _,x in ipairs({.137,.847}) do
+  for _,y in ipairs({.069,.91}) do
+   make("Frame",{Name="PaperCorner",Position=UDim2.fromScale(x,y),Size=UDim2.fromOffset(16,16),Rotation=45,BackgroundColor3=Color3.fromRGB(181,145,92),BackgroundTransparency=.4,BorderSizePixel=0,ZIndex=42},book)
+  end
+ end
+ local regions=make("ScrollingFrame",{Name="JournalRegions",Position=UDim2.fromScale(.005,.18),Size=UDim2.fromScale(.125,.64),BackgroundTransparency=1,BorderSizePixel=0,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ScrollBarThickness=2,ZIndex=45},book)
+ make("UIListLayout",{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},regions)
+ local pages=make("Frame",{Name="JournalEntries",BackgroundTransparency=1,Position=UDim2.fromScale(.15,.085),Size=UDim2.fromScale(.70,.83),ZIndex=43},book)
+ local close=make("TextButton",{Name="CloseJournal",Text="×",Position=UDim2.fromScale(.91,.005),Size=UDim2.fromScale(.075,.065),BackgroundTransparency=1,TextColor3=Color3.fromRGB(246,226,184),TextSize=30,ZIndex=46},book)
+ local previous=make("TextButton",{Name="JournalPrevious",Text="‹",Position=UDim2.fromScale(.145,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
+ local nextPage=make("TextButton",{Name="JournalNext",Text="›",Position=UDim2.fromScale(.735,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
+ local pageNumber=text(book,"JournalPage","",.32,.942,.36,.052,18) pageNumber.TextColor3=Color3.fromRGB(250,230,187)
+ local lockedHumanoid,savedWalk,savedJump,savedRotate,savedHeight
+ local function freeze()
+  local character=player.Character local h=character and character:FindFirstChildOfClass("Humanoid")
+  if h and h~=lockedHumanoid then
+   lockedHumanoid=h savedWalk=h.WalkSpeed savedJump=h.JumpPower savedRotate=h.AutoRotate savedHeight=h.JumpHeight
+   h.WalkSpeed=0 h.JumpPower=0 h.JumpHeight=0 h.AutoRotate=false
+  end
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid:Move(Vector3.zero) end
+ end
+ local function unlock()
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid.WalkSpeed=savedWalk lockedHumanoid.JumpPower=savedJump lockedHumanoid.JumpHeight=savedHeight lockedHumanoid.AutoRotate=savedRotate end
+  lockedHumanoid=nil CAS:UnbindAction("JournalPages")
+ end
+ local generation=0 local turning=false
+ local function flip(direction)
+  generation+=1 local token=generation turning=true Audio.ui("PageTurn")
+  local leaf=make("Frame",{Name="TurningPage",AnchorPoint=Vector2.new(direction<0 and 1 or 0,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.355,.87),BackgroundColor3=Color3.fromRGB(242,225,185),BorderSizePixel=0,ZIndex=55},book)
+  gradient(leaf,Color3.fromRGB(250,237,207),Color3.fromRGB(201,166,109))
+  Tween:Create(leaf,TweenInfo.new(.25,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Size=UDim2.fromScale(0,.87)}):Play()
+  task.delay(.26,function() leaf:Destroy() if generation==token then turning=false end end)
+ end
+ function self.close()
+  book.Visible=false generation+=1 turning=false unlock()
+  for _,n in ipairs(book:GetChildren()) do if n.Name=="TurningPage" then n:Destroy() end end
+ end
+ local function speciesList()
+  local ids={} for _,id in ipairs(C.Order) do if self.region=="All" or C[id].Region==self.region then table.insert(ids,id) end end return ids
+ end
+ function self.render()
+  for _,n in ipairs(pages:GetChildren()) do n:Destroy() end
+  local ids=speciesList() local max=math.max(1,math.ceil(#ids/self.perSpread)) self.page=math.clamp(self.page,1,max)
+  pageNumber.Text=self.page.." / "..max
+  local discovered=0 for _,entry in ipairs(self.entries) do if self.seen[entry.key] then discovered+=1 end end
+  summary.Text=T("Discovered").." "..discovered.." / "..#self.entries.."   ·   "..T("Total caught").." "..(self.data.captures or 0)
+  for _,tab in ipairs(regions:GetChildren()) do if tab:IsA("TextButton") then tab.BackgroundTransparency=tab.Name=="Region_"..self.region and 0 or .28 end end
+  previous.AutoButtonColor=self.page>1 nextPage.AutoButtonColor=self.page<max
+  if #ids==0 then text(pages,"JournalEmpty",T("Region not released yet"),0,.2,1,.5,20) return end
+  for slot=1,self.perSpread do
+   local id=ids[(self.page-1)*self.perSpread+slot] if not id then continue end
+   local species=C[id] local known=false local caught=0
+   for _,stars in ipairs({1,3,6,9}) do local key=id..":"..stars known=known or self.seen[key]==true caught+=(self.data.caught and self.data.caught[key] or 0) end
+   local page=make("Frame",{Name="SpeciesPage",BackgroundTransparency=1,Position=UDim2.fromScale((slot-1)/self.perSpread+.01,0),Size=UDim2.fromScale(1/self.perSpread-.02,1),ZIndex=44},pages)
+   text(page,"SpeciesTitle",known and T(id) or "???",0,0,1,.07,24)
+   local caughtLabel=text(page,"SpeciesCaught",T("Caught").." "..caught,0,.075,1,.055,15) caughtLabel.TextColor3=Color3.fromRGB(82,109,67)
+   local info=make("Frame",{Name="SpeciesInformation",Position=UDim2.fromScale(0,.75),Size=UDim2.fromScale(1,.25),BackgroundColor3=Color3.fromRGB(246,228,187),BorderSizePixel=0,ZIndex=44},page)
+   text(info,"FoundAt",T("Found at").." · "..T(species.Region).." "..(species.UnlockMeters or 0).."m",.03,.03,.94,.22,15)
+   text(info,"TamingTime",T("Taming (1 star)").." · "..species.TameSeconds..T("Seconds"),.03,.27,.94,.22,15)
+   local income=text(info,"Production","",.03,.51,.94,.22,15)
+   local acquisition=text(info,"Acquisition","",.03,.75,.94,.23,13)
+   local function select(stars)
+    income.Text=stars.."★ · "..L.income((species.IncomeAmount or 1)*2^(stars-1),species.IncomeSeconds or 3,player.LocaleId)
+    acquisition.Text=stars==1 and L.huntHint(species.UnlockMeters,species.TameSeconds,player.LocaleId) or L.evolutionHint(stars,player.LocaleId)
+   end
+   select(1)
+   for index,stars in ipairs({1,3,6,9}) do
+    local revealed=self.seen[id..":"..stars]==true
+    local card=make("TextButton",{Name="JournalEntry",Text="",Position=UDim2.fromScale(((index-1)%2)*.51,.14+math.floor((index-1)/2)*.30),Size=UDim2.fromScale(.49,.285),BackgroundColor3=Color3.fromRGB(216,204,170),BackgroundTransparency=.22,BorderSizePixel=0,ZIndex=44},page)
+    make("UIStroke",{Color=Color3.fromRGB(169,147,102),Thickness=1},card)
+    local viewport=make("ViewportFrame",{Name="JournalPortrait",Position=UDim2.fromScale(0,0),Size=UDim2.fromScale(1,.8),BackgroundTransparency=1,Ambient=Color3.fromRGB(205,205,185),LightColor=Color3.new(1,1,1),ZIndex=45},card)
+    Portrait.fill(viewport,id,stars,not revealed,1.65)
+    if not revealed then local q=text(card,"UndiscoveredQuestion","?",.2,.12,.6,.55,52) q.TextColor3=Color3.fromRGB(244,209,121) q.ZIndex=46 q.TextStrokeTransparency=.2 end
+    text(card,"Stars",stars.."★",0,.8,1,.2,17)
+    card.MouseEnter:Connect(function() select(stars) end)
+    card.Activated:Connect(function() select(stars) end)
+   end
+  end
+ end
+ function self.turn(direction)
+  if not book.Visible or turning then return end
+  local max=math.max(1,math.ceil(#speciesList()/self.perSpread)) local next=math.clamp(self.page+direction,1,max)
+  if next==self.page then return end
+  self.page=next self.render() flip(direction)
+ end
+ function self.open()
+  if self.area=="Hunt" then return end
+  if book.Visible then self.close() return end
+  if self.onOpen then self.onOpen() end
+  book.Visible=true freeze() self.render() Audio.ui("BookOpen") if not self.other then remote:FireServer("Journal") end
+  CAS:BindActionAtPriority("JournalPages",function(_,state,input)
+   if state==Enum.UserInputState.Begin then
+    if input.KeyCode==Enum.KeyCode.A or input.KeyCode==Enum.KeyCode.Left then self.turn(-1)
+    elseif input.KeyCode==Enum.KeyCode.D or input.KeyCode==Enum.KeyCode.Right then self.turn(1) end
+   end
+   return Enum.ContextActionResult.Sink
+  end,false,3000,Enum.KeyCode.W,Enum.KeyCode.A,Enum.KeyCode.S,Enum.KeyCode.D,Enum.KeyCode.Space,Enum.KeyCode.Up,Enum.KeyCode.Down,Enum.KeyCode.Left,Enum.KeyCode.Right,Enum.KeyCode.Thumbstick1,Enum.KeyCode.ButtonA)
+ end
+ function self.viewOther(data) self.other=true self.close() self.snapshot(data) self.open() end
+ function self.snapshot(data) self.data=data self.seen=data.seen or self.seen if book.Visible then self.render() end end
+ function self.state(data)
+   self.area=data.area button.Visible=self.area~="Hunt"
+  if self.area=="Hunt" then self.close() end
+  if book.Visible and not self.other and data.count~=self.lastCount then remote:FireServer("Journal") end self.lastCount=data.count
+ end
+ for index,region in ipairs({"All","Meadow","Forest","Swamp","Ocean"}) do
+  local colors={Color3.fromRGB(172,145,85),Color3.fromRGB(112,153,85),Color3.fromRGB(70,123,88),Color3.fromRGB(122,120,76),Color3.fromRGB(75,137,164)}
+  local tab=make("TextButton",{Name="Region_"..region,LayoutOrder=index,Text=T(region),Size=UDim2.new(1,-3,0,42),TextScaled=true,BackgroundColor3=colors[index],TextColor3=Color3.fromRGB(255,242,214),BorderSizePixel=0,ZIndex=46},regions)
+  make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=16},tab)
+  tab.Activated:Connect(function()
+   if turning or self.region==region then return end
+   self.region=region self.page=1 self.render() flip(1)
+  end)
+ end
+ -- Mutation/breeding tabs wait for confirmed content and recipe rules.
+ previous.Activated:Connect(function() self.turn(-1) end) nextPage.Activated:Connect(function() self.turn(1) end)
+ close.Activated:Connect(self.close) button.Activated:Connect(function() self.other=false self.open() end)
+ UIS.InputBegan:Connect(function(input,processed)
+  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and self.area=="Lobby" then self.other=false self.open() end
+ end)
+ local function resize()
+  local n=book.AbsoluteSize.X<700 and 1 or 2
+  if n~=self.perSpread then
+   local first=(self.page-1)*self.perSpread self.perSpread=n self.page=math.floor(first/n)+1
+   spine.Visible=n==2 if book.Visible then self.render() end
+  end
+ end
+ book:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize) resize()
+ Run.RenderStepped:Connect(function() if book.Visible then freeze() end end)
+ return self
+end
+return J
+]========],[========[local J={}
+local player=game:GetService("Players").LocalPlayer
+local UIS=game:GetService("UserInputService")
+local Run=game:GetService("RunService")
+local Tween=game:GetService("TweenService")
+local CAS=game:GetService("ContextActionService")
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Q=require(package.CollectionQuery)
+local L=require(package.Localization)
+local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
+local Buttons=require(script.Parent:WaitForChild("BagUI"))
+local Audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local function make(class,props,parent)
+ local node=Instance.new(class)
+ if node:IsA("TextLabel") or node:IsA("TextButton") then node.Font=Enum.Font.GothamMedium node.TextColor3=Color3.fromRGB(68,52,33) end
+ for key,value in pairs(props) do node[key]=value end
+ node.Parent=parent return node
+end
+local function T(value) return L.text(value,player.LocaleId) end
+local function gradient(parent,a,b)
+ make("UIGradient",{Rotation=90,Color=ColorSequence.new(a,b)},parent)
+end
+local function text(parent,name,value,x,y,w,h,size)
+ local n=make("TextLabel",{Name=name,Text=value,BackgroundTransparency=1,Position=UDim2.fromScale(x,y),Size=UDim2.fromScale(w,h),TextScaled=true,TextWrapped=true,ZIndex=45},parent)
+ make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=size},n) return n
+end
+function J.new(gui,remote)
+ local self={area="Lobby",page=1,region="All",seen={},data={},entries=Q.entries(C),perSpread=2}
+ local button=Buttons.iconButton(gui,"Journal","T",92)
+ local book=make("Frame",{Name="FieldJournal",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.96,.86),BackgroundColor3=Color3.fromRGB(87,54,34),BorderSizePixel=0,ZIndex=40},gui)
+ make("UISizeConstraint",{MaxSize=Vector2.new(1200,780)},book)
+ make("UICorner",{CornerRadius=UDim.new(0,12)},book)
+ make("UIStroke",{Color=Color3.fromRGB(189,143,80),Thickness=3},book)
+ gradient(book,Color3.fromRGB(129,82,47),Color3.fromRGB(59,39,29))
+ local paper=make("Frame",{Name="Parchment",Position=UDim2.fromScale(.135,.065),Size=UDim2.fromScale(.73,.87),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,ZIndex=41},book)
+ gradient(paper,Color3.fromRGB(248,237,209),Color3.fromRGB(213,191,147))
+ make("UIStroke",{Color=Color3.fromRGB(182,154,107),Thickness=2},paper)
+ local spine=make("Frame",{Name="BookSpine",Position=UDim2.fromScale(.498,.065),Size=UDim2.fromScale(.004,.87),BackgroundColor3=Color3.fromRGB(150,111,68),BorderSizePixel=0,ZIndex=42},book)
+ local summary=text(book,"JournalCount","",.14,.005,.68,.05,18)
+ summary.TextColor3=Color3.fromRGB(250,230,187)
+ for _,x in ipairs({.145,.50}) do
+  local line=make("Frame",{Name="PageHeaderRule",Position=UDim2.fromScale(x,.069),Size=UDim2.fromScale(.355,.004),BackgroundColor3=Color3.fromRGB(187,145,73),BorderSizePixel=0,ZIndex=42},book)
+ end
+ for _,x in ipairs({.137,.847}) do
+  for _,y in ipairs({.069,.91}) do
+   make("Frame",{Name="PaperCorner",Position=UDim2.fromScale(x,y),Size=UDim2.fromOffset(16,16),Rotation=45,BackgroundColor3=Color3.fromRGB(181,145,92),BackgroundTransparency=.4,BorderSizePixel=0,ZIndex=42},book)
+  end
+ end
+ local regions=make("ScrollingFrame",{Name="JournalRegions",Position=UDim2.fromScale(.005,.18),Size=UDim2.fromScale(.125,.64),BackgroundTransparency=1,BorderSizePixel=0,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ScrollBarThickness=2,ZIndex=45},book)
+ make("UIListLayout",{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},regions)
+ local pages=make("Frame",{Name="JournalEntries",BackgroundTransparency=1,Position=UDim2.fromScale(.15,.085),Size=UDim2.fromScale(.70,.83),ZIndex=43},book)
+ local close=make("TextButton",{Name="CloseJournal",Text="×",Position=UDim2.fromScale(.91,.005),Size=UDim2.fromScale(.075,.065),BackgroundTransparency=1,TextColor3=Color3.fromRGB(246,226,184),TextSize=30,ZIndex=46},book)
+ local previous=make("TextButton",{Name="JournalPrevious",Text="‹",Position=UDim2.fromScale(.145,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
+ local nextPage=make("TextButton",{Name="JournalNext",Text="›",Position=UDim2.fromScale(.735,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
+ local pageNumber=text(book,"JournalPage","",.32,.942,.36,.052,18) pageNumber.TextColor3=Color3.fromRGB(250,230,187)
+ local lockedHumanoid,savedWalk,savedJump,savedRotate,savedHeight
+ local function freeze()
+  local character=player.Character local h=character and character:FindFirstChildOfClass("Humanoid")
+  if h and h~=lockedHumanoid then
+   lockedHumanoid=h savedWalk=h.WalkSpeed savedJump=h.JumpPower savedRotate=h.AutoRotate savedHeight=h.JumpHeight
+   h.WalkSpeed=0 h.JumpPower=0 h.JumpHeight=0 h.AutoRotate=false
+  end
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid:Move(Vector3.zero) end
+ end
+ local function unlock()
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid.WalkSpeed=savedWalk lockedHumanoid.JumpPower=savedJump lockedHumanoid.JumpHeight=savedHeight lockedHumanoid.AutoRotate=savedRotate end
+  lockedHumanoid=nil CAS:UnbindAction("JournalPages")
+ end
+ local generation=0 local turning=false
+ local function flip(direction)
+  generation+=1 local token=generation turning=true Audio.ui("PageTurn")
+  local leaf=make("Frame",{Name="TurningPage",AnchorPoint=Vector2.new(direction<0 and 1 or 0,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.355,.87),BackgroundColor3=Color3.fromRGB(242,225,185),BorderSizePixel=0,ZIndex=55},book)
+  gradient(leaf,Color3.fromRGB(250,237,207),Color3.fromRGB(201,166,109))
+  Tween:Create(leaf,TweenInfo.new(.25,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Size=UDim2.fromScale(0,.87)}):Play()
+  task.delay(.26,function() leaf:Destroy() if generation==token then turning=false end end)
+ end
+ function self.close()
+  book.Visible=false generation+=1 turning=false unlock()
+  for _,n in ipairs(book:GetChildren()) do if n.Name=="TurningPage" then n:Destroy() end end
+ end
+ local function speciesList()
+  local ids={} for _,id in ipairs(C.Order) do if self.region=="All" or C[id].Region==self.region then table.insert(ids,id) end end return ids
+ end
+ function self.render()
+  for _,n in ipairs(pages:GetChildren()) do n:Destroy() end
+  local ids=speciesList() local max=math.max(1,math.ceil(#ids/self.perSpread)) self.page=math.clamp(self.page,1,max)
+  pageNumber.Text=self.page.." / "..max
+  local discovered=0 for _,entry in ipairs(self.entries) do if self.seen[entry.key] then discovered+=1 end end
+  summary.Text=T("Discovered").." "..discovered.." / "..#self.entries.."   ·   "..T("Total caught").." "..(self.data.captures or 0)
+  for _,tab in ipairs(regions:GetChildren()) do if tab:IsA("TextButton") then tab.BackgroundTransparency=tab.Name=="Region_"..self.region and 0 or .28 end end
+  previous.AutoButtonColor=self.page>1 nextPage.AutoButtonColor=self.page<max
+  if #ids==0 then text(pages,"JournalEmpty",T("Region not released yet"),0,.2,1,.5,20) return end
+  for slot=1,self.perSpread do
+   local id=ids[(self.page-1)*self.perSpread+slot] if not id then continue end
+   local species=C[id] local known=false local caught=0
+   for _,stars in ipairs({1,3,6,9}) do local key=id..":"..stars known=known or self.seen[key]==true caught+=(self.data.caught and self.data.caught[key] or 0) end
+   local page=make("Frame",{Name="SpeciesPage",BackgroundTransparency=1,Position=UDim2.fromScale((slot-1)/self.perSpread+.01,0),Size=UDim2.fromScale(1/self.perSpread-.02,1),ZIndex=44},pages)
+   text(page,"SpeciesTitle",known and T(id) or "???",0,0,1,.07,24)
+   local caughtLabel=text(page,"SpeciesCaught",T("Caught").." "..caught,0,.075,1,.055,15) caughtLabel.TextColor3=Color3.fromRGB(82,109,67)
+   local info=make("Frame",{Name="SpeciesInformation",Position=UDim2.fromScale(0,.75),Size=UDim2.fromScale(1,.25),BackgroundColor3=Color3.fromRGB(246,228,187),BorderSizePixel=0,ZIndex=44},page)
+   text(info,"FoundAt",T("Found at").." · "..T(species.Region).." "..(species.UnlockMeters or 0).."m",.03,.03,.94,.22,15)
+   text(info,"TamingTime",T("Taming (1 star)").." · "..species.TameSeconds..T("Seconds"),.03,.27,.94,.22,15)
+   local income=text(info,"Production","",.03,.51,.94,.22,15)
+   local acquisition=text(info,"Acquisition","",.03,.75,.94,.23,13)
+   local function select(stars)
+    income.Text=stars.."★ · "..L.income((species.IncomeAmount or 1)*2^(stars-1),species.IncomeSeconds or 3,player.LocaleId)
+    acquisition.Text=stars==1 and L.huntHint(species.UnlockMeters,species.TameSeconds,player.LocaleId) or L.evolutionHint(stars,player.LocaleId)
+   end
+   select(1)
+   for index,stars in ipairs({1,3,6,9}) do
+    local revealed=self.seen[id..":"..stars]==true
+    local card=make("TextButton",{Name="JournalEntry",Text="",Position=UDim2.fromScale(((index-1)%2)*.51,.14+math.floor((index-1)/2)*.30),Size=UDim2.fromScale(.49,.285),BackgroundColor3=Color3.fromRGB(216,204,170),BackgroundTransparency=.22,BorderSizePixel=0,ZIndex=44},page)
+    make("UIStroke",{Color=Color3.fromRGB(169,147,102),Thickness=1},card)
+    local viewport=make("ViewportFrame",{Name="JournalPortrait",Position=UDim2.fromScale(0,0),Size=UDim2.fromScale(1,.8),BackgroundTransparency=1,Ambient=Color3.fromRGB(205,205,185),LightColor=Color3.new(1,1,1),ZIndex=45},card)
+    Portrait.fill(viewport,id,stars,not revealed,1.65)
+    if not revealed then local q=text(card,"UndiscoveredQuestion","?",.2,.12,.6,.55,52) q.TextColor3=Color3.fromRGB(244,209,121) q.ZIndex=46 q.TextStrokeTransparency=.2 end
+    text(card,"Stars",stars.."★",0,.8,1,.2,17)
+    card.MouseEnter:Connect(function() select(stars) end)
+    card.Activated:Connect(function() select(stars) end)
+   end
+  end
+ end
+ function self.turn(direction)
+  if not book.Visible or turning then return end
+  local max=math.max(1,math.ceil(#speciesList()/self.perSpread)) local next=math.clamp(self.page+direction,1,max)
+  if next==self.page then return end
+  self.page=next self.render() flip(direction)
+ end
+ function self.open()
+  if self.area=="Hunt" then return end
+  if book.Visible then self.close() return end
+  if self.onOpen then self.onOpen() end
+  book.Visible=true freeze() self.render() Audio.ui("BookOpen") if not self.other then remote:FireServer("Journal") end
+  CAS:BindActionAtPriority("JournalPages",function(_,state,input)
+   if state==Enum.UserInputState.Begin then
+    if input.KeyCode==Enum.KeyCode.A or input.KeyCode==Enum.KeyCode.Left then self.turn(-1)
+    elseif input.KeyCode==Enum.KeyCode.D or input.KeyCode==Enum.KeyCode.Right then self.turn(1) end
+   end
+   return Enum.ContextActionResult.Sink
+  end,false,3000,Enum.KeyCode.W,Enum.KeyCode.A,Enum.KeyCode.S,Enum.KeyCode.D,Enum.KeyCode.Space,Enum.KeyCode.Up,Enum.KeyCode.Down,Enum.KeyCode.Left,Enum.KeyCode.Right,Enum.KeyCode.Thumbstick1,Enum.KeyCode.ButtonA)
+ end
+ function self.viewOther(data) self.other=true self.close() self.snapshot(data) self.open() end
+ function self.snapshot(data) self.data=data self.seen=data.seen or self.seen if book.Visible then self.render() end end
+ function self.state(data)
+   self.area=data.area button.Visible=self.area~="Hunt"
+  if self.area=="Hunt" then self.close() end
+  if book.Visible and not self.other and data.count~=self.lastCount then remote:FireServer("Journal") end self.lastCount=data.count
+ end
+ for index,region in ipairs({"All","Meadow","Forest","Swamp","Ocean"}) do
+  local colors={Color3.fromRGB(172,145,85),Color3.fromRGB(112,153,85),Color3.fromRGB(70,123,88),Color3.fromRGB(122,120,76),Color3.fromRGB(75,137,164)}
+  local tab=make("TextButton",{Name="Region_"..region,LayoutOrder=index,Text=T(region),Size=UDim2.new(1,-3,0,42),TextScaled=true,BackgroundColor3=colors[index],TextColor3=Color3.fromRGB(255,242,214),BorderSizePixel=0,ZIndex=46},regions)
+  make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=16},tab)
+  tab.Activated:Connect(function()
+   if turning or self.region==region then return end
+   self.region=region self.page=1 self.render() flip(1)
+  end)
+ end
+ -- Mutation/breeding tabs wait for confirmed content and recipe rules.
+ previous.Activated:Connect(function() self.turn(-1) end) nextPage.Activated:Connect(function() self.turn(1) end)
+ close.Activated:Connect(self.close) button.Activated:Connect(function() self.other=false self.open() end)
+ UIS.InputBegan:Connect(function(input,processed)
+  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and self.area=="Lobby" then self.other=false self.open() end
+ end)
+ local function resize()
+  local n=book.AbsoluteSize.X<700 and 1 or 2
+  if n~=self.perSpread then
+   local first=(self.page-1)*self.perSpread self.perSpread=n self.page=math.floor(first/n)+1
+   spine.Visible=n==2 if book.Visible then self.render() end
+  end
+ end
+ book:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize) resize()
+ Run.RenderStepped:Connect(function() if book.Visible then freeze() end end)
+ return self
+end
+return J
+]========],[========[local J={}
+local player=game:GetService("Players").LocalPlayer
+local UIS=game:GetService("UserInputService")
+local Run=game:GetService("RunService")
+local Tween=game:GetService("TweenService")
+local CAS=game:GetService("ContextActionService")
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Q=require(package.CollectionQuery)
+local L=require(package.Localization)
+local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
+local Buttons=require(script.Parent:WaitForChild("BagUI"))
+local Audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local function make(class,props,parent)
+ local node=Instance.new(class)
+ if node:IsA("TextLabel") or node:IsA("TextButton") then node.Font=Enum.Font.GothamMedium node.TextColor3=Color3.fromRGB(68,52,33) end
+ for key,value in pairs(props) do node[key]=value end
+ node.Parent=parent return node
+end
+local function T(value) return L.text(value,player.LocaleId) end
+local function gradient(parent,a,b)
+ make("UIGradient",{Rotation=90,Color=ColorSequence.new(a,b)},parent)
+end
+local function text(parent,name,value,x,y,w,h,size)
+ local n=make("TextLabel",{Name=name,Text=value,BackgroundTransparency=1,Position=UDim2.fromScale(x,y),Size=UDim2.fromScale(w,h),TextScaled=true,TextWrapped=true,ZIndex=45},parent)
+ make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=size},n) return n
+end
+function J.new(gui,remote)
+ local self={area="Lobby",page=1,region="All",seen={},data={},entries=Q.entries(C),perSpread=2}
+ local button=Buttons.iconButton(gui,"Journal","T",92)
+ local book=make("Frame",{Name="FieldJournal",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.96,.86),BackgroundColor3=Color3.fromRGB(87,54,34),BorderSizePixel=0,ZIndex=40},gui)
+ make("UISizeConstraint",{MaxSize=Vector2.new(1200,780)},book)
+ make("UICorner",{CornerRadius=UDim.new(0,12)},book)
+ make("UIStroke",{Color=Color3.fromRGB(189,143,80),Thickness=3},book)
+ gradient(book,Color3.fromRGB(129,82,47),Color3.fromRGB(59,39,29))
+ local paper=make("Frame",{Name="Parchment",Position=UDim2.fromScale(.135,.065),Size=UDim2.fromScale(.73,.87),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,ZIndex=41},book)
+ gradient(paper,Color3.fromRGB(248,237,209),Color3.fromRGB(213,191,147))
+ make("UIStroke",{Color=Color3.fromRGB(182,154,107),Thickness=2},paper)
+ local spine=make("Frame",{Name="BookSpine",Position=UDim2.fromScale(.498,.065),Size=UDim2.fromScale(.004,.87),BackgroundColor3=Color3.fromRGB(150,111,68),BorderSizePixel=0,ZIndex=42},book)
+ local summary=text(book,"JournalCount","",.14,.005,.68,.05,18)
+ summary.TextColor3=Color3.fromRGB(250,230,187)
+ for _,x in ipairs({.145,.50}) do
+  local line=make("Frame",{Name="PageHeaderRule",Position=UDim2.fromScale(x,.069),Size=UDim2.fromScale(.355,.004),BackgroundColor3=Color3.fromRGB(187,145,73),BorderSizePixel=0,ZIndex=42},book)
+ end
+ for _,x in ipairs({.137,.847}) do
+  for _,y in ipairs({.069,.91}) do
+   make("Frame",{Name="PaperCorner",Position=UDim2.fromScale(x,y),Size=UDim2.fromOffset(16,16),Rotation=45,BackgroundColor3=Color3.fromRGB(181,145,92),BackgroundTransparency=.4,BorderSizePixel=0,ZIndex=42},book)
+  end
+ end
+ local regions=make("ScrollingFrame",{Name="JournalRegions",Position=UDim2.fromScale(.005,.18),Size=UDim2.fromScale(.125,.64),BackgroundTransparency=1,BorderSizePixel=0,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ScrollBarThickness=2,ZIndex=45},book)
+ make("UIListLayout",{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},regions)
+ local pages=make("Frame",{Name="JournalEntries",BackgroundTransparency=1,Position=UDim2.fromScale(.15,.085),Size=UDim2.fromScale(.70,.83),ZIndex=43},book)
+ local close=make("TextButton",{Name="CloseJournal",Text="×",Position=UDim2.fromScale(.91,.005),Size=UDim2.fromScale(.075,.065),BackgroundTransparency=1,TextColor3=Color3.fromRGB(246,226,184),TextSize=30,ZIndex=46},book)
+ local previous=make("TextButton",{Name="JournalPrevious",Text="‹",Position=UDim2.fromScale(.145,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
+ local nextPage=make("TextButton",{Name="JournalNext",Text="›",Position=UDim2.fromScale(.735,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
+ local pageNumber=text(book,"JournalPage","",.32,.942,.36,.052,18) pageNumber.TextColor3=Color3.fromRGB(250,230,187)
+ local lockedHumanoid,savedWalk,savedJump,savedRotate,savedHeight
+ local function freeze()
+  local character=player.Character local h=character and character:FindFirstChildOfClass("Humanoid")
+  if h and h~=lockedHumanoid then
+   lockedHumanoid=h savedWalk=h.WalkSpeed savedJump=h.JumpPower savedRotate=h.AutoRotate savedHeight=h.JumpHeight
+   h.WalkSpeed=0 h.JumpPower=0 h.JumpHeight=0 h.AutoRotate=false
+  end
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid:Move(Vector3.zero) end
+ end
+ local function unlock()
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid.WalkSpeed=savedWalk lockedHumanoid.JumpPower=savedJump lockedHumanoid.JumpHeight=savedHeight lockedHumanoid.AutoRotate=savedRotate end
+  lockedHumanoid=nil CAS:UnbindAction("JournalPages")
+ end
+ local generation=0 local turning=false
+ local function flip(direction)
+  generation+=1 local token=generation turning=true Audio.ui("PageTurn")
+  local leaf=make("Frame",{Name="TurningPage",AnchorPoint=Vector2.new(direction<0 and 1 or 0,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.355,.87),BackgroundColor3=Color3.fromRGB(242,225,185),BorderSizePixel=0,ZIndex=55},book)
+  gradient(leaf,Color3.fromRGB(250,237,207),Color3.fromRGB(201,166,109))
+  Tween:Create(leaf,TweenInfo.new(.25,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Size=UDim2.fromScale(0,.87)}):Play()
+  task.delay(.26,function() leaf:Destroy() if generation==token then turning=false end end)
+ end
+ function self.close()
+  book.Visible=false generation+=1 turning=false unlock()
+  for _,n in ipairs(book:GetChildren()) do if n.Name=="TurningPage" then n:Destroy() end end
+ end
+ local function speciesList()
+  local ids={} for _,id in ipairs(C.Order) do if self.region=="All" or C[id].Region==self.region then table.insert(ids,id) end end return ids
+ end
+ function self.render()
+  for _,n in ipairs(pages:GetChildren()) do n:Destroy() end
+  local ids=speciesList() local max=math.max(1,math.ceil(#ids/self.perSpread)) self.page=math.clamp(self.page,1,max)
+  pageNumber.Text=self.page.." / "..max
+  local discovered=0 for _,entry in ipairs(self.entries) do if self.seen[entry.key] then discovered+=1 end end
+  summary.Text=T("Discovered").." "..discovered.." / "..#self.entries.."   ·   "..T("Total caught").." "..(self.data.captures or 0)
+  for _,tab in ipairs(regions:GetChildren()) do if tab:IsA("TextButton") then tab.BackgroundTransparency=tab.Name=="Region_"..self.region and 0 or .28 end end
+  previous.AutoButtonColor=self.page>1 nextPage.AutoButtonColor=self.page<max
+  if #ids==0 then text(pages,"JournalEmpty",T("Region not released yet"),0,.2,1,.5,20) return end
+  for slot=1,self.perSpread do
+   local id=ids[(self.page-1)*self.perSpread+slot] if not id then continue end
+   local species=C[id] local known=false local caught=0
+   for _,stars in ipairs({1,3,6,9}) do local key=id..":"..stars known=known or self.seen[key]==true caught+=(self.data.caught and self.data.caught[key] or 0) end
+   local page=make("Frame",{Name="SpeciesPage",BackgroundTransparency=1,Position=UDim2.fromScale((slot-1)/self.perSpread+.01,0),Size=UDim2.fromScale(1/self.perSpread-.02,1),ZIndex=44},pages)
+   text(page,"SpeciesTitle",known and T(id) or "???",0,0,1,.07,24)
+   local caughtLabel=text(page,"SpeciesCaught",T("Caught").." "..caught,0,.075,1,.055,15) caughtLabel.TextColor3=Color3.fromRGB(82,109,67)
+   local info=make("Frame",{Name="SpeciesInformation",Position=UDim2.fromScale(0,.75),Size=UDim2.fromScale(1,.25),BackgroundColor3=Color3.fromRGB(246,228,187),BorderSizePixel=0,ZIndex=44},page)
+   text(info,"FoundAt",T("Found at").." · "..T(species.Region).." "..(species.UnlockMeters or 0).."m",.03,.03,.94,.22,15)
+   text(info,"TamingTime",T("Taming (1 star)").." · "..species.TameSeconds..T("Seconds"),.03,.27,.94,.22,15)
+   local income=text(info,"Production","",.03,.51,.94,.22,15)
+   local acquisition=text(info,"Acquisition","",.03,.75,.94,.23,13)
+   local function select(stars)
+    income.Text=stars.."★ · "..L.income((species.IncomeAmount or 1)*2^(stars-1),species.IncomeSeconds or 3,player.LocaleId)
+    acquisition.Text=stars==1 and L.huntHint(species.UnlockMeters,species.TameSeconds,player.LocaleId) or L.evolutionHint(stars,player.LocaleId)
+   end
+   select(1)
+   for index,stars in ipairs({1,3,6,9}) do
+    local revealed=self.seen[id..":"..stars]==true
+    local card=make("TextButton",{Name="JournalEntry",Text="",Position=UDim2.fromScale(((index-1)%2)*.51,.14+math.floor((index-1)/2)*.30),Size=UDim2.fromScale(.49,.285),BackgroundColor3=Color3.fromRGB(216,204,170),BackgroundTransparency=.22,BorderSizePixel=0,ZIndex=44},page)
+    make("UIStroke",{Color=Color3.fromRGB(169,147,102),Thickness=1},card)
+    local viewport=make("ViewportFrame",{Name="JournalPortrait",Position=UDim2.fromScale(0,0),Size=UDim2.fromScale(1,.8),BackgroundTransparency=1,Ambient=Color3.fromRGB(205,205,185),LightColor=Color3.new(1,1,1),ZIndex=45},card)
+    Portrait.fill(viewport,id,stars,not revealed,1.65)
+    if not revealed then local q=text(card,"UndiscoveredQuestion","?",.2,.12,.6,.55,52) q.TextColor3=Color3.fromRGB(244,209,121) q.ZIndex=46 q.TextStrokeTransparency=.2 end
+    text(card,"Stars",stars.."★",0,.8,1,.2,17)
+    card.MouseEnter:Connect(function() select(stars) end)
+    card.Activated:Connect(function() select(stars) end)
+   end
+  end
+ end
+ function self.turn(direction)
+  if not book.Visible or turning then return end
+  local max=math.max(1,math.ceil(#speciesList()/self.perSpread)) local next=math.clamp(self.page+direction,1,max)
+  if next==self.page then return end
+  self.page=next self.render() flip(direction)
+ end
+ function self.open()
+  if self.area=="Hunt" then return end
+  if book.Visible then self.close() return end
+  if self.onOpen then self.onOpen() end
+  book.Visible=true freeze() self.render() Audio.ui("BookOpen") if not self.other then remote:FireServer("Journal") end
+  CAS:BindActionAtPriority("JournalPages",function(_,state,input)
+   if state==Enum.UserInputState.Begin then
+    if input.KeyCode==Enum.KeyCode.A or input.KeyCode==Enum.KeyCode.Left then self.turn(-1)
+    elseif input.KeyCode==Enum.KeyCode.D or input.KeyCode==Enum.KeyCode.Right then self.turn(1) end
+   end
+   return Enum.ContextActionResult.Sink
+  end,false,3000,Enum.KeyCode.W,Enum.KeyCode.A,Enum.KeyCode.S,Enum.KeyCode.D,Enum.KeyCode.Space,Enum.KeyCode.Up,Enum.KeyCode.Down,Enum.KeyCode.Left,Enum.KeyCode.Right,Enum.KeyCode.Thumbstick1,Enum.KeyCode.ButtonA)
+ end
+ function self.viewOther(data) self.other=true self.close() self.snapshot(data) self.open() end
+ function self.snapshot(data) self.data=data self.seen=data.seen or self.seen if book.Visible then self.render() end end
+ function self.state(data)
+   self.area=data.area button.Visible=self.area~="Hunt"
+  if self.area=="Hunt" then self.close() end
+  if book.Visible and not self.other and data.count~=self.lastCount then remote:FireServer("Journal") end self.lastCount=data.count
+ end
+ for index,region in ipairs({"All","Meadow","Forest","Swamp","Ocean"}) do
+  local colors={Color3.fromRGB(172,145,85),Color3.fromRGB(112,153,85),Color3.fromRGB(70,123,88),Color3.fromRGB(122,120,76),Color3.fromRGB(75,137,164)}
+  local tab=make("TextButton",{Name="Region_"..region,LayoutOrder=index,Text=T(region),Size=UDim2.new(1,-3,0,42),TextScaled=true,BackgroundColor3=colors[index],TextColor3=Color3.fromRGB(255,242,214),BorderSizePixel=0,ZIndex=46},regions)
+  make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=16},tab)
+  tab.Activated:Connect(function()
+   if turning or self.region==region then return end
+   self.region=region self.page=1 self.render() flip(1)
+  end)
+ end
+ -- Mutation/breeding tabs wait for confirmed content and recipe rules.
+ previous.Activated:Connect(function() self.turn(-1) end) nextPage.Activated:Connect(function() self.turn(1) end)
+ close.Activated:Connect(self.close) button.Activated:Connect(function() self.other=false self.open() end)
+ UIS.InputBegan:Connect(function(input,processed)
+  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and self.area=="Lobby" then self.other=false self.open() end
+ end)
+ local function resize()
+  local n=book.AbsoluteSize.X<700 and 1 or 2
+  if n~=self.perSpread then
+   local first=(self.page-1)*self.perSpread self.perSpread=n self.page=math.floor(first/n)+1
+   spine.Visible=n==2 if book.Visible then self.render() end
+  end
+ end
+ book:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize) resize()
+ Run.RenderStepped:Connect(function() if book.Visible then freeze() end end)
+ return self
+end
+return J
+]========],[========[local J={}
+local player=game:GetService("Players").LocalPlayer
+local UIS=game:GetService("UserInputService")
+local Run=game:GetService("RunService")
+local Tween=game:GetService("TweenService")
+local CAS=game:GetService("ContextActionService")
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Q=require(package.CollectionQuery)
+local L=require(package.Localization)
+local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
+local Buttons=require(script.Parent:WaitForChild("BagUI"))
+local Audio=require(script.Parent:WaitForChild("AudioPresentation"))
+local function make(class,props,parent)
+ local node=Instance.new(class)
+ if node:IsA("TextLabel") or node:IsA("TextButton") then node.Font=Enum.Font.GothamMedium node.TextColor3=Color3.fromRGB(68,52,33) end
+ for key,value in pairs(props) do node[key]=value end
+ node.Parent=parent return node
+end
+local function T(value) return L.text(value,player.LocaleId) end
+local function gradient(parent,a,b)
+ make("UIGradient",{Rotation=90,Color=ColorSequence.new(a,b)},parent)
+end
+local function text(parent,name,value,x,y,w,h,size)
+ local n=make("TextLabel",{Name=name,Text=value,BackgroundTransparency=1,Position=UDim2.fromScale(x,y),Size=UDim2.fromScale(w,h),TextScaled=true,TextWrapped=true,ZIndex=45},parent)
+ make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=size},n) return n
+end
+function J.new(gui,remote)
+ local self={area="Lobby",page=1,region="All",seen={},data={},entries=Q.entries(C),perSpread=2}
+ local button=Buttons.iconButton(gui,"Journal","T",92)
+ local book=make("Frame",{Name="FieldJournal",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.96,.86),BackgroundColor3=Color3.fromRGB(87,54,34),BorderSizePixel=0,ZIndex=40},gui)
+ make("UISizeConstraint",{MaxSize=Vector2.new(1200,780)},book)
+ make("UICorner",{CornerRadius=UDim.new(0,12)},book)
+ make("UIStroke",{Color=Color3.fromRGB(189,143,80),Thickness=3},book)
+ gradient(book,Color3.fromRGB(129,82,47),Color3.fromRGB(59,39,29))
+ local paper=make("Frame",{Name="Parchment",Position=UDim2.fromScale(.135,.065),Size=UDim2.fromScale(.73,.87),BackgroundColor3=Color3.new(1,1,1),BorderSizePixel=0,ZIndex=41},book)
+ gradient(paper,Color3.fromRGB(248,237,209),Color3.fromRGB(213,191,147))
+ make("UIStroke",{Color=Color3.fromRGB(182,154,107),Thickness=2},paper)
+ local spine=make("Frame",{Name="BookSpine",Position=UDim2.fromScale(.498,.065),Size=UDim2.fromScale(.004,.87),BackgroundColor3=Color3.fromRGB(150,111,68),BorderSizePixel=0,ZIndex=42},book)
+ local summary=text(book,"JournalCount","",.14,.005,.68,.05,18)
+ summary.TextColor3=Color3.fromRGB(250,230,187)
+ for _,x in ipairs({.145,.50}) do
+  local line=make("Frame",{Name="PageHeaderRule",Position=UDim2.fromScale(x,.069),Size=UDim2.fromScale(.355,.004),BackgroundColor3=Color3.fromRGB(187,145,73),BorderSizePixel=0,ZIndex=42},book)
+ end
+ for _,x in ipairs({.137,.847}) do
+  for _,y in ipairs({.069,.91}) do
+   make("Frame",{Name="PaperCorner",Position=UDim2.fromScale(x,y),Size=UDim2.fromOffset(16,16),Rotation=45,BackgroundColor3=Color3.fromRGB(181,145,92),BackgroundTransparency=.4,BorderSizePixel=0,ZIndex=42},book)
+  end
+ end
+ local regions=make("ScrollingFrame",{Name="JournalRegions",Position=UDim2.fromScale(.005,.18),Size=UDim2.fromScale(.125,.64),BackgroundTransparency=1,BorderSizePixel=0,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ScrollBarThickness=2,ZIndex=45},book)
+ make("UIListLayout",{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},regions)
+ local pages=make("Frame",{Name="JournalEntries",BackgroundTransparency=1,Position=UDim2.fromScale(.15,.085),Size=UDim2.fromScale(.70,.83),ZIndex=43},book)
+ local close=make("TextButton",{Name="CloseJournal",Text="×",Position=UDim2.fromScale(.91,.005),Size=UDim2.fromScale(.075,.065),BackgroundTransparency=1,TextColor3=Color3.fromRGB(246,226,184),TextSize=30,ZIndex=46},book)
+ local previous=make("TextButton",{Name="JournalPrevious",Text="‹",Position=UDim2.fromScale(.145,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
+ local nextPage=make("TextButton",{Name="JournalNext",Text="›",Position=UDim2.fromScale(.735,.94),Size=UDim2.fromScale(.12,.06),BackgroundColor3=Color3.fromRGB(217,186,125),BorderSizePixel=0,TextSize=32,ZIndex=46},book)
+ local pageNumber=text(book,"JournalPage","",.32,.942,.36,.052,18) pageNumber.TextColor3=Color3.fromRGB(250,230,187)
+ local lockedHumanoid,savedWalk,savedJump,savedRotate,savedHeight
+ local function freeze()
+  local character=player.Character local h=character and character:FindFirstChildOfClass("Humanoid")
+  if h and h~=lockedHumanoid then
+   lockedHumanoid=h savedWalk=h.WalkSpeed savedJump=h.JumpPower savedRotate=h.AutoRotate savedHeight=h.JumpHeight
+   h.WalkSpeed=0 h.JumpPower=0 h.JumpHeight=0 h.AutoRotate=false
+  end
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid:Move(Vector3.zero) end
+ end
+ local function unlock()
+  if lockedHumanoid and lockedHumanoid.Parent then lockedHumanoid.WalkSpeed=savedWalk lockedHumanoid.JumpPower=savedJump lockedHumanoid.JumpHeight=savedHeight lockedHumanoid.AutoRotate=savedRotate end
+  lockedHumanoid=nil CAS:UnbindAction("JournalPages")
+ end
+ local generation=0 local turning=false
+ local function flip(direction)
+  generation+=1 local token=generation turning=true Audio.ui("PageTurn")
+  local leaf=make("Frame",{Name="TurningPage",AnchorPoint=Vector2.new(direction<0 and 1 or 0,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.355,.87),BackgroundColor3=Color3.fromRGB(242,225,185),BorderSizePixel=0,ZIndex=55},book)
+  gradient(leaf,Color3.fromRGB(250,237,207),Color3.fromRGB(201,166,109))
+  Tween:Create(leaf,TweenInfo.new(.25,Enum.EasingStyle.Quad,Enum.EasingDirection.In),{Size=UDim2.fromScale(0,.87)}):Play()
+  task.delay(.26,function() leaf:Destroy() if generation==token then turning=false end end)
+ end
+ function self.close()
+  book.Visible=false generation+=1 turning=false unlock()
+  for _,n in ipairs(book:GetChildren()) do if n.Name=="TurningPage" then n:Destroy() end end
+ end
+ local function speciesList()
+  local ids={} for _,id in ipairs(C.Order) do if self.region=="All" or C[id].Region==self.region then table.insert(ids,id) end end return ids
+ end
+ function self.render()
+  for _,n in ipairs(pages:GetChildren()) do n:Destroy() end
+  local ids=speciesList() local max=math.max(1,math.ceil(#ids/self.perSpread)) self.page=math.clamp(self.page,1,max)
+  pageNumber.Text=self.page.." / "..max
+  local discovered=0 for _,entry in ipairs(self.entries) do if self.seen[entry.key] then discovered+=1 end end
+  summary.Text=T("Discovered").." "..discovered.." / "..#self.entries.."   ·   "..T("Total caught").." "..(self.data.captures or 0)
+  for _,tab in ipairs(regions:GetChildren()) do if tab:IsA("TextButton") then tab.BackgroundTransparency=tab.Name=="Region_"..self.region and 0 or .28 end end
+  previous.AutoButtonColor=self.page>1 nextPage.AutoButtonColor=self.page<max
+  if #ids==0 then text(pages,"JournalEmpty",T("Region not released yet"),0,.2,1,.5,20) return end
+  for slot=1,self.perSpread do
+   local id=ids[(self.page-1)*self.perSpread+slot] if not id then continue end
+   local species=C[id] local known=false local caught=0
+   for _,stars in ipairs({1,3,6,9}) do local key=id..":"..stars known=known or self.seen[key]==true caught+=(self.data.caught and self.data.caught[key] or 0) end
+   local page=make("Frame",{Name="SpeciesPage",BackgroundTransparency=1,Position=UDim2.fromScale((slot-1)/self.perSpread+.01,0),Size=UDim2.fromScale(1/self.perSpread-.02,1),ZIndex=44},pages)
+   text(page,"SpeciesTitle",known and T(id) or "???",0,0,1,.07,24)
+   local caughtLabel=text(page,"SpeciesCaught",T("Caught").." "..caught,0,.075,1,.055,15) caughtLabel.TextColor3=Color3.fromRGB(82,109,67)
+   local info=make("Frame",{Name="SpeciesInformation",Position=UDim2.fromScale(0,.75),Size=UDim2.fromScale(1,.25),BackgroundColor3=Color3.fromRGB(246,228,187),BorderSizePixel=0,ZIndex=44},page)
+   text(info,"FoundAt",T("Found at").." · "..T(species.Region).." "..(species.UnlockMeters or 0).."m",.03,.03,.94,.22,15)
+   text(info,"TamingTime",T("Taming (1 star)").." · "..species.TameSeconds..T("Seconds"),.03,.27,.94,.22,15)
+   local income=text(info,"Production","",.03,.51,.94,.22,15)
+   local acquisition=text(info,"Acquisition","",.03,.75,.94,.23,13)
+   local function select(stars)
+    income.Text=stars.."★ · "..L.income((species.IncomeAmount or 1)*2^(stars-1),species.IncomeSeconds or 3,player.LocaleId)
+    acquisition.Text=stars==1 and L.huntHint(species.UnlockMeters,species.TameSeconds,player.LocaleId) or L.evolutionHint(stars,player.LocaleId)
+   end
+   select(1)
+   for index,stars in ipairs({1,3,6,9}) do
+    local revealed=self.seen[id..":"..stars]==true
+    local card=make("TextButton",{Name="JournalEntry",Text="",Position=UDim2.fromScale(((index-1)%2)*.51,.14+math.floor((index-1)/2)*.30),Size=UDim2.fromScale(.49,.285),BackgroundColor3=Color3.fromRGB(216,204,170),BackgroundTransparency=.22,BorderSizePixel=0,ZIndex=44},page)
+    make("UIStroke",{Color=Color3.fromRGB(169,147,102),Thickness=1},card)
+    local viewport=make("ViewportFrame",{Name="JournalPortrait",Position=UDim2.fromScale(0,0),Size=UDim2.fromScale(1,.8),BackgroundTransparency=1,Ambient=Color3.fromRGB(205,205,185),LightColor=Color3.new(1,1,1),ZIndex=45},card)
+    Portrait.fill(viewport,id,stars,not revealed,1.65)
+    if not revealed then local q=text(card,"UndiscoveredQuestion","?",.2,.12,.6,.55,52) q.TextColor3=Color3.fromRGB(244,209,121) q.ZIndex=46 q.TextStrokeTransparency=.2 end
+    text(card,"Stars",stars.."★",0,.8,1,.2,17)
+    card.MouseEnter:Connect(function() select(stars) end)
+    card.Activated:Connect(function() select(stars) end)
+   end
+  end
+ end
+ function self.turn(direction)
+  if not book.Visible or turning then return end
+  local max=math.max(1,math.ceil(#speciesList()/self.perSpread)) local next=math.clamp(self.page+direction,1,max)
+  if next==self.page then return end
+  self.page=next self.render() flip(direction)
+ end
+ function self.open()
+  if self.area=="Hunt" then return end
+  if book.Visible then self.close() return end
+  if self.onOpen then self.onOpen() end
+  book.Visible=true freeze() self.render() Audio.ui("BookOpen") if not self.other then remote:FireServer("Journal") end
+  CAS:BindActionAtPriority("JournalPages",function(_,state,input)
+   if state==Enum.UserInputState.Begin then
+    if input.KeyCode==Enum.KeyCode.A or input.KeyCode==Enum.KeyCode.Left then self.turn(-1)
+    elseif input.KeyCode==Enum.KeyCode.D or input.KeyCode==Enum.KeyCode.Right then self.turn(1) end
+   end
+   return Enum.ContextActionResult.Sink
+  end,false,3000,Enum.KeyCode.W,Enum.KeyCode.A,Enum.KeyCode.S,Enum.KeyCode.D,Enum.KeyCode.Space,Enum.KeyCode.Up,Enum.KeyCode.Down,Enum.KeyCode.Left,Enum.KeyCode.Right,Enum.KeyCode.Thumbstick1,Enum.KeyCode.ButtonA)
+ end
+ function self.viewOther(data) self.other=true self.close() self.snapshot(data) self.open() end
+ function self.snapshot(data) self.data=data self.seen=data.seen or self.seen if book.Visible then self.render() end end
+ function self.state(data)
+   self.area=data.area button.Visible=self.area~="Hunt"
+  if self.area=="Hunt" then self.close() end
+  if book.Visible and not self.other and data.count~=self.lastCount then remote:FireServer("Journal") end self.lastCount=data.count
+ end
+ for index,region in ipairs({"All","Meadow","Forest","Swamp","Ocean"}) do
+  local colors={Color3.fromRGB(172,145,85),Color3.fromRGB(112,153,85),Color3.fromRGB(70,123,88),Color3.fromRGB(122,120,76),Color3.fromRGB(75,137,164)}
+  local tab=make("TextButton",{Name="Region_"..region,LayoutOrder=index,Text=T(region),Size=UDim2.new(1,-3,0,42),TextScaled=true,BackgroundColor3=colors[index],TextColor3=Color3.fromRGB(255,242,214),BorderSizePixel=0,ZIndex=46},regions)
+  make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=16},tab)
+  tab.Activated:Connect(function()
+   if turning or self.region==region then return end
+   self.region=region self.page=1 self.render() flip(1)
+  end)
+ end
+ -- Mutation/breeding tabs wait for confirmed content and recipe rules.
+ previous.Activated:Connect(function() self.turn(-1) end) nextPage.Activated:Connect(function() self.turn(1) end)
+ close.Activated:Connect(self.close) button.Activated:Connect(function() self.other=false self.open() end)
+ UIS.InputBegan:Connect(function(input,processed)
+  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and self.area=="Lobby" then self.other=false self.open() end
+ end)
+ local function resize()
+  local n=book.AbsoluteSize.X<700 and 1 or 2
+  if n~=self.perSpread then
+   local first=(self.page-1)*self.perSpread self.perSpread=n self.page=math.floor(first/n)+1
+   spine.Visible=n==2 if book.Visible then self.render() end
+  end
+ end
+ book:GetPropertyChangedSignal("AbsoluteSize"):Connect(resize) resize()
+ Run.RenderStepped:Connect(function() if book.Visible then freeze() end end)
+ return self
+end
+return J
+]========]}},{parent=clients,name="MonsterPortrait",kind="ModuleScript",new=false,after=[========[local P={}
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Mesh=require(script.Parent:WaitForChild("CreatureMesh"))
+function P.fill(viewport,id,stars,silhouette,distanceScale)
+ local world=Instance.new("WorldModel") world.Parent=viewport
+ local source=package:FindFirstChild(C.visual(id,stars))
+ if not source or not source:GetAttribute("NativeMeshyMossrat") then
+  local label=Instance.new("TextLabel") label.BackgroundTransparency=1 label.Size=UDim2.fromScale(1,1)
+  label.Text="모델 준비 중" label.TextScaled=true label.TextColor3=Color3.fromRGB(160,180,170) label.Parent=viewport
+  return nil
+ end
+ local model=source:Clone()
+ local stage=C.stage(stars)
+ model:ScaleTo(C.scale(stars)/C.Scales[stage])
+ model.Parent=world model:PivotTo(CFrame.new())
+ for _,node in ipairs(model:GetDescendants()) do
+  if node:IsA("BillboardGui") or node:IsA("Light") then node:Destroy()
+  elseif silhouette and node:IsA("SurfaceAppearance") then node:Destroy()
+  elseif silhouette and node:IsA("BasePart") then node.Color=Color3.new(0,0,0) node.Material=Enum.Material.SmoothPlastic if node:IsA("MeshPart") then node.TextureID="" end end
+ end
+ model:SetAttribute("Stars",stars)
+ model:SetAttribute("MonsterId",id) model:SetAttribute("PortraitSilhouette",silhouette==true)
+ Mesh.decorate(model)
+ Mesh.posePortrait(model)
+ local frame,size=model:GetBoundingBox()
+ local camera=Instance.new("Camera") camera.FieldOfView=32
+ -- Approved visual faces -Z. A straight camera avoids the old overhead
+ -- three-quarter view, which made the face look turned in every menu.
+ local direction=Vector3.new(0,0,-1)
+ local function fit()
+  local distance=math.max(size.X,size.Y,size.Z)*2.3
+  if distanceScale then
+   local aspect=viewport.AbsoluteSize.Y>0 and viewport.AbsoluteSize.X/viewport.AbsoluteSize.Y or 1
+   local basis=CFrame.lookAt(Vector3.zero,-direction)
+   local tangent=math.tan(math.rad(camera.FieldOfView/2))
+   distance=0
+   for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
+    local p=basis:VectorToObjectSpace(frame:VectorToWorldSpace(Vector3.new(x*size.X/2,y*size.Y/2,z*size.Z/2)))
+    distance=math.max(distance,p.Z+math.abs(p.Y)/tangent,p.Z+math.abs(p.X)/(tangent*math.max(.1,aspect)))
+   end end end
+   distance*=1.08
+  end
+  camera.CFrame=CFrame.lookAt(frame.Position+direction*distance,frame.Position)
+ end
+ fit()
+ viewport:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+ camera.Parent=viewport viewport.CurrentCamera=camera
+ return model
+end
+return P
+]========],allowed={[========[local P={}
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Mesh=require(script.Parent:WaitForChild("CreatureMesh"))
+function P.fill(viewport,id,stars,silhouette,distanceScale)
+ local world=Instance.new("WorldModel") world.Parent=viewport
+ local source=package:FindFirstChild(C.visual(id,stars))
+ if not source or not source:GetAttribute("NativeMeshyMossrat") then
+  local label=Instance.new("TextLabel") label.BackgroundTransparency=1 label.Size=UDim2.fromScale(1,1)
+  label.Text="모델 준비 중" label.TextScaled=true label.TextColor3=Color3.fromRGB(160,180,170) label.Parent=viewport
+  return nil
+ end
+ local model=source:Clone()
+ local stage=C.stage(stars)
+ model:ScaleTo(C.scale(stars)/C.Scales[stage])
+ model.Parent=world model:PivotTo(CFrame.new())
+ for _,node in ipairs(model:GetDescendants()) do
+  if node:IsA("BillboardGui") or node:IsA("Light") then node:Destroy()
+  elseif silhouette and node:IsA("SurfaceAppearance") then node:Destroy()
+  elseif silhouette and node:IsA("BasePart") then node.Color=Color3.new(0,0,0) node.Material=Enum.Material.SmoothPlastic if node:IsA("MeshPart") then node.TextureID="" end end
+ end
+ model:SetAttribute("Stars",stars)
+ model:SetAttribute("MonsterId",id) model:SetAttribute("PortraitSilhouette",silhouette==true)
+ Mesh.decorate(model)
+ Mesh.posePortrait(model)
+ local frame,size=model:GetBoundingBox()
+ local camera=Instance.new("Camera") camera.FieldOfView=32
+ -- Approved visual faces -Z. A straight camera avoids the old overhead
+ -- three-quarter view, which made the face look turned in every menu.
+ local direction=Vector3.new(0,0,-1)
+ local function fit()
+  local distance=math.max(size.X,size.Y,size.Z)*2.3
+  if distanceScale then
+   local aspect=viewport.AbsoluteSize.Y>0 and viewport.AbsoluteSize.X/viewport.AbsoluteSize.Y or 1
+   local basis=CFrame.lookAt(Vector3.zero,-direction)
+   local tangent=math.tan(math.rad(camera.FieldOfView/2))
+   distance=0
+   for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
+    local p=basis:VectorToObjectSpace(frame:VectorToWorldSpace(Vector3.new(x*size.X/2,y*size.Y/2,z*size.Z/2)))
+    distance=math.max(distance,p.Z+math.abs(p.Y)/tangent,p.Z+math.abs(p.X)/(tangent*math.max(.1,aspect)))
+   end end end
+   distance*=1.08
+  end
+  camera.CFrame=CFrame.lookAt(frame.Position+direction*distance,frame.Position)
+ end
+ fit()
+ viewport:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+ camera.Parent=viewport viewport.CurrentCamera=camera
+ return model
+end
+return P
+]========],[========[local P={}
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Mesh=require(script.Parent:WaitForChild("CreatureMesh"))
+function P.fill(viewport,id,stars,silhouette,distanceScale)
+ local world=Instance.new("WorldModel") world.Parent=viewport
+ local source=package:FindFirstChild(C.visual(id,stars))
+ if not source or not source:GetAttribute("NativeMeshyMossrat") then
+  local label=Instance.new("TextLabel") label.BackgroundTransparency=1 label.Size=UDim2.fromScale(1,1)
+  label.Text="모델 준비 중" label.TextScaled=true label.TextColor3=Color3.fromRGB(160,180,170) label.Parent=viewport
+  return nil
+ end
+ local model=source:Clone()
+ local stage=C.stage(stars)
+ model:ScaleTo(C.scale(stars)/C.Scales[stage])
+ model.Parent=world model:PivotTo(CFrame.new())
+ for _,node in ipairs(model:GetDescendants()) do
+  if node:IsA("BillboardGui") or node:IsA("Light") then node:Destroy()
+  elseif silhouette and node:IsA("SurfaceAppearance") then node:Destroy()
+  elseif silhouette and node:IsA("BasePart") then node.Color=Color3.new(0,0,0) node.Material=Enum.Material.SmoothPlastic if node:IsA("MeshPart") then node.TextureID="" end end
+ end
+ model:SetAttribute("Stars",stars)
+ model:SetAttribute("MonsterId",id) model:SetAttribute("PortraitSilhouette",silhouette==true)
+ Mesh.decorate(model)
+ local frame,size=model:GetBoundingBox()
+ local camera=Instance.new("Camera") camera.FieldOfView=32
+ local direction=Vector3.new(1,.55,-1.5).Unit
+ local function fit()
+  local distance=math.max(size.X,size.Y,size.Z)*2.3
+  if distanceScale then
+   local aspect=viewport.AbsoluteSize.Y>0 and viewport.AbsoluteSize.X/viewport.AbsoluteSize.Y or 1
+   local basis=CFrame.lookAt(Vector3.zero,-direction)
+   local tangent=math.tan(math.rad(camera.FieldOfView/2))
+   distance=0
+   for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
+    local p=basis:VectorToObjectSpace(frame:VectorToWorldSpace(Vector3.new(x*size.X/2,y*size.Y/2,z*size.Z/2)))
+    distance=math.max(distance,p.Z+math.abs(p.Y)/tangent,p.Z+math.abs(p.X)/(tangent*math.max(.1,aspect)))
+   end end end
+   distance*=1.08
+  end
+  camera.CFrame=CFrame.lookAt(frame.Position+direction*distance,frame.Position)
+ end
+ fit()
+ viewport:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+ camera.Parent=viewport viewport.CurrentCamera=camera
+ return model
+end
+return P
+]========],[========[local P={}
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Mesh=require(script.Parent:WaitForChild("CreatureMesh"))
+function P.fill(viewport,id,stars,silhouette,distanceScale)
+ local world=Instance.new("WorldModel") world.Parent=viewport
+ local source=package:FindFirstChild(C.visual(id,stars))
+ if not source or not source:GetAttribute("NativeMeshyMossrat") then
+  local label=Instance.new("TextLabel") label.BackgroundTransparency=1 label.Size=UDim2.fromScale(1,1)
+  label.Text="모델 준비 중" label.TextScaled=true label.TextColor3=Color3.fromRGB(160,180,170) label.Parent=viewport
+  return nil
+ end
+ local model=source:Clone()
+ local stage=C.stage(stars)
+ model:ScaleTo(C.scale(stars)/C.Scales[stage])
+ model.Parent=world model:PivotTo(CFrame.new())
+ for _,node in ipairs(model:GetDescendants()) do
+  if node:IsA("BillboardGui") or node:IsA("Light") then node:Destroy()
+  elseif silhouette and node:IsA("SurfaceAppearance") then node:Destroy()
+  elseif silhouette and node:IsA("BasePart") then node.Color=Color3.new(0,0,0) node.Material=Enum.Material.SmoothPlastic if node:IsA("MeshPart") then node.TextureID="" end end
+ end
+ model:SetAttribute("Stars",stars)
+ model:SetAttribute("MonsterId",id) model:SetAttribute("PortraitSilhouette",silhouette==true)
+ Mesh.decorate(model)
+ local frame,size=model:GetBoundingBox()
+ local camera=Instance.new("Camera") camera.FieldOfView=32
+ local direction=Vector3.new(1,.55,-1.5).Unit
+ local function fit()
+  local distance=math.max(size.X,size.Y,size.Z)*2.3
+  if distanceScale then
+   local aspect=viewport.AbsoluteSize.Y>0 and viewport.AbsoluteSize.X/viewport.AbsoluteSize.Y or 1
+   local basis=CFrame.lookAt(Vector3.zero,-direction)
+   local tangent=math.tan(math.rad(camera.FieldOfView/2))
+   distance=0
+   for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
+    local p=basis:VectorToObjectSpace(frame:VectorToWorldSpace(Vector3.new(x*size.X/2,y*size.Y/2,z*size.Z/2)))
+    distance=math.max(distance,p.Z+math.abs(p.Y)/tangent,p.Z+math.abs(p.X)/(tangent*math.max(.1,aspect)))
+   end end end
+   distance*=1.08
+  end
+  camera.CFrame=CFrame.lookAt(frame.Position+direction*distance,frame.Position)
+ end
+ fit()
+ viewport:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+ camera.Parent=viewport viewport.CurrentCamera=camera
+ return model
+end
+return P
+]========],[========[local P={}
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Mesh=require(script.Parent:WaitForChild("CreatureMesh"))
+function P.fill(viewport,id,stars,silhouette,distanceScale)
+ local world=Instance.new("WorldModel") world.Parent=viewport
+ local source=package:FindFirstChild(C.visual(id,stars))
+ if not source or not source:GetAttribute("NativeMeshyMossrat") then
+  local label=Instance.new("TextLabel") label.BackgroundTransparency=1 label.Size=UDim2.fromScale(1,1)
+  label.Text="모델 준비 중" label.TextScaled=true label.TextColor3=Color3.fromRGB(160,180,170) label.Parent=viewport
+  return nil
+ end
+ local model=source:Clone()
+ local stage=C.stage(stars)
+ model:ScaleTo(C.scale(stars)/C.Scales[stage])
+ model.Parent=world model:PivotTo(CFrame.new())
+ for _,node in ipairs(model:GetDescendants()) do
+  if node:IsA("BillboardGui") or node:IsA("Light") then node:Destroy()
+  elseif silhouette and node:IsA("SurfaceAppearance") then node:Destroy()
+  elseif silhouette and node:IsA("BasePart") then node.Color=Color3.new(0,0,0) node.Material=Enum.Material.SmoothPlastic if node:IsA("MeshPart") then node.TextureID="" end end
+ end
+ model:SetAttribute("Stars",stars)
+ model:SetAttribute("MonsterId",id) model:SetAttribute("PortraitSilhouette",silhouette==true)
+ Mesh.decorate(model)
+ local frame,size=model:GetBoundingBox()
+ local camera=Instance.new("Camera") camera.FieldOfView=32
+ local direction=Vector3.new(1,.55,-1.5).Unit
+ local function fit()
+  local distance=math.max(size.X,size.Y,size.Z)*2.3
+  if distanceScale then
+   local aspect=viewport.AbsoluteSize.Y>0 and viewport.AbsoluteSize.X/viewport.AbsoluteSize.Y or 1
+   local basis=CFrame.lookAt(Vector3.zero,-direction)
+   local tangent=math.tan(math.rad(camera.FieldOfView/2))
+   distance=0
+   for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
+    local p=basis:VectorToObjectSpace(frame:VectorToWorldSpace(Vector3.new(x*size.X/2,y*size.Y/2,z*size.Z/2)))
+    distance=math.max(distance,p.Z+math.abs(p.Y)/tangent,p.Z+math.abs(p.X)/(tangent*math.max(.1,aspect)))
+   end end end
+   distance*=1.08
+  end
+  camera.CFrame=CFrame.lookAt(frame.Position+direction*distance,frame.Position)
+ end
+ fit()
+ viewport:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+ camera.Parent=viewport viewport.CurrentCamera=camera
+ return model
+end
+return P
+]========],[========[local P={}
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Mesh=require(script.Parent:WaitForChild("CreatureMesh"))
+function P.fill(viewport,id,stars,silhouette,distanceScale)
+ local world=Instance.new("WorldModel") world.Parent=viewport
+ local source=package:FindFirstChild(C.visual(id,stars))
+ if not source or not source:GetAttribute("NativeMeshyMossrat") then
+  local label=Instance.new("TextLabel") label.BackgroundTransparency=1 label.Size=UDim2.fromScale(1,1)
+  label.Text="모델 준비 중" label.TextScaled=true label.TextColor3=Color3.fromRGB(160,180,170) label.Parent=viewport
+  return nil
+ end
+ local model=source:Clone()
+ local stage=C.stage(stars)
+ model:ScaleTo(C.scale(stars)/C.Scales[stage])
+ model.Parent=world model:PivotTo(CFrame.new())
+ for _,node in ipairs(model:GetDescendants()) do
+  if node:IsA("BillboardGui") or node:IsA("Light") then node:Destroy()
+  elseif silhouette and node:IsA("SurfaceAppearance") then node:Destroy()
+  elseif silhouette and node:IsA("BasePart") then node.Color=Color3.new(0,0,0) node.Material=Enum.Material.SmoothPlastic if node:IsA("MeshPart") then node.TextureID="" end end
+ end
+ model:SetAttribute("Stars",stars)
+ model:SetAttribute("MonsterId",id) model:SetAttribute("PortraitSilhouette",silhouette==true)
+ Mesh.decorate(model)
+ local frame,size=model:GetBoundingBox()
+ local camera=Instance.new("Camera") camera.FieldOfView=32
+ local direction=Vector3.new(1,.55,-1.5).Unit
+ local function fit()
+  local distance=math.max(size.X,size.Y,size.Z)*2.3
+  if distanceScale then
+   local aspect=viewport.AbsoluteSize.Y>0 and viewport.AbsoluteSize.X/viewport.AbsoluteSize.Y or 1
+   local basis=CFrame.lookAt(Vector3.zero,-direction)
+   local tangent=math.tan(math.rad(camera.FieldOfView/2))
+   distance=0
+   for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
+    local p=basis:VectorToObjectSpace(frame:VectorToWorldSpace(Vector3.new(x*size.X/2,y*size.Y/2,z*size.Z/2)))
+    distance=math.max(distance,p.Z+math.abs(p.Y)/tangent,p.Z+math.abs(p.X)/(tangent*math.max(.1,aspect)))
+   end end end
+   distance*=1.08
+  end
+  camera.CFrame=CFrame.lookAt(frame.Position+direction*distance,frame.Position)
+ end
+ fit()
+ viewport:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+ camera.Parent=viewport viewport.CurrentCamera=camera
+ return model
+end
+return P
+]========],[========[local P={}
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Mesh=require(script.Parent:WaitForChild("CreatureMesh"))
+function P.fill(viewport,id,stars,silhouette,distanceScale)
+ local world=Instance.new("WorldModel") world.Parent=viewport
+ local source=package:FindFirstChild(C.visual(id,stars))
+ if not source or not source:GetAttribute("NativeMeshyMossrat") then
+  local label=Instance.new("TextLabel") label.BackgroundTransparency=1 label.Size=UDim2.fromScale(1,1)
+  label.Text="모델 준비 중" label.TextScaled=true label.TextColor3=Color3.fromRGB(160,180,170) label.Parent=viewport
+  return nil
+ end
+ local model=source:Clone()
+ local stage=C.stage(stars)
+ model:ScaleTo(C.scale(stars)/C.Scales[stage])
+ model.Parent=world model:PivotTo(CFrame.new())
+ for _,node in ipairs(model:GetDescendants()) do
+  if node:IsA("BillboardGui") or node:IsA("Light") then node:Destroy()
+  elseif silhouette and node:IsA("SurfaceAppearance") then node:Destroy()
+  elseif silhouette and node:IsA("BasePart") then node.Color=Color3.new(0,0,0) node.Material=Enum.Material.SmoothPlastic if node:IsA("MeshPart") then node.TextureID="" end end
+ end
+ model:SetAttribute("Stars",stars)
+ model:SetAttribute("MonsterId",id) model:SetAttribute("PortraitSilhouette",silhouette==true)
+ Mesh.decorate(model)
+ local frame,size=model:GetBoundingBox()
+ local camera=Instance.new("Camera") camera.FieldOfView=32
+ local direction=Vector3.new(1,.55,-1.5).Unit
+ local function fit()
+  local distance=math.max(size.X,size.Y,size.Z)*2.3
+  if distanceScale then
+   local aspect=viewport.AbsoluteSize.Y>0 and viewport.AbsoluteSize.X/viewport.AbsoluteSize.Y or 1
+   local basis=CFrame.lookAt(Vector3.zero,-direction)
+   local tangent=math.tan(math.rad(camera.FieldOfView/2))
+   distance=0
+   for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
+    local p=basis:VectorToObjectSpace(frame:VectorToWorldSpace(Vector3.new(x*size.X/2,y*size.Y/2,z*size.Z/2)))
+    distance=math.max(distance,p.Z+math.abs(p.Y)/tangent,p.Z+math.abs(p.X)/(tangent*math.max(.1,aspect)))
+   end end end
+   distance*=1.08
+  end
+  camera.CFrame=CFrame.lookAt(frame.Position+direction*distance,frame.Position)
+ end
+ fit()
+ viewport:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+ camera.Parent=viewport viewport.CurrentCamera=camera
+ return model
+end
+return P
+]========],[========[local P={}
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local Mesh=require(script.Parent:WaitForChild("CreatureMesh"))
+function P.fill(viewport,id,stars,silhouette,distanceScale)
+ local world=Instance.new("WorldModel") world.Parent=viewport
+ local source=package:FindFirstChild(C.visual(id,stars))
+ if not source or not source:GetAttribute("NativeMeshyMossrat") then
+  local label=Instance.new("TextLabel") label.BackgroundTransparency=1 label.Size=UDim2.fromScale(1,1)
+  label.Text="모델 준비 중" label.TextScaled=true label.TextColor3=Color3.fromRGB(160,180,170) label.Parent=viewport
+  return nil
+ end
+ local model=source:Clone()
+ local stage=C.stage(stars)
+ model:ScaleTo(C.scale(stars)/C.Scales[stage])
+ model.Parent=world model:PivotTo(CFrame.new())
+ for _,node in ipairs(model:GetDescendants()) do
+  if node:IsA("BillboardGui") or node:IsA("Light") then node:Destroy()
+  elseif silhouette and node:IsA("SurfaceAppearance") then node:Destroy()
+  elseif silhouette and node:IsA("BasePart") then node.Color=Color3.new(0,0,0) node.Material=Enum.Material.SmoothPlastic if node:IsA("MeshPart") then node.TextureID="" end end
+ end
+ model:SetAttribute("Stars",stars)
+ model:SetAttribute("MonsterId",id) model:SetAttribute("PortraitSilhouette",silhouette==true)
+ Mesh.decorate(model)
+ local frame,size=model:GetBoundingBox()
+ local camera=Instance.new("Camera") camera.FieldOfView=32
+ local direction=Vector3.new(1,.55,-1.5).Unit
+ local function fit()
+  local distance=math.max(size.X,size.Y,size.Z)*2.3
+  if distanceScale then
+   local aspect=viewport.AbsoluteSize.Y>0 and viewport.AbsoluteSize.X/viewport.AbsoluteSize.Y or 1
+   local basis=CFrame.lookAt(Vector3.zero,-direction)
+   local tangent=math.tan(math.rad(camera.FieldOfView/2))
+   distance=0
+   for _,x in ipairs({-1,1}) do for _,y in ipairs({-1,1}) do for _,z in ipairs({-1,1}) do
+    local p=basis:VectorToObjectSpace(frame:VectorToWorldSpace(Vector3.new(x*size.X/2,y*size.Y/2,z*size.Z/2)))
+    distance=math.max(distance,p.Z+math.abs(p.Y)/tangent,p.Z+math.abs(p.X)/(tangent*math.max(.1,aspect)))
+   end end end
+   distance*=1.08
+  end
+  camera.CFrame=CFrame.lookAt(frame.Position+direction*distance,frame.Position)
+ end
+ fit()
+ viewport:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
+ camera.Parent=viewport viewport.CurrentCamera=camera
+ return model
+end
+return P
+]========]}},{parent=clients,name="CreatureMesh",kind="ModuleScript",new=false,after=[========[-- Only approved user-supplied models; no legacy generated creature fallback.
+local Native=require(script.Parent:WaitForChild("NativeMossrat"))
+local M={ready=true,failed=false}
+function M.prepare() end
+function M.materialize(model) if Native.isTarget(model) then Native.apply(model) end end
+function M.decorate(model) M.materialize(model) end
+function M.posePortrait(model) Native.posePortrait(model) end
+function M.animate(model,phase,moving,angry) Native.animate(model,phase,moving,angry) end
+function M.huntFrame(model,frame) return Native.huntFrame(model,frame) end
+return M
+]========],allowed={[========[-- Only approved user-supplied models; no legacy generated creature fallback.
+local Native=require(script.Parent:WaitForChild("NativeMossrat"))
+local M={ready=true,failed=false}
+function M.prepare() end
+function M.materialize(model) if Native.isTarget(model) then Native.apply(model) end end
+function M.decorate(model) M.materialize(model) end
+function M.posePortrait(model) Native.posePortrait(model) end
+function M.animate(model,phase,moving,angry) Native.animate(model,phase,moving,angry) end
+function M.huntFrame(model,frame) return Native.huntFrame(model,frame) end
+return M
+]========],[========[-- Only approved user-supplied models; no legacy generated creature fallback.
+local Native=require(script.Parent:WaitForChild("NativeMossrat"))
+local M={ready=true,failed=false}
+function M.prepare() end
+function M.materialize(model) if Native.isTarget(model) then Native.apply(model) end end
+function M.decorate(model) M.materialize(model) end
+function M.animate(model,phase,moving,angry) Native.animate(model,phase,moving,angry) end
+function M.huntFrame(model,frame) return Native.huntFrame(model,frame) end
+return M
+]========],[========[-- Only approved user-supplied models; no legacy generated creature fallback.
+local Native=require(script.Parent:WaitForChild("NativeMossrat"))
+local M={ready=true,failed=false}
+function M.prepare() end
+function M.materialize(model) if Native.isTarget(model) then Native.apply(model) end end
+function M.decorate(model) M.materialize(model) end
+function M.animate(model,phase,moving,angry) Native.animate(model,phase,moving,angry) end
+function M.huntFrame(model,frame) return Native.huntFrame(model,frame) end
+return M
+]========],[========[-- Only approved user-supplied models; no legacy generated creature fallback.
+local Native=require(script.Parent:WaitForChild("NativeMossrat"))
+local M={ready=true,failed=false}
+function M.prepare() end
+function M.materialize(model) if Native.isTarget(model) then Native.apply(model) end end
+function M.decorate(model) M.materialize(model) end
+function M.animate(model,phase,moving,angry) Native.animate(model,phase,moving,angry) end
+function M.huntFrame(model,frame) return Native.huntFrame(model,frame) end
+return M
+]========],[========[-- Only approved user-supplied models; no legacy generated creature fallback.
+local Native=require(script.Parent:WaitForChild("NativeMossrat"))
+local M={ready=true,failed=false}
+function M.prepare() end
+function M.materialize(model) if Native.isTarget(model) then Native.apply(model) end end
+function M.decorate(model) M.materialize(model) end
+function M.animate(model,phase,moving,angry) Native.animate(model,phase,moving,angry) end
+function M.huntFrame(model,frame) return Native.huntFrame(model,frame) end
+return M
+]========],[========[-- Only approved user-supplied models; no legacy generated creature fallback.
+local Native=require(script.Parent:WaitForChild("NativeMossrat"))
+local M={ready=true,failed=false}
+function M.prepare() end
+function M.materialize(model) if Native.isTarget(model) then Native.apply(model) end end
+function M.decorate(model) M.materialize(model) end
+function M.animate(model,phase,moving,angry) Native.animate(model,phase,moving,angry) end
+function M.huntFrame(model,frame) return Native.huntFrame(model,frame) end
+return M
+]========],[========[-- Only approved user-supplied models; no legacy generated creature fallback.
+local Native=require(script.Parent:WaitForChild("NativeMossrat"))
+local M={ready=true,failed=false}
+function M.prepare() end
+function M.materialize(model) if Native.isTarget(model) then Native.apply(model) end end
+function M.decorate(model) M.materialize(model) end
+function M.animate(model,phase,moving,angry) Native.animate(model,phase,moving,angry) end
+function M.huntFrame(model,frame) return Native.huntFrame(model,frame) end
+return M
 ]========]}}}
 local function norm(s) return s:gsub("\r\n","\n") end
 for _,c in ipairs(changes) do

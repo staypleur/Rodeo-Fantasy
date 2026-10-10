@@ -22,9 +22,12 @@ function P.fill(viewport,id,stars,silhouette,distanceScale)
  model:SetAttribute("Stars",stars)
  model:SetAttribute("MonsterId",id) model:SetAttribute("PortraitSilhouette",silhouette==true)
  Mesh.decorate(model)
+ Mesh.posePortrait(model)
  local frame,size=model:GetBoundingBox()
  local camera=Instance.new("Camera") camera.FieldOfView=32
- local direction=Vector3.new(1,.55,-1.5).Unit
+ -- Approved visual faces -Z. A straight camera avoids the old overhead
+ -- three-quarter view, which made the face look turned in every menu.
+ local direction=Vector3.new(0,0,-1)
  local function fit()
   local distance=math.max(size.X,size.Y,size.Z)*2.3
   if distanceScale then

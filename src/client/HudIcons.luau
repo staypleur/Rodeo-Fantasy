@@ -1,5 +1,28 @@
 -- Small native shapes: no external images are required for the menu symbols.
 local I={}
+-- User-supplied PNGs become Roblox image assets only after upload. Keep the
+-- native controls usable until their content IDs are configured.
+function I.bindArtwork(button,key)
+ local package=game.ReplicatedStorage.RodeoFantasy
+ local image=Instance.new("ImageLabel") image.Name="UploadedArtwork"
+ image.BackgroundTransparency=1 image.Size=UDim2.fromScale(1,1)
+ image.ZIndex=button.ZIndex+2 image.ScaleType=Enum.ScaleType.Fit image.Parent=button
+ local background=button.BackgroundTransparency
+ local originals,strokes={},{}
+ for _,n in ipairs(button:GetChildren()) do
+  if n:IsA("GuiObject") and n~=image then originals[n]=n.Visible
+  elseif n:IsA("UIStroke") then strokes[n]=n.Enabled end
+ end
+ local function refresh()
+  local id=package:GetAttribute(key)
+  local ready=type(id)=="string" and id:match("^rbxassetid://%d+$")~=nil
+  image.Image=ready and id or "" image.Visible=ready
+  button.BackgroundTransparency=ready and 1 or background
+  for n,visible in pairs(originals) do n.Visible=not ready and visible end
+  for n,enabled in pairs(strokes) do n.Enabled=not ready and enabled end
+ end
+ package:GetAttributeChangedSignal(key):Connect(refresh) refresh()
+end
 function I.draw(parent,kind,size)
  local root=Instance.new("Frame") root.Name=kind.."Icon" root.Size=UDim2.fromOffset(size,size) root.BackgroundTransparency=1 root.Parent=parent
  local function shape(x,y,w,h,color,radius,rotation)

@@ -1188,3 +1188,14 @@
 - 도어가 단일 메시라는 이유로 문짝 분리를 질문했고 사용자가 에이전트 분리 선택. 실제 형상 검토에서 빈 문틀임을 확인하여 정정했고, 원본 절단 대신 matching native 금속 문짝 2개 추가. 원본 문틀/부화기/콘솔8개씩+행성1개 재사용 설치 commandbar, 입력검사/사전clone/백업/오류복구. 실제 Studio 자동 적용·업로드는 미실시. APPLY_LOBBY_MODULES.md로 클릭순서/모델 이름/성공문구/검증 항목 전달.
 - 5개 검사 통과: current_fixes/lobby_entries/lobby_update/legacy_restore/lobby_modules. 컴파일/모의 UI·복귀·다리/원본 해시/메시UV이미지 byte 보존/유리천장·벽·충돌판·바닥랭킹 XML 확인. 실제 PC·모바일·성능·GLB 업로드 및 플레이어8명 동시검증 미실시.
 - 추가: GameOver/CourseEnd 복귀는 생존 Humanoid도 LoadCharacterAsync로 재생성하여 사냥 Motor6D/물리 상태를 초기화. 현재 모의 검사 기대를 재생성으로 변경; 서버 보유 목록/잔액은 유지. 실제 스크린샷 증상 해결은 확인 전.
+
+
+## 2026-10-10 인덱스 디자인·정면 미리보기 및 텍스처 재시도
+
+- 사용자 요청: 기존 작업 계속, 모스랫 메뉴 미리보기 정면, 도감 표시를 인덱스로 변경, 제공 참고 화면의 청록 제목줄/어두운 카드 프레임/선택 상세/수집 진행도, 오른쪽 Green Star 행성 분류. 제공 상점·인덱스·알·발자국 PNG 원본 저장 및 Roblox 이미지 속성 연결. 돈 그림의 고정 예시 금액은 실제 잔액으로 사용하지 않는다.
+- JournalUI를 카드형 인덱스로 변경. 현재 CollectionQuery의 모스랫 1·3·6·9성 4개 키와 기존 seen/caught 및 수입·획득 공식을 유지. 4개는 2×2 카드, 향후 더 많은 기존 항목은 8개 단위. 미수집 실루엣 및 선택 상세, 열기/닫기/T/사냥 차단/캐릭터 이동 복원/타인 열람 API 유지. 좁은 화면은 행성 버튼을 내부에 두고 보조 획득 패널을 숨긴다. 참고 게임의 보상·희귀도·112종 숫자는 구현하지 않았다.
+- MonsterPortrait의 기존 (1,.55,-1.5) 사선 카메라를 (0,0,-1) 정면으로 변경. 머리/몸통 보정은 실행 중 애니메이션 루프에만 있었으므로 새 poseFront로 메뉴 생성 즉시 적용. 기존 -8.2도 머리 보정 및 몸통 값 그대로 사용. 이동용 root/메시/UV/색상은 변경하지 않았다. 실제 얼굴의 정렬 및 주행은 Studio에서 확인 필요.
+- assets/ui의 제공 PNG 네 개는 이미지를 재생성하지 않고 원본 그대로 복사. 업로드 콘텐츠 ID용 ShopButtonImage/IndexButtonImage/EggButtonImage/PawButtonImage 속성 연결과 미설정 시 기본 버튼 유지. MoneyReference PNG는 참고만 저장. 실제 PNG 업로드/ID 수령은 미완료. IndexPreview는 코드로 만든 배치 검토 그림이며 실제 Studio 및 실제 3D 렌더가 아니다.
+- 사용자 로그: 부화기 RoughnessMap 120641170813912 및 행성 ColorMap 132065898109030 / RoughnessMap 129909987929379 HTTP 502. 서버 텍스처 요청 단계 오류, 모델 자체 실패/영구 손상으로 단정하지 않음. RetryLobbyTextures는 네 Import 모델의 업로드된 맵 ID를 보관/일시 초기화/복원/한 번 preload 요청하며 맵/모델 삭제 및 ID 교체 없음. Roblox 서버 오류 복구 성공은 확인하지 못했다.
+- dist/InstallIndex.commandbar.lua는 기존 장소의 7개 클라이언트 모듈만 백업 후 수정, 알려진 소스 사전검증 및 실패 시 복구. FixCurrentLobbyHunt 전체 설치 파일에도 반영하고 신규 메인 장소 재빌드. APPLY_INDEX에 초보자 적용·콘텐츠 ID·재시도 안내 기록.
+- 검증: Luau 컴파일, check_index 수집 카운트 1/4·선택·닫기·이동 복원·사냥 차단·화면 폭 분기 모의 실행, check_current_fixes 실제 ReturnLobby 분기 및 다리 교대/머리 중립/정지 포즈 모의 실행, check_lobby_entries, check_lobby_update, check_lobby_modules, check_legacy_restore 통과. 실제 Studio/PC/모바일/8인 성능 및 텍스처 로딩 검증은 미완료.

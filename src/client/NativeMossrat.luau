@@ -58,6 +58,11 @@ function M.apply(model)
  return true
 end
 -- Hunt presentation faces the course while the authoritative root still avoids obstacles.
+function M.posePortrait(model)
+ if not M.isTarget(model) then return end
+ rigAnimator=rigAnimator or require(script.Parent:WaitForChild("UserMossratRigAnimator"))
+ rigAnimator.poseFront(model)
+end
 function M.huntFrame(model,frame)
  local hunt=package:FindFirstChild("MeshyMossratHuntTemplate")
  if model:GetAttribute("VisualDeferred") and M.isTarget(model) and hunt and hunt:GetAttribute("FaceCourseForward") then
