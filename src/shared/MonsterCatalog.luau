@@ -6,7 +6,7 @@ local C={
  Weedcrow={RunSpeed=80,HerdSpeed=55,SizeClass="Small",Flying=true,RootHeight=16,SaddleHeight=1.9,TameSeconds=5,UnlockMeters=400,IncomeSeconds=3,IncomeAmount=2,Template="WeedcrowTemplate",Visual="WeedcrowVisualTemplate"},
  RockElephant={RunSpeed=64,HerdSpeed=44,SizeClass="Large",Flying=false,RootHeight=5.3625,SaddleHeight=5.0325,TameSeconds=7,UnlockMeters=500,IncomeSeconds=3,IncomeAmount=3,Template="RockElephantTemplate",Visual="RockElephantVisualTemplate"},
 }
-C.Order={"MeadowMouse","GrassBoar","TreeWolf","Weedcrow","RockElephant"}
+C.Order={"MeadowMouse"}
 C.MeadowEndMeters=1000 -- Meadow wildlife spawns only at 0 <= metres < 1000.
 for _,id in ipairs(C.Order) do C[id].Region=C[id].Region or (C[id].Acquisition=="Breeding" and "Breeding" or "Meadow") C[id].Acquisition=C[id].Acquisition or "Hunt" end
 C.Scales={[1]=1,[3]=1.4,[6]=1.9,[9]=2.5}

@@ -1,7 +1,0 @@
-{
-  "reviewOnly": true,
-  "palette": {"leaf": [155, 222, 77], "glow": [123, 230, 128], "spark": [255, 220, 128]},
-  "6": {"orbits": 2, "leafRate": 2, "sparkRate": 4, "glowRate": 1, "lifetime": 1.8, "radiusRatio": 0.30, "heightRatio": 0.42, "orbitSpeed": 0.55, "leafSizeRatio": 0.055, "glowSizeRatio": 0.16},
-  "9": {"orbits": 4, "leafRate": 3, "sparkRate": 9, "glowRate": 2, "lifetime": 2.2, "radiusRatio": 0.38, "heightRatio": 0.58, "orbitSpeed": 0.75, "leafSizeRatio": 0.06, "glowSizeRatio": 0.22},
-  "quality": {"mobileRateFactor": 0.45, "mobileMaxAuras": 2, "desktopMaxAuras": 4, "distanceStuds": 90}
-}

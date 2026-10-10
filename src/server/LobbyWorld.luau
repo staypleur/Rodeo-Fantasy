@@ -3,7 +3,7 @@ local map=workspace:WaitForChild("RodeoLobby")
 local plots=map:WaitForChild("Plots")
 local owned,occupants={},{}
 Lobby.Departure=map.Airport.Departure
-Lobby.Spawn=CFrame.new(6000,4,0)
+Lobby.Spawn=CFrame.new(6000,4,-60)
 function Lobby.prepareCharacter(character)
  if not character then return end
  local humanoid=character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid",10)
@@ -86,7 +86,7 @@ function Lobby.connectPens(callback)
 end
 function Lobby.connect(callback)
  local prompt=Instance.new("ProximityPrompt")
- prompt.Name="FlyToHunt" prompt.ActionText="Fly to hunt" prompt.ObjectText="Airship"
+ prompt.Name="FlyToHunt" prompt.ActionText="행성 선택" prompt.ObjectText="로켓"
  prompt.HoldDuration=1 prompt.MaxActivationDistance=12 prompt.RequiresLineOfSight=false
  prompt.KeyboardKeyCode=Enum.KeyCode.E
  prompt.Parent=Lobby.Departure

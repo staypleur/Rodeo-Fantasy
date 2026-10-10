@@ -1059,3 +1059,14 @@
 - 사용자 '로켓도 모스랫이랑 같은 증상' 보고. UserRocket의재질이미지참조/PNG서명/4096²RGB검사정상. PNG외부파일읽기원인및직접선택해결여부는실제Studio미확인.
 - 기존채널분리도구에--model rocket 옵션추가. RocketTexture1의G/B를RocketRoughness.png(2,563,843bytes)/RocketMetalness.png(1,557,645bytes)로손실없이분리하고원본채널픽셀완전일치검사통과. RocketTexture0도디코드검사통과. 원본PNG/로켓GLTF·bin/형상/UV/설치스크립트미변경.
 - 로켓안내문에BakedMaterial선택/폴더버튼/실제폴더주소/3항목파일/성공확인순서추가. 기존미커밋CaptureServer/장소파일은변경/스테이징하지않음. 이번완료범위는로컬파일·검사·안내준비이며실제Studio설치나모바일성능검증이아님.
+
+## 2026-10-10 프로젝트 재구성과 불필요 파일 정리
+
+- 사용자 '지금까지 한거 다 없애고 새로 하나', '새로 만든 사냥터랑 로비랑 모델만', '도감 가방이런건 가져오고 카페도 시스템만 맵은 다시', '필요없는건 파일 지워' 확정. 활성 장소를RodeoFantasy-New.rbxlx 하나로 통합하고README/GAME_DESIGN/적용안내를 다시 작성.
+- 새 Stud 우주선 로비8방/알자리32/자동문/소유권알관리/랭킹·상점·룰렛·패스자리와GreenStar revision8의2,179Parts/1km/192폭을 실제 새장소XML에 연결. 기존조작·개인herd세션유지. 옛무작위길/폭축소/옛몬스터·비행선메시제거. Course halfwidth96/입력94(양끝2충돌여백),지면단차높이spawn·탑승·야생이동반영. 장애물은읽기전용Lua상자로충돌검사하여추가420물리Parts/플레이어를생성하지않음.
+- 표준XML서비스/필요모듈로재빌드하며옛place입력에의존하지않음. 실제미업로드메시ID를만들지않고빈투명Root템플릿만준비. 사용자모스랫·로켓만모델입력유지/누락모델'모델준비중'. 기존DataStore명·가방·도감·수입·별성장·교감·거래코드보존. CafeServer/Client Disabled,옛카페맵·자동생성Layout삭제. 로비동행런타임은후속미완료명시.
+- 사용자Import실패상세는'가져오기실패'뿐이며Output도없음. 업로드/권한/Studio원인은미확정. 복구ZIP60,415,309bytes를영문폴더추출용생성:sidecar/이미지이름정리,4검토클립을가져오기gltf에서만제외. 메시/노드/34관절/스킨/UV/텍스처/버퍼원본일치검사. 게임Idle/Walk키데이터유지. ZIP은중복대용량생성물로Gitignore/생성기기록. 실제가져오기성공미확인.
+- InstallModels.commandbar.lua 하나로모스랫빈Root템플릿연결/중앙로켓dock윗면8studs·높이64.3설치/ServerStorage백업준비. 옛버전별패치묶음삭제. 실제Studio설치실행은미완료.
+- 자동승인검토가523개삭제를처음거절:백업두파일에한정/범위가넓다는사유. 523개전부.local-backup/pre-reset-files.zip(245,310,960bytes)보관/전체SHA256검증. 동일PowerShell삭제를백업수·현재해시·프로젝트내절대경로검사후재요청하여승인·실행. 523개삭제완료. 미사용OperatorPrompt(기존Git이력복구가능)추가삭제/빈폴더정리. 원래미커밋서버·거대place도교체전복구사본보관. 로컬복구/개인operator파일은GitHub업로드하지않음.
+- check_new_project:모든XML referent/UniqueId/Ref,8방/32socket/문참조,2,179개숲,Plastic/5면Studs,옛MeshPart·카페맵·비행선없음,모든임베드Script·Installer컴파일,192폭·경계·소유권·잠금·가방ID·진화중복방지·수입검사통과. 모스랫원본·정점가중·34관절·4클립루프검사통과.
+- 실제Studio자동문/지면접촉/사냥/가방UI/모델업로드/PC·모바일/FPS·메모리는미검증. 사냥약3K간소화/텍스처최적화/카페새맵/로비동행후속남음. 플레이어DataStore삭제·Roblox게시를수행하지않음.

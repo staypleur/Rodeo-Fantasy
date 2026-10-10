@@ -20,11 +20,6 @@ local function sendBag(p)
  for _,m in ipairs(b.monsters) do table.insert(items,{id=m.id,monsterId=m.monsterId,stars=m.stars,sex=m.sex,breedingTeam=m.breedingTeam,incomeSeconds=m.incomeSeconds,incomeAmount=Bag.income(m)}) end
  remote:FireClient(p,"Bag",items)
 end
-require(script.Parent.OperatorCommands).register(C,remote,function(p,id,stars,count)
- if not active(p) or Store.busy(p) or Social.trading(p) then return false end
- for _=1,count do Bag.grant(bags[p],id,workspace:GetServerTimeNow(),C[id].IncomeSeconds,C[id].IncomeAmount) bags[p].monsters[#bags[p].monsters].stars=stars end
- sendBag(p) return true
-end)
 local function dismount(p)
  local m=mounts[p] if not m then return end
  if m.root.Parent then m.root.Anchored=m.anchored m.humanoid.PlatformStand=m.platform m.humanoid.AutoRotate=m.rotate m.root.CFrame=m.root.CFrame*CFrame.new(5,0,0) end

@@ -18,6 +18,13 @@ local Travel=require(script.Parent.PlaceTravel)
 local SocialRules=require(package.SocialRules)
 local remote=package.CaptureRemote
 local tuning=Config.Prototype
+-- ROCKET_DEPARTURE_V1
+local rocketLaunchPermit={}
+local function rocketModelReady(id,stars)
+ local name=Catalog.template(id,stars)
+ local model=game:GetService("ServerStorage"):FindFirstChild(name)
+ return model and model:IsA("Model") and model.PrimaryPart~=nil and model:GetAttribute("UserApprovedHuntModel")==true
+end
 local states,bags,limits,views={},{},{},{}
 local worlds,worldRoots={},{}
 local runs=Instance.new("Folder") runs.Name="PrivateHunts" runs.Parent=game:GetService("Workspace")
@@ -65,18 +72,6 @@ local function sendBag(player)
  end
  remote:FireClient(player,"Bag",items)
 end
-require(script.Parent:WaitForChild("OperatorCommands")).register(Catalog,remote,function(player,id,stars,count)
- local bag=bags[player]
- if not bag or states[player] or Store.busy(player) or Social.trading(player) then return false end
- local species=Catalog[id]
- for _=1,count do
-  BagRules.grant(bag,id,now(),species.IncomeSeconds,species.IncomeAmount)
-  bag.monsters[#bag.monsters].stars=stars
- end
- send(player,"운영자 명령어로 몬스터를 가방에 추가했습니다.")
- sendBag(player)
- return true
-end)
 local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
  state.rope=nil
@@ -101,7 +96,7 @@ local function freeMount(state)
   state.monster:SetAttribute("AngerWarning",false)
   state.monster:SetAttribute("AngerStarted",nil)
   local p=state.monster.PrimaryPart.Position
-  state.monster.PrimaryPart.CFrame=CFrame.new(p.X,state.monster:GetAttribute("RootHeight") or 2,p.Z)
+  state.monster.PrimaryPart.CFrame=CFrame.new(p.X,(state.monster:GetAttribute("RootHeight") or 2)+World.groundHeight(state.monster.PrimaryPart.Position.X,state.monster.PrimaryPart.Position.Z),p.Z)
  end
  state.previousMonster,state.monster=state.monster,nil
  clearRope(state)
@@ -157,6 +152,11 @@ local function start(player)
  local root=character and character:FindFirstChild("HumanoidRootPart")
  local humanoid=character and character:FindFirstChildOfClass("Humanoid")
  if not root or not humanoid or humanoid.Health<=0 then return end
+ if not previous and not rocketLaunchPermit[player] then return end
+ local picked,reason=require(package.DepartureSelectionRules).validate(bags[player],"GreenStar",startingMounts[player],Catalog,rocketModelReady)
+ if not picked or workspace.RodeoLobby:GetAttribute("GreenStarRuntimeReady")~=true then
+  send(player,"새 사냥터와 선택한 몬스터를 연결할 준비 중입니다.") return
+ end
  if not previous and not Lobby.canDepart(player) then send(player,"Approach the airship to start.") return end
  local rootFolder=Instance.new("Folder") rootFolder.Name=tostring(player.UserId) rootFolder:SetAttribute("OwnerUserId",player.UserId)
  local slot=player:GetAttribute("LobbySlot")
@@ -224,7 +224,33 @@ local function lasso(player,state)
  send(player)
 end
 Social.start(bags,function(p) return bags[p] and not states[p] and not p:GetAttribute("Travelling") end,sendBag)
-Lobby.connect(function(p) if not Store.busy(p) and not p:GetAttribute("Travelling") then start(p) end end)
+local departure=require(script.Parent.RocketDepartureService).new({
+ catalog=Catalog,now=now,token=function() return game:GetService("HttpService"):GenerateGUID(false) end,
+ bag=function(p) return bags[p] end,
+ canOpen=function(p)
+  local humanoid=p.Character and p.Character:FindFirstChildOfClass("Humanoid")
+  return bags[p] and not states[p] and humanoid and humanoid.Health>0 and not Store.busy(p) and not Social.trading(p)
+   and not p:GetAttribute("Travelling") and Lobby.canDepart(p)
+ end,
+ modelReady=rocketModelReady,
+ courseReady=function() return workspace.RodeoLobby:GetAttribute("GreenStarRuntimeReady")==true end,
+ send=function(p,action,value) remote:FireClient(p,action,value) end,
+ launch=function(p,id)
+  local before,old=states[p],startingMounts[p]
+  startingMounts[p]=id rocketLaunchPermit[p]=true
+  local ok,err=pcall(start,p)
+  rocketLaunchPermit[p]=nil
+  local launched=ok and states[p]~=before and states[p]~=nil
+  if not launched then startingMounts[p]=old if not ok then warn("ROCKET_LAUNCH_FAILED: "..tostring(err)) end end
+  return launched
+ end,
+})
+Lobby.connect(function(p) departure.open(p) end)
+remote.OnServerEvent:Connect(function(p,action,value)
+ if action=="LaunchSelection" then departure.submit(p,value)
+ elseif action=="CancelDeparture" then departure.cancel(p) end
+end)
+Players.PlayerRemoving:Connect(function(p) departure.remove(p) rocketLaunchPermit[p]=nil end)
 Lobby.connectPens(function(player)
  if not states[player] then sendBag(player) remote:FireClient(player,"RanchMenu") end
 end)
@@ -326,7 +352,7 @@ RunService.Heartbeat:Connect(function(delta)
    if state.monster then state.monster:SetAttribute("Running",false) state.monster:SetAttribute("DashUntil",nil) state.monster:SetAttribute("Angry",false) state.monster:SetAttribute("AngerWarning",false) end
    if state.monster then
     local p=state.monster.PrimaryPart.Position
-    state.monster.PrimaryPart.CFrame=CFrame.new(p.X,state.monster:GetAttribute("RootHeight") or 2,p.Z)
+    state.monster.PrimaryPart.CFrame=CFrame.new(p.X,(state.monster:GetAttribute("RootHeight") or 2)+World.groundHeight(state.monster.PrimaryPart.Position.X,state.monster.PrimaryPart.Position.Z),p.Z)
     state.root.CFrame=state.monster:GetPivot()*CFrame.new(0,state.monster:GetAttribute("SaddleHeight") or tuning.RideHeightStuds,tuning.RideForwardStuds)
    end
    clearRope(state)
@@ -344,7 +370,7 @@ RunService.Heartbeat:Connect(function(delta)
   elseif state.phase=="Lassoing" then
    if not state.monster or not state.monster.Parent then finish(player,"You lost your mount.") continue end
    local p=state.monster.PrimaryPart.Position
-   state.monster.PrimaryPart.CFrame=CFrame.new(p.X,state.monster:GetAttribute("RootHeight") or 2,p.Z-(state.initialLanding and 0 or baseSpeed(state)*dt))
+   state.monster.PrimaryPart.CFrame=CFrame.new(p.X,(state.monster:GetAttribute("RootHeight") or 2)+World.groundHeight(state.monster.PrimaryPart.Position.X,state.monster.PrimaryPart.Position.Z),p.Z-(state.initialLanding and 0 or baseSpeed(state)*dt))
    local saddle=state.monster:GetPivot()*CFrame.new(0,state.monster:GetAttribute("SaddleHeight") or tuning.RideHeightStuds,tuning.RideForwardStuds)
    local landingSeconds=state.landingSeconds or tuning.JumpSeconds
    local landingProgress=math.clamp((clock-state.started)/landingSeconds,0,1)
@@ -366,7 +392,7 @@ RunService.Heartbeat:Connect(function(delta)
    end
   elseif state.phase=="Riding" then
    if not state.monster or not state.monster.Parent then finish(player,"You lost your mount.") continue end
-   position=Vector3.new(position.X,(state.monster:GetAttribute("RootHeight") or 2)+buckHeight,position.Z)
+   position=Vector3.new(position.X,((state.monster:GetAttribute("RootHeight") or 2)+World.groundHeight(state.monster.PrimaryPart.Position.X,state.monster.PrimaryPart.Position.Z))+buckHeight,position.Z)
    local before=state.monster.PrimaryPart.Position
    state.monster.PrimaryPart.CFrame=CFrame.new(position)
    state.monster:SetAttribute("Steering",steer)
@@ -413,26 +439,3 @@ Players.PlayerRemoving:Connect(function(player) send(player) if worlds[player] t
 for _,player in ipairs(Players:GetPlayers()) do added(player) end
 
 if RunService:IsRunning() then Records.start() Progress.start() end
-
-local bench
-local garden=workspace.RodeoLobby:FindFirstChild("PlazaGarden",true)
-local desired=Vector3.new(6057.28,0,23.73)
-if garden then
- for _,part in ipairs(garden:GetChildren()) do
-  if part:IsA("BasePart") and part.Name=="BenchSeat" and (not bench or (part.Position-desired).Magnitude<(bench.Position-desired).Magnitude) then bench=part end
- end
-end
-local position=bench and bench.Position or Vector3.new(6057.28,1,23.73)
-if bench then
- for _,part in ipairs(garden:GetChildren()) do
-  if part:IsA("BasePart") and part.Name:match("^Bench") and (part.Position-position).Magnitude<6 then part:Destroy() end
- end
-end
-local sign=Instance.new("Part") sign.Name="CafeTravel" sign.Size=Vector3.new(8,6,1) sign.CFrame=CFrame.lookAt(position+Vector3.new(0,3,0),Vector3.new(6000,position.Y+3,0)) sign.Color=Color3.fromRGB(64,96,72) sign.Anchored=true sign.Parent=workspace.RodeoLobby
-local gui=Instance.new("SurfaceGui") gui.Parent=sign
-local text=Instance.new("TextLabel") text.Size=UDim2.fromScale(1,1) text.BackgroundTransparency=1 text.Text="MONSTER CAFE" text.TextScaled=true text.TextColor3=Color3.fromRGB(249,230,189) text.Parent=gui
-local prompt=Instance.new("ProximityPrompt") prompt.ActionText="카페로 이동" prompt.HoldDuration=1 prompt.MaxActivationDistance=12 prompt.RequiresLineOfSight=false prompt.Parent=sign
-prompt.Triggered:Connect(function(p)
- local r=p.Character and p.Character:FindFirstChild("HumanoidRootPart")
- if r and not states[p] and (r.Position-sign.Position).Magnitude<=16 then Travel.go(p,true) end
-end)

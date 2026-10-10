@@ -4,3 +4,5 @@ __pycache__/
 *.rbxlx.lock
 *.rbxl.lock
 dist/LocalOperator/
+.local-backup/
+dist/ImportRecovery/

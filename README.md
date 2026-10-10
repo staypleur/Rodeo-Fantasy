@@ -1,30 +1,14 @@
-# Rodeo Planeture
+# Rodeo Fantasy — 새 프로젝트
 
-독자적인 판타지 몬스터를 포획해 가방에서 돈을 생산하고, 로비 목장에 전시하는 Roblox 시험 게임입니다. 카페·배합·상점 판매는 후속 작업입니다.
+이제 **`dist/RodeoFantasy-New.rbxlx` 하나만** Roblox Studio에서 연다. 옛 맵·몬스터·비행선·중복 적용 파일은 정리했다.
 
-초원 5종의 **A안 1·3·6·9성 모델 20개**를 로우폴리 3D 메시로 만들고 Roblox Studio용 GLB 파일로 내보냈습니다. 이 파일은 아직 Roblox 경험에 자동 업로드되지 않으므로, [Studio 모델 가져오기 절차](docs/ROBLOX_MODEL_IMPORT.md)를 따라 장소 모델에 연결해야 합니다. B/C 비교 시안은 미래 변종·배합 후보로 보관합니다. 실제 사냥에는 1성만 등장하며 합성 조작은 아직 미정입니다. 별마다 생산량은2배이며 간격은3초입니다.
+- 로비: Stud 우주선, 부화실8개/알자리32개/자동문, 상점2곳/랭킹2곳/룰렛/배틀패스 자리.
+- 사냥터: Green Star 숲1,000m/폭192studs, 얇은 판 나무·바위/절벽/폭포/바람. 개인 사냥과 기존 이동·점프·줄 조작 유지.
+- 모델: 사용자 모스랫1성/로켓만 준비. Roblox 업로드는 아직 미완료이며 옛 모델로 대체하지 않는다.
+- 가방·도감·교감·거래·저장과 카페 시스템 유지. 옛 카페 맵은 삭제했고 새 맵 제작 때 실행을 연결한다.
 
-[Studio 적용](docs/STUDIO_SETUP.md) · [전체 기획](GAME_DESIGN.md) · [선택 시안](docs/MONSTER_CONCEPTS.md) · [검증](docs/VALIDATION.md) · [작업 기록](docs/WORK_LOG.md)
+**실행·모델 연결·성공 확인:** [새 프로젝트 안내](docs/NEW_PROJECT.md).
 
-## 실행
+빌드: `tools/build_project.py`. 모델 설치 파일 생성: `tools/build_model_installer.py`. 가져오기 묶음: `tools/prepare_import_recovery.py`. 검사: `tests/check_new_project.py`, `tests/check_user_mossrat_rig.py`.
 
-`dist/RodeoFantasy-Capture.rbxlx`를 Studio의 **Ctrl+O**로 열고 **F5**로 실행합니다. 중앙 평지에서 시작하고 나무 사다리를 올라 열린 바구니 입구에서 **E 1초**로 사냥합니다. **A/D** 조향, **Space** 점프, 공중에서 다시 **Space**로 줄을 던집니다. 사망 후 Space 재도전 / E 1초 로비, 마우스 버튼도 지원합니다.
-
-로비에는 A안 석조 정원 양식의 8개 건물과 건물 안뜰 목장 4개씩(총32개)이 있습니다. 내 구역 입구에서 E 1초 → 목장1~4 → 가방 몬스터 배치/회수, 한 목장2마리입니다. R로 검색·지역 분류 가방을 열고 모습·별·생산량을 봅니다. T를1초 누르면 다이어리 도감이 열리고 이동이 멈춥니다. A/D로 페이지를 넘기며 카드 말풍선에서 획득 방법을 봅니다. 목장에서는 먼지가 없습니다. 사냥 정보 HUD는 미터만 표시합니다.
-
-꼬마쥐0m, 풀멧돼지150m, 나무늑대강아지300m, 잡초까마귀400m, 바위코끼리500m부터 등장합니다. 사냥터마다 개인 야생 무리3~6마리가 보이고, 새 개체는 화면 밖에서 합류합니다. 로비는 최대8명이 공유합니다. 초원은1,000m에서 종료합니다. 중형 대시/대형 주행은 야생 소·중형을 날립니다. 대형은 작은 나무·바위를 부수고5초 후 복구합니다.
-
-## 파일
-
-- `dist/RodeoFantasy-Capture.rbxlx`: 전체 로비/초원 시험 장소
-- `dist/*_S1.rbxmx`, `*_S3.rbxmx`, `*_S6.rbxmx`, `*_S9.rbxmx`: 5종의 독립 모델20개
-- `dist/BlueSeaElephantAirship.rbxmx`: 미래 최종형 방향의 비행선
-- `assets/concepts/meadow/`: A/B/C 비교 시안과 생성 프롬프트
-- `assets/previews/meadow-approved-a-models.png`: 실제 부품 좌표의 오프라인 구조 렌더(Studio 화면 아님)
-- `tools/meadow_models.py`: A계열 모델 부품 설계
-- `tools/build_place.py`: 시험 장소와 모델 재생성
-- `tools/lobby_map.py`: 로비 구성
-
-전체 거리·누적 생산액 랭킹 저장 코드는 있습니다. 게시된 경험에서의 저장/재접속, 실제8인 네트워크·모바일·F5 화면 체감은 추가 확인이 필요합니다. **가방과 사용 잔액은 현재 접속 중만 유지**합니다. 공개 서버 정원8명은 Creator Dashboard에서 설정해야 합니다. 로컬 Git 변경은 Roblox 웹 경험에 자동 게시되지 않으며, 게시하려면 Studio에서 저장한 새 장소를 직접 Publish 해야 합니다.
-
-도감 발견/포획 경험치는 별도 저장을 준비했으며 머리 위 이름 옆에 레벨별 테마 배지를 표시합니다. 실제 공개 저장 검증은 남아 있습니다. 5000회 포획으로 최대1000레벨이며 가방/잔액은 아직 세션 전용입니다.
+플레이어 DataStore 이름은 유지한다. 삭제 파일과 미커밋 작업의 로컬 복구 사본은 `.local-backup`에 보관하며 GitHub에 올리지 않는다. 코드 검사와 실제 Studio·모바일·PC 검증을 구분한다.

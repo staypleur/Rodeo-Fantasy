@@ -33,7 +33,6 @@ local function make(kind,props,parent)
  return node
 end
 local gui=make("ScreenGui",{Name="RodeoCaptureUI",ResetOnSpawn=false,DisplayOrder=10},player:WaitForChild("PlayerGui"))
-require(script.Parent:WaitForChild("OperatorPrompt")).new(player.PlayerGui,remote)
 local function text(parent,value,pos,size,font)
  return make("TextLabel",{Text=value,Position=pos,Size=size,TextSize=font or 18,Font=Enum.Font.GothamBold,TextColor3=Color3.fromRGB(255,245,219),BackgroundTransparency=1,TextWrapped=true},parent)
 end
@@ -58,34 +57,7 @@ for _,plot in ipairs(workspace.RodeoLobby.Plots:GetChildren()) do
  plot.DescendantAdded:Connect(function(node) if node:IsA("ProximityPrompt") then updatePrompts() end end)
  updatePrompts()
 end
-local airship=workspace.RodeoLobby.Airport.Airship
-local whaleMotion=require(script.Parent:WaitForChild("SkyWhaleMotion"))
-local shipAnchor=CFrame.new(6000,24,-5)
-local shipParts={}
-local function rememberShip(node)
- if node:IsA("BasePart") then shipParts[node]=shipAnchor:ToObjectSpace(node.CFrame) end
-end
-for _,node in ipairs(airship:GetDescendants()) do rememberShip(node) end
-airship.DescendantAdded:Connect(rememberShip)
-task.spawn(function()
- require(script.Parent:WaitForChild("FacetedMouse")).prepare()
- require(script.Parent:WaitForChild("SkyWhaleRuntime")).install(airship)
- require(script.Parent:WaitForChild("CreatureMesh")).prepare()
-end)
-local function animateShip(clock)
- if airship:GetAttribute("SkyWhaleRevision") then whaleMotion.step(airship,clock) return end
- local sway=shipAnchor*CFrame.new(math.sin(clock*.7)*.35,math.sin(clock*.9)*.25,0)*CFrame.Angles(0,0,math.sin(clock*.7)*.018)
- for node,rest in pairs(shipParts) do
-  if not node.Parent then shipParts[node]=nil continue end
-  local pose=rest
-  if node.Name=="SeaWingRoot" or node.Name=="SeaWingFeather" then
-   local sign=rest.X<0 and -1 or 1
-   local pivot=CFrame.new(sign*18,23,-4)
-   pose=pivot*CFrame.Angles(0,0,sign*math.sin(clock*1.1)*.18)*pivot:Inverse()*rest
-  end
-  node.CFrame=sway*pose
- end
-end
+task.spawn(function() require(script.Parent:WaitForChild("CreatureMesh")).prepare() end)
 local function T(value) return locale.text(value) end
 local distance=text(gui,"0m",UDim2.new(0.5,-80,0,12),UDim2.fromOffset(160,48),32)
 distance.Name="DistanceCounter"
@@ -259,7 +231,7 @@ player.CharacterAdded:Connect(function() state.phase="Idle" cameraMode(false) re
 RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Camera.Value+1, function(dt)
  if returnHeld and state.phase=="GameOver" and os.clock()-returnHeld>=1 then returnHeld=nil remote:FireServer("ReturnLobby") end
  local clock=workspace:GetServerTimeNow()
- if state.area=="Lobby" or state.area==nil then animateShip(clock) end
+ if state.area=="Lobby" or state.area==nil then  end
  local size=workspace.CurrentCamera.ViewportSize
  local aspect=size.Y>0 and math.clamp(size.X/size.Y,0.4,4) or 1
  if not lastAspect or math.abs(aspect-lastAspect)>0.05 then remote:FireServer("View",aspect) lastAspect=aspect end
