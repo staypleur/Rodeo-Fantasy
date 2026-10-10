@@ -1,8 +1,8 @@
 -- Small native shapes: no external images are required for the menu symbols.
 local I={}
 -- IDs supplied by the user from their uploaded image list.
-I.ImageIds={ShopButtonImage="rbxassetid://84295507284264",IndexButtonImage="rbxassetid://135277525783308",
- EggButtonImage="rbxassetid://87551432940862",PawButtonImage="rbxassetid://85966265063532",MossratFaceImage="rbxassetid://98296663869747"}
+I.ImageIds={ShopButtonImage="rbxassetid://135776139567636",RouletteButtonImage="rbxassetid://103655794024864",IndexButtonImage="rbxassetid://135277525783308",
+ EggButtonImage="rbxassetid://87551432940862",PawButtonImage="rbxassetid://85966265063532",MossratFaceImage="rbxassetid://87383094549038",MoneyImage="rbxassetid://71604722538432"}
 function I.imageId(package,key)
  local id=package:GetAttribute(key)
  if key=="PawButtonImage" and id=="rbxassetid://8596625063532" then return I.ImageIds[key] end
@@ -24,7 +24,9 @@ function I.bindArtwork(button,key)
  end
  local function display()
   local ready=image.Image~="" and image.IsLoaded
-  image.Visible=ready
+  -- Keep the label renderable while Roblox requests the image. Hiding it until
+  -- IsLoaded can leave it waiting indefinitely; a faint image permits loading.
+  image.Visible=true image.ImageTransparency=ready and 0 or .99
   button.BackgroundTransparency=ready and 1 or background
   for n,visible in pairs(originals) do n.Visible=not ready and visible end
   for n,enabled in pairs(strokes) do n.Enabled=not ready and enabled end
@@ -33,6 +35,12 @@ function I.bindArtwork(button,key)
   local id=I.imageId(package,key)
   if image.Image~=id then image.Image=id end
   display()
+  -- IsLoaded may update without a property signal. Poll only this request and
+  -- stop when it loads, changes, or the control is removed.
+  task.spawn(function()
+   while image.Parent and image.Image==id and not image.IsLoaded do task.wait(.25) end
+   if image.Parent and image.Image==id then display() end
+  end)
  end
  image:GetPropertyChangedSignal("IsLoaded"):Connect(display)
  package:GetAttributeChangedSignal(key):Connect(refresh) refresh()

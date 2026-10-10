@@ -1,5 +1,6 @@
 local Lobby={}
 local map=workspace:WaitForChild("RodeoLobby")
+require(script.Parent.LobbyAppearance).ensure(map)
 local plots=map:WaitForChild("Plots")
 local owned,occupants={},{}
 Lobby.Departure=map.Airport.Departure
@@ -67,7 +68,7 @@ function Lobby.assign(player)
    occupants[index]=player owned[player]=index
    plots["Plot_"..index]:SetAttribute("OwnerUserId",player.UserId)
    player:SetAttribute("LobbySlot",index)
-   label(index,player.DisplayName or player.Name)
+   label(index,player.Name)
    return index
   end
  end

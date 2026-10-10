@@ -1,4 +1,5 @@
 local M={}
+local mirrored=setmetatable({},{__mode="k"})
 function M.ensure(lobby)
  local boards=lobby:FindFirstChild("Leaderboards")
  if not boards then boards=Instance.new("Folder") boards.Name="Leaderboards" boards.Parent=lobby end
@@ -13,7 +14,7 @@ function M.ensure(lobby)
    board.Anchored=true board.Material=Enum.Material.SmoothPlastic board.Color=Color3.fromRGB(24,38,64)
    board.TopSurface=Enum.SurfaceType.Smooth board.BottomSurface=Enum.SurfaceType.Smooth board.Parent=boards
   end
-  local target=CFrame.new(center+Vector3.new(i==1 and -54 or 54,17,24))
+  local target=CFrame.new(center+Vector3.new(i==1 and -54 or 54,17,24))*CFrame.Angles(0,math.pi/2,0)
   if board:IsA("BasePart") then board.Size=Vector3.new(26,30,1.5) board.CanCollide=false board.CanTouch=false board.CanQuery=false end
   if board:IsA("BasePart") then board.CFrame=target elseif board:IsA("Model") then board:PivotTo(target) end
   local gui=board:FindFirstChild("Ranking")
@@ -27,6 +28,15 @@ function M.ensure(lobby)
    end
   end
   gui.Face=Enum.NormalId.Front
+  local back=board:FindFirstChild("RankingBack")
+  if not back then back=gui:Clone() back.Name="RankingBack" back.Parent=board end
+  back.Face=Enum.NormalId.Back
+  back.Heading.Text=gui.Heading.Text back.Entries.Text=gui.Entries.Text
+  if not mirrored[board] then
+   mirrored[board]=true
+   gui.Entries:GetPropertyChangedSignal("Text"):Connect(function() back.Entries.Text=gui.Entries.Text end)
+   gui.Heading:GetPropertyChangedSignal("Text"):Connect(function() back.Heading.Text=gui.Heading.Text end)
+  end
  end
  return boards
 end

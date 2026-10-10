@@ -1,8 +1,8 @@
 from pathlib import Path
 import subprocess
 R=Path(__file__).resolve().parents[1]
-expected={'ShopButtonImage':'84295507284264','IndexButtonImage':'135277525783308','EggButtonImage':'87551432940862','PawButtonImage':'85966265063532','MossratFaceImage':'98296663869747'}
-h='local game,Instance,UDim2,Enum\nlocal I=(function()\n'+(R/'src/client/HudIcons.luau').read_text(encoding='utf-8')+'\nend)()\n'
+expected={'ShopButtonImage':'135776139567636','IndexButtonImage':'135277525783308','EggButtonImage':'87551432940862','PawButtonImage':'85966265063532','MossratFaceImage':'87383094549038','RouletteButtonImage':'103655794024864','MoneyImage':'71604722538432'}
+h='local game,Instance,UDim2,Enum\nlocal task={spawn=function() end}\nlocal I=(function()\n'+(R/'src/client/HudIcons.luau').read_text(encoding='utf-8')+'\nend)()\n'
 h+='local attrs={} local p={GetAttribute=function(_,k) return attrs[k] end,SetAttribute=function(_,k,v) attrs[k]=v end}\n'
 for key,id in expected.items():
  h+=f'assert(I.imageId(p,"{key}")=="rbxassetid://{id}")\n'
@@ -24,16 +24,16 @@ local artwork,signals
 Instance={new=function() signals={} artwork={IsLoaded=false,GetPropertyChangedSignal=function(_,k) return {Connect=function(_,f) signals[k]=f end} end}; return artwork end}
 UDim2={fromScale=function() return {} end}; Enum={ScaleType={Fit=1}}
 I.bindArtwork(button,"PawButtonImage")
-assert(native.Visible and stroke.Enabled and not artwork.Visible and button.BackgroundTransparency==0)
+assert(native.Visible and stroke.Enabled and artwork.Visible and artwork.ImageTransparency==.99 and button.BackgroundTransparency==0)
 artwork.IsLoaded=true signals.IsLoaded()
 assert(not native.Visible and not stroke.Enabled and artwork.Visible and button.BackgroundTransparency==1)
 artwork.IsLoaded=false signals.IsLoaded()
-assert(native.Visible and stroke.Enabled and not artwork.Visible)
+assert(native.Visible and stroke.Enabled and artwork.Visible and artwork.ImageTransparency==.99)
 print("HUD_ARTWORK_LOAD_PASS: pending/failure fallback, loaded image, stale paw migration")
 '''
 h+=(R/'dist/ApplyHudImages.commandbar.lua').read_text(encoding='utf-8')
 for key,id in expected.items():h+=f'assert(attrs["{key}"]=="rbxassetid://{id}")\n'
-h+='print("HUD_IMAGE_IDS_PASS: all five configured, zero placeholder ignored, custom override retained")\n'
+h+='print("HUD_IMAGE_IDS_PASS: all seven configured, zero placeholder ignored, custom override retained")\n'
 source=(R/'src/client/BagUI.luau').read_text(encoding='utf-8')
 menu=source[source.index(' function self.openCompanionMenu()'):source.index(' function self.openRanchMenu()')]
 h+='''

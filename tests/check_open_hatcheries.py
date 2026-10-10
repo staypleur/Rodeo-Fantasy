@@ -36,7 +36,7 @@ name=lambda n:n.findtext("Properties/string[@name='Name']")
 child=lambda n,k:next(x for x in n.findall('Item') if name(x)==k)
 ws=next(n for n in tree.getroot().findall('Item') if n.get('class')=='Workspace')
 lobby=child(ws,'RodeoLobby')
-removed={'UserIncubator','UserDoorFrame','UserDoorConsole','DoorLeft','DoorRight','DoorSensor','BabyCapsules','RoomRoof','Roof','OwnerBoard','Planter','Stem','LeafPlate','Amenities','ShipShell','SpaceLobbyDoors'}
+removed={'UserIncubator','UserDoorFrame','UserDoorConsole','DoorLeft','DoorRight','DoorSensor','BabyCapsules','RoomRoof','Planter','Stem','LeafPlate','Amenities','ShipShell','SpaceLobbyDoors'}
 assert not removed.intersection(name(n) for n in lobby.iter('Item'))
 def vec(n,kind,key): return [float(n.findtext(f'Properties/{kind}[@name="{key}"]/{a}')) for a in 'XYZ']
 for i in range(1,9):
@@ -49,6 +49,10 @@ for i in range(1,9):
  walls=child(room,'SolidRoomWalls');assert len(walls.findall('Item'))==5
  # Exact room-local butt-joint extents; side inner face +/-38 meets front/rear ends.
  assert vec(child(walls,'RearWall'),'Vector3','size')==[76,32,2]
+child(child(lobby,'Roof'),'FullGlassCeiling')
+child(lobby,'BlackSpaceSphere')
+child(lobby,'PlanetAura')
+for room in child(lobby,'Plots').findall('Item'): child(room,'OwnerBoard')
 floor=child(lobby,'LobbyCollisionFloor')
 assert floor.findtext("Properties/float[@name='Transparency']")=='0'
 assert floor.findtext("Properties/bool[@name='CanCollide']")=='true'
@@ -57,9 +61,11 @@ for key in ['Distance','Income']:
  board=child(child(lobby,'Leaderboards'),key)
  assert vec(board,'Vector3','size')==[26,30,1.5]
  assert abs(vec(board,'CoordinateFrame','CFrame')[2]-24)<.001
+ assert abs(float(board.findtext("Properties/CoordinateFrame[@name='CFrame']/R00")))<.001
+ assert child(board,'RankingBack').findtext("Properties/token[@name='Face']")=='2'
  assert child(board,'Ranking').findtext("Properties/token[@name='Face']")=='5'
 # Live module source must match the four updated inventory/UI modules and rankings.
 for key,path in [('LobbyWorld','src/server/LobbyWorld.luau'),('BagUI','src/client/BagUI.luau'),('LobbyIncubatorRules','src/shared/LobbyIncubatorRules.luau'),('CaptureServer','src/server/CaptureServer.server.luau'),('LobbyRankings','src/server/LobbyRankings.luau'),('LobbyPresentation','src/server/LobbyPresentation.server.luau')]:
  node=next(n for n in tree.findall('.//Item') if name(n)==key)
  assert node.findtext("Properties/ProtectedString[@name='Source']").replace('\r\n','\n')==(R/path).read_text(encoding='utf-8')
-print('OPEN_LOBBY_SAVED_PASS: 8x4 open stands, no door/capsule/roof/sign/tree, opaque collision backing, upright rankings, saved source matches; live egg/reconnect and mobile checks pending')
+print('OPEN_LOBBY_SAVED_PASS: 8x4 open stands, no door/capsule/room roof/tree; glass lobby roof and owner signs restored, opaque collision backing, upright rankings, saved source matches; live egg/reconnect and mobile checks pending')

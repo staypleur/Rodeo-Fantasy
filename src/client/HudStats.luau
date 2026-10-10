@@ -9,6 +9,7 @@ function H.new(gui)
  end
  local count=label("BagCount",0,Color3.new(1,1,1));local money=label("MoneyCount",42,Color3.fromRGB(54,255,9))
  local cash=Icons.draw(root,"Money",40) cash.Position=UDim2.fromOffset(0,42)
+ Icons.bindArtwork(cash,"MoneyImage")
  local face=Instance.new("ImageLabel") face.Name="MossratFace" face.Size=UDim2.fromOffset(40,40) face.BackgroundTransparency=1 face.Parent=root
  local package=game.ReplicatedStorage.RodeoFantasy
  face.Image=Icons.imageId(package,"MossratFaceImage")
@@ -25,6 +26,9 @@ function H.new(gui)
   face.Image=Icons.imageId(package,"MossratFaceImage") showFace()
  end)
  showFace()
+ task.spawn(function()
+  while face.Parent do showFace() task.wait(.5) end
+ end)
  local function short(n)
   n=math.max(0,tonumber(n) or 0)
   for _,v in ipairs({{1e9,"B"},{1e6,"M"},{1e3,"K"}}) do if n>=v[1] then return string.format("%.1f%s",n/v[1],v[2]):gsub("%.0([KMB])","%1") end end

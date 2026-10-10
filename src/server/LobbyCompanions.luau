@@ -41,10 +41,11 @@ function M.new(context)
    elseif part:IsA("BillboardGui") then part:Destroy() end
   end
   for key,value in pairs({MonsterId=item.monsterId,Stars=item.stars,OwnerUserId=p.UserId,BagItemId=id,Running=false,RootHeight=height,RunStarted=workspace:GetServerTimeNow()}) do model:SetAttribute(key,value) end
-  api.clear(p) model.Parent=folder pets[p]={model=model,id=id,height=height}
+  api.clear(p) model.Parent=folder pets[p]={model=model,id=id,height=height,following=false}
   p:SetAttribute("SummonedId",id)
   local prompt=Instance.new("ProximityPrompt") prompt.Name="PetOwnCompanion" prompt.ActionText="교감"
   prompt.HoldDuration=1 prompt.MaxActivationDistance=10 prompt.RequiresLineOfSight=false prompt.Parent=model.PrimaryPart
+  prompt.Style=Enum.ProximityPromptStyle.Custom
   local last=-math.huge
   prompt.Triggered:Connect(function(who)
    local rr=root(who)
@@ -59,11 +60,15 @@ function M.new(context)
    local r=root(p)
    if not r or not context.canAct(p) or not Rules.available(Rules.find(context.bag(p),pet.id)) then api.clear(p) continue end
    local old=pet.model.PrimaryPart.CFrame
-   local target=r.Position-r.CFrame.LookVector*5+r.CFrame.RightVector*4
+   local toOwner=Vector3.new(r.Position.X-old.X,0,r.Position.Z-old.Z)
+   -- A start/stop band keeps a resting pet still when its owner turns nearby.
+   if toOwner.Magnitude>11 then pet.following=true
+   elseif toOwner.Magnitude<=6 then pet.following=false end
+   local target=r.Position
    local delta=Vector3.new(target.X-old.X,0,target.Z-old.Z)
-   local moving=delta.Magnitude>2
+   local moving=pet.following and delta.Magnitude>6
    if moving then
-    delta=delta.Unit*math.min(delta.Magnitude,48*step)
+    delta=delta.Unit*math.min(delta.Magnitude-6,32*step)
     local position=old.Position+delta
     local y=ground(Vector3.new(position.X,r.Position.Y,position.Z))
     -- Lift the cast over the lobby's short steps, while still checking walls.

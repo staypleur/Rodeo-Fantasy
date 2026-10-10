@@ -27,6 +27,16 @@ local notice,noticeUntil="",0
 local menuBound=false local returnHeld=nil local suppressJumpUntilRelease=false
 local flightFrame=nil
 local savedType,savedSubject,savedFieldOfView=nil,nil,nil
+local wasFirstPerson=false
+RunService:BindToRenderStep("RodeoLobbyFirstPerson",Enum.RenderPriority.Camera.Value+1,function()
+ local camera=workspace.CurrentCamera
+ local first=state.area=="Lobby" and camera.CameraType==Enum.CameraType.Custom and (camera.CFrame.Position-camera.Focus.Position).Magnitude<2.5
+ if (first or wasFirstPerson) and player.Character then
+  -- Large avatar accessories and our helmet can otherwise block the lens.
+  for _,p in ipairs(player.Character:GetDescendants()) do if p:IsA("BasePart") then p.LocalTransparencyModifier=first and 1 or 0 end end
+ end
+ wasFirstPerson=first
+end)
 local function make(kind,props,parent)
  local node=Instance.new(kind)
  for k,v in pairs(props) do node[k]=v end
@@ -50,6 +60,7 @@ lobbyMenus.onOpen=function() bagUI.close() journalUI.close() settingsUI.close() 
 socialUI.onOpen=function() lobbyMenus.close() settingsUI.close() end
 local locale=require(script.Parent:WaitForChild("LocalizationController"))
 locale.watch(gui) locale.watch(workspace.RodeoLobby)
+require(script.Parent:WaitForChild("PetPromptUI")).new(gui,player)
 game:GetService("ProximityPromptService").PromptShown:Connect(function(prompt)
  if prompt.Name=="PetOwnCompanion" then
   local model=prompt:FindFirstAncestorOfClass("Model")
@@ -157,6 +168,8 @@ local function cameraMode(enabled)
   held,left,right=false,false,false
  end
  if not enabled and state.area=="Lobby" then
+  player.CameraMode=Enum.CameraMode.Classic
+  player.CameraMinZoomDistance=.5 player.CameraMaxZoomDistance=48
   local humanoid=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
   if humanoid then camera.CameraSubject=humanoid camera.CameraType=Enum.CameraType.Custom end
  end
