@@ -3,7 +3,9 @@ assert(not game:GetService("RunService"):IsRunning(),"Play를 중지하세요.")
 local map=assert(workspace:FindFirstChild("RodeoLobby"),"새 로비 없음")
 assert(workspace:FindFirstChild("GreenStar") and map:FindFirstChild("Plots") and map:FindFirstChild("Airport"),"RodeoFantasy-New 맵을 먼저 여세요.")
 local package=game:GetService("ReplicatedStorage"):FindFirstChild("RodeoFantasy")
-assert(package and package:FindFirstChild("MonsterCatalog") and package:FindFirstChild("UserMossratRigAnimator"),"새 프로젝트 시스템이 없습니다.")
+assert(package and package:FindFirstChild("MonsterCatalog") and package:FindFirstChild("UserMossratRigData"),"ReplicatedStorage의 새 프로젝트 모듈이 없습니다.")
+local clients=game:GetService("StarterPlayer"):FindFirstChild("StarterPlayerScripts")
+assert(clients and clients:FindFirstChild("UserMossratRigAnimator"),"StarterPlayerScripts의 모스랫 애니메이션 모듈이 없습니다.")
 local hasMossrat=workspace:FindFirstChild("MossratImport")~=nil
 local hasRocket=workspace:FindFirstChild("RocketImport")~=nil
 assert(hasMossrat or hasRocket,"가져온 전체 Model 이름을 MossratImport 또는 RocketImport로 바꾸세요.")

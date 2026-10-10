@@ -1086,3 +1086,8 @@
 - 사용자가 CommandBar:4 RodeoFantasy-New 맵을 먼저 여세요 오류 제공. build_project가 로비 복제본을 Workspace에 추가한 뒤 원래 객체에 SpaceLobbyDoors를 붙여 저장 파일에서 자동문 스크립트가 누락된 원인 확인. 저장되는 실제 로비 객체에 스크립트를 붙이도록 수정.
 - 기존 Studio 작업공간의 모델·세 재질 연결을 보존하도록 InstallModels에 누락 자동문 스크립트만 추가하는 복구 처리. 새 맵 구조와 리그 모듈 검사 유지. 새 place 재빌드 및 실제 저장 XML의 자동문 Script/Source 존재 회귀 검사 추가, 전체 기존 검사·컴파일 통과. 사용자에게 현재 맵을 다시 열지 않고 갱신 설치기를 실행하도록 안내.
 - 사용자 금속성·거칠기·색상 CONNECTED 출력 보고는 받았으나 실제 색상·모션/설치 성공은 별도 확인 전. Studio·기기 실행 검증 미완료.
+
+## 2026-10-10 설치 전 모듈 경로 검사 수정
+
+- 사용자 CommandBar:6 새 프로젝트 시스템이 없습니다 오류 확인. 앞선 복구 수정에서 UserMossratRigAnimator를 ReplicatedStorage 폴더에서 검사한 오류가 원인. 실제 배치는 StarterPlayer/StarterPlayerScripts이며, ReplicatedStorage에는 UserMossratRigData가 있음. 실제 배치에 맞춰 두 경로를 각각 검사하고 메시지도 경로를 명시.
+- 새 맵 XML에서 서비스/객체 계층을 추출하여 설치기 실제 preflight를 Luau 모형 환경에서 실행하는 회귀 검사 추가. 정상 맵은 통과, 클라이언트 애니메이터 누락은 거부 확인. 전체 새 프로젝트 규칙·XML·자동문 Source·컴파일 검사 통과. 실제 Studio 설치 및 렌더 검증은 별도 미완료.

@@ -34,6 +34,32 @@ for n in root.iter('Item'):
   subprocess.run([str(R/'.tools/luau/luau-compile.exe'),str(p.relative_to(R))],cwd=R,check=True,stdout=subprocess.DEVNULL)
   if name(n) in ('CafeServer','CafeClient'):assert n.findtext("Properties/bool[@name='Disabled']")=='true'
 subprocess.run([str(R/'.tools/luau/luau-compile.exe'),'dist/InstallModels.commandbar.lua'],cwd=R,check=True,stdout=subprocess.DEVNULL)
+# Run the installer's actual preflight against the generated place hierarchy.
+def lua_tree(n,depth=0):
+ children=[c for c in n.findall('Item') if c.get('class') not in ('Part','SpawnLocation','Terrain')]
+ return '{name='+json.dumps(name(n) or '')+',children={'+(','.join(lua_tree(c,depth+1) for c in children) if depth<3 else '')+'}}'
+services='{name="game",children={'+','.join(lua_tree(n) for n in root.findall('Item'))+'}}'
+preflight=(R/'dist/InstallModels.commandbar.lua').read_text(encoding='utf-8').split('local hasMossrat=')[0]
+mock='''
+local function attach(n)
+ function n:FindFirstChild(k) for _,c in ipairs(self.children) do if c.name==k then return c end end end
+ for _,c in ipairs(n.children) do attach(c) end
+ return n
+end
+game=attach('''+services+''')
+function game:GetService(k) if k=="RunService" then return {IsRunning=function() return false end} end return assert(self:FindFirstChild(k),k) end
+workspace=game:GetService("Workspace")
+local function check()
+'''+preflight+'''
+end
+check()
+local clients=game:GetService("StarterPlayer"):FindFirstChild("StarterPlayerScripts")
+for i,c in ipairs(clients.children) do if c.name=="UserMossratRigAnimator" then table.remove(clients.children,i) break end end
+local ok,err=pcall(check) assert(not ok and string.find(err,"StarterPlayerScripts",1,true))
+print("MODEL_INSTALL_PREFLIGHT_PASS: actual place hierarchy accepted, missing animator rejected")
+'''
+(R/'.tools/model_install_preflight.luau').write_text(mock,encoding='utf-8')
+subprocess.run([str(R/'.tools/luau/luau.exe'),'.tools/model_install_preflight.luau'],cwd=R,check=True)
 # Numeric route and border functions: full width stays constant at all meters.
 course=(R/'src/shared/CourseGeometry.luau').read_text(encoding='utf-8')
 rules=(R/'src/shared/DepartureSelectionRules.luau').read_text(encoding='utf-8')
