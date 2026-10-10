@@ -31,7 +31,7 @@ local worlds,worldRoots={},{}
 local companions=require(script.Parent.LobbyCompanions).new({
  bag=function(p) return bags[p] end,
  canAct=function(p) return bags[p] and not states[p] and not Store.busy(p) and not Social.trading(p) and not p:GetAttribute("Travelling") end,
- canSummon=function(p) return Lobby.canManage(p) end,
+ canSummon=function(p) return Lobby.canSummon(p) end,
 })
 local runs=Instance.new("Folder") runs.Name="PrivateHunts" runs.Parent=game:GetService("Workspace")
 local lastSync,lastCleanup,lastHerd=0,0,0
@@ -66,7 +66,7 @@ local function send(player,message)
  local gains=BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
  Records.sample(player,bag.totalProduced or 0,state and state.distance or 0)
  local wildIds={}
- if state then for model in pairs(worlds[player].visibleSet(state.root.Position.Z,views[player],player)) do table.insert(wildIds,model:GetAttribute("SpawnSerial")) end end
+ if state and worlds[player] then for model in pairs(worlds[player].visibleSet(state.root.Position.Z,views[player],player)) do table.insert(wildIds,model:GetAttribute("SpawnSerial")) end end
  remote:FireClient(player,"State",{summonedId=player:GetAttribute("SummonedId"),huntRoot=worldRoots[player],initialLanding=state and state.initialLanding,income=not state and gains or nil,progress=Progress.snapshot(player),wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,tameSeconds=state and state.monster and Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds or 5,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,balance=bag.balance,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
 end
 local function sendBag(player)
@@ -281,7 +281,8 @@ remote.OnServerEvent:Connect(function(player,action,value)
   return
  end
  if action=="Manage" then
-  if not states[player] and Lobby.canUsePen(player,value) then remote:FireClient(player,"Eggs",{pen=value,eggs=bags[player].eggs or {}}) end
+  if not states[player] and Lobby.canUsePen(player,value) then remote:FireClient(player,"Eggs",{pen=value,eggs=bags[player].eggs or {}})
+  elseif not states[player] then remote:FireClient(player,"SocialMessage","알 배치는 내 부화실 안에서 이용해주세요.") end
   return
  end
  if action=="Place" or action=="Remove" then return end -- Monster pens were replaced by egg incubators.
@@ -324,7 +325,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
    worlds[player],worldRoots[player]=nil,nil
    local character=player.Character
    local humanoid=character and character:FindFirstChildOfClass("Humanoid")
-   if not humanoid or humanoid.Health<=0 then
+   if not humanoid or humanoid.Health<=0 or (state and (state.phase=="GameOver" or state.phase=="CourseEnd")) then
     local ok,err=pcall(function() player:LoadCharacterAsync() end)
     if not ok then states[player]=state player:SetAttribute("ReturningLobby",nil) warn("LOBBY_RESPAWN_FAILED: "..tostring(err)) send(player,"다시 로비로 돌아가기를 눌러 주세요.") return end
     character=player.Character

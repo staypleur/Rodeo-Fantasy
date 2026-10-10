@@ -6,3 +6,7 @@ __pycache__/
 dist/LocalOperator/
 .local-backup/
 dist/ImportRecovery/
+# Recreate external glTF recovery files from the tracked original GLBs.
+assets/models/LobbyModules/*/*.bin
+assets/models/LobbyModules/*/*.gltf
+assets/models/LobbyModules/*/Texture*

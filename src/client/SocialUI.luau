@@ -27,8 +27,10 @@ function S.new(gui,remote,bag,journal)
  local mode,selected,other,trade=nil,{},nil,nil
  local function clear(parent) for _,n in ipairs(parent:GetChildren()) do if not n:IsA("UIGridLayout") then n:Destroy() end end end
  local function open(name)
+  if self.onOpen then self.onOpen() end
   bag.close() journal.close() window.Visible=true title.Text=name clear(content) clear(controls) clear(footer)
  end
+ function self.close() window.Visible=false end
  local function ids() local out={} for id in pairs(selected) do table.insert(out,id) end table.sort(out) return out end
  local function card(m,fn)
   local frame=make("Frame",{BackgroundColor3=selected[m.id] and Color3.fromRGB(183,208,155) or Color3.fromRGB(251,243,224),Size=UDim2.fromOffset(170,205),ZIndex=62},content)

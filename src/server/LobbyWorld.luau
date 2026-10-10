@@ -18,9 +18,23 @@ centerDeparture()
 function Lobby.prepareCharacter(character)
  if not character then return end
  local root=character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart",10)
- if root then character:PivotTo(Lobby.Spawn) root.AssemblyLinearVelocity=Vector3.zero end
+ if root then
+  root.Anchored=true
+  character:PivotTo(Lobby.Spawn) root.AssemblyLinearVelocity=Vector3.zero root.AssemblyAngularVelocity=Vector3.zero
+  local owner=game:GetService("Players"):GetPlayerFromCharacter(character)
+  if owner and workspace.StreamingEnabled then pcall(function() owner:RequestStreamAroundAsync(Lobby.Spawn.Position,3) end) end
+ end
  local humanoid=character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid",10)
- if humanoid then humanoid.WalkSpeed=require(game.ReplicatedStorage.RodeoFantasy.Config).LobbyWalkSpeed end
+ if humanoid then humanoid.WalkSpeed=require(game.ReplicatedStorage.RodeoFantasy.Config).LobbyWalkSpeed humanoid.PlatformStand=false humanoid.AutoRotate=true end
+ if root then
+  task.delay(.35,function()
+   if character.Parent and root.Parent then
+    character:PivotTo(Lobby.Spawn) root.AssemblyLinearVelocity=Vector3.zero root.AssemblyAngularVelocity=Vector3.zero
+    root.Anchored=false
+    if humanoid and humanoid.Health>0 then humanoid:ChangeState(Enum.HumanoidStateType.GettingUp) end
+   end
+  end)
+ end
  local head=character:FindFirstChild("Head") or character:WaitForChild("Head",10)
  if head and not character:FindFirstChild("AstronautHelmet") then
   local helmet=Instance.new("Accessory") helmet.Name="AstronautHelmet"
@@ -83,6 +97,10 @@ function Lobby.canManage(player)
  local index=owned[player]
  local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
  return index and root and (root.Position-plots["Plot_"..index].ManagePoint.Position).Magnitude<=36
+end
+function Lobby.canSummon(player)
+ local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+ return owned[player]~=nil and root and math.abs(root.Position.X-6000)<=256 and math.abs(root.Position.Z)<=256
 end
 function Lobby.canUsePen(player,index)
  return Lobby.getPen(player,index) and Lobby.canManage(player)

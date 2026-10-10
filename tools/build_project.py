@@ -55,8 +55,9 @@ def build():
  expand(lobby,node,part)
  boards=node(lobby,'Folder','Leaderboards')
  for key,title,x in [('Distance','최고 거리',5946),('Income','도감 수집',6054)]:
-  board=part(boards,key,[x,23,-16],[26,30,2],(24,38,64))
-  gui=node(board,'SurfaceGui','Ranking');prop(gui,'token','Face',5)
+  board=part(boards,key,[x,2.04,-16],[26,.08,30],(24,38,64))
+  prop(board,'bool','CanCollide','false');prop(board,'bool','CanQuery','false')
+  gui=node(board,'SurfaceGui','Ranking');prop(gui,'token','Face',1)
   composite(gui,'Vector2','CanvasSize',{'X':780,'Y':900})
   for key,y,height,text,size in [('Heading',0,120,title,52),('Entries',140,740,'기록을 불러오는 중입니다.',34)]:
    label=node(gui,'TextLabel',key);prop(label,'string','Text',text);prop(label,'float','TextSize',size)
@@ -88,7 +89,15 @@ def build():
    if gui.get('class')=='TextLabel':prop(gui,'string','Text','')
  roof=next((c for c in lobby.findall('Item') if c.findtext("Properties/string[@name='Name']")=='Roof'),None)
  if roof is None:roof=node(lobby,'Model','Roof')
- if not any(c.findtext("Properties/string[@name='Name']")=='FullOpaqueCeiling' for c in roof.findall('Item')):part(roof,'FullOpaqueCeiling',[6000,102,0],[512,8,512],(25,35,57))
+ for c in list(roof.findall('Item')):
+  if c.findtext("Properties/string[@name='Name']") in ('Ceiling','FullOpaqueCeiling'):roof.remove(c)
+ cap=part(roof,'FullGlassCeiling',[6000,102,0],[512,2,512],(173,212,232));prop(cap,'token','Material',1568);prop(cap,'float','Transparency',.65)
+ floor=part(lobby,'LobbyCollisionFloor',[6000,0,0],[512,4,512],hidden=True);prop(floor,'bool','CanCollide','true')
+ for parent in lobby.iter('Item'):
+  for c in list(parent.findall('Item')):
+   if c.findtext("Properties/string[@name='Name']") in ('PlanetLayer','PlanetRing','DepartureSign'):parent.remove(c)
+  if parent.findtext("Properties/string[@name='Name']")=='WindowSpace':
+   prop(parent,'token','Material',1088);prop(parent,'float','Transparency',0);prop(parent,'bool','CanCollide','true')
  # Latest request removes Studs from the installed lobby, not just a separate draft.
  for p in lobby.iter('Item'):
   if p.get('class')=='Part':

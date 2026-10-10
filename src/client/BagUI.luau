@@ -143,6 +143,13 @@ function UI.new(gui,remote)
   make("UICorner",{CornerRadius=UDim.new(0,14)},choice)
   choice.Activated:Connect(function() if self.area=="Lobby" then remote:FireServer("Manage",index) end end)
  end
+ local babies=make("TextButton",{Name="BabyCapsules",Text="새끼 캡슐 4칸 · 설정 준비 중",BackgroundColor3=Color3.fromRGB(147,182,154),TextColor3=Color3.fromRGB(37,61,46),TextSize=18,TextWrapped=true,ZIndex=24},chooser)
+ make("UICorner",{CornerRadius=UDim.new(0,14)},babies)
+ function self.openCompanionMenu()
+  if self.area=="Hunt" then return end
+  self.mode="Companion" self.pen=nil self.setEvolutionMode(false) chooser.Visible=false scroll.Visible=true
+  self.snapshot(self.items) window.Visible=true self.opened() title.Text="동행 몬스터 · 1마리 선택" remote:FireServer("Bag")
+ end
  function self.openRanchMenu()
   if self.area=="Hunt" then return end
   self.setEvolutionMode(false) self.mode="RanchMenu" self.pen=nil self.snapshot(self.items) window.Visible=true self.opened() chooser.Visible=true scroll.Visible=false empty.Visible=false
@@ -181,7 +188,7 @@ function UI.new(gui,remote)
   for id in pairs(self.selected) do if not present[id] then self.selected[id]=nil end end
   local placed=0
   for _,item in ipairs(items) do if item.assignedPen==self.pen and self.pen then placed+=1 end end
-  title.Text=L.text(self.mode=="RanchMenu" and "Choose ranch" or self.pen and "Ranch" or "Bag",player.LocaleId)..(self.pen and (" "..self.pen.." · "..placed.."/2") or "")
+  title.Text=L.text(self.mode=="Companion" and "동행 몬스터 · 1마리 선택" or self.mode=="RanchMenu" and "Choose ranch" or self.pen and "Ranch" or "Bag",player.LocaleId)..(self.pen and (" "..self.pen.." · "..placed.."/2") or "")
   for _,node in ipairs(scroll:GetChildren()) do if node:IsA("Frame") then node:Destroy() end end
   local filtered=Query.filter(items,Catalog,self.region,self.query,function(id) return L.text(id,player.LocaleId) end)
   local pages=math.max(1,math.ceil(#filtered/12)) self.page=math.clamp(self.page,1,pages)
@@ -220,7 +227,10 @@ function UI.new(gui,remote)
    Portrait.fill(preview,item.monsterId,item.stars,false)
    make("TextLabel",{Text=L.text(item.monsterId,player.LocaleId).." · "..tostring(item.stars).."★",BackgroundTransparency=1,Position=UDim2.fromOffset(4,140),Size=UDim2.new(1,-8,0,28),TextSize=18,TextColor3=Color3.fromRGB(43,74,55),ZIndex=23},card)
    make("TextLabel",{Name="Income",Text=L.income(item.incomeAmount,item.incomeSeconds,player.LocaleId),BackgroundTransparency=1,Position=UDim2.fromOffset(4,172),Size=UDim2.new(1,-8,0,30),TextSize=14,TextWrapped=true,TextColor3=Color3.fromRGB(43,74,55),ZIndex=23},card)
-   if self.pen then
+   if self.mode=="Companion" then
+    local choose=make("TextButton",{Name="ChooseCompanion",Text=self.summonedId==item.id and "소환 해제" or "동행 선택",Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,32),TextSize=16,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},card)
+    choose.Activated:Connect(function() if self.area=="Lobby" then remote:FireServer("Summon",item.id) end end)
+   elseif self.pen then
     local mine=item.assignedPen==self.pen
     local allowed=mine or (not item.assignedPen and placed<2)
     local label=mine and "Return to bag" or item.assignedPen and "Placed" or placed>=2 and "Full" or "Place"

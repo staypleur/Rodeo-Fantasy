@@ -13,7 +13,8 @@ function M.ensure(lobby)
    board.Anchored=true board.Material=Enum.Material.SmoothPlastic board.Color=Color3.fromRGB(24,38,64)
    board.TopSurface=Enum.SurfaceType.Smooth board.BottomSurface=Enum.SurfaceType.Smooth board.Parent=boards
   end
-  local target=CFrame.new(center+Vector3.new(i==1 and -54 or 54,23,-16))
+  local target=CFrame.new(center+Vector3.new(i==1 and -54 or 54,2.04,-16))
+  if board:IsA("BasePart") then board.Size=Vector3.new(26,.08,30) board.CanCollide=false board.CanTouch=false board.CanQuery=false end
   if board:IsA("BasePart") then board.CFrame=target elseif board:IsA("Model") then board:PivotTo(target) end
   local gui=board:FindFirstChild("Ranking")
   if not gui then
@@ -25,6 +26,7 @@ function M.ensure(lobby)
     text.TextYAlignment=Enum.TextYAlignment.Top text.Parent=gui
    end
   end
+  gui.Face=Enum.NormalId.Top
  end
  return boards
 end

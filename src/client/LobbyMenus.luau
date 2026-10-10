@@ -1,6 +1,6 @@
 -- Lobby entries only; products, odds and rewards remain undecided.
 local M={}
-function M.new(gui)
+function M.new(gui,bag,journal,remote)
  local api={}
  local function make(kind,props,parent)
   local n=Instance.new(kind) for k,v in pairs(props) do n[k]=v end n.Parent=parent return n
@@ -17,10 +17,15 @@ function M.new(gui)
  function api.close() panel.Visible=false end
  close.Activated:Connect(api.close)
  local buttons={}
+ local Icons=require(script.Parent:WaitForChild("HudIcons"))
  for i,entry in ipairs({{"OpenShop","상점","상점 1 · 상점 2\n상품은 준비 중입니다."},{"OpenRoulette","룰렛","룰렛 규칙과 보상은 준비 중입니다."}}) do
-  local button=make("TextButton",{Name=entry[1],Text=entry[2],TextSize=18,Font=Enum.Font.GothamBold,AnchorPoint=Vector2.new(1,1),Position=UDim2.new(1,-18-(i-1)*74,1,-92),Size=UDim2.fromOffset(64,56),BackgroundColor3=Color3.fromRGB(34,58,88),TextColor3=Color3.fromRGB(231,246,255),Visible=false},gui)
-  make("UICorner",{CornerRadius=UDim.new(0,12)},button)
-  make("UIStroke",{Color=Color3.fromRGB(93,187,231),Thickness=1},button)
+  local color=i==1 and Color3.fromRGB(100,255,12) or Color3.fromRGB(255,191,31)
+  local button=make("TextButton",{Name=entry[1],Text="",Position=UDim2.new(0,8,.42,i==1 and -26 or -90),Size=UDim2.fromOffset(144,56),BackgroundColor3=color,BorderSizePixel=0,Visible=false},gui)
+  make("UICorner",{CornerRadius=UDim.new(0,5)},button)
+  make("UIStroke",{Color=Color3.fromRGB(0,0,0),Thickness=2},button)
+  make("UIGradient",{Color=ColorSequence.new(Color3.new(1,1,1),Color3.fromRGB(150,214,135)),Rotation=90},button)
+  local icon=Icons.draw(button,i==1 and "Shop" or "Roulette",38) icon.Position=UDim2.fromOffset(8,9)
+  make("TextLabel",{Text=entry[2],BackgroundTransparency=1,Position=UDim2.fromOffset(54,0),Size=UDim2.new(1,-58,1,0),Font=Enum.Font.GothamBlack,TextSize=24,TextColor3=Color3.new(1,1,1),TextStrokeColor3=Color3.new(0,0,0),TextStrokeTransparency=0},button)
   button.Activated:Connect(function()
    if not button.Visible then return end
    if api.onOpen then api.onOpen() end
@@ -28,6 +33,45 @@ function M.new(gui)
   end)
   table.insert(buttons,button)
  end
+ local journalButton=gui:FindFirstChild("OpenJournal")
+ if journalButton then
+  for _,n in ipairs(journalButton:GetChildren()) do n:Destroy() end
+  journalButton.AnchorPoint=Vector2.zero journalButton.Position=UDim2.new(0,8,.42,38) journalButton.Size=UDim2.fromOffset(144,56)
+  journalButton.BackgroundColor3=Color3.fromRGB(15,216,255) journalButton.BackgroundTransparency=0
+  make("UICorner",{CornerRadius=UDim.new(0,5)},journalButton) make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},journalButton)
+  local icon=Icons.draw(journalButton,"Journal",38) icon.Position=UDim2.fromOffset(8,9)
+  make("TextLabel",{Text="도감",BackgroundTransparency=1,Position=UDim2.fromOffset(54,0),Size=UDim2.new(1,-58,1,0),Font=Enum.Font.GothamBlack,TextSize=24,TextColor3=Color3.new(1,1,1),TextStrokeColor3=Color3.new(0,0,0),TextStrokeTransparency=0},journalButton)
+ end
+ for i,kind in ipairs({"Egg","Paw"}) do
+  local button=make("TextButton",{Name="Open"..kind,Text="",AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-8,.42,i==1 and -26 or 38),Size=UDim2.fromOffset(56,56),BorderSizePixel=0,BackgroundColor3=i==1 and Color3.fromRGB(255,83,80) or Color3.fromRGB(255,160,54),Visible=false},gui)
+  make("UICorner",{CornerRadius=UDim.new(0,5)},button) make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},button)
+  local icon=Icons.draw(button,kind,42) icon.Position=UDim2.fromOffset(7,7)
+  button.Activated:Connect(function()
+   if not button.Visible then return end
+   if api.onOpen then api.onOpen() end
+   if kind=="Egg" then bag.openRanchMenu() else bag.openCompanionMenu() end
+  end)
+  table.insert(buttons,button)
+ end
+ local function layout()
+  local camera=workspace.CurrentCamera
+  local compact=camera and camera.ViewportSize.Y<420
+  local factor=compact and .8 or 1
+  for _,button in ipairs(buttons) do
+   local scale=button:FindFirstChild("ResponsiveScale")
+   if not scale then scale=make("UIScale",{Name="ResponsiveScale"},button) end
+   scale.Scale=factor
+   local left=button.Name=="OpenShop" or button.Name=="OpenRoulette"
+   local offset=button.Name=="OpenRoulette" and -90 or button.Name=="OpenPaw" and 38 or -26
+   button.Position=UDim2.new(left and 0 or 1,left and 8 or -8,compact and .36 or .42,offset*factor)
+  end
+  if journalButton then
+   local scale=journalButton:FindFirstChild("ResponsiveScale") or make("UIScale",{Name="ResponsiveScale"},journalButton)
+   scale.Scale=factor journalButton.Position=UDim2.new(0,8,compact and .36 or .42,38*factor)
+  end
+ end
+ if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout) end
+ layout()
  function api.state(data)
   local lobby=data.phase=="Idle" or data.phase=="Lobby"
   for _,button in ipairs(buttons) do button.Visible=lobby end

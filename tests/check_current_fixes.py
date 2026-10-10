@@ -4,10 +4,10 @@ R=Path(__file__).resolve().parents[1]
 root=E.parse(R/'dist/RodeoFantasy-New.rbxlx')
 def name(n):return n.findtext("Properties/string[@name='Name']")
 lobby=next(n for n in root.findall('.//Item') if name(n)=='RodeoLobby')
-cap=next(n for n in lobby.findall('.//Item') if name(n)=='FullOpaqueCeiling')
+cap=next(n for n in lobby.findall('.//Item') if name(n)=='FullGlassCeiling')
 size=cap.find("Properties/Vector3[@name='size']")
 assert float(size.find('X').text)>=512 and float(size.find('Z').text)>=512
-assert cap.findtext("Properties/float[@name='Transparency']")=='0'
+assert cap.findtext("Properties/float[@name='Transparency']")=='0.65'
 for p in lobby.findall('.//Item'):
  if p.get('class')=='Part':
   for face in ('TopSurface','BottomSurface','FrontSurface','BackSurface','LeftSurface','RightSurface'):assert p.findtext(f"Properties/token[@name='{face}']")=='0'
@@ -51,9 +51,9 @@ end
 player.Character=character(100)
 states[player]={phase="Riding"} returnLobby() assert(moved==0)
 states[player]={phase="GameOver",root={CFrame="STALE"}}
-returnLobby() assert(moved==1 and states[player]==nil and respawns==0)
+returnLobby() assert(moved==1 and states[player]==nil and respawns==1)
 player.Character=character(0) states[player]={phase="GameOver",root={CFrame="DEAD"}}
-returnLobby() assert(moved==2 and respawns==1 and states[player]==nil)
+returnLobby() assert(moved==2 and respawns==2 and states[player]==nil)
 -- CharacterRemoving may have already cleared the state; still return the current avatar.
 player.Character=character(100) returnLobby() assert(moved==3)
 player:SetAttribute("ReturningLobby",true) returnLobby() assert(moved==3)

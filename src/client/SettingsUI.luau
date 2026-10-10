@@ -44,7 +44,7 @@ function UI.new(gui,audio)
    button.Parent=gui button.AnchorPoint=Vector2.new(0,0) button.Position=UDim2.fromOffset(14,12) button.Size=UDim2.fromOffset(48,48)
   end
   local stats=gui:FindFirstChild("LobbyStats")
-  if stats then stats.Position=UDim2.fromOffset(16,math.max(12,button.AbsolutePosition.Y+button.AbsoluteSize.Y-gui.AbsolutePosition.Y+8)) end
+  if stats and stats:GetAttribute("BottomHud")~=true then stats.Position=UDim2.fromOffset(16,math.max(12,button.AbsolutePosition.Y+button.AbsoluteSize.Y-gui.AbsolutePosition.Y+8)) end
  end
  listen(button:GetPropertyChangedSignal("AbsolutePosition"),placeButton)
  listen(button:GetPropertyChangedSignal("AbsoluteSize"),placeButton)

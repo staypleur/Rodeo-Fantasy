@@ -1177,3 +1177,14 @@
 - 로비에 RecordService가 기대하는 Leaderboards가 누락된 것을 확인. 실제 Distance/Income(도감) 게시판을 로켓 양옆에 생성 및 연결, 기존 데이터 저장소 유지. 상점·룰렛 Activated 버튼/안내 창, 기존 가방·도감·설정 창과 상호 닫기, 사냥에서는 숨김. 품목/확률/보상 미구현.
 - 단일 FixCurrentLobbyHunt.commandbar.lua 준비: 허용 코드 버전/종류 사전 검사, 모델 색 보존, 기존 로비·스크립트 SS 백업, 실패 롤백. 현재 Studio에 자동 적용하지 않음. APPLY_CURRENT_FIXES.md 실행 순서와 성공 확인 추가.
 - check_current_fixes/check_lobby_entries/check_legacy_restore/check_lobby_update 통과: XML Smooth/천장/입구/랭킹, Luau 컴파일, 캐릭터 복귀·다리·UI 모의 동작, 모델 속성 보존, 소환 소유권 검사. 실제 Studio·PC·모바일·성능·게시 서버 랭킹 확인은 미실시.
+
+## 2026-10-10 참고 HUD·로비 복귀 보완·제공 부화실 모델
+
+- UI 요청: 왼쪽 룰렛/상점/도감, 오른쪽 알/발자국, 왼쪽 아래 몬스터수/초록 돈. Native 도형 아이콘 및 화면 높이420 미만 .8배 버튼(터치44.8px), 모의 메뉴 전환 검사. 잔액+미수령 수입 표시. Imagegen으로 실제 모델 스크린샷을 참고한 투명 모스랫 얼굴 그림 준비; 원본 메시 직접 렌더 아님. Roblox 이미지 ID 연결 전에는 native 얼굴 도형을 사용. UI 배치 검토 PNG는 Studio 화면이 아님.
+- 사용자 추가 로비복귀 실패 화면 수령. 실제 원인 확정 안 됨. 투명 충돌 바닥, 복귀 시 일시 고정/속도0/직립/0.35초 후 재배치/GettingUp, StreamingEnabled 시 도착지역 요청, 카메라 현재 Humanoid/Custom 복원. 실제 해결 확인은 사용자 Studio 테스트가 필요.
+- 로비 전역 보유 몬스터 동행 선택 버튼, 한 마리 제한/자기 소유/잠금/모델준비 검사 유지. 같은 선택 해제. 알 관리는 기존 자기 부화실 권한 유지하고 밖에서 이용 시 안내. 양육 캡슐은 외형/준비 자리만.
+- 바닥 랭킹으로 변경: 26x0.08x30 / y2.04, Top SurfaceGui, 충돌/접촉/query off. 검은 DepartureSign 및 옛 PlanetLayer/Ring 제거. 새 사용자 결정으로 불투명 천장은 폐기하고 유리 천장, 금속 불투명 외벽, 위 우주 배경/고정 별을 준비.
+- 4 GLB 원본 확인 및 프로젝트 보존. Planet2535tri/Incubator4135tri/Door3477tri/Console2895tri; metadata SHA256 기록. 외부 glTF/bin/이미지 추출 bytes 그대로, 재생성 파일은 .gitignore. 원본 GLB와 검토 PNG 저장.
+- 도어가 단일 메시라는 이유로 문짝 분리를 질문했고 사용자가 에이전트 분리 선택. 실제 형상 검토에서 빈 문틀임을 확인하여 정정했고, 원본 절단 대신 matching native 금속 문짝 2개 추가. 원본 문틀/부화기/콘솔8개씩+행성1개 재사용 설치 commandbar, 입력검사/사전clone/백업/오류복구. 실제 Studio 자동 적용·업로드는 미실시. APPLY_LOBBY_MODULES.md로 클릭순서/모델 이름/성공문구/검증 항목 전달.
+- 5개 검사 통과: current_fixes/lobby_entries/lobby_update/legacy_restore/lobby_modules. 컴파일/모의 UI·복귀·다리/원본 해시/메시UV이미지 byte 보존/유리천장·벽·충돌판·바닥랭킹 XML 확인. 실제 PC·모바일·성능·GLB 업로드 및 플레이어8명 동시검증 미실시.
+- 추가: GameOver/CourseEnd 복귀는 생존 Humanoid도 LoadCharacterAsync로 재생성하여 사냥 Motor6D/물리 상태를 초기화. 현재 모의 검사 기대를 재생성으로 변경; 서버 보유 목록/잔액은 유지. 실제 스크린샷 증상 해결은 확인 전.

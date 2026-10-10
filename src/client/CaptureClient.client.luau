@@ -42,11 +42,12 @@ local bagUI=require(script.Parent:WaitForChild("BagUI")).new(gui,remote)
 local journalUI=require(script.Parent:WaitForChild("JournalUI")).new(gui,remote)
 local socialUI=require(script.Parent:WaitForChild("SocialUI")).new(gui,remote,bagUI,journalUI)
 local settingsUI=require(script.Parent:WaitForChild("SettingsUI")).new(gui,audio)
-local lobbyMenus=require(script.Parent:WaitForChild("LobbyMenus")).new(gui)
-settingsUI.onOpen=function() bagUI.close() journalUI.close() lobbyMenus.close() held=false pointerOrigin,pointerX=nil,nil end
-bagUI.onOpen=function() journalUI.close() settingsUI.close() lobbyMenus.close() end
-journalUI.onOpen=function() bagUI.close() settingsUI.close() lobbyMenus.close() end
-lobbyMenus.onOpen=function() bagUI.close() journalUI.close() settingsUI.close() held=false pointerOrigin,pointerX=nil,nil end
+local lobbyMenus=require(script.Parent:WaitForChild("LobbyMenus")).new(gui,bagUI,journalUI,remote)
+settingsUI.onOpen=function() bagUI.close() journalUI.close() socialUI.close() lobbyMenus.close() held=false pointerOrigin,pointerX=nil,nil end
+bagUI.onOpen=function() journalUI.close() settingsUI.close() socialUI.close() lobbyMenus.close() end
+journalUI.onOpen=function() bagUI.close() settingsUI.close() socialUI.close() lobbyMenus.close() end
+lobbyMenus.onOpen=function() bagUI.close() journalUI.close() settingsUI.close() socialUI.close() held=false pointerOrigin,pointerX=nil,nil end
+socialUI.onOpen=function() lobbyMenus.close() settingsUI.close() end
 local locale=require(script.Parent:WaitForChild("LocalizationController"))
 locale.watch(gui) locale.watch(workspace.RodeoLobby)
 game:GetService("ProximityPromptService").PromptShown:Connect(function(prompt)
@@ -76,21 +77,8 @@ distance.BackgroundColor3=Color3.fromRGB(31,55,42) distance.BackgroundTransparen
 make("UICorner",{CornerRadius=UDim.new(0,14)},distance)
 make("UIStroke",{Color=Color3.fromRGB(113,148,95),Thickness=2},distance)
 local lastAspect=nil
-local bag=make("Frame",{Name="LobbyStats",Position=UDim2.fromOffset(16,12),Size=UDim2.fromOffset(240,48),BackgroundColor3=Color3.fromRGB(40,65,56),BackgroundTransparency=.1},gui)
-settingsUI.refreshLayout()
-make("UICorner",{CornerRadius=UDim.new(0,12)},bag)
-local function iconBlock(name,pos,size,color,parent,round)
- local frame=make("Frame",{Name=name,Position=pos,Size=size,BackgroundColor3=color,BorderSizePixel=0},parent)
- make("UICorner",{CornerRadius=UDim.new(0,round or 5)},frame) return frame
-end
-local bagIcon=iconBlock("BagIcon",UDim2.fromOffset(12,14),UDim2.fromOffset(24,26),Color3.fromRGB(178,126,84),bag)
-iconBlock("Handle",UDim2.fromOffset(5,-7),UDim2.fromOffset(14,10),Color3.fromRGB(178,126,84),bagIcon)
-iconBlock("Pocket",UDim2.fromOffset(4,12),UDim2.fromOffset(16,9),Color3.fromRGB(133,88,58),bagIcon)
-local coinIcon=iconBlock("CoinIcon",UDim2.fromOffset(115,10),UDim2.fromOffset(28,28),Color3.fromRGB(249,198,83),bag,50)
-make("UIStroke",{Color=Color3.fromRGB(220,159,45),Thickness=2},coinIcon)
-iconBlock("CoinShine",UDim2.fromOffset(11,5),UDim2.fromOffset(5,18),Color3.fromRGB(255,228,138),coinIcon)
-local bagCount=text(bag,"0",UDim2.fromOffset(43,4),UDim2.fromOffset(62,40),20) bagCount.Name="BagCount"
-local moneyCount=text(bag,"0",UDim2.fromOffset(151,4),UDim2.fromOffset(80,40),20) moneyCount.Name="MoneyCount"
+local hudStats=require(script.Parent:WaitForChild("HudStats")).new(gui)
+local bag=gui:FindFirstChild("LobbyStats")
 local panel=make("Frame",{Name="HuntHelp",AnchorPoint=Vector2.new(0.5,1),Position=UDim2.new(0.5,0,1,-20),Size=UDim2.new(0.9,0,0,94),BackgroundColor3=Color3.fromRGB(43,67,49),BackgroundTransparency=0.22,BorderSizePixel=0},gui)
 make("UISizeConstraint",{MaxSize=Vector2.new(510,94)},panel)
 make("UICorner",{CornerRadius=UDim.new(0,14)},panel)
@@ -168,6 +156,10 @@ local function cameraMode(enabled)
   savedType,savedSubject,savedFieldOfView=nil,nil,nil
   held,left,right=false,false,false
  end
+ if not enabled and state.area=="Lobby" then
+  local humanoid=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+  if humanoid then camera.CameraSubject=humanoid camera.CameraType=Enum.CameraType.Custom end
+ end
 end
 local function menuMode(enabled)
  if enabled==menuBound then return end menuBound=enabled returnHeld=nil
@@ -235,7 +227,7 @@ remote.OnClientEvent:Connect(function(kind,data)
  startButton.Text=state.phase=="GameOver" and "Hunt again" or "Start hunt"
  cameraMode(active() or state.phase=="CourseEnd")
  menuMode(state.phase=="GameOver")
- bagCount.Text=tostring(state.count or 0) moneyCount.Text=tostring(state.pending or 0)
+ hudStats.state(state)
 end)
 player.CharacterAdded:Connect(function() state.phase="Idle" cameraMode(false) remote:FireServer("Sync") end)
 RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Camera.Value+1, function(dt)
