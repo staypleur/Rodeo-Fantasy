@@ -36,19 +36,20 @@ local UI=(function()
 end)()
 local eggs,pets=0,0
 local bag={openRanchMenu=function() eggs+=1 end,openCompanionMenu=function() pets+=1 end}
-local api=UI.new({FindFirstChild=function() return nil end},bag)
+local oldBag={Visible=true} local api=UI.new({FindFirstChild=function(_,name) if name=="OpenBag" then return oldBag end end},bag)
 local function node(name) for _,n in ipairs(nodes) do if n.Name==name then return n end end error(name) end
 local shop,roulette,panel=node("OpenShop"),node("OpenRoulette"),node("LobbyMenus")
 local opens=0 api.onOpen=function() opens+=1 end
 assert(not shop.Visible and not roulette.Visible)
-api.state({phase="Idle"}) assert(shop.Visible and roulette.Visible)
+api.state({phase="Idle",area="Lobby"}) assert(shop.Visible and roulette.Visible and not oldBag.Visible)
 shop.Activated.fire() assert(panel.Visible and opens==1)
 node("Close").Activated.fire() assert(not panel.Visible)
 roulette.Activated.fire() assert(panel.Visible and opens==2)
-api.state({phase="Riding"}) assert(not panel.Visible and not shop.Visible and not roulette.Visible)
+api.state({phase="Riding",area="Hunt"}) assert(not panel.Visible and not shop.Visible and not roulette.Visible and not oldBag.Visible)
 shop.Activated.fire() assert(opens==2)
 api.state({phase="Idle"}) assert(shop.Visible)
 node("OpenEgg").Activated.fire() node("OpenPaw").Activated.fire() assert(eggs==1 and pets==1)
+api.state({phase="Cafe",area="Cafe"}) assert(oldBag.Visible)
 print("LOBBY_ENTRIES_PASS: open/close, lobby visibility, hunt transition, hidden-button guard")
 '''
 (R/'.tools/test_lobby_entries.luau').write_text(h,encoding='utf-8')

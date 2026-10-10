@@ -5,6 +5,7 @@ I.ImageIds={ShopButtonImage="rbxassetid://84295507284264",IndexButtonImage="rbxa
  EggButtonImage="rbxassetid://87551432940862",PawButtonImage="rbxassetid://85966265063532",MossratFaceImage="rbxassetid://98296663869747"}
 function I.imageId(package,key)
  local id=package:GetAttribute(key)
+ if key=="PawButtonImage" and id=="rbxassetid://8596625063532" then return I.ImageIds[key] end
  if type(id)=="string" and id~="rbxassetid://0" and id:match("^rbxassetid://%d+$") then return id end
  return I.ImageIds[key] or ""
 end
@@ -21,14 +22,19 @@ function I.bindArtwork(button,key)
   if n:IsA("GuiObject") and n~=image then originals[n]=n.Visible
   elseif n:IsA("UIStroke") then strokes[n]=n.Enabled end
  end
- local function refresh()
-  local id=I.imageId(package,key)
-  local ready=type(id)=="string" and id:match("^rbxassetid://%d+$")~=nil
-  image.Image=ready and id or "" image.Visible=ready
+ local function display()
+  local ready=image.Image~="" and image.IsLoaded
+  image.Visible=ready
   button.BackgroundTransparency=ready and 1 or background
   for n,visible in pairs(originals) do n.Visible=not ready and visible end
   for n,enabled in pairs(strokes) do n.Enabled=not ready and enabled end
  end
+ local function refresh()
+  local id=I.imageId(package,key)
+  if image.Image~=id then image.Image=id end
+  display()
+ end
+ image:GetPropertyChangedSignal("IsLoaded"):Connect(display)
  package:GetAttributeChangedSignal(key):Connect(refresh) refresh()
 end
 function I.draw(parent,kind,size)

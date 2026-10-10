@@ -147,7 +147,7 @@ function UI.new(gui,remote)
  make("UICorner",{CornerRadius=UDim.new(0,14)},babies)
  function self.openCompanionMenu()
   if self.area=="Hunt" then return end
-  self.mode="Companion" self.pen=nil self.setEvolutionMode(false) chooser.Visible=false scroll.Visible=true
+  self.setEvolutionMode(false) self.mode="Companion" self.pen=nil chooser.Visible=false scroll.Visible=true
   self.snapshot(self.items) window.Visible=true self.opened() title.Text="동행 몬스터 · 1마리 선택" remote:FireServer("Bag")
  end
  function self.openRanchMenu()

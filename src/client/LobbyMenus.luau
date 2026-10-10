@@ -77,6 +77,8 @@ function M.new(gui,bag,journal,remote)
  layout()
  function api.state(data)
   local lobby=data.phase=="Idle" or data.phase=="Lobby"
+  local oldBag=gui:FindFirstChild("OpenBag")
+  if oldBag then oldBag.Visible=not lobby and data.area~="Hunt" end
   for _,button in ipairs(buttons) do button.Visible=lobby end
   if not lobby then api.close() end
  end

@@ -59,6 +59,8 @@ p:SetAttribute("PawButtonImage","rbxassetid://0")
 
 ## 부화기만 회색으로 보일 때 색상 분리 점검
 
+추가 사용자 확인: 색상 단독 점검 후에도 회색이다. 이 파일의 반복 실행을 권하지 않는다. 일반 ImageLabel의 편집 모드 IsLoaded 점검에서는 부화기 색상과 발자국이 true로 보고됐지만, 실제 부화기 색상 렌더링 복구를 확인하지 못했다.
+
 2026-10-10 실제 화면에서 문틀·콘솔 색상은 표시되고 부화기는 회색인 상태를 확인했다. 원시 ID의 PreloadAsync 실패 12개를 모든 설치 재질의 실패로 해석하지 않는다. 부화기 색상 이미지 128153809027742는 Creator Hub에서 공개 사용으로 표시된다. 실패 원인은 아직 확정하지 않았다.
 
 1. Play를 중지한다. `dist/CheckIncubatorColor.commandbar.lua`를 메모장으로 열고 전체 복사한다.
@@ -66,5 +68,11 @@ p:SetAttribute("PawButtonImage","rbxassetid://0")
 3. `INCUBATOR_COLOR_CHECK_REQUESTED`는 요청 완료이며 색상 로딩 성공을 뜻하지 않는다. 부화기의 원래 무늬와 색이 나타나는지 화면에서 확인한다.
 4. 이 점검은 부화기만 새 SurfaceAppearance에 원래 ColorMap을 연결한다. 금속·거칠기 맵은 점검 중 제외되므로 반사와 광택은 최종 상태가 아니다. 원본 재질과 원래 파트 색은 ServerStorage의 IncubatorColorCheckBackup 폴더에 보관된다.
 5. 점검 직후 편집 → 실행 취소(Ctrl+Z)로 원래 재질로 돌아갈 수 있다. 회색이 계속되면 재실행을 반복하지 말고 해당 시점의 출력 로그를 확인한다. 색상 표시 확인 전에는 최종 복구로 기록하지 않는다.
+
+## 발자국 버튼이 사라지고 옛 가방 버튼이 보일 때
+
+`dist/FixHudArtwork.commandbar.lua`는 HudIcons/HudStats/LobbyMenus/BagUI만 백업·수정한다. Play 중지 → 파일을 메모장으로 열어 전체 복사 → Studio 명령 모음에 코드만 붙여 넣고 Enter → HUD_ARTWORK_FIX_INSTALLED 확인 → Ctrl+S → Play 순서로 적용한다. 이번 작업에서는 Studio에 직접 설치했다.
+
+이미지가 아직 로딩되지 않으면 기본 발자국을 유지하며, 이미지 로딩 완료 후 업로드 그림으로 전환한다. 알려진 잘못된 ID 8596625063532는 올바른 85966265063532로 바꾸고 사용자 지정 다른 ID는 유지한다. 로비의 옛 가방 버튼을 숨기되 R키와 가방 데이터는 유지한다. 발자국 클릭은 동행 선택 모드로 열리며 서버의 목록 응답 뒤에도 그 모드를 유지한다.
 
 코드·파일 검사와 모의 실행은 통과했지만 실제 Studio·PC·모바일 조작, 이미지 업로드, Roblox 텍스처 복구 여부와 성능 측정은 아직 확인하지 않았습니다.

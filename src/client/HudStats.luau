@@ -19,9 +19,12 @@ function H.new(gui)
   local c=Instance.new("UICorner") c.CornerRadius=UDim.new(.3,0) c.Parent=f
  end
  for _,x in ipairs({.33,.6}) do local eye=Instance.new("Frame") eye.Position=UDim2.fromScale(x,.5) eye.Size=UDim2.fromScale(.12,.17) eye.BackgroundColor3=Color3.fromRGB(36,30,21) eye.BorderSizePixel=0 eye.Parent=fallback end
+ local function showFace() fallback.Visible=not face.IsLoaded end
+ face:GetPropertyChangedSignal("IsLoaded"):Connect(showFace)
  game.ReplicatedStorage.RodeoFantasy:GetAttributeChangedSignal("MossratFaceImage"):Connect(function()
-  face.Image=Icons.imageId(package,"MossratFaceImage") fallback.Visible=face.Image==""
+  face.Image=Icons.imageId(package,"MossratFaceImage") showFace()
  end)
+ showFace()
  local function short(n)
   n=math.max(0,tonumber(n) or 0)
   for _,v in ipairs({{1e9,"B"},{1e6,"M"},{1e3,"K"}}) do if n>=v[1] then return string.format("%.1f%s",n/v[1],v[2]):gsub("%.0([KMB])","%1") end end
