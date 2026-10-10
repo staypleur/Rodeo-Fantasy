@@ -1070,3 +1070,9 @@
 - 자동승인검토가523개삭제를처음거절:백업두파일에한정/범위가넓다는사유. 523개전부.local-backup/pre-reset-files.zip(245,310,960bytes)보관/전체SHA256검증. 동일PowerShell삭제를백업수·현재해시·프로젝트내절대경로검사후재요청하여승인·실행. 523개삭제완료. 미사용OperatorPrompt(기존Git이력복구가능)추가삭제/빈폴더정리. 원래미커밋서버·거대place도교체전복구사본보관. 로컬복구/개인operator파일은GitHub업로드하지않음.
 - check_new_project:모든XML referent/UniqueId/Ref,8방/32socket/문참조,2,179개숲,Plastic/5면Studs,옛MeshPart·카페맵·비행선없음,모든임베드Script·Installer컴파일,192폭·경계·소유권·잠금·가방ID·진화중복방지·수입검사통과. 모스랫원본·정점가중·34관절·4클립루프검사통과.
 - 실제Studio자동문/지면접촉/사냥/가방UI/모델업로드/PC·모바일/FPS·메모리는미검증. 사냥약3K간소화/텍스처최적화/카페새맵/로비동행후속남음. 플레이어DataStore삭제·Roblox게시를수행하지않음.
+
+## 2026-10-10 임시 텍스처 로드 오류 우회 준비
+
+- 사용자가 ColorMap/RoughnessMap/MetalnessMap rbxtemp 임시 이미지 로드 실패와 SurfaceAppearance 생성 실패의 전체 오류를 제공. 미리보기 임시 텍스처 단계 실패는 확인했으나 원인 및 업로드 성공은 미확정.
+- 복구 생성기에 MossratMeshOnly.gltf/RocketMeshOnly.gltf 추가. 재질 참조만 제외하고 메시·UV·스킨·관절·버퍼 동일성 검사 통과. 원본 PNG 별도 업로드 후 SurfaceAppearance 연결 안내 작성. 원본 모델 및 기존 재질 포함 가져오기 파일은 유지.
+- 복구 ZIP 재생성 완료. 실제 Studio 업로드/렌더/모바일 검증 미완료.

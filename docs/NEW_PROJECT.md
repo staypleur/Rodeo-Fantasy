@@ -23,6 +23,19 @@
 
 복구묶음은원본메시·UV·스킨·텍스처를변경하지않고영문파일명으로정리했다. 가져오기gltf에서검토클립4개만제외했고게임은별도승인키데이터로Idle/Walk를재생한다. 원본리깅·검토클립은assets/models에남긴다.
 
+## 임시 텍스처 오류가 반복될 때
+
+`ColorMap/RoughnessMap/MetalnessMap 'rbxtemp://...'` 오류는 미리보기의 임시 텍스처 로드 실패입니다. 이 문장만으로 경로, Studio 내부 처리, 업로드 권한 중 원인을 확정할 수 없습니다.
+
+1. 가져오기 창을 닫습니다. 갱신된 `dist/ImportRecovery/RodeoImport.zip`을 `C:\Users\wucha\Downloads\RodeoImport`에 다시 압축 해제합니다.
+2. **파일 → 가져오기**에서 `Mossrat/MossratMeshOnly.gltf`를 선택합니다. Rig Type=Custom, 영향이 없는 뼈 보관, 작업공간에 추가를 켭니다. 이 파일은 재질을 제외했으므로 회색이 정상입니다. 성공한 모델을 `MossratImport`로 바꿉니다.
+3. Explorer에서 모델 안의 `MossratS1Body` MeshPart를 찾습니다. SurfaceAppearance가 있다면 선택하고, 없다면 MeshPart 옆 **＋ → SurfaceAppearance**로 추가합니다.
+4. **속성 → ColorMap**의 이미지 선택 창에서 로컬 이미지 업로드/추가 기능으로 같은 폴더의 `Texture0.png`를 올립니다. 생성된 이미지 자산을 선택합니다. 업로드가 실패하면 이 단계의 오류로 원인을 더 좁힐 수 있습니다.
+5. 초록색·크림색이 표시되면 RoughnessMap에는 `Roughness.png`, MetalnessMap에는 `Metalness.png`를 같은 방법으로 연결합니다. NormalMap은 비워 둡니다. 먼저 색상만 연결해서 확인해도 됩니다.
+6. 색과 뼈대를 확인한 다음 위의 InstallModels 설치를 진행합니다. 로켓도 `Rocket/RocketMeshOnly.gltf`를 가져와 해당 폴더의 PNG를 같은 방식으로 연결합니다.
+
+별도 이미지 업로드 후 SurfaceAppearance 맵에 이미지 자산을 연결하는 방식은 [Roblox 공식 문서](https://create.roblox.com/docs/art/modeling/surface-appearance)에 설명되어 있습니다. 우회 파일의 메시·UV·뼈대·가중치는 파일 검사로 확인했습니다. 실제 Studio 업로드 성공은 아직 미확인입니다.
+
 ## 남은 사항과 복구
 
 - 원인불명의Roblox업로드실패및실제Studio검증.

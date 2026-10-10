@@ -1,6 +1,6 @@
 """Package short ASCII paths; model geometry and approved rig remain unchanged."""
 from pathlib import Path
-import json,shutil,zipfile
+import json,shutil,zipfile,copy
 R=Path(__file__).resolve().parents[1]
 def build():
  out=R/'dist/ImportRecovery';out.mkdir(parents=True,exist_ok=True)
@@ -12,6 +12,18 @@ def build():
   for i,img in enumerate(g['images']):
    old=source/img['uri'];img['uri']=f'Texture{i}.png';shutil.copyfile(old,dest/img['uri'])
   (dest/(label+'.gltf')).write_text(json.dumps(g,indent=2)+'\n',encoding='utf-8')
+  # Bypass importer temporary PBR images; upload the same PNGs separately in Studio.
+  mesh_only=copy.deepcopy(g)
+  for mesh in mesh_only['meshes']:
+   for primitive in mesh['primitives']:primitive.pop('material',None)
+  for key in ('materials','textures','images','samplers'):mesh_only.pop(key,None)
+  (dest/(label+'MeshOnly.gltf')).write_text(json.dumps(mesh_only,indent=2)+'\n',encoding='utf-8')
+  for key in ('skins','nodes','accessors','bufferViews','buffers'):
+   assert mesh_only.get(key)==g.get(key),label+' mesh-only '+key
+  for a,b in zip(g['meshes'],mesh_only['meshes']):
+   expected=copy.deepcopy(a)
+   for primitive in expected['primitives']:primitive.pop('material',None)
+   assert expected==b,label+' mesh-only geometry'
   # For manual importer material-path overrides (packed originals stay linked in glTF).
   for suffix in ('Metalness','Roughness'):
    shutil.copyfile(source/(label+suffix+'.png'),dest/(suffix+'.png'))
