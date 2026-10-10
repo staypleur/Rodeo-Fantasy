@@ -13,9 +13,11 @@ def block(name, pos, size, color):
 
 # Width and placement are review proposals, not approved gameplay dimensions.
 block('MeadowPlate', (0, -1, -130), (160, 2, 320), (166, 196, 112))
-for x in range(-78, 80, 4):
-    for z in range(-288, 30, 4):
-        block('ReviewStud', (x, .09, z), (1.15, .18, 1.15), (182, 208, 132))
+STUD_PITCH = 1.5
+STUD_WIDTH = 1.0
+for x in np.arange(-79, 80, STUD_PITCH):
+    for z in np.arange(-289, 30, STUD_PITCH):
+        block('ReviewStud', (x, .07, z), (STUD_WIDTH, .14, STUD_WIDTH), (182, 208, 132))
 for side in (-1, 1):
     for i, z in enumerate(range(-290, 31, 40)):
         h = 16 + (i % 3) * 5
@@ -70,9 +72,9 @@ for name,pos,size,color,matrix in parts:
 image=Image.fromarray(pixels);draw=ImageDraw.Draw(image)
 font=ImageFont.truetype('C:/Windows/Fonts/malgun.ttf',25)
 draw.rectangle((0,0,W,83),fill=(239,244,231))
-draw.text((24,10),'뒤쪽 시점 / 넓은 길 / 돌기 블록 바닥 — 3D 검토안',font=font,fill=(38,67,47))
+draw.text((24,10),'촘촘한 돌기 바닥 수정안 — 기존보다 간격을 줄인 블록 초원',font=font,fill=(38,67,47))
 draw.text((24,46),'동일한 Roblox Part 모델을 렌더 · Studio 화면 아님 · 몬스터/조작 미포함',font=font,fill=(65,83,62))
-out=ROOT/'assets/previews/HuntWideBlockCameraReview.png';image.save(out)
+out=ROOT/'assets/previews/HuntDenseBlockCameraReview.png';image.save(out)
 model=ROOT/'dist/ReviewModels/HuntWideBlockReview.rbxmx'
 tree=ET.parse(model)
 assert len(tree.findall('.//Item[@class="Part"]'))==len(parts)
