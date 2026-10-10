@@ -38,6 +38,8 @@ function A.animate(model,moving)
   if b then
    local p=poses[name] or {}
    local frame=CFrame.new(p.translation or Vector3.zero)*(p.rotation or CFrame.identity)
+   -- Keep the face forward; retain body, legs, ears and tail motion.
+   if name=="Head" or name=="Neck" then frame=CFrame.identity end
    b.Transform=(c.previous[name] or CFrame.identity):Lerp(frame,blend)
   end
  end

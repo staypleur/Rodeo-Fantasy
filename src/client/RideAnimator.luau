@@ -5,7 +5,7 @@ local visibility={}
 local warnings = {}
 local package = game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy")
 local template = package:WaitForChild("VisualTemplate")
-local templateRoot=template:WaitForChild("MountRoot")
+local templateRoot=assert(template.PrimaryPart,"VisualTemplate PrimaryPart 없음")
 local tuning = require(package:WaitForChild("Config")).Prototype
 local Rules = require(package:WaitForChild("HuntRules"))
 local Catalog=require(package.MonsterCatalog)
@@ -29,7 +29,7 @@ local function remember(model, existing)
 	local root = model.PrimaryPart
  local speciesId=model:GetAttribute("MonsterId") or "MeadowMouse"
  local referenceTemplate=package:WaitForChild(Catalog.visual(speciesId,model:GetAttribute("Stars") or 1))
- local referenceRoot=referenceTemplate:WaitForChild("MountRoot")
+ local referenceRoot=assert(referenceTemplate.PrimaryPart,"몬스터 템플릿 PrimaryPart 없음")
 	if not root then return nil end
 	local pose = existing or {frame = root.CFrame, sample = root.CFrame, received = nil, tracked={}, restByPart={}}
  if existing and not pose.dirty then return pose end

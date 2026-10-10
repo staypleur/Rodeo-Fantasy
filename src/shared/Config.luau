@@ -1,9 +1,10 @@
 -- Confirmed rules and adjustable prototype presentation values are kept separate.
 local Config = {}
-Config.LobbyWalkSpeed=32 -- Faster walking across the expanded lobby (originally 16).
+Config.LobbyWalkSpeed=40 -- Adjustable presentation tuning for the larger lobby.
 
 -- Creator Store music/hoof recording plus Roblox bundled action sounds.
 Config.Audio = {
+ Wind="rbxassetid://2306939610", -- Creator Store wind; availability requires Studio verification.
  BookOpen="rbxassetid://9118835414", -- ProSoundEffects: Scrapbook Open And Turn Pages 2
  PageTurn="rbxassetid://9118835637", -- ProSoundEffects: Scrapbook Open And Turn Pages 5
  BagOpen="rbxassetid://9121003611", -- ProSoundEffects: Zipper Fly On Jeans Various Speeds 5

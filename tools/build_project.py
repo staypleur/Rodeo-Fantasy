@@ -3,6 +3,7 @@ from pathlib import Path
 import xml.etree.ElementTree as E
 import json,copy,math
 from place_identity import assert_unique_ids
+from lobby_geometry import expand
 R=Path(__file__).resolve().parents[1]
 serial=0
 def prop(n,tag,key,value):
@@ -39,6 +40,9 @@ def generate_data():
  return data
 def build():
  global serial
+ # Keep the user's successfully uploaded models and material asset references.
+ existing=R/'dist/RodeoFantasy-New.rbxlx'
+ previous=E.parse(existing).getroot() if existing.exists() else None
  serial=0;data=generate_data();root=E.Element('roblox',version='4')
  ws=node(root,'Workspace','Workspace');node(ws,'Terrain','Terrain')
  prop(ws,'float','Gravity',196.2)
@@ -47,6 +51,7 @@ def build():
  player=node(root,'StarterPlayer','StarterPlayer');client=node(player,'StarterPlayerScripts','StarterPlayerScripts');node(root,'StarterGui','StarterGui');node(root,'Lighting','Lighting')
  node(package,'RemoteEvent','CaptureRemote')
  lobby=copy.deepcopy(E.parse(R/'assets/maps/SpaceLobby.rbxmx').getroot().find('Item'));ws.append(lobby)
+ expand(lobby,node,part)
  prototype=node(ws,'Folder','RodeoPrototype');node(prototype,'Folder','Monsters')
  forest=node(ws,'Model','GreenStar')
  for b in data['blocks']:
@@ -69,6 +74,42 @@ lobby:SetAttribute("GreenStarRuntimeReady",workspace:FindFirstChild("GreenStar")
 lobby:SetAttribute("LobbyCapacity",8)
 lobby.Airport.Airship:SetAttribute("RocketDepartureActive",true)
 ''')
+ if previous is not None:
+  def named(parent,key):return next((c for c in parent.findall('Item') if c.findtext("Properties/string[@name='Name']")==key),None)
+  def service(key):return next((n for n in previous.findall('Item') if n.get('class')==key),None)
+  preserved_serial=0
+  def preserve(saved):
+   nonlocal preserved_serial
+   clone=copy.deepcopy(saved);refs={}
+   for item in clone.iter('Item'):
+    preserved_serial+=1;refs[item.get('referent')]=f'RBXPreserved{preserved_serial}'
+   for item in clone.iter('Item'):item.set('referent',refs[item.get('referent')])
+   for ref in clone.iter('Ref'):
+    if ref.text not in ('null','nil',None):
+     assert ref.text in refs,'Preserved model has external reference: '+str(ref.text)
+     ref.text=refs[ref.text]
+   return clone
+  old_ss=service('ServerStorage');old_rs=service('ReplicatedStorage');old_ws=service('Workspace')
+  old_package=named(old_rs,'RodeoFantasy') if old_rs is not None else None
+  for old_parent,new_parent,names in [(old_ss,ss,['RodeoMonsterTemplate']),(old_package,package,['VisualTemplate','MeshyMossratHuntTemplate'])]:
+   if old_parent is None:continue
+   for key in names:
+    saved=named(old_parent,key)
+    if saved is not None and any(n.get('class')=='MeshPart' for n in saved.iter('Item')):
+     default=named(new_parent,key)
+     if default is not None:new_parent.remove(default)
+     new_parent.append(preserve(saved))
+  if old_ss is not None:
+   for saved in old_ss.findall('Item'):
+    key=saved.findtext("Properties/string[@name='Name']") or ''
+    if key.startswith(('MossratRigBackup_','RocketImportBackup_')):ss.append(preserve(saved))
+  if old_ws is not None:
+   for key in ('MossratImport','RocketImport'):
+    saved=named(old_ws,key)
+    if saved is not None:ws.append(preserve(saved))
+   old_lobby=named(old_ws,'RodeoLobby');old_airport=named(old_lobby,'Airport') if old_lobby is not None else None
+   saved=named(old_airport,'Rocket') if old_airport is not None else None
+   if saved is not None:named(lobby,'Airport').append(preserve(saved))
  assert_unique_ids(root)
  out=R/'dist/RodeoFantasy-New.rbxlx';out.parent.mkdir(exist_ok=True)
  E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)

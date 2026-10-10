@@ -14,6 +14,7 @@ local gauge=require(script.Parent:WaitForChild("TamingGauge"))
 local crashEffect=require(script.Parent:WaitForChild("CrashEffect"))
 local audio=require(script.Parent:WaitForChild("AudioPresentation"))
 local catch=require(script.Parent:WaitForChild("CatchPresentation"))
+local atmosphere=require(script.Parent:WaitForChild("HuntEffects"))
 local dash=require(script.Parent:WaitForChild("DashPresentation"))
 local markers=require(script.Parent:WaitForChild("DistanceMarkers"))
 local monsters=workspace:WaitForChild("RodeoPrototype"):WaitForChild("Monsters")
@@ -46,6 +47,12 @@ bagUI.onOpen=function() journalUI.close() settingsUI.close() end
 journalUI.onOpen=function() bagUI.close() settingsUI.close() end
 local locale=require(script.Parent:WaitForChild("LocalizationController"))
 locale.watch(gui) locale.watch(workspace.RodeoLobby)
+game:GetService("ProximityPromptService").PromptShown:Connect(function(prompt)
+ if prompt.Name=="PetOwnCompanion" then
+  local model=prompt:FindFirstAncestorOfClass("Model")
+  prompt.Enabled=model and model:GetAttribute("OwnerUserId")==player.UserId or false
+ end
+end)
 -- Only the owner sees a ranch interaction. The server separately checks ownership/distance.
 for _,plot in ipairs(workspace.RodeoLobby.Plots:GetChildren()) do
  local function updatePrompts()
@@ -197,6 +204,7 @@ remote.OnClientEvent:Connect(function(kind,data)
  if kind=="RanchMenu" then bagUI.openRanchMenu() return end
  if kind=="Pen" then bagUI.openPen(data) return end
  if kind=="Journal" then journalUI.snapshot(data) return end
+ if kind=="LobbyPet" then atmosphere.pet(data) return end
  if kind=="Bag" then bagUI.snapshot(data) return end
  if kind=="EvolutionResult" then bagUI.evolutionResult(data) return end
  if kind=="BagIncome" then bagUI.income(data) return end
@@ -269,6 +277,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
    visualFrame=flightFrame
   end
  end
+ atmosphere.update(state,visualFrame,clock)
  local catchFov=catch.update(state,player.Character,visualFrame,clock)
  rider.update(player.Character,state.phase,visualFrame,dt,clock,state.dashUntil)
  dash.update(state.phase,visualFrame,clock,state.dashUntil,t.SwitchDashSeconds)

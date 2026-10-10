@@ -1091,3 +1091,16 @@
 
 - 사용자 CommandBar:6 새 프로젝트 시스템이 없습니다 오류 확인. 앞선 복구 수정에서 UserMossratRigAnimator를 ReplicatedStorage 폴더에서 검사한 오류가 원인. 실제 배치는 StarterPlayer/StarterPlayerScripts이며, ReplicatedStorage에는 UserMossratRigData가 있음. 실제 배치에 맞춰 두 경로를 각각 검사하고 메시지도 경로를 명시.
 - 새 맵 XML에서 서비스/객체 계층을 추출하여 설치기 실제 preflight를 Luau 모형 환경에서 실행하는 회귀 검사 추가. 정상 맵은 통과, 클라이언트 애니메이터 누락은 거부 확인. 전체 새 프로젝트 규칙·XML·자동문 Source·컴파일 검사 통과. 실제 Studio 설치 및 렌더 검증은 별도 미완료.
+
+
+## 2026-10-10 현재 모델 보존 및 로비·사냥 보완
+
+- 사용자 요청과 두 추가 답변 기록: 로켓 미가져오기, 사냥은 기존 조작 유지. 영상 URL은 웹 접근 실패로 실제 재생 확인 전. 영상의 정확한 복제 완료를 주장하지 않음.
+- 사용자 Studio 저장 파일에 MeshPart 4개(3개 템플릿+원본 백업), 실제 메시 rbxassetid://112233757801076, SurfaceAppearance/Bone 포함 확인. 수정 전 파일을 .local-backup/before-lobby-update에 보관. 빌드 시 제공 모델·재질·관절·원본 백업 보존, 외부 Ref 검증 및 XML referent 재매핑.
+- 기존 Stud 로비 X/Z 약1.2배·4격자 스냅, 방 확대, 높이92의40x40 천장201장으로 빈 구간 보강, 중앙 출발 상호작용을(6000,4,-44)로 이동. 걷기32→40, 표시이름+@사용자명 부화실 표기, 투명 Glass 헬멧 한 개/캐릭터. 스케일은 기존 디자인 확대이며 실제 외형 검토 미완료.
+- CaptureServer의 startingMounts 미선언 및 선택 몬스터를 무시하던 초기 spawn 수정. RideAnimator가 없는 MountRoot를 기다리며 클라이언트 시작을 막던 문제를 PrimaryPart 사용으로 수정. 기존 가방·도감·거리·수입 UI/저장 규칙 보존.
+- LobbyCompanions: 자기 부화실에서 소유/사용가능 모델 하나 소환·동일 선택 해제,10Hz 추적·맵 충돌/지면 검사, 소유자 교감 하트만·탑승 없음. 거래·진화·사냥·캐릭터 제거 시 정리. Head/Neck 흔들림을 중립화하고 다른 관절 모션 유지; 원본 머리 형상의 기울기는 별도 실화면 검토.
+- 기존 점프/줄/착지/포획 음향 유지. HuntEffects는 사냥에서만 고정6/10개 바람 Beam과8/16rate 먼지·바람 소리. 사용자 설정의 Effects SoundGroup 연결. 바람2306939610 Creator Store 참조 확인, 실제 오디오 권한/로드 미확인.
+- UpdateCurrentProject 설치 파일: 알려진 d1b7826 코드 또는 수정본만 허용, 새 모듈 추가, 로비·소스 백업 및 실패 시 복구. 현재 모델/텍스처/로켓은 유지. 사용자 저장 코드가 preflight 기준과 일치하는지 비교 통과.
+- check_lobby_update: 실제 클라이언트 의존성 존재, 출발 선택값 지역 선언/선택 모델 spawn, 예상 밖 전역 없음, 업데이트 컴파일, 소환시 비활성/다른방/잘못된ID/거래잠금/미준비 모델 검사 통과. check_new_project: 자동문/8방32자리/천장201장/중앙출발 좌표/192사냥폭/소유권/가방·진화·수입/XML·Source·컴파일 통과. 업로드 메시 ID·Bone·SurfaceAppearance 수 보존 확인.
+- 실제 Studio 출발·소환·걷기·교감·머리 정면·헬멧·천장·사운드·UI/터치·성능 검증 미완료. 로켓 실제 업로드/재질/설치는 사용자 작업 남음. 카페 새맵 및 사냥 간소화 모델 미완료 유지. DataStore 초기화·Roblox 게시 없음.

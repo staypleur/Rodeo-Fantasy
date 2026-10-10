@@ -26,7 +26,16 @@ for part in list(lobby.iter('Item'))+list(forest.iter('Item')):
  assert props.findtext("token[@name='BottomSurface']")=='4'
  # Floor plates exactly meet their neighbors, no coplanar imitation studs.
  assert not (name(part) or '').lower().startswith('stud_')
-assert not any(n.get('class')=='MeshPart' for n in root.iter('Item')),'Unuploaded model references must not masquerade as installed'
+for mesh in (n for n in root.iter('Item') if n.get('class')=='MeshPart'):
+ assert mesh.findtext("Properties/Content[@name='MeshId']/url",'').startswith('rbxassetid://'),'Uploaded models require real asset IDs'
+child(lobby,'LargerLobbyV1')
+roof=child(lobby,'Roof')
+ceilings=[n for n in roof.findall('Item') if name(n)=='Ceiling']
+assert len(ceilings)==201
+assert child(child(lobby,'Airport'),'Departure').findtext("Properties/CoordinateFrame[@name='CFrame']/Z")=='-44'
+rs=next(n for n in root.findall('Item') if n.get('class')=='ReplicatedStorage')
+visual=child(child(rs,'RodeoFantasy'),'VisualTemplate')
+assert visual.findtext("Properties/Ref[@name='PrimaryPart']") in {n.get('referent') for n in visual.findall('Item')}
 assert not any(name(n) in ('FacetedMouse','SkyWhaleRuntime','MeshyAirshipData','CafeLayout','OperatorPrompt') for n in root.iter('Item'))
 for n in root.iter('Item'):
  if n.get('class') in ('Script','LocalScript','ModuleScript'):

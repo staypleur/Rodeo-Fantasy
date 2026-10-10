@@ -20,6 +20,7 @@ local remote=package.CaptureRemote
 local tuning=Config.Prototype
 -- ROCKET_DEPARTURE_V1
 local rocketLaunchPermit={}
+local startingMounts={}
 local function rocketModelReady(id,stars)
  local name=Catalog.template(id,stars)
  local model=game:GetService("ServerStorage"):FindFirstChild(name)
@@ -27,6 +28,11 @@ local function rocketModelReady(id,stars)
 end
 local states,bags,limits,views={},{},{},{}
 local worlds,worldRoots={},{}
+local companions=require(script.Parent.LobbyCompanions).new({
+ bag=function(p) return bags[p] end,
+ canAct=function(p) return bags[p] and not states[p] and not Store.busy(p) and not Social.trading(p) and not p:GetAttribute("Travelling") end,
+ canSummon=function(p) return Lobby.canManage(p) end,
+})
 local runs=Instance.new("Folder") runs.Name="PrivateHunts" runs.Parent=game:GetService("Workspace")
 local lastSync,lastCleanup,lastHerd=0,0,0
 local huntGroups={}
@@ -61,7 +67,7 @@ local function send(player,message)
  Records.sample(player,bag.totalProduced or 0,state and state.distance or 0)
  local wildIds={}
  if state then for model in pairs(worlds[player].visibleSet(state.root.Position.Z,views[player],player)) do table.insert(wildIds,model:GetAttribute("SpawnSerial")) end end
- remote:FireClient(player,"State",{huntRoot=worldRoots[player],initialLanding=state and state.initialLanding,income=not state and gains or nil,progress=Progress.snapshot(player),wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,tameSeconds=state and state.monster and Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds or 5,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,balance=bag.balance,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
+ remote:FireClient(player,"State",{summonedId=player:GetAttribute("SummonedId"),huntRoot=worldRoots[player],initialLanding=state and state.initialLanding,income=not state and gains or nil,progress=Progress.snapshot(player),wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,tameSeconds=state and state.monster and Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds or 5,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,balance=bag.balance,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
 end
 local function sendBag(player)
  local bag=bags[player]
@@ -168,7 +174,7 @@ local function start(player)
  local ok,model=pcall(function()
   nextWorld.init(rootFolder,huntTemplate(),Config,Rules)
   nextWorld.ensure(0) nextWorld.replenish(0,views[player] or 1,nil,true,40)
-  return nextWorld.spawn(Vector3.new(0,2,-8))
+  return nextWorld.spawn(Vector3.new(0,2,-8),picked.monsterId,picked.stars)
  end)
  if not ok then
   rootFolder:Destroy()
@@ -190,6 +196,7 @@ local function start(player)
  model:SetAttribute("Occupied",true)
  model:SetAttribute("Angry",false) model:SetAttribute("InitialLanding",true)
  states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,initialLanding=true,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),distance=0,tamed=false}
+ companions.clear(player)
  root.Anchored,humanoid.AutoRotate,humanoid.PlatformStand=true,false,true
  root.CFrame=model:GetPivot()*CFrame.new(0,model:GetAttribute("SaddleHeight") or tuning.RideHeightStuds,8)
  states[player].origin=root.CFrame
@@ -223,7 +230,7 @@ local function lasso(player,state)
  attachRope(state)
  send(player)
 end
-Social.start(bags,function(p) return bags[p] and not states[p] and not p:GetAttribute("Travelling") end,sendBag)
+Social.start(bags,function(p) return bags[p] and not states[p] and not p:GetAttribute("Travelling") end,sendBag,companions.clear)
 local departure=require(script.Parent.RocketDepartureService).new({
  catalog=Catalog,now=now,token=function() return game:GetService("HttpService"):GenerateGUID(false) end,
  bag=function(p) return bags[p] end,
@@ -250,19 +257,23 @@ remote.OnServerEvent:Connect(function(p,action,value)
  if action=="LaunchSelection" then departure.submit(p,value)
  elseif action=="CancelDeparture" then departure.cancel(p) end
 end)
-Players.PlayerRemoving:Connect(function(p) departure.remove(p) rocketLaunchPermit[p]=nil end)
+Players.PlayerRemoving:Connect(function(p) departure.remove(p) rocketLaunchPermit[p]=nil startingMounts[p]=nil companions.clear(p) end)
 Lobby.connectPens(function(player)
  if not states[player] then sendBag(player) remote:FireClient(player,"RanchMenu") end
 end)
 remote.OnServerEvent:Connect(function(player,action,value)
  if type(action)~="string" or not bags[player] or Store.busy(player) or player:GetAttribute("Travelling") then return end
- if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" and action~="PlaceEgg" and action~="RemoveEgg" then return end
+ if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" and action~="PlaceEgg" and action~="RemoveEgg" and action~="Summon" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
  local interval=action=="Jump" and 0.08 or action=="Steer" and 0.04 or 0.25
  if now()-(stamps[action] or -math.huge)<interval then return end
  stamps[action]=now()
+ if action=="Summon" then
+  if not states[player] then companions.summon(player,value) send(player) end
+  return
+ end
  if action=="View" then
   if type(value)=="number" and value==value and value>=0.4 and value<=4 then views[player]=value end
   return
@@ -289,6 +300,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
    sendBag(player)
    return
   end
+  companions.clear(player)
   for pen in pairs(affected) do Lobby.display(player,pen,bags[player].monsters) end
   remote:FireClient(player,"EvolutionResult",{ok=true,monsterId=evolved.monsterId,stars=evolved.stars})
   send(player)
@@ -432,7 +444,7 @@ local function added(player)
  if not bag then Lobby.release(player) player:Kick(message) return end
  bags[player]=bag player:SetAttribute("Area","Lobby") Progress.join(player)
  for pen=1,4 do Lobby.display(player,pen,bag.eggs or {}) end
- player.CharacterRemoving:Connect(function() finish(player,"Hunt ended") states[player]=nil end)
+ player.CharacterRemoving:Connect(function() companions.clear(player) finish(player,"Hunt ended") states[player]=nil end)
 end
 Players.PlayerAdded:Connect(added)
 Players.PlayerRemoving:Connect(function(player) send(player) if worlds[player] then worlds[player].resetVisibility(player) end Records.leave(player) Progress.leave(player) Store.close(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil if worldRoots[player] then worldRoots[player]:Destroy() end worlds[player],worldRoots[player]=nil,nil end)

@@ -3,11 +3,22 @@ local map=workspace:WaitForChild("RodeoLobby")
 local plots=map:WaitForChild("Plots")
 local owned,occupants={},{}
 Lobby.Departure=map.Airport.Departure
-Lobby.Spawn=CFrame.new(6000,4,-60)
+Lobby.Spawn=CFrame.new(6000,4,-72)
 function Lobby.prepareCharacter(character)
  if not character then return end
  local humanoid=character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid",10)
  if humanoid then humanoid.WalkSpeed=require(game.ReplicatedStorage.RodeoFantasy.Config).LobbyWalkSpeed end
+ local head=character:FindFirstChild("Head") or character:WaitForChild("Head",10)
+ if head and not character:FindFirstChild("AstronautHelmet") then
+  local helmet=Instance.new("Accessory") helmet.Name="AstronautHelmet"
+  local bubble=Instance.new("Part") bubble.Name="Handle" bubble.Shape=Enum.PartType.Ball
+  bubble.Size=Vector3.one*math.max(2.8,head.Size.Magnitude*1.5)
+  bubble.Material=Enum.Material.Glass bubble.Color=Color3.fromRGB(196,232,245) bubble.Transparency=.78
+  bubble.CanCollide=false bubble.CanTouch=false bubble.CanQuery=false bubble.Massless=true bubble.CastShadow=false
+  bubble.CFrame=head.CFrame bubble.Parent=helmet
+  local weld=Instance.new("WeldConstraint") weld.Part0=head weld.Part1=bubble weld.Parent=bubble
+  helmet.Parent=character
+ end
 end
 for index=1,8 do
  local plot=plots["Plot_"..index]
@@ -27,7 +38,7 @@ function Lobby.assign(player)
    occupants[index]=player owned[player]=index
    plots["Plot_"..index]:SetAttribute("OwnerUserId",player.UserId)
    player:SetAttribute("LobbySlot",index)
-   label(index,player.Name or player.DisplayName or "Player")
+   label(index,(player.DisplayName or player.Name).."\n@"..player.Name.." · 알 부화실")
    return index
   end
  end
@@ -42,7 +53,7 @@ function Lobby.release(player)
  for _,pen in ipairs(plots["Plot_"..index].Pens:GetChildren()) do
   local display=pen:FindFirstChild("DisplayMonsters") if display then display:Destroy() end
  end
- label(index," ")
+ label(index,"빈 부화실")
 end
 function Lobby.canDepart(player)
  local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
@@ -55,7 +66,7 @@ end
 function Lobby.canManage(player)
  local index=owned[player]
  local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
- return index and root and (root.Position-plots["Plot_"..index].ManagePoint.Position).Magnitude<=16
+ return index and root and (root.Position-plots["Plot_"..index].ManagePoint.Position).Magnitude<=36
 end
 function Lobby.canUsePen(player,index)
  return Lobby.getPen(player,index) and Lobby.canManage(player)

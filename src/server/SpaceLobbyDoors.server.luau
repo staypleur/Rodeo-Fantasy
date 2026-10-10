@@ -25,7 +25,7 @@ local connection=Run.Heartbeat:Connect(function(dt)
   if near~=door.open then
    door.open=near
    for _,t in ipairs(door.tweens) do t:Cancel() end door.tweens={}
-   for _,item in ipairs({{door.left,door.lc,-16},{door.right,door.rc,16}}) do
+   for _,item in ipairs({{door.left,door.lc,-door.left.Size.X},{door.right,door.rc,door.right.Size.X}}) do
     local t=Tween:Create(item[1],TweenInfo.new(.35),{CFrame=item[2]*CFrame.new(near and item[3] or 0,0,0)})
     table.insert(door.tweens,t) t:Play()
    end

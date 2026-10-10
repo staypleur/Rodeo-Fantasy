@@ -82,7 +82,7 @@ function UI.new(gui,remote)
  local breed=make("TextButton",{Name="Breed",Text="교배",Position=UDim2.new(.62,0,0,55),Size=UDim2.new(.17,0,0,34),TextSize=16,BackgroundColor3=Color3.fromRGB(110,133,91),TextColor3=Color3.new(1,1,1),ZIndex=23},window)
  breed.Activated:Connect(function() if self.onBreed then self.onBreed() end end)
  local hovered,hold
- UIS.InputBegan:Connect(function(input,processed) if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.E and hovered and window.Visible and self.area=="Cafe" then hold={id=hovered,at=os.clock()} end end)
+ UIS.InputBegan:Connect(function(input,processed) if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.E and hovered and window.Visible and (self.area=="Cafe" or self.area=="Lobby") then hold={id=hovered,at=os.clock()} end end)
  UIS.InputEnded:Connect(function(input) if input.KeyCode==Enum.KeyCode.E then hold=nil end end)
  game:GetService("RunService").RenderStepped:Connect(function() if hold and window.Visible and hovered==hold.id and os.clock()-hold.at>=1 then remote:FireServer("Summon",hold.id) hold=nil end end)
  local chooser
@@ -240,11 +240,11 @@ function UI.new(gui,remote)
      elseif compatible and selectedCount()<3 and self.area~="Hunt" then self.selected[item.id]=true end
      self.snapshot(self.items)
     end)
-   elseif self.area=="Cafe" then
-    if item.id==self.summonedId then
+   elseif self.area=="Cafe" or self.area=="Lobby" then
+    if item.id==self.summonedId and self.area=="Cafe" then
      make("TextLabel",{Text="소환 중",BackgroundTransparency=1,Position=UDim2.fromOffset(4,208),Size=UDim2.new(1,-8,0,29),TextSize=14,ZIndex=23},card)
     elseif not item.breedingTeam then
-     local summon=make("TextButton",{Text="E 꾹 · 소환",Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,29),TextSize=14,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},card)
+     local summon=make("TextButton",{Text=item.id==self.summonedId and "E 꾹 · 소환 해제" or "E 꾹 · 소환",Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,29),TextSize=14,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},card)
      card.MouseEnter:Connect(function() hovered=item.id end) card.MouseLeave:Connect(function() if hovered==item.id then hovered=nil hold=nil end end)
      summon.InputBegan:Connect(function(input) if input.UserInputType==Enum.UserInputType.Touch or input.UserInputType==Enum.UserInputType.MouseButton1 then hovered=item.id hold={id=item.id,at=os.clock()} end end)
      summon.InputEnded:Connect(function() hold=nil end)
