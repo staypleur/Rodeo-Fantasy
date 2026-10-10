@@ -1159,3 +1159,12 @@
 - 사용자가 배치를 수용하고 참고 이미지처럼 그라데이션과 디자인 보완 요청. 8개 부화실 배치 유지. 부화기 단색 원판 발광을 분할 발광 링으로 교체하고 4단 금속 명암 칼라·지지대 클램프·상단 기계부·상태 제어판, 캡슐 레일·3단 명암 칼라, 통로 발광선, 화분, 창 기둥 조명, 외부 행성/소행성 형상 추가.
 - 2,086 native smooth Parts, 그림자 없는 고정 PointLight 4개. 캡슐별 동적 조명/파티클 없음. Part 수 증가는 실제 모바일 측정이 필요하며 최적화 완료로 표시하지 않음.
 - 생성기 및 실제 형상 미리보기 실행. XML 참조/8x(1+4)/Smooth/조명 검사 수행. Studio 렌더·PC/모바일 실행 미실시. 메인 게임은 미교체, 텍스처 회색 문제 미해결. 참고 이미지의 완성도에 도달했다고 주장하지 않음.
+
+## 2026-10-10 새 로켓 준비·사냥터 복원·모스랫 방향
+
+- Downloads 경로에는 제공 파일이 없었으나 OneDrive/바탕 화면/사진/로데오 게임개발에서 동일 파일명 확인. assets/models/CentralRocket/Rocket.glb에 보존. 5,151tri, SHA256 f493574040f7972bfd4eedac3322fd37596dcf219f558aa0e62a2ce2d4fa06fd. GLB 그대로 및 외부 이미지 glTF/메시 전용 fallback 생성. 메시·UV·이미지 bytes 보존. Studio 업로드 미실시.
+- InstallCentralRocket.commandbar.lua 준비: 전체 RocketImport 검증, 기존 중앙 로켓 크기/중심 기준 배치, 메시·텍스처 보존, 이동/충돌 비활성, ServerStorage 백업/롤백. 기존 Departure/E 시스템 변경 없음. 사용자 Studio 가져오기 후 실행 필요. 로켓 방향은 원본 가져오기 방향 유지, 실제 확인 필요.
+- 사용자 답변으로 Raise Animal 전 맵 복원 확정. Git 17297b5 HuntWorld와 CourseGeometry 복원, 현재 CaptureServer의 groundHeight 인터페이스(평지0) 추가, RoadHalfWidth35. 개인 세션·승인 모델·현재 시스템 보존. 새 Stud GreenStar 형상을 활성 장소에서 제외하여 중첩 방지. main place rebuild, 변경 전 .local-backup/before-legacy-hunt 저장. 로비는 기존 상태 유지; smooth draft 전체 적용/비주얼 완성 미완료.
+- NativeMossrat에서 승인 S1 외형만 추가180도 및 고정 revision으로 반복 누적/재생성 방지. authoritative root와 이동은 미변경. 머리/목 중립 애니메이션 유지. 실제 역방향 해결/정면 및 색상은 Studio 사용자 실행 필요.
+- RestoreLegacyHunt.commandbar.lua: 코드 허용 버전 검사, 이전 GreenStar/코드 백업, 새 코스 marker로 교체, 실패 롤백. 현재 Studio의 업로드 모델/재질/로비 수정 보존.
+- check_legacy_restore.py 통과: 구버전 코스 코드 일치, 호환 groundHeight 외 HuntWorld 일치, 35폭, 기존 메시/Bone/SurfaceAppearance 전체 속성 보존, 관련6개 Luau 컴파일. 실제 Studio 주행·모바일·PC 검증 미실시. 기존 Stud 전용 테스트는 복원된 코스에 적용하지 않음. 회색 모스랫은 미해결.

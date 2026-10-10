@@ -15,6 +15,12 @@ function M.apply(model)
  if not source then return false end
  local facingRevision=source:GetAttribute("MeshyFacingRevision") or "Original"
  local yaw=source:GetAttribute("MeshyVisualYawDegrees") or 0
+ -- Correct the installed S1 mesh facing opposite the forward (-Z) run direction.
+ -- Fixed revision keeps this idempotent; never rotate the authoritative root.
+ if source:GetAttribute("MossratUserRigRevision")=="ApprovedS1-v1" then
+  yaw+=180
+  facingRevision..="-ForwardV2"
+ end
  if model:GetAttribute("NativeMeshyReady") and model:GetAttribute("NativeMeshyStars")==stars and model:GetAttribute("NativeMeshyFacingRevision")==facingRevision and model:FindFirstChild("Body") then return true end
  local scale=C.scale(model:GetAttribute("Stars") or 1)
  local staged={}

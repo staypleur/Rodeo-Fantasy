@@ -43,7 +43,8 @@ def build():
  # Keep the user's successfully uploaded models and material asset references.
  existing=R/'dist/RodeoFantasy-New.rbxlx'
  previous=E.parse(existing).getroot() if existing.exists() else None
- serial=0;data=generate_data();root=E.Element('roblox',version='4')
+ legacy_course='Restored pre-Raise-Animal' in (R/'src/server/HuntWorld.luau').read_text(encoding='utf-8')
+ serial=0;data={'blocks':[]} if legacy_course else generate_data();root=E.Element('roblox',version='4')
  ws=node(root,'Workspace','Workspace');node(ws,'Terrain','Terrain')
  prop(ws,'float','Gravity',196.2)
  rs=node(root,'ReplicatedStorage','ReplicatedStorage');package=node(rs,'Folder','RodeoFantasy')

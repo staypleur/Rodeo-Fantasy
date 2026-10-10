@@ -1,0 +1,114 @@
+{
+  "asset": {
+    "generator": "Khronos glTF Blender I/O v4.4.55",
+    "version": "2.0"
+  },
+  "scene": 0,
+  "scenes": [
+    {
+      "name": "Scene",
+      "nodes": [
+        0
+      ]
+    }
+  ],
+  "nodes": [
+    {
+      "mesh": 0,
+      "name": "output_unwrapped"
+    }
+  ],
+  "meshes": [
+    {
+      "name": "output_unwrapped",
+      "primitives": [
+        {
+          "attributes": {
+            "POSITION": 0,
+            "NORMAL": 1,
+            "TEXCOORD_0": 2
+          },
+          "indices": 3
+        }
+      ]
+    }
+  ],
+  "accessors": [
+    {
+      "bufferView": 0,
+      "componentType": 5126,
+      "count": 7717,
+      "max": [
+        6.6061601638793945,
+        18,
+        5.450521469116211
+      ],
+      "min": [
+        -6.610645294189453,
+        0,
+        -5.474721908569336
+      ],
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 1,
+      "componentType": 5126,
+      "count": 7717,
+      "type": "VEC3"
+    },
+    {
+      "bufferView": 2,
+      "componentType": 5126,
+      "count": 7717,
+      "type": "VEC2"
+    },
+    {
+      "bufferView": 3,
+      "componentType": 5123,
+      "count": 15453,
+      "type": "SCALAR"
+    }
+  ],
+  "bufferViews": [
+    {
+      "buffer": 0,
+      "byteLength": 92604,
+      "byteOffset": 0,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 92604,
+      "byteOffset": 92604,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 61736,
+      "byteOffset": 185208,
+      "target": 34962
+    },
+    {
+      "buffer": 0,
+      "byteLength": 30906,
+      "byteOffset": 246944,
+      "target": 34963
+    },
+    {
+      "buffer": 0,
+      "byteLength": 14602733,
+      "byteOffset": 277852
+    },
+    {
+      "buffer": 0,
+      "byteLength": 7879981,
+      "byteOffset": 14880588
+    }
+  ],
+  "buffers": [
+    {
+      "byteLength": 22760572,
+      "uri": "Rocket.bin"
+    }
+  ]
+}
