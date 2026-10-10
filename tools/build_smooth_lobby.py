@@ -8,6 +8,8 @@ R=Path(__file__).resolve().parents[1];OUT=R/'assets/maps/SmoothLobby';OUT.mkdir(
 root=E.Element('roblox',version='4');lobby=node(root,'Model','SmoothLobbyDesignDraft')
 WHITE=(220,229,241);NAVY=(25,35,57);GREY=(89,109,139);CYAN=(61,205,247);GOLD=(255,205,91)
 shapes=[]
+
+def blend(a,b,t):return tuple(round(x*(1-t)+y*t) for x,y in zip(a,b))
 def rot(y):return np.array([[math.cos(y),0,math.sin(y)],[0,1,0],[-math.sin(y),0,math.cos(y)]])
 def create(parent,name,pos,size,color=WHITE,shape='box',yaw=0,glass=False,neon=False,kind='detail'):
  p=part(parent,name,[6000+pos[0],pos[1],pos[2]],size,color)
@@ -80,24 +82,55 @@ for index in range(8):
  local(pen,'PenGrass',[0,6,0],[24,4,24],NAVY,'cylinder')
  for y in [9,31]:
   local(pen,'IncubatorFrame',[0,y,0],[28,4,28],WHITE,'cylinder')
-  local(pen,'IncubatorRim',[0,y+2.1,0],[25,.3,25],accent,'cylinder',neon=True)
+  for band in range(4):
+   local(pen,'CollarShade',[0,y-1.7+band*.85,0],[28.5,.8,28.5],blend(GREY,WHITE,band/3),'cylinder')
+  for segment in range(24):
+   theta=segment*math.tau/24
+   create(pen,'IncubatorRim',(center+turn@np.array([math.sin(theta)*13,y+2.1,math.cos(theta)*13])).tolist(),[1,.45,3.1],blend(accent,WHITE,.2),yaw=a+theta,neon=True)
  local(pen,'GlassChamber',[0,20,0],[23,20,23],accent,'cylinder',glass=True)
  for theta in [math.pi/4,3*math.pi/4,5*math.pi/4,7*math.pi/4]:
   local(pen,'FrameSupport',[math.sin(theta)*13,20,math.cos(theta)*13],[3,24,3],WHITE,'cylinder')
+  for y in [14,20,26]:
+   local(pen,'SupportClamp',[math.sin(theta)*13,y,math.cos(theta)*13],[4,2,4],GREY)
+  local(pen,'SupportLight',[math.sin(theta)*13,20,math.cos(theta)*13-.4],[1,10,3],accent,neon=True)
+ local(pen,'TopMechanism',[0,35,0],[18,4,18],GREY,'cylinder')
+ local(pen,'TopCap',[0,38,0],[14,2,14],WHITE,'cylinder')
+ for side in [-1,1]:
+  local(room,'ControlPedestal',[side*17,9,-16],[7,10,6],GREY)
+  label(room,'IncubatorConsole',(center+turn@np.array([side*17,16,-18])).tolist(),[9,7,1],'EGG STATUS\nREADY',accent,a)
+  for row in range(3):local(room,'ConsoleBar',[side*17,15+row,-18.7],[6-row,.35,.3],blend(accent,WHITE,row/3),neon=True)
+ # Fixed room accent light; no animated light or particle emitter per capsule.
+ lamp=local(room,'RoomLamp',[0,37,0],[5,.4,5],accent,neon=True)
+ if index in [0,2,4,6]:
+  light=node(lamp,'PointLight','AccentLight');prop(light,'float','Range',42);prop(light,'float','Brightness',.65);prop(light,'bool','Shadows','false')
+  composite(light,'Color3','Color',dict(zip('RGB',[v/255 for v in accent])))
  capsules=node(room,'Folder','BabyCapsules')
  for slot,(x,z) in enumerate([(-22,10),(-22,24),(22,10),(22,24)],1):
   cap=node(capsules,'Model',f'Capsule_{slot}')
   for y in [7,23]:local(cap,'Frame',[x,y,z],[12,3,12],WHITE,'cylinder')
   local(cap,'Glass',[x,15,z],[10,14,10],accent,'cylinder',glass=True)
   local(cap,'Glow',[x,8.6,z],[10,.3,10],accent,'cylinder',neon=True)
+  for band in range(3):local(cap,'CapsuleCollar',[x,22+band*.6,z],[12.4,.55,12.4],blend(GREY,WHITE,band/2),'cylinder')
+  for side in [-1,1]:
+   local(cap,'CapsuleRail',[x+side*5,15,z],[1.4,14,1.4],WHITE)
+   local(cap,'CapsuleRailGlow',[x+side*5,15,z-.75],[.5,8,.25],accent,neon=True)
   label(cap,'CapsuleNumber',(center+turn@np.array([x,25,z-6])).tolist(),[8,4,1],str(slot),accent,a)
  for t in range(7):
   r=38+t*9
   create(deck,'Walkway',[math.sin(a)*r,3,math.cos(a)*r],[14,1,8],WHITE,yaw=a,kind='guide')
+  create(deck,'WalkwayLight',[math.sin(a)*r,3.65,math.cos(a)*r],[10,.2,1],blend(CYAN,WHITE,t/9),yaw=a,neon=True,kind='guide')
+ for side in [-1,1]:
+  local(room,'PlanterBase',[side*32,6,-19],[10,4,12],WHITE)
+  local(room,'PlanterSoil',[side*32,8.2,-19],[8,.4,10],NAVY)
+  local(room,'PlantTrunk',[side*32,12,-19],[2,8,2],(113,86,69))
+  for level in range(3):local(room,'PlantCanopy',[side*32,15+level*2,-19],[8-level*2,3,8-level*2],blend((46,105,77),(139,185,109),level/2),'ball')
 shell=node(lobby,'Model','ShipShell')
 for n in range(16):
  a=n*math.tau/16;r=188
  create(shell,'StructuralRib',[math.sin(a)*r,45,math.cos(a)*r],[5,88,5],WHITE,'cylinder')
+ for y in [20,62,80]:
+  create(shell,'RibJoint',[math.sin(a)*r,y,math.cos(a)*r],[9,6,9],GREY,yaw=a)
+  create(shell,'RibLamp',[math.sin(a)*(r-5),y,math.cos(a)*(r-5)],[3,4,1],GOLD,yaw=a,neon=True)
  create(shell,'Window',[math.sin(a)*r,48,math.cos(a)*r],[r*math.tau/16-5,72,1],(106,173,223),yaw=a,glass=True,kind='window')
 for radius,y in [(188,10),(188,86)]:
  for n in range(64):
@@ -106,6 +139,16 @@ for radius,y in [(188,10),(188,86)]:
 roof=node(lobby,'Model','Roof');create(roof,'Ceiling',[0,94,0],[392,4,392],NAVY,'cylinder',kind='roof')
 label(shell,'GameTitle',[0,70,186],[72,20,3],'RODEO\nPLANETURE',GOLD)
 create(shell,'TitlePlanet',[0,85,183],[9,9,3],CYAN,'ball')
+universe=node(lobby,'Model','WindowDiorama')
+for i,(pos,size,color) in enumerate([([-105,66,230],68,(64,127,219)),([145,77,215],54,(175,112,226))]):
+ create(universe,'Planet',pos,[size,size,size],color,'ball',kind='space')
+ for stripe in range(5):
+  y=pos[1]+(stripe-2)*size*.13
+  radius=math.sqrt(max(0,(size/2)**2-(y-pos[1])**2))
+  create(universe,'PlanetBand',[pos[0],y,pos[2]],[radius*2+.2,size*.07,radius*2+.2],blend(color,WHITE,.12+stripe*.09),'cylinder',kind='space')
+for i in range(28):
+ a=(i+.3)*math.tau/28;r=218+(i%3)*9
+ create(universe,'Asteroid',[math.sin(a)*r,24+(i*19)%78,math.cos(a)*r],[4+i%5,4+i%4,5+i%3],blend(GREY,WHITE,(i%5)/7),'ball',kind='space')
 for name,x,z,text in [('ShopA',-90,-145,'SHOP 01'),('ShopB',90,-145,'SHOP 02'),('DistanceRank',-168,-50,'DISTANCE'),('JournalRank',-168,50,'JOURNAL'),('Roulette',168,-50,'ROULETTE'),('BattlePass',168,50,'BATTLE PASS')]:
  booth=node(lobby,'Model',name);label(booth,'Board',[x,22,z],[32,20,2],text)
  create(booth,'Console',[x,6,z],[32,8,14],WHITE)

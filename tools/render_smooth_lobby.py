@@ -36,7 +36,7 @@ def polygons(b):
 def render(filename,detail=False):
  w,h=1700,1150;im=Image.new('RGBA',(w,h),(10,17,32,255));glow=Image.new('RGBA',(w,h));g=ImageDraw.Draw(glow)
  focus=np.array([0,10,0]) if not detail else np.array([0,12,138])
- scale=3.25 if not detail else 12
+ scale=2.85 if not detail else 12
  def project(p):
   d=p-focus;return (w/2+float(right@d)*scale,h*.60-float(up@d)*scale)
  visible=[]
