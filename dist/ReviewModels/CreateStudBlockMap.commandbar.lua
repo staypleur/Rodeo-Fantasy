@@ -2,6 +2,75 @@
 local Generator = (function()
 -- Review map only. Does not install hunting logic or modify an existing map.
 local Generator = {}
+local Layout = (function()
+-- Deterministic private meadow layout. No monsters, rewards, or new hunt rules.
+local Layout = {WidthStuds=192,LengthStuds=4800,LengthMeters=1000,MetersPerStud=1000/4800}
+-- Latest user target is screen composition, not spawn counts or exact pixel masks.
+-- Tune against the rear-follow camera after the user supplies new monster models.
+Layout.ScreenComposition = {Empty=0.40,Obstacles=0.20,Monsters=0.40}
+
+function Layout.build()
+ local blocks = {}
+ local function put(name,x,y,z,sx,sy,sz,r,g,b,kind)
+  table.insert(blocks,{Name=name,Position={x,y,z},Size={sx,sy,sz},Color={r,g,b},Kind=kind or "Scenery"})
+ end
+ -- Adjacent slabs share only their edge; no overlapping top faces.
+ for index=0,29 do
+  local z=-80-index*160
+  local tint=index%3
+  put("MeadowPlate",0,-4,z,192,8,160,224-tint*3,199-tint*3,151-tint*2,"Ground")
+  for _,side in ipairs({-1,1}) do
+   local height=24+(index%3)*8
+   put("CliffFoot",side*104,4,z,16,8,160,113,73,48)
+   for level=0,height/8-1 do
+    put("CliffWall",side*120,12+level*8,z,16,8,160,119+level*10,76+level*9,48+level*7)
+   end
+   put("GrassCap",side*120,12+height,z,16,8,160,154,170,89)
+  end
+ end
+ local function tree(x,z,large)
+  local crown=large and 48 or 40
+  put("TreeRoot",x,4,z,16,8,16,107,72,48,"Obstacle")
+  for level=0,2 do
+   put("TreeTrunk",x,12+level*8,z,8,8,8,125+level*12,86+level*10,58+level*8,"Obstacle")
+  end
+  for _,side in ipairs({-1,1}) do
+   put("TreeBranch",x+side*12,24,z,16,8,8,146,104,72,"Obstacle")
+  end
+  -- Separate adjacent strips give irregular crowns and colour variation without
+  -- overlapping coplanar surfaces. All geometry stays on the four-stud grid.
+  for band=-1,1 do
+   local w=band==0 and crown or crown-8
+   put("CanopyLower",x+band*4,36,z+band*8,w,8,8,99+band*9,120+band*8,52+band*5,"Obstacle")
+   put("CanopyMiddle",x-band*4,44,z+band*8,w-8,8,8,153+band*13,170+band*9,82+band*8,"Obstacle")
+  end
+  put("CanopyUpper",x,52,z,crown-16,8,16,182,193,104,"Obstacle")
+ end
+ local function rock(x,z,large)
+  local w=large and 48 or 32
+  put("LowRock",x,4,z,w,8,24,106,91,94,"Obstacle")
+  put("RockMiddle",x+4,12,z+4,w-8,8,16,139,120,123,"Obstacle")
+  put("RockCap",x,20,z,w-16,8,8,178,157,151,"Obstacle")
+ end
+ -- Opening and final approach stay clear. Alternate splits with open recovery space.
+ -- Rows have 160-stud spacing (~33 m); the full outer width stays constant.
+ for row=0,27 do
+  local z=-240-row*160
+  local pattern=row%7
+  if pattern==0 then tree(0,z,true)
+  elseif pattern==1 then rock(-40,z,false) rock(40,z,false)
+  elseif pattern==2 then tree(-56,z,true) rock(24,z,false)
+  elseif pattern==3 then rock(-24,z,false) tree(56,z,true)
+  elseif pattern==4 then rock(-24,z,true) rock(24,z,true)
+  elseif pattern==5 then tree(-64,z,false) tree(0,z,false) tree(64,z,false)
+  else rock(-64,z,false) tree(40,z,true) end
+ end
+ return blocks
+end
+
+return Layout
+
+end)()
 local GRID = 4
 
 local function onGrid(value)
@@ -37,8 +106,17 @@ function Generator.create(parent, origin, backupParent)
  local model = Instance.new("Model")
  model.Name = "HuntStudBlockReview"
  model:SetAttribute("StudMapGenerator",true)
- model:SetAttribute("StudMapRevision",2)
- local function block(name, position, size, color)
+ model:SetAttribute("StudMapRevision",3)
+ model:SetAttribute("LengthMeters",Layout.LengthMeters)
+ model:SetAttribute("LengthStuds",Layout.LengthStuds)
+ model:SetAttribute("WidthStuds",Layout.WidthStuds)
+ model:SetAttribute("MetersPerStud",Layout.MetersPerStud)
+ model:SetAttribute("PrivateHunt",true)
+ model:SetAttribute("MonsterModelsPending",true)
+ model:SetAttribute("TargetEmptyScreenShare",Layout.ScreenComposition.Empty)
+ model:SetAttribute("TargetObstacleScreenShare",Layout.ScreenComposition.Obstacles)
+ model:SetAttribute("TargetMonsterScreenShare",Layout.ScreenComposition.Monsters)
+ local function block(name, position, size, color, kind)
   for _, value in ipairs({position.X, position.Y, position.Z}) do
    assert(onGrid(value), "Block position must align to the 4-stud grid")
   end
@@ -63,31 +141,12 @@ function Generator.create(parent, origin, backupParent)
   part.Size = size
   part.Position = position + origin
   part.Color = color
+  part:SetAttribute("MapKind",kind)
   part.Parent = model
  end
- local function put(name, x,y,z, sx,sy,sz, r,g,b)
-  block(name,Vector3.new(x,y,z),Vector3.new(sx,sy,sz),Color3.fromRGB(r,g,b))
- end
  local ok, err = pcall(function()
-  -- 20% wider review; default origin lifts the floor 8 studs above Baseplate.
-  put("MeadowPlate",0,-4,-128,192,8,320,166,196,112)
-  for _, side in ipairs({-1,1}) do
-   for index=0,7 do
-    local z=-268+index*40
-    local height=16+(index%3)*8
-    put("CliffFoot",side*104,4,z,16,8,40,169,126,83)
-    put("CliffWall",side*120,8+height/2,z,16,height,40,144,104,70)
-    put("GrassCap",side*120,12+height,z,16,8,40,119,159,84)
-   end
-  end
-  for _, spot in ipairs({{-56,-40},{56,-88},{-56,-136},{56,-192},{-48,-232},{40,-272}}) do
-   local x,z=spot[1]+(if spot[1]<0 then -16 else 16),spot[2]
-   put("TreeTrunk",x,8,z,8,16,8,125,87,56)
-   put("CanopyLower",x,20,z,24,8,24,115,154,76)
-   put("CanopyUpper",x,28,z,16,8,16,150,184,98)
-  end
-  for _, spot in ipairs({{-32,-72},{32,-136},{-24,-216},{48,-248}}) do
-   put("LowRock",spot[1],4,spot[2],16,8,16,177,165,130)
+  for _, data in ipairs(Layout.build()) do
+   block(data.Name,Vector3.new(table.unpack(data.Position)),Vector3.new(table.unpack(data.Size)),Color3.fromRGB(table.unpack(data.Color)),data.Kind)
   end
   -- Publish only when the complete map passes the grid checks.
   model.Parent = parent
@@ -106,5 +165,5 @@ end)()
 game:GetService("ChangeHistoryService"):SetWaypoint("Before Stud map review")
 local model = Generator.create(workspace, Vector3.new(0,8,0), game:GetService("ServerStorage"))
 game:GetService("ChangeHistoryService"):SetWaypoint("After Stud map review")
-game:GetService("Selection"):Set({model})
-print("STUD_MAP_REVIEW_CREATED", #model:GetChildren(), "Parts; no hunt logic installed")
+game:GetService("Selection"):Set({model:FindFirstChild("MeadowPlate")})
+print("STUD_MAP_REVIEW_CREATED", #model:GetChildren(), "Parts; 1000m x 192 studs; models pending")

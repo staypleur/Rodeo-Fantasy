@@ -1,5 +1,6 @@
 -- Review map only. Does not install hunting logic or modify an existing map.
 local Generator = {}
+local Layout = require(script.Parent.StudHuntLayout)
 local GRID = 4
 
 local function onGrid(value)
@@ -35,8 +36,17 @@ function Generator.create(parent, origin, backupParent)
  local model = Instance.new("Model")
  model.Name = "HuntStudBlockReview"
  model:SetAttribute("StudMapGenerator",true)
- model:SetAttribute("StudMapRevision",2)
- local function block(name, position, size, color)
+ model:SetAttribute("StudMapRevision",3)
+ model:SetAttribute("LengthMeters",Layout.LengthMeters)
+ model:SetAttribute("LengthStuds",Layout.LengthStuds)
+ model:SetAttribute("WidthStuds",Layout.WidthStuds)
+ model:SetAttribute("MetersPerStud",Layout.MetersPerStud)
+ model:SetAttribute("PrivateHunt",true)
+ model:SetAttribute("MonsterModelsPending",true)
+ model:SetAttribute("TargetEmptyScreenShare",Layout.ScreenComposition.Empty)
+ model:SetAttribute("TargetObstacleScreenShare",Layout.ScreenComposition.Obstacles)
+ model:SetAttribute("TargetMonsterScreenShare",Layout.ScreenComposition.Monsters)
+ local function block(name, position, size, color, kind)
   for _, value in ipairs({position.X, position.Y, position.Z}) do
    assert(onGrid(value), "Block position must align to the 4-stud grid")
   end
@@ -61,31 +71,12 @@ function Generator.create(parent, origin, backupParent)
   part.Size = size
   part.Position = position + origin
   part.Color = color
+  part:SetAttribute("MapKind",kind)
   part.Parent = model
  end
- local function put(name, x,y,z, sx,sy,sz, r,g,b)
-  block(name,Vector3.new(x,y,z),Vector3.new(sx,sy,sz),Color3.fromRGB(r,g,b))
- end
  local ok, err = pcall(function()
-  -- 20% wider review; default origin lifts the floor 8 studs above Baseplate.
-  put("MeadowPlate",0,-4,-128,192,8,320,166,196,112)
-  for _, side in ipairs({-1,1}) do
-   for index=0,7 do
-    local z=-268+index*40
-    local height=16+(index%3)*8
-    put("CliffFoot",side*104,4,z,16,8,40,169,126,83)
-    put("CliffWall",side*120,8+height/2,z,16,height,40,144,104,70)
-    put("GrassCap",side*120,12+height,z,16,8,40,119,159,84)
-   end
-  end
-  for _, spot in ipairs({{-56,-40},{56,-88},{-56,-136},{56,-192},{-48,-232},{40,-272}}) do
-   local x,z=spot[1]+(if spot[1]<0 then -16 else 16),spot[2]
-   put("TreeTrunk",x,8,z,8,16,8,125,87,56)
-   put("CanopyLower",x,20,z,24,8,24,115,154,76)
-   put("CanopyUpper",x,28,z,16,8,16,150,184,98)
-  end
-  for _, spot in ipairs({{-32,-72},{32,-136},{-24,-216},{48,-248}}) do
-   put("LowRock",spot[1],4,spot[2],16,8,16,177,165,130)
+  for _, data in ipairs(Layout.build()) do
+   block(data.Name,Vector3.new(table.unpack(data.Position)),Vector3.new(table.unpack(data.Size)),Color3.fromRGB(table.unpack(data.Color)),data.Kind)
   end
   -- Publish only when the complete map passes the grid checks.
   model.Parent = parent

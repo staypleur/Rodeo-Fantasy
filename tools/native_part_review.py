@@ -4,7 +4,7 @@ import math,itertools,xml.etree.ElementTree as E
 import numpy as np
 from PIL import Image,ImageDraw,ImageFont
 R=Path(__file__).resolve().parents[1]
-def save_review(parts,model_name,title,note,eye_direction=(.72,.85,-1.1),sphere_names=None):
+def save_review(parts,model_name,title,note,eye_direction=(.72,.85,-1.1),sphere_names=None,export_model=True):
  sphere_names=sphere_names or set()
  root=E.Element('roblox',version='4');model=E.SubElement(root,'Item',{'class':'Model','referent':model_name})
  props=E.SubElement(model,'Properties');E.SubElement(props,'string',name='Name').text=model_name
@@ -20,8 +20,9 @@ def save_review(parts,model_name,title,note,eye_direction=(.72,.85,-1.1),sphere_
   for j,a in enumerate('XYZ'):E.SubElement(cf,a).text=str(pos[j]);E.SubElement(dims,a).text=str(size[j])
   for i in range(3):
    for j in range(3):E.SubElement(cf,f'R{i}{j}').text=str(matrix[i,j])
- folder=R/'dist/ReviewModels';folder.mkdir(parents=True,exist_ok=True)
- E.ElementTree(root).write(folder/(model_name+'.rbxmx'),encoding='utf-8',xml_declaration=True)
+ if export_model:
+  folder=R/'dist/ReviewModels';folder.mkdir(parents=True,exist_ok=True)
+  E.ElementTree(root).write(folder/(model_name+'.rbxmx'),encoding='utf-8',xml_declaration=True)
  # Orthographic render of actual geometry, no generated concept art.
  image=Image.new('RGB',(1500,1020),(234,237,226));draw=ImageDraw.Draw(image)
  eye=np.array(eye_direction,dtype=float);eye/=np.linalg.norm(eye);right=np.cross((0,1,0),eye);right/=np.linalg.norm(right);up=np.cross(eye,right)

@@ -4,7 +4,7 @@ import struct,json,io
 import numpy as np
 from PIL import Image
 ROOT=Path(__file__).resolve().parents[1]
-data=(ROOT/'dist/ReviewModels/MeadowMouse_A_S1_FacetedReview.glb').read_bytes()
+data=(ROOT/'archive/legacy-monsters/2026-10-10/dist/ReviewModels/MeadowMouse_A_S1_FacetedReview.glb').read_bytes()
 magic,version,length=struct.unpack_from('<4sII',data)
 assert (magic,version,length)==(b'glTF',2,len(data))
 n,kind=struct.unpack_from('<I4s',data,12);assert kind==b'JSON'
@@ -36,7 +36,7 @@ assert 0<total<2000,total
 view=g['bufferViews'][g['images'][0]['bufferView']]
 atlas=Image.open(io.BytesIO(binary[view['byteOffset']:view['byteOffset']+view['byteLength']]))
 assert atlas.size==(1024,1024)
-external=Image.open(ROOT/'assets/meshes/review/MeadowMouse_A_S1_FacetedReview_BaseColor.png')
+external=Image.open(ROOT/'archive/legacy-monsters/2026-10-10/assets/meshes/review/MeadowMouse_A_S1_FacetedReview_BaseColor.png')
 assert atlas.tobytes()==external.tobytes()
 assert g['materials'][0]['pbrMetallicRoughness']['baseColorTexture']['index']==0
 print(f'FACETED_REVIEW_PASS: {total} triangles, all flat normals, planar eyes, valid UVs, embedded/external atlas equality; static review only')
