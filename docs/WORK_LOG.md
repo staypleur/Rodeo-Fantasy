@@ -1104,3 +1104,10 @@
 - UpdateCurrentProject 설치 파일: 알려진 d1b7826 코드 또는 수정본만 허용, 새 모듈 추가, 로비·소스 백업 및 실패 시 복구. 현재 모델/텍스처/로켓은 유지. 사용자 저장 코드가 preflight 기준과 일치하는지 비교 통과.
 - check_lobby_update: 실제 클라이언트 의존성 존재, 출발 선택값 지역 선언/선택 모델 spawn, 예상 밖 전역 없음, 업데이트 컴파일, 소환시 비활성/다른방/잘못된ID/거래잠금/미준비 모델 검사 통과. check_new_project: 자동문/8방32자리/천장201장/중앙출발 좌표/192사냥폭/소유권/가방·진화·수입/XML·Source·컴파일 통과. 업로드 메시 ID·Bone·SurfaceAppearance 수 보존 확인.
 - 실제 Studio 출발·소환·걷기·교감·머리 정면·헬멧·천장·사운드·UI/터치·성능 검증 미완료. 로켓 실제 업로드/재질/설치는 사용자 작업 남음. 카페 새맵 및 사냥 간소화 모델 미완료 유지. DataStore 초기화·Roblox 게시 없음.
+
+## 2026-10-10 모스랫 재가져오기 실패 대응
+
+- 사용자가 상세 오류 없이 가져오기 실패 상태와 스크린샷을 제공. 화면의 LOBBY_HUNT_UPDATE_INSTALLED는 성공했고 별도 Mossrat.gltf/Metalness.png 업로드가 실패한 상태로 구분.
+- 실제 저장 XML에서 설치 템플릿 3개와 백업 1개의 업로드 MeshId 112233757801076, Bone 구조 및 SurfaceAppearance/TexturePack 보존 확인. 업로더 원인은 확정하지 않음.
+- ShowInstalledMossrat.commandbar.lua 추가: 편집 모드/기존 메시·뼈 확인 후 기존 템플릿 복제만 로비에 표시하고 선택. 업로드/데이터/게임 템플릿 수정 없음. 반복 실행 시 자기 확인용 복제만 교체.
+- Luau 컴파일 통과. 실제 Studio 실행·색상·모션 및 모바일 검증은 미실시.

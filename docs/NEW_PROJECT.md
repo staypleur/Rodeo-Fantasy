@@ -100,3 +100,14 @@ print("METALNESS_CONNECTED", image)
 저장된 맵에서 실제 모스랫 업로드 ID와 세 재질 연결을 보존했습니다. 코드·XML·설치 전 경로 검사·소환 소유권 검사·기존 가방 규칙 검사는 통과했습니다. 실제 출발·머리 방향·충돌·UI·헬멧·소리와 PC/모바일 FPS·메모리는 아직 검증하지 못했습니다. 영상 자체도 재생 확인 전입니다.
 
 바람 소리는 [Creator Store wind](https://create.roblox.com/store/asset/2306939610/wind)를 연결한 시험용 설정입니다. 실제 게임에서 자산 권한이나 로드 오류가 나오면 교체 또는 사용 권한 확인이 필요합니다. 개별 효과음 권한과 볼륨도 실제 Studio에서 확인합니다.
+
+## 이미 설치한 모스랫 확인 (재업로드 불필요)
+
+가져오기 대기열의 Mossrat.gltf/Metalness.png 실패와 로비 업데이트 성공은 별개입니다. 저장된 RodeoFantasy-New.rbxlx에는 기존 업로드 메시 112233757801076과 리그가 있습니다. 재질은 기존 SurfaceAppearance와 TexturePack을 그대로 보존합니다.
+
+1. Play를 중지합니다. 실패한 가져오기 대기열은 닫습니다.
+2. dist/ShowInstalledMossrat.commandbar.lua를 메모장으로 열고 전체 복사합니다.
+3. Studio의 창 → 명령 모음(Command Bar)에 붙여넣고 Enter를 누릅니다.
+4. INSTALLED_MOSSRAT_READY가 나오면 선택된 모델에 F를 눌러 확인합니다. Workspace의 InstalledMossratPreview는 확인용 복제이며 게임 템플릿은 수정하지 않습니다. 확인 후 이 복제만 삭제할 수 있습니다.
+
+업로더 실패 원인은 아직 확정하지 못했습니다. 이 절차는 기존 설치 모델을 사용하므로 추가 업로드가 필요하지 않습니다. 실제 색상과 모션 확인은 Studio에서 남아 있습니다.
