@@ -25,7 +25,7 @@ local function bind(node,property)
  function record.apply()
   if record.busy then return end
   record.busy=true
-  local rankingRows=node.Name=="Entries" and node.Parent and node.Parent.Name=="Ranking"
+  local rankingRows=node.Name=="Entries" and node.Parent and (node.Parent.Name=="Ranking" or node.Parent.Name=="RankingBack")
   record.applied=(rankingRows and not L.entries[record.source]) and record.source or C.text(record.source)
   node[property]=record.applied record.busy=false
  end

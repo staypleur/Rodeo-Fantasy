@@ -43,8 +43,11 @@ shell=child(lobby,'BlackSpaceSphere')
 assert shell.get('class')=='UnionOperation'
 assert shell.findtext("Properties/bool[@name='UsePartColor']")=='true'
 assert shell.findtext("Properties/bool[@name='CanCollide']")=='false'
-assert len(child(lobby,'PlanetAura').findall('Item'))==3
-assert child(child(lobby,'Roof'),'FullGlassCeiling').findtext("Properties/float[@name='Transparency']").startswith('0.89') or abs(float(child(child(lobby,'Roof'),'FullGlassCeiling').findtext("Properties/float[@name='Transparency']"))-.9)<.001
+assert sum(name(n).startswith('VioletHalo') for n in child(lobby,'PlanetAura').findall('Item'))==3
+roof=child(child(lobby,'Roof'),'FullGlassCeiling')
+assert abs(float(roof.findtext("Properties/float[@name='Transparency']"))-.94)<.001
+assert roof.findtext("Properties/token[@name='Material']")=='272' # SmoothPlastic glass render workaround
+
 for key in ['Distance','Income']:
  board=child(child(lobby,'Leaderboards'),key)
  assert child(board,'Ranking').findtext("Properties/token[@name='Face']")=='5'

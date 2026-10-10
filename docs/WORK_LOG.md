@@ -1269,3 +1269,21 @@
 - 최종 실제 PC Studio Play: 마우스 휠 확대 시 아바타가 시야를 가리지 않는 1인칭, 휠 축소 시 3인칭 복귀 확인. 발자국 클릭→보유 모스랫 동행 선택→창 닫기 후 하단 교감 버튼과 펫이 동시에 보이는 것 확인. PetApplied-2026-10-11.png에 기록. 터치 길게 누르기 및 교감 완료 이벤트는 실제 기기에서 검증하지 않았다.
 - 최종 검사 재실행: HUD 로딩/7개 ID/동행 모드, 열린 부화소 데이터 보존/저장 구조, 이름 배정·퇴장·9번째 접속 경계, 9개 실제 저장 소스 일치 통과. 최신 설치기 재생성 및 Luau 컴파일 통과. 사냥터 카메라·로비 복귀는 이번 최종 Play에서 다시 실행하지 않았다.
 - 저장 중 XML 읽기와 충돌해 한 번 파일 잠금 오류가 발생했으나 재저장 성공 로그와 파일/소스 일치 확인으로 복구했다. 로비+행성 편집 화면 LobbyPolish-2026-10-11.png 기록. 대형 검은 구·행성 효과의 실제 모바일 메모리/프레임 성능은 미측정.
+
+
+## 2026-10-11 직접 Studio 조작: 동행 교감·Green Star·행성 기록
+
+- 사용자 요청: 공동 탑승 타이머, 교감 E, 앉기/하트/고개 기울기, 행성별거리TOP10, 강한보라오라, 펫사라짐수정, GreenStar이미지, 게임헬멧제거, 영어번역질문. 컴퓨터 직접조작으로 적용했다.
+- 타이머는 기존에도Riding.started 기준5/8/10초였다. 공통HuntRules.mountTimeline에 명시하고5종별별길들이기/경고/날뛰기 경계값검사를 통과했다. 중복지급이나 새소유권규칙을 추가하지 않았다.
+- 펫 heartbeat가canAct/available/root의 일시적 실패를 삭제조건으로 사용하던 원인을 수정했다. 기다리는동안 Running=false, 소유권상실/로비이탈만정리. Persistent스트리밍, 서버교감시각3초, 재교감간격3.5초.500회잠금/50회root없음 유지 및소유권상실정리 Luau검사통과.
+- Bone.Transform으로뒷발앉기/앞발들기/얼굴좌우기울기를3초재생,8개의분홍하트상승·소멸. 눈감기추가없음. 실제PC Studio Play에서ProximityPrompt InputHoldBegin/End를 통해서버교감속성이설정되고 하트와모션이재생됨 확인. 정면촬영MossratBondFront-2026-10-11.png. 게임Helmet없음도현재캐릭터검사true. 실기기터치미검증.
+- GreenStar원본PNG bytes그대로CreatorHub업로드. 데칼74025325907489 → InsertService를 통해내부Texture78730064656056확인. 실제Play로켓행성선택창/인덱스에서로딩확인. 업로드증거GreenStarUpload-2026-10-11.png, 선택창GreenStarDeparture-2026-10-11.png.
+- 인덱스좁은화면의행성이미지·글씨겹침을분리한좌우탭으로수정. 큰화면은좌측지역이미지에도제공그림표시. 세부기기확인은아래추가기록.
+- RecordRules.mergePlanets에기존거리→GreenStar초기이관/행성별최대값보존. 기존GreenStar OrderedDataStore명유지, 향후확정행성은별도store. 현재분류GreenStar만. 동시저장중새기록dirty보존. 지역별저장합성검사통과; 로컬GameId0이므로실제게시게임DataStore TOP10읽기검증미실시.
+- 실제Play에서Glass천장뒤의Neon반투명/ParticleEmitter/Highlight가보이지않는것확인. 임시SmoothPlastic비교로원인확인. 투명광학유리외형은유지하면서SmoothPlastic .94로최종적용.380/410/440stud보라광환세겹(.98/.992/.996), 보라윤곽, 작은반짝임12/s와낮은rate광환입자. 과한보라색덮임을실제캡처로검토후낮췄다. 최종오라및모바일성능은별도검증.
+- 한/영번역목록에이번문구추가, RocketDeparture GUI에도LocalizationController.watch연결. 행성선택/교감한영Luau검사통과. 한국어PNG버튼과미등록동적문구는한국어가남으므로전체영어자동번역완료라고말하지않는다. Roblox공식문서기준자동번역은SourceLanguage와번역표설정에의존한다.
+- 기존 scene전체재빌드없음. 서버/클라이언트/공유16소스만좁은설치기 적용, 이전모듈/오라는ServerStorage백업. 최종Journal/Aura추가수정도실제Studio적용. 큰장소파일은로컬저장,소스/이미지/증거/기록은Git저장.
+
+- 최종좁은Play화면632x676에서행성분류PNG와GreenStar글씨확인. 새TextLabel의ZIndex가배경아래라안보이던순서를47로교정. 공통경고시작도state.started+8에고정해프레임지연이10초날뛰기시각을미루지않도록했다. 최종재시작후비주얼검사와16소스저장일치는아래에추가기록.
+
+- 최종Studio저장성공02:24:44. 마지막탭ZIndex코드/공통경고시각을포함한16개실제Module/Script 소스가저장rbxlx와일치했고전부Luau컴파일통과. 공통시간/행성기록/펫잠금유지검사및기존HUD7개·열린부화소·주인이름경계검사도통과. 실제게시게임랭킹·해외계정·실기기모바일·장시간재접속펫은미검증. 장소는로컬저장했으며Roblox게시하지않았다.

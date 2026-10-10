@@ -31,11 +31,13 @@ function A.animate(model,moving)
  end
  local now=os.clock()
  if c.mode and now-c.last<1/30 then return end c.last=now
- local mode=moving and "Walk" or "Idle"
+ local bondUntil=model:GetAttribute("PetBondUntil") or 0
+ local bonding=bondUntil>workspace:GetServerTimeNow()
+ local mode=bonding and "Bond" or moving and "Walk" or "Idle"
  if c.mode~=mode then c.mode=mode c.started=now c.blendStarted=now c.previous={}
   for name,b in pairs(c.bones) do c.previous[name]=b.Transform end
  end
- local clip=data.clips[mode]
+ local clip=data.clips[mode=="Bond" and "Idle" or mode]
  local sample=((now-c.started)%clip.duration)*clip.fps
  local index=math.floor(sample)+1 local alpha=sample-math.floor(sample)
  local poses={}
@@ -61,7 +63,22 @@ function A.animate(model,moving)
    -- Explicit four-leg stride also covers imported rigs whose revision attribute is absent.
    local legSide=name:sub(1,4)=="Left" and "Left" or name:sub(1,5)=="Right" and "Right" or nil
    local legLimb=name:find("Front",1,true) and "Front" or name:find("Rear",1,true) and "Rear" or nil
-   if legSide and legLimb and moving then
+   if bonding then
+    -- Settle onto the rear paws, raise the front paws and gently tilt the face.
+    local t=workspace:GetServerTimeNow()-(model:GetAttribute("PetBondStarted") or 0)
+    local ease=math.min(math.clamp(t/.3,0,1),math.clamp((bondUntil-workspace:GetServerTimeNow())/.35,0,1))
+    local pose=CFrame.identity
+    if name=="Pelvis" then pose=CFrame.new(0,-.08*scale,0)*CFrame.Angles(math.rad(-32),0,0)
+    elseif name=="Spine" then pose=CFrame.Angles(math.rad(-18),0,0)
+    elseif name=="Chest" then pose=CFrame.Angles(math.rad(8),0,0)
+    elseif name=="Neck" then pose=CFrame.Angles(math.rad(22),0,0)
+    elseif name=="Head" then pose=CFrame.Angles(math.rad(20),math.sin(t*4)*.12,math.sin(t*4)*.20)
+    elseif legLimb=="Rear" and name:find("Upper",1,true) then pose=CFrame.Angles(math.rad(50),0,0)
+    elseif legLimb=="Rear" and name:find("Lower",1,true) then pose=CFrame.Angles(math.rad(-55),0,0)
+    elseif legLimb=="Front" and name:find("Upper",1,true) then pose=CFrame.Angles(math.rad(-50),0,0)
+    elseif legLimb=="Front" and name:find("Lower",1,true) then pose=CFrame.Angles(math.rad(40),0,0) end
+    frame=frame*CFrame.identity:Lerp(pose,ease)
+   elseif legSide and legLimb and moving then
     local opposite=(legSide=="Left")~=(legLimb=="Front")
     local beat=math.sin((now-c.started)*math.pi*6+(opposite and math.pi or 0))
     if name:find("Upper",1,true) then frame=CFrame.Angles(beat*.65,0,0)

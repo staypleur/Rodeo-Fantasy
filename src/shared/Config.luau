@@ -52,6 +52,7 @@ Config.BagIncome = {
 -- Original-style behaviours; exact source-game numbers are not verified.
 -- Timing below is explicit prototype tuning, not a claim of identical balance.
 Config.Hunt = {
+	-- Both clocks begin at the same Riding.started; never after taming finishes.
 	TameSeconds = 5,
 	AngerSeconds = 8,
 	AngerEnabled = true,

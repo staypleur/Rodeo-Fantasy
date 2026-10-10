@@ -23,7 +23,7 @@ function M.new(gui,player)
   if prompt.Name~="PetOwnCompanion" then return end
   local model=prompt:FindFirstAncestorOfClass("Model")
   if not model or model:GetAttribute("OwnerUserId")~=player.UserId then prompt.Enabled=false return end
-  hide() current=prompt button.Visible=true button.Text=UIS.TouchEnabled and "교감 · 꾹 누르기" or "교감 · E 꾹"
+  hide() current=prompt button.Visible=true button.Text=UIS.TouchEnabled and "교감" or "교감 E"
   table.insert(connections,prompt.PromptButtonHoldBegan:Connect(function()
    reset() tween=game:GetService("TweenService"):Create(bar,TweenInfo.new(prompt.HoldDuration,Enum.EasingStyle.Linear),{Size=UDim2.new(1,0,0,4)}) tween:Play()
   end))

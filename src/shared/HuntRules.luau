@@ -1,6 +1,11 @@
 -- Pure rules for continuous riding, airborne lassoing and swept collisions.
 local Rules = {}
 
+-- Shared elapsed time from landing, independent of whether taming has completed.
+function Rules.mountTimeline(elapsed,tameSeconds,warningSeconds,warningDuration)
+ return elapsed>=tameSeconds,elapsed>=warningSeconds,elapsed>=warningSeconds+warningDuration
+end
+
 function Rules.rideSpeed(clock,dashUntil,base,multiplier)
  return base*(dashUntil and clock<dashUntil and multiplier or 1)
 end

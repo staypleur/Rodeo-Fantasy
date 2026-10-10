@@ -6,10 +6,12 @@ local package=RS:WaitForChild("RodeoFantasy")
 local remote=package:WaitForChild("CaptureRemote")
 local Catalog=require(package:WaitForChild("MonsterCatalog"))
 local L=require(package:WaitForChild("Localization"))
+local Planets=require(package:WaitForChild("PlanetCatalog"))
 local function make(class,props,parent)
  local p=Instance.new(class) for key,value in pairs(props) do p[key]=value end p.Parent=parent return p
 end
 local gui=make("ScreenGui",{Name="RocketDepartureUI",ResetOnSpawn=false,DisplayOrder=40,Enabled=false},player:WaitForChild("PlayerGui"))
+require(script.Parent:WaitForChild("LocalizationController")).watch(gui)
 local overlay=make("TextButton",{Size=UDim2.fromScale(1,1),Text="",AutoButtonColor=false,Modal=true,BackgroundColor3=Color3.fromRGB(5,14,24),BackgroundTransparency=.15},gui)
 local panel=make("Frame",{AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.94,.9),BackgroundColor3=Color3.fromRGB(17,38,54)},overlay)
 make("UISizeConstraint",{MaxSize=Vector2.new(700,600)},panel)
@@ -56,7 +58,7 @@ local function chooseMonster()
  if #menu.items==0 then status.Text="보유 몬스터가 없어요. 무료 1성 모스랫은 새 모델 연결 후 지급됩니다." end
  for index,item in ipairs(menu.items) do
   local id=item.monsterId
-  local name=id=="MeadowMouse" and "모스랫" or Catalog[id] and L.text(Catalog[id].Template:gsub("Template$",""),player.LocaleId) or tostring(id)
+  local name=L.text(id,player.LocaleId)
   local b
   b=button(name.." · "..tostring(item.stars).."성"..(item.ready and "" or " · 준비 중"),index,function()
    if busy then return end
@@ -93,6 +95,9 @@ remote.OnClientEvent:Connect(function(action,data)
   nextButton.Text="다음 · 몬스터 선택" status.Text=""
   local b
   b=button("Green Star\n숲 · 1,000m",1,function() selected="GreenStar" b.BackgroundColor3=Color3.fromRGB(47,125,112) status.Text="Green Star를 선택했어요." end)
+  b.Size=UDim2.new(1,-8,0,160) b.Text=""
+  make("ImageLabel",{Name="GreenStarArtwork",Image=Planets.GreenStar.Image,BackgroundTransparency=1,Position=UDim2.fromScale(.02,.04),Size=UDim2.fromScale(.40,.92),ScaleType=Enum.ScaleType.Fit},b)
+  make("TextLabel",{Name="PlanetLabel",Text=L.text("Green Star\n숲 · 1,000m",player.LocaleId),BackgroundTransparency=1,Position=UDim2.fromScale(.44,.1),Size=UDim2.fromScale(.54,.8),TextScaled=true,TextWrapped=true,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1)},b)
  elseif action=="DepartureResult" and gui.Enabled then
   busy=false
   if data.ok then hide(false) else status.Text=messages[data.reason] or "출발할 수 없어요. 다시 선택해 주세요." end

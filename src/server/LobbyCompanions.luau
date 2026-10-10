@@ -36,6 +36,7 @@ function M.new(context)
   local frame=CFrame.new(position.X,y+height,position.Z)
   model:PivotTo(frame*model.PrimaryPart.CFrame:Inverse()*model:GetPivot())
   model.Name="Companion_"..p.UserId
+  model.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
   for _,part in ipairs(model:GetDescendants()) do
    if part:IsA("BasePart") then part.Anchored=true part.CanCollide=false part.CanTouch=false part.CanQuery=false
    elseif part:IsA("BillboardGui") then part:Destroy() end
@@ -49,8 +50,11 @@ function M.new(context)
   local last=-math.huge
   prompt.Triggered:Connect(function(who)
    local rr=root(who)
-   if who~=p or not context.canAct(p) or not Rules.available(Rules.find(context.bag(p),id)) or not rr or (rr.Position-model.PrimaryPart.Position).Magnitude>12 or os.clock()-last<1.5 then return end
-   last=os.clock() P.CaptureRemote:FireAllClients("LobbyPet",{model=model,at=workspace:GetServerTimeNow()})
+   if who~=p or not context.canAct(p) or not Rules.available(Rules.find(context.bag(p),id)) or not rr or (rr.Position-model.PrimaryPart.Position).Magnitude>12 or os.clock()-last<3.5 then return end
+   last=os.clock()
+   local at=workspace:GetServerTimeNow()
+   model:SetAttribute("PetBondStarted",at) model:SetAttribute("PetBondUntil",at+3)
+   P.CaptureRemote:FireAllClients("LobbyPet",{model=model,at=at})
   end)
  end
  local elapsed=0
@@ -58,7 +62,11 @@ function M.new(context)
   elapsed+=dt if elapsed<.1 then return end local step=math.min(elapsed,.2) elapsed=0
   for p,pet in pairs(pets) do
    local r=root(p)
-   if not r or not context.canAct(p) or not Rules.available(Rules.find(context.bag(p),pet.id)) then api.clear(p) continue end
+   -- Saving/trading locks and character replacement are transient. Only clear
+   -- on leaving the lobby or actually losing ownership; never on Store.busy.
+   if not p.Parent or not context.inLobby(p) or not Rules.find(context.bag(p),pet.id) then api.clear(p) continue end
+   if not r or not context.canAct(p) or not Rules.available(Rules.find(context.bag(p),pet.id)) then pet.model:SetAttribute("Running",false) continue end
+   if (pet.model:GetAttribute("PetBondUntil") or 0)>workspace:GetServerTimeNow() then pet.model:SetAttribute("Running",false) continue end
    local old=pet.model.PrimaryPart.CFrame
    local toOwner=Vector3.new(r.Position.X-old.X,0,r.Position.Z-old.Z)
    -- A start/stop band keeps a resting pet still when its owner turns nearby.

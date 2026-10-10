@@ -8,6 +8,7 @@ local package=game.ReplicatedStorage.RodeoFantasy
 local C=require(package.MonsterCatalog)
 local Q=require(package.CollectionQuery)
 local L=require(package.Localization)
+local Planets=require(package.PlanetCatalog)
 local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
 local Buttons=require(script.Parent:WaitForChild("BagUI"))
 local Audio=require(script.Parent:WaitForChild("AudioPresentation"))
@@ -57,6 +58,8 @@ function J.new(gui,remote)
  make("UIAspectRatioConstraint",{AspectRatio=1},planet)
  gradient(planet,Color3.fromRGB(166,237,66),Color3.fromRGB(19,100,55))
  make("UIStroke",{Color=Color3.fromRGB(158,255,157),Thickness=2},planet)
+ local art=make("ImageLabel",{Name="GreenStarArtwork",Image=Planets.GreenStar.Image,BackgroundTransparency=1,Position=UDim2.fromScale(.01,.23),Size=UDim2.fromScale(.98,.42),ScaleType=Enum.ScaleType.Fit,ZIndex=44},region)
+ task.spawn(function() while art.Parent and not art.IsLoaded do task.wait(.25) end if art.Parent then planet.Visible=false end end)
  local pages=panel(book,"JournalEntries",.18,.16,.50,.53,Color3.fromRGB(23,27,35))
  local progress=panel(book,"CollectionProgress",.18,.72,.50,.12,Color3.fromRGB(14,18,25))
  local progressFill=make("Frame",{Name="ProgressFill",Size=UDim2.fromScale(0,1),BackgroundColor3=Color3.fromRGB(26,220,84),BorderSizePixel=0,ZIndex=43},progress)
@@ -75,6 +78,9 @@ function J.new(gui,remote)
  make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},planetTab)
  make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=21},planetTab)
  gradient(planetTab,Color3.fromRGB(167,250,95),Color3.fromRGB(14,127,67))
+ planetTab.Text=""
+ local tabLabel=label(planetTab,"PlanetTabLabel","행성\nGreen Star",.36,.04,.62,.92,21) tabLabel.ZIndex=47
+ make("ImageLabel",{Name="GreenStarTabArtwork",Image=Planets.GreenStar.Image,BackgroundTransparency=1,Position=UDim2.fromScale(.015,.08),Size=UDim2.fromScale(.34,.84),ScaleType=Enum.ScaleType.Fit,ZIndex=47},planetTab)
  local compact=false
  local lockedHumanoid,savedWalk,savedJump,savedRotate,savedHeight
  local function freeze()
@@ -110,7 +116,7 @@ function J.new(gui,remote)
   self.selected=math.clamp(self.selected,1,math.max(1,#self.entries))
   pageNumber.Text=self.page.." / "..max
   local discovered=0 for _,entry in ipairs(self.entries) do if self.seen[entry.key] then discovered+=1 end end
-  summary.Text="잠금 해제: "..discovered.."/"..#self.entries
+  summary.Text=T("Unlocked")..": "..discovered.."/"..#self.entries
   progressText.Text=discovered.."/"..#self.entries progressFill.Size=UDim2.fromScale(#self.entries>0 and discovered/#self.entries or 0,1)
   previous.Visible=max>1 nextPage.Visible=max>1
   local colors={Color3.fromRGB(83,181,78),Color3.fromRGB(26,139,232),Color3.fromRGB(203,73,229),Color3.fromRGB(242,190,32)}

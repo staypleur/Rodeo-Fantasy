@@ -30,6 +30,7 @@ local states,bags,limits,views={},{},{},{}
 local worlds,worldRoots={},{}
 local companions=require(script.Parent.LobbyCompanions).new({
  bag=function(p) return bags[p] end,
+ inLobby=function(p) return bags[p] and not states[p] and not p:GetAttribute("Travelling") end,
  canAct=function(p) return bags[p] and not states[p] and not Store.busy(p) and not Social.trading(p) and not p:GetAttribute("Travelling") end,
  canSummon=function(p) return Lobby.canSummon(p) end,
 })
@@ -64,7 +65,7 @@ local function send(player,message)
  local state,bag=states[player],bags[player]
  if not bag or Store.busy(player) or player:GetAttribute("Travelling") then return end
  local gains=BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
- Records.sample(player,bag.totalProduced or 0,state and state.distance or 0)
+ Records.sample(player,bag.totalProduced or 0,state and state.distance or 0,"GreenStar")
  local wildIds={}
  if state and worlds[player] then for model in pairs(worlds[player].visibleSet(state.root.Position.Z,views[player],player)) do table.insert(wildIds,model:GetAttribute("SpawnSerial")) end end
  remote:FireClient(player,"State",{summonedId=player:GetAttribute("SummonedId"),huntRoot=worldRoots[player],initialLanding=state and state.initialLanding,income=not state and gains or nil,progress=Progress.snapshot(player),wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,tameSeconds=state and state.monster and Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds or 5,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,balance=bag.balance,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
@@ -365,7 +366,7 @@ RunService.Heartbeat:Connect(function(delta)
   local steer=state.phase=="Riding" and clock-state.steerAt<0.5 and state.steer or 0
   local buckHeight,buckDrift=0,0
   if state.phase=="Riding" and Config.Hunt.AngerEnabled and clock-state.started>=Config.Hunt.AngerSeconds then
-   state.angerAt=state.angerAt or clock
+   state.angerAt=state.angerAt or state.started+Config.Hunt.AngerSeconds
    local elapsed=clock-state.angerAt-tuning.AngerWarningSeconds
    if elapsed>=0 then
     buckHeight,buckDrift=Rules.buck(elapsed,tuning.BuckCycleSeconds,tuning.BuckHeightStuds,Catalog[state.monster:GetAttribute("MonsterId")].TripleHop)
@@ -431,14 +432,15 @@ RunService.Heartbeat:Connect(function(delta)
    local contact=World.mountedHit(before,position,state.monster,World.visibleSet(position.Z,views[player],player),dashing)
    if contact then finish(player,contact=="Wall" and "You hit a wall." or "You hit another monster.",contact) continue end
    if World.hit(before,position,state.monster:GetAttribute("Flying"),state.monster,dashing) then finish(player,"You hit an obstacle.","Obstacle") continue end
-   if not state.tamed and clock-state.started>=Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds then
+   local tameReady,warningReady=Rules.mountTimeline(clock-state.started,Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds,Config.Hunt.AngerSeconds,tuning.AngerWarningSeconds)
+   if not state.tamed and tameReady then
     local id=state.monster:GetAttribute("MonsterId") or Config.Monster.Id
     local species=Catalog[id]
     state.tamed=true BagRules.grant(bags[player],id,clock,species.IncomeSeconds,species.IncomeAmount) Progress.caught(player,id,1) send(player,"Monster tamed! Added to your bag.")
     state.monster:SetAttribute("Tamed_"..player.UserId,true)
    end
-   if Config.Hunt.AngerEnabled and clock-state.started>=Config.Hunt.AngerSeconds then
-    state.angerAt=state.angerAt or clock
+   if Config.Hunt.AngerEnabled and warningReady then
+    state.angerAt=state.angerAt or state.started+Config.Hunt.AngerSeconds
     state.monster:SetAttribute("AngerWarning",true)
     state.monster:SetAttribute("AngerStarted",state.angerAt+tuning.AngerWarningSeconds)
     state.monster:SetAttribute("Angry",clock-state.angerAt>=tuning.AngerWarningSeconds)

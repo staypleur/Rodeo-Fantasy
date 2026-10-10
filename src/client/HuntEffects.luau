@@ -49,10 +49,17 @@ end
 function M.pet(data)
  local model=type(data)=="table" and data.model
  if typeof(model)~="Instance" or not model:IsA("Model") or not model.PrimaryPart then return end
- local gui=Instance.new("BillboardGui") gui.Name="LocalPetHeart" gui.Size=UDim2.fromOffset(60,60)
- gui.StudsOffset=Vector3.new(0,4,0) gui.AlwaysOnTop=false gui.Parent=model.PrimaryPart
- local label=Instance.new("TextLabel") label.Size=UDim2.fromScale(1,1) label.BackgroundTransparency=1
- label.Text="♥" label.TextColor3=Color3.fromRGB(255,162,193) label.TextSize=40 label.Parent=gui
- game:GetService("Debris"):AddItem(gui,1.2)
+ local tween=game:GetService("TweenService")
+ for i=1,8 do
+  local angle=i*math.pi/4
+  local gui=Instance.new("BillboardGui") gui.Name="LocalPetHeart" gui.Size=UDim2.fromOffset(38,38)
+  gui.StudsOffsetWorldSpace=Vector3.new(math.cos(angle)*1.6,.4+(i%3)*.4,math.sin(angle)*1.6)
+  gui.AlwaysOnTop=false gui.MaxDistance=100 gui.Parent=model.PrimaryPart
+  local label=Instance.new("TextLabel") label.Size=UDim2.fromScale(1,1) label.BackgroundTransparency=1
+  label.Text="♥" label.TextColor3=Color3.fromRGB(255,130,190) label.TextSize=30 label.Parent=gui
+  tween:Create(gui,TweenInfo.new(3),{StudsOffsetWorldSpace=gui.StudsOffsetWorldSpace+Vector3.new(0,2.2,0)}):Play()
+  tween:Create(label,TweenInfo.new(3),{TextTransparency=1}):Play()
+  game:GetService("Debris"):AddItem(gui,3)
+ end
 end
 return M

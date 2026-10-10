@@ -36,17 +36,8 @@ function Lobby.prepareCharacter(character)
    end
   end)
  end
- local head=character:FindFirstChild("Head") or character:WaitForChild("Head",10)
- if head and not character:FindFirstChild("AstronautHelmet") then
-  local helmet=Instance.new("Accessory") helmet.Name="AstronautHelmet"
-  local bubble=Instance.new("Part") bubble.Name="Handle" bubble.Shape=Enum.PartType.Ball
-  bubble.Size=Vector3.one*math.max(2.8,head.Size.Magnitude*1.5)
-  bubble.Material=Enum.Material.Glass bubble.Color=Color3.fromRGB(196,232,245) bubble.Transparency=.78
-  bubble.CanCollide=false bubble.CanTouch=false bubble.CanQuery=false bubble.Massless=true bubble.CastShadow=false
-  bubble.CFrame=head.CFrame bubble.Parent=helmet
-  local weld=Instance.new("WeldConstraint") weld.Part0=head weld.Part1=bubble weld.Parent=bubble
-  helmet.Parent=character
- end
+ local helmet=character:FindFirstChild("AstronautHelmet")
+ if helmet then helmet:Destroy() end
 end
 for index=1,8 do
  local plot=plots["Plot_"..index]
