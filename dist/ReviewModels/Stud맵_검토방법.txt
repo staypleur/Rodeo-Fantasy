@@ -7,9 +7,14 @@
 4. Studio 명령 모음에 붙여넣고 Enter를 누르세요. Play 중이 아닌 편집 상태에서 실행하세요.
 5. Explorer의 Workspace 안에 HuntStudBlockReview 모델이 생기고 선택됩니다. 마우스를 3D 화면에 놓고 F를 눌러 모델을 화면에 맞추세요.
 6. Output(출력)에 STUD_MAP_REVIEW_CREATED 71이 나오면 생성 성공입니다.
-7. 모델 안 MeadowPlate를 선택해 Properties에서 Material=Plastic, Shape=Block, TopSurface=Studs를 확인하세요. 바닥 돌기 표면이 어떻게 보이는지 확인하세요.
+7. 모델 안 MeadowPlate를 선택해 Properties에서 Material=Plastic, Shape=Block, TopSurface=Studs, Size.X=192를 확인하세요. 나무/옆 벽도 윗면과 네 옆면이 Studs인지 확인하세요.
 
 블록 나무/바위도 모두 Plastic Part이며 4studs 격자에 맞습니다.
 이 검토 모델에는 몬스터·사냥 조작·후방 추적 카메라가 없습니다.
 실제 Studio 화면/모바일·PC 실행 검증은 별도로 필요합니다.
-재실행하면 새 검토 모델이 추가됩니다. 기존 모델이나 게임을 삭제하지 않습니다.
+맵 폭은160에서192studs로20% 넓어졌습니다. 길이/전체 폭은 일정하며 멀티 요소는 없습니다.
+기본 바닥 윗면은Y=8로 올려 Baseplate와 분리합니다.
+재실행 시 기존 생성기의 검토 모델은 ServerStorage에 보관하고 새 맵만 Workspace에 남깁니다.
+모델을 삭제하지 않으며 Baseplate/다른 게임 모델은 그대로 둡니다. Ctrl+Z로 되돌릴 수 있습니다.
+기존 생성 코드를 여러 번 실행한 경우에도 새 코드를 한 번 실행하세요.
+바닥 깜빡임이 남으면 카메라를 가까이/멀리 움직여도 같은 위치가 깜빡이는지 확인하고 해당 화면을 공유하세요. 실제 원인은 코드만으로 확정하지 않습니다.
