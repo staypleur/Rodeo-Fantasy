@@ -52,7 +52,7 @@ local function inspect(origin)
    for _,axis in ipairs({"X","Y","Z"}) do
     local position,size=p.Position[axis],p.Size[axis]
     assert(position%4==0 and size>0 and size%4==0)
-    assert((position-size/2)%4==0 and (position+size/2)%4==0)
+    if axis~="Y" then assert((position-size/2)%4==0 and (position+size/2)%4==0) end
    end
   end
  end
@@ -102,6 +102,18 @@ for _,p in ipairs(fourth:GetChildren()) do
 end
 -- Adjacent gradient strips must not reintroduce overlapping top faces.
 local all=fourth:GetChildren()
+-- Thin decorative plates must sit on a supporting plate/trunk, not float.
+for _,a in ipairs(all) do
+ if a.Size.Y==4 and a.Name~="LowRock" then
+  local supported=false
+  for _,b in ipairs(all) do
+   if b~=a and b.Position.Y+b.Size.Y/2==a.Position.Y-a.Size.Y/2
+    and math.abs(a.Position.X-b.Position.X)<(a.Size.X+b.Size.X)/2
+    and math.abs(a.Position.Z-b.Position.Z)<(a.Size.Z+b.Size.Z)/2 then supported=true break end
+  end
+  assert(supported,"Floating decorative plate: "..a.Name)
+ end
+end
 for i,a in ipairs(all) do
  for j=i+1,#all do
   local b=all[j]

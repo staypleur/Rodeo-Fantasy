@@ -46,25 +46,26 @@ function Layout.build()
   local crown=large and 48 or 40
   put("TreeRoot",x,4,z,16,8,16,107,72,48,"Obstacle")
   for level=0,2 do
-   put("TreeTrunk",x,12+level*8,z,8,8,8,125+level*12,86+level*10,58+level*8,"Obstacle")
+   put("TreeTrunk",x,12+level*8,z,8,level==2 and 12 or 8,8,125+level*12,86+level*10,58+level*8,"Obstacle")
   end
   for _,side in ipairs({-1,1}) do
    put("TreeBranch",x+side*12,24,z,16,8,8,146,104,72,"Obstacle")
   end
-  -- Separate adjacent strips give irregular crowns and colour variation without
-  -- overlapping coplanar surfaces. All geometry stays on the four-stud grid.
-  for band=-1,1 do
-   local w=band==0 and crown or crown-8
-   put("CanopyLower",x+band*4,36,z+band*8,w,8,8,99+band*9,120+band*8,52+band*5,"Obstacle")
-   put("CanopyMiddle",x-band*4,44,z+band*8,w-8,8,8,153+band*13,170+band*9,82+band*8,"Obstacle")
-  end
-  put("CanopyUpper",x,52,z,crown-16,8,16,182,193,104,"Obstacle")
+  -- Broad, four-stud-thick plates, shifted slightly like the user's stacked
+  -- Lego reference. Each upper plate touches the lower one without a gap.
+  put("CanopyLower",x-4,36,z,crown,4,40,99,120,52,"Obstacle")
+  put("CanopyMiddle",x+4,40,z+4,crown-8,4,32,127,148,68,"Obstacle")
+  put("CanopyMiddle",x,44,z,crown-8,4,24,154,171,83,"Obstacle")
+  put("CanopyUpper",x+4,48,z+4,crown-16,4,16,182,193,104,"Obstacle")
  end
  local function rock(x,z,large)
   local w=large and 48 or 32
-  put("LowRock",x,4,z,w,8,24,106,91,94,"Obstacle")
-  put("RockMiddle",x+4,12,z+4,w-8,8,16,139,120,123,"Obstacle")
-  put("RockCap",x,20,z,w-16,8,8,178,157,151,"Obstacle")
+  -- Bottom plate embeds two studs into the floor; upper plates are flush stacked.
+  put("LowRock",x,0,z,w,4,32,106,91,94,"Obstacle")
+  put("RockMiddle",x+4,4,z+4,w-8,4,32,124,107,110,"Obstacle")
+  put("RockMiddle",x,8,z,w-8,4,24,143,124,127,"Obstacle")
+  put("RockCap",x+4,12,z+4,w-16,4,16,161,141,140,"Obstacle")
+  put("RockCap",x,16,z,w-16,4,16,178,157,151,"Obstacle")
  end
  -- Opening and final approach stay clear. Alternate splits with open recovery space.
  -- Rows have 160-stud spacing (~33 m); the full outer width stays constant.

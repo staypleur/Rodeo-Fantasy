@@ -36,7 +36,7 @@ function Generator.create(parent, origin, backupParent)
  local model = Instance.new("Model")
  model.Name = "HuntStudBlockReview"
  model:SetAttribute("StudMapGenerator",true)
- model:SetAttribute("StudMapRevision",4)
+ model:SetAttribute("StudMapRevision",5)
  model:SetAttribute("TerrainSeed",Layout.Seed)
  model:SetAttribute("LengthMeters",Layout.LengthMeters)
  model:SetAttribute("LengthStuds",Layout.LengthStuds)
@@ -52,8 +52,7 @@ function Generator.create(parent, origin, backupParent)
    assert(onGrid(value), "Block position must align to the 4-stud grid")
   end
   for _, value in ipairs({size.X, size.Y, size.Z}) do
-   -- Multiples of 8 also put both faces on the 4-stud grid.
-   assert(onGrid(value) and value > 0 and value % 8 == 0, "Block dimensions must align their faces to the grid")
+   assert(onGrid(value) and value > 0, "Block dimensions must align to the 4-stud grid")
   end
   local part = Instance.new("Part")
   part.Name = name
