@@ -111,3 +111,7 @@ print("METALNESS_CONNECTED", image)
 4. INSTALLED_MOSSRAT_READY가 나오면 선택된 모델에 F를 눌러 확인합니다. Workspace의 InstalledMossratPreview는 확인용 복제이며 게임 템플릿은 수정하지 않습니다. 확인 후 이 복제만 삭제할 수 있습니다.
 
 업로더 실패 원인은 아직 확정하지 못했습니다. 이 절차는 기존 설치 모델을 사용하므로 추가 업로드가 필요하지 않습니다. 실제 색상과 모션 확인은 Studio에서 남아 있습니다.
+
+### 회색 모스랫의 색상 복구
+
+확인용 복제가 회색인 사용자 화면 확인. 저장 XML에서 ColorMap=null이고 TexturePack만 남아 있어 색상 표시 완료로 판단하지 않습니다. Play 중지 후 dist/RepairMossratColor.commandbar.lua를 전체 복사하여 Command Bar에 실행합니다. 웹에 이미 올린 색상 데칼 88970410075115에서 실제 이미지 주소를 읽고 설치 템플릿 3개와 확인용 복제의 ColorMap을 연결합니다. MOSSRAT_COLOR_CONNECTED 출력 후 초록색·크림색이 보이면 Ctrl+S로 저장합니다. 주소 연결 성공과 실제 이미지 로딩 성공은 구분합니다. 실패 시 새 오류를 확인하며 재업로드하지 않습니다.

@@ -1111,3 +1111,9 @@
 - 실제 저장 XML에서 설치 템플릿 3개와 백업 1개의 업로드 MeshId 112233757801076, Bone 구조 및 SurfaceAppearance/TexturePack 보존 확인. 업로더 원인은 확정하지 않음.
 - ShowInstalledMossrat.commandbar.lua 추가: 편집 모드/기존 메시·뼈 확인 후 기존 템플릿 복제만 로비에 표시하고 선택. 업로드/데이터/게임 템플릿 수정 없음. 반복 실행 시 자기 확인용 복제만 교체.
 - Luau 컴파일 통과. 실제 Studio 실행·색상·모션 및 모바일 검증은 미실시.
+
+## 2026-10-10 회색 모스랫 색상 복구
+
+- 사용자 실제 화면에서 기존 메시 복제 표시 성공, 색상 미표시 확인. ColorMap null 상태를 명확히 보고.
+- RepairMossratColor.commandbar.lua: 기존 웹 색상 데칼에서 이미지 참조를 해석하여 실제 모스랫 MeshId에 한정해 템플릿과 확인용 복제의 ColorMap 연결. 업로드·형상·뼈대 변경 없음. 변경 전 waypoint/실패 시 주소 복원.
+- Luau 컴파일 통과. 실제 계정 InsertService 로드와 이미지 표시 검증은 사용자 실행 후 남음.
