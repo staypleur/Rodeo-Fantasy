@@ -1,7 +1,7 @@
 from pathlib import Path
 import subprocess
 R=Path(__file__).resolve().parents[1]
-expected={'ShopButtonImage':'84295507284264','IndexButtonImage':'135277525783308','EggButtonImage':'87551432940862','PawButtonImage':'8596625063532','MossratFaceImage':'98296663869747'}
+expected={'ShopButtonImage':'84295507284264','IndexButtonImage':'135277525783308','EggButtonImage':'87551432940862','PawButtonImage':'85966265063532','MossratFaceImage':'98296663869747'}
 h='local I=(function()\n'+(R/'src/client/HudIcons.luau').read_text(encoding='utf-8')+'\nend)()\n'
 h+='local attrs={} local p={GetAttribute=function(_,k) return attrs[k] end,SetAttribute=function(_,k,v) attrs[k]=v end}\n'
 for key,id in expected.items():

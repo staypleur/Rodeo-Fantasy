@@ -5,7 +5,7 @@ game:GetService("ChangeHistoryService"):SetWaypoint("Before uploaded HUD images"
 p:SetAttribute("ShopButtonImage","rbxassetid://84295507284264")
 p:SetAttribute("IndexButtonImage","rbxassetid://135277525783308")
 p:SetAttribute("EggButtonImage","rbxassetid://87551432940862")
-p:SetAttribute("PawButtonImage","rbxassetid://8596625063532")
+p:SetAttribute("PawButtonImage","rbxassetid://85966265063532")
 p:SetAttribute("MossratFaceImage","rbxassetid://98296663869747")
 game:GetService("ChangeHistoryService"):SetWaypoint("Uploaded HUD images configured")
 print("HUD_IMAGES_CONFIGURED — 이미지 5개 연결. Ctrl+S 저장 후 Play로 확인하세요.")

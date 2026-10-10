@@ -1216,3 +1216,12 @@
 - 사용자가 저장한 장소 파일은 재빌드/커밋하지 않으며 원본 그대로 유지. 소스, 적용 파일, 검증 및 안내만 저장한다. 실제 PNG 표시, Roblox 에셋 타입·승인·서버 로딩 성공은 아직 확인하지 않았다.
 
 - 검증: check_hud_images 실제 적용 본문으로 속성 5개 설정·0 예시 무시·사용자 지정 ID 우선 확인, 관련 Luau 컴파일 및 check_index 통과. check_lobby_entries의 장소 좌표 정확 일치 검사는 Studio 저장 후 -16→-16.0000019 / 2.04→2.03999996 float 정밀도 변화로 실패하여 0.0001stud 허용 오차로 수정 후 재검사 통과. 실제 배치 목표나 장소 파일은 수정하지 않았다.
+
+## 2026-10-10 회색 부화기 로딩 원인 조사·색상 분리 점검
+
+- 사용자 로그: 설치 모델 25개·재질 25개·업로드 맵 12개·임시 맵 0개, raw ID PreloadAsync 성공 0/실패 12. 실제 Studio 편집 화면에서는 문틀·콘솔 색상 표시, 부화기 회색 확인. 모든 재질 실패로 단정하지 않는다.
+- 공개 Roblox 메타데이터 조회: 12개 모두 AssetTypeId 1 Image, 제작자 puller3313, 썸네일 상태 Completed. 공개 메타데이터·썸네일 완료는 Studio 콘텐츠 로딩 성공의 증거가 아니다. Creator Hub 부화기 ColorMap 128153809027742 구성 화면은 공개 사용으로 표시됨. 해당 색상 이미지의 비공개 설정은 원인으로 확인되지 않음.
+- 사용자 저장 장소의 부화기 MeshId/크기/UV를 유지. 기존 SurfaceAppearance에는 ColorMap/MetalnessMap/RoughnessMap/생성 TexturePack이 있다. 부화기만 원본 재질·파트 색을 백업하고 새 ColorMap 단독 재질로 분리하는 CheckIncubatorColor 작성. 보조 맵 제외에 따라 광택은 최종 상태가 아니며 실제 표시 확인 필요. 실패 원인·해결 완료는 미확정.
+- Studio 입력 중 사용자의 직접 입력이 감지되어 자동 입력 중지. 준비된 색상 점검은 Studio에서 실행하지 않았음. 장소 파일은 재빌드·커밋하지 않음.
+- Creator Hub 실제 이미지 목록에서 PawButton ID 85966265063532 확인. 이전 8596625063532는 숫자 판독 오류였음. 기본 소스·적용 스크립트·안내·검사 수정. 다른 네 ID 유지. 설치기에는 직전 58bd747 소스 호환 추가.
+- 검증: CheckIncubatorColor Luau 컴파일, check_hud_images 및 check_index 통과. 부화기 단독 재질의 실제 Studio 색상 생성·모바일/PC 렌더링은 미검증.

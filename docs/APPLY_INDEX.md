@@ -21,7 +21,7 @@
 | ShopButton | 84295507284264 |
 | IndexButton | 135277525783308 |
 | EggButton | 87551432940862 |
-| PawButton | 8596625063532 |
+| PawButton | 85966265063532 |
 | MossratFace | 98296663869747 |
 
 ID 값은 기록했으며 실제 Roblox 에셋 타입/승인/로딩 성공은 아직 확인하지 않았습니다. 실제 이미지가 표시되지 않으면 출력의 이미지 로딩 오류로 확인합니다.
@@ -56,5 +56,15 @@ p:SetAttribute("PawButtonImage","rbxassetid://0")
 5. 색상과 재질이 화면에 표시되는지 확인합니다. 502가 계속되면 재실행을 반복하지 말고 잠시 후 저장한 장소를 다시 열어 확인합니다.
 
 재시도 파일은 Workspace 안의 IncubatorImport / DoorImport / ConsoleImport / PlanetImport 및 설치된 UserIncubator / UserDoorFrame / UserDoorConsole / CeilingPlanet을 대상으로 합니다. RodeoLobby 아래에 중첩되어 있어도 찾으며, ServerStorage의 백업 원본은 건드리지 않습니다. `LOBBY_TEXTURE_TARGETS`의 모델/재질/업로드 맵/임시 맵 수로 찾은 대상을 확인할 수 있습니다. 모델 및 SurfaceAppearance를 삭제하지 않습니다. 로딩 성공 수는 실제 재질 렌더링 검증과 구분합니다. 네 모델이 정상 표시되면 기존 `dist/InstallLobbyModules.commandbar.lua`로 8개 구역에 배치합니다.
+
+## 부화기만 회색으로 보일 때 색상 분리 점검
+
+2026-10-10 실제 화면에서 문틀·콘솔 색상은 표시되고 부화기는 회색인 상태를 확인했다. 원시 ID의 PreloadAsync 실패 12개를 모든 설치 재질의 실패로 해석하지 않는다. 부화기 색상 이미지 128153809027742는 Creator Hub에서 공개 사용으로 표시된다. 실패 원인은 아직 확정하지 않았다.
+
+1. Play를 중지한다. `dist/CheckIncubatorColor.commandbar.lua`를 메모장으로 열고 전체 복사한다.
+2. Studio의 명령 모음에 코드 내용만 붙여 넣고 Enter를 누른다.
+3. `INCUBATOR_COLOR_CHECK_REQUESTED`는 요청 완료이며 색상 로딩 성공을 뜻하지 않는다. 부화기의 원래 무늬와 색이 나타나는지 화면에서 확인한다.
+4. 이 점검은 부화기만 새 SurfaceAppearance에 원래 ColorMap을 연결한다. 금속·거칠기 맵은 점검 중 제외되므로 반사와 광택은 최종 상태가 아니다. 원본 재질과 원래 파트 색은 ServerStorage의 IncubatorColorCheckBackup 폴더에 보관된다.
+5. 점검 직후 편집 → 실행 취소(Ctrl+Z)로 원래 재질로 돌아갈 수 있다. 회색이 계속되면 재실행을 반복하지 말고 해당 시점의 출력 로그를 확인한다. 색상 표시 확인 전에는 최종 복구로 기록하지 않는다.
 
 코드·파일 검사와 모의 실행은 통과했지만 실제 Studio·PC·모바일 조작, 이미지 업로드, Roblox 텍스처 복구 여부와 성능 측정은 아직 확인하지 않았습니다.

@@ -2,7 +2,7 @@
 local I={}
 -- IDs supplied by the user from their uploaded image list.
 I.ImageIds={ShopButtonImage="rbxassetid://84295507284264",IndexButtonImage="rbxassetid://135277525783308",
- EggButtonImage="rbxassetid://87551432940862",PawButtonImage="rbxassetid://8596625063532",MossratFaceImage="rbxassetid://98296663869747"}
+ EggButtonImage="rbxassetid://87551432940862",PawButtonImage="rbxassetid://85966265063532",MossratFaceImage="rbxassetid://98296663869747"}
 function I.imageId(package,key)
  local id=package:GetAttribute(key)
  if type(id)=="string" and id~="rbxassetid://0" and id:match("^rbxassetid://%d+$") then return id end
