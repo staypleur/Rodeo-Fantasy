@@ -195,7 +195,9 @@ local function start(player)
  worlds[player]=nextWorld worldRoots[player]=rootFolder
  model:SetAttribute("Occupied",true)
  model:SetAttribute("Angry",false) model:SetAttribute("InitialLanding",true)
- states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,initialLanding=true,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),distance=0,tamed=false}
+ model:SetAttribute("StartingOwnedMount",true)
+ model:SetAttribute("Tamed_"..player.UserId,true)
+ states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,initialLanding=true,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),distance=0,tamed=true}
  companions.clear(player)
  root.Anchored,humanoid.AutoRotate,humanoid.PlatformStand=true,false,true
  root.CFrame=model:GetPivot()*CFrame.new(0,model:GetAttribute("SaddleHeight") or tuning.RideHeightStuds,8)
@@ -314,13 +316,27 @@ remote.OnServerEvent:Connect(function(player,action,value)
  if action=="Start" then start(player) return end
  if action=="ReturnLobby" then
   local state=states[player]
-  if state and (state.phase=="GameOver" or state.phase=="CourseEnd") then
-   finish(player,"Welcome back to the lobby.")
+  if (not state or state.phase=="GameOver" or state.phase=="CourseEnd") and not player:GetAttribute("ReturningLobby") then
+   player:SetAttribute("ReturningLobby",true)
    restoreAvatar(state)
-   state.root.CFrame=Lobby.Spawn
+   states[player]=nil
+   if worldRoots[player] then worldRoots[player]:Destroy() end
+   worlds[player],worldRoots[player]=nil,nil
+   local character=player.Character
+   local humanoid=character and character:FindFirstChildOfClass("Humanoid")
+   if not humanoid or humanoid.Health<=0 then
+    local ok,err=pcall(function() player:LoadCharacterAsync() end)
+    if not ok then states[player]=state player:SetAttribute("ReturningLobby",nil) warn("LOBBY_RESPAWN_FAILED: "..tostring(err)) send(player,"다시 로비로 돌아가기를 눌러 주세요.") return end
+    character=player.Character
+   end
+   local root=character and character:FindFirstChild("HumanoidRootPart")
+   if root then root.Anchored=false root.AssemblyLinearVelocity=Vector3.zero character:PivotTo(Lobby.Spawn) end
+   humanoid=character and character:FindFirstChildOfClass("Humanoid")
+   if humanoid then humanoid.PlatformStand=false humanoid.AutoRotate=true end
    setCharacterGroup(player,"Default")
-   Lobby.prepareCharacter(player.Character)
-   states[player]=nil send(player) sendBag(player)
+   Lobby.prepareCharacter(character)
+   player:SetAttribute("ReturningLobby",nil)
+   send(player,"로비로 돌아왔습니다.") sendBag(player)
   end
   return
  end
@@ -445,7 +461,11 @@ local function added(player)
  bags[player]=bag player:SetAttribute("Area","Lobby") Progress.join(player)
  require(game.ReplicatedStorage.RodeoFantasy.LobbyIncubatorRules).migrate(bag)
  Lobby.display(player,1,bag.eggs or {})
- player.CharacterRemoving:Connect(function() companions.clear(player) finish(player,"Hunt ended") states[player]=nil end)
+ player.CharacterRemoving:Connect(function()
+  companions.clear(player) finish(player,"Hunt ended") states[player]=nil
+  if worldRoots[player] then worldRoots[player]:Destroy() end
+  worlds[player],worldRoots[player]=nil,nil
+ end)
 end
 Players.PlayerAdded:Connect(added)
 Players.PlayerRemoving:Connect(function(player) send(player) if worlds[player] then worlds[player].resetVisibility(player) end Records.leave(player) Progress.leave(player) Store.close(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil if worldRoots[player] then worldRoots[player]:Destroy() end worlds[player],worldRoots[player]=nil,nil end)

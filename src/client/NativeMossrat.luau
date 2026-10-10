@@ -67,12 +67,13 @@ function M.huntFrame(model,frame)
 end
 function M.animate(model,phase,moving,angry)
  if not M.isTarget(model) then return end
- if model:GetAttribute("MossratUserRigRevision")=="ApprovedS1-v1" then
+ local body=model:FindFirstChild("Body")
+ if body and body:FindFirstChild("LeftFrontUpper",true) and body:FindFirstChild("Head",true) then
   rigAnimator=rigAnimator or require(script.Parent:WaitForChild("UserMossratRigAnimator"))
   rigAnimator.animate(model,moving)
   return
  end
- local body=model:FindFirstChild("Body")
+ body=model:FindFirstChild("Body")
  if not body then return end
  local cached=boneCache[model]
  if not cached or cached.body~=body then

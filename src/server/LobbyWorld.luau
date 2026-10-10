@@ -3,9 +3,22 @@ local map=workspace:WaitForChild("RodeoLobby")
 local plots=map:WaitForChild("Plots")
 local owned,occupants={},{}
 Lobby.Departure=map.Airport.Departure
-Lobby.Spawn=CFrame.new(6000,4,-72)
+Lobby.Spawn=CFrame.new(6000,14,-72)
+local departureRadius=38
+local function centerDeparture()
+ local rocket=map.Airport:FindFirstChild("Rocket")
+ if rocket and rocket:IsA("Model") then
+  local box=rocket:GetBoundingBox()
+  Lobby.Departure.Position=Vector3.new(box.Position.X,Lobby.Departure.Position.Y,box.Position.Z)
+ end
+ Lobby.Departure.Transparency=1
+ Lobby.Departure.CanCollide=false
+end
+centerDeparture()
 function Lobby.prepareCharacter(character)
  if not character then return end
+ local root=character:FindFirstChild("HumanoidRootPart") or character:WaitForChild("HumanoidRootPart",10)
+ if root then character:PivotTo(Lobby.Spawn) root.AssemblyLinearVelocity=Vector3.zero end
  local humanoid=character:FindFirstChildOfClass("Humanoid") or character:WaitForChild("Humanoid",10)
  if humanoid then humanoid.WalkSpeed=require(game.ReplicatedStorage.RodeoFantasy.Config).LobbyWalkSpeed end
  local head=character:FindFirstChild("Head") or character:WaitForChild("Head",10)
@@ -31,6 +44,7 @@ local function label(index,name)
   if gui:IsA("SurfaceGui") then gui.Text.Text=name end
  end
 end
+for index=1,8 do label(index,"") end
 function Lobby.assign(player)
  if owned[player] then return owned[player] end
  for index=1,8 do
@@ -38,7 +52,7 @@ function Lobby.assign(player)
    occupants[index]=player owned[player]=index
    plots["Plot_"..index]:SetAttribute("OwnerUserId",player.UserId)
    player:SetAttribute("LobbySlot",index)
-   label(index,(player.DisplayName or player.Name).."\n@"..player.Name.." · 알 부화실")
+   label(index,player.DisplayName or player.Name)
    return index
   end
  end
@@ -55,11 +69,11 @@ function Lobby.release(player)
    local display=pen:FindFirstChild(name) if display then display:Destroy() end
   end
  end
- label(index,"빈 부화실")
+ label(index,"")
 end
 function Lobby.canDepart(player)
  local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
- return owned[player]~=nil and root and (root.Position-Lobby.Departure.Position).Magnitude<=16
+ return owned[player]~=nil and root and (root.Position-Lobby.Departure.Position).Magnitude<=departureRadius
 end
 function Lobby.getPen(player,index)
  if index~=1 or not owned[player] then return nil end
@@ -100,7 +114,7 @@ end
 function Lobby.connect(callback)
  local prompt=Instance.new("ProximityPrompt")
  prompt.Name="FlyToHunt" prompt.ActionText="행성 선택" prompt.ObjectText="로켓"
- prompt.HoldDuration=1 prompt.MaxActivationDistance=12 prompt.RequiresLineOfSight=false
+ prompt.HoldDuration=1 prompt.MaxActivationDistance=departureRadius prompt.RequiresLineOfSight=false
  prompt.KeyboardKeyCode=Enum.KeyCode.E
  prompt.Parent=Lobby.Departure
  prompt.Triggered:Connect(function(player) if Lobby.canDepart(player) then callback(player) end end)

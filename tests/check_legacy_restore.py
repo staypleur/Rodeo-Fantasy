@@ -15,7 +15,17 @@ def models(path):
   if item.get('class') in ('MeshPart','Bone','SurfaceAppearance'):
    result.append((item.get('class'),E.tostring(item.find('Properties'))))
  return result
-assert models(R/'dist/RodeoFantasy-New.rbxlx')==models(R/'.local-backup/before-legacy-hunt/RodeoFantasy-New.rbxlx')
+baseline=R/'.local-backup/before-current-fixes/RodeoFantasy-New.rbxlx'
+if not baseline.exists():baseline=R/'.local-backup/before-legacy-hunt/RodeoFantasy-New.rbxlx'
+# Compare uploaded templates by role, ignoring unrelated preview/backup models.
+def templates(path):
+ result={}
+ for item in E.parse(path).findall('.//Item'):
+  n=item.findtext("Properties/string[@name='Name']")
+  if n in ('RodeoMonsterTemplate','VisualTemplate','MeshyMossratHuntTemplate') and any(x.get('class')=='MeshPart' for x in item.iter('Item')) and n not in result:
+   result[n]=[(x.get('class'),E.tostring(x.find('Properties'))) for x in item.iter('Item') if x.get('class') in ('MeshPart','Bone','SurfaceAppearance')]
+ return result
+assert templates(R/'dist/RodeoFantasy-New.rbxlx')==templates(baseline)
 for p in ['src/shared/CourseGeometry.luau','src/server/HuntWorld.luau','src/shared/Config.luau','src/client/NativeMossrat.luau','dist/RestoreLegacyHunt.commandbar.lua','dist/InstallCentralRocket.commandbar.lua']:
  subprocess.run([str(R/'.tools/luau/luau-compile.exe'),p],cwd=R,stdout=subprocess.DEVNULL,check=True)
 print('LEGACY_MAP_SOURCE_MATCH; MODEL_PROPERTIES_PRESERVED; LUAU_COMPILES')

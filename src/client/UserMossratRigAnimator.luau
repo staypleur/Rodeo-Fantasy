@@ -2,6 +2,7 @@
 local A={}
 local data=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigData"))
 local cache=setmetatable({},{__mode="k"})
+local torsoCenterX={Pelvis=-.04,Spine=.02,Chest=.035,Neck=.025,Head=.015}
 local function rotation(v)
  local x,y,z,w=v[1],v[2],v[3],v[4]
  local n=math.sqrt(x*x+y*y+z*z+w*w) x,y,z,w=x/n,y/n,z/n,w/n
@@ -39,7 +40,21 @@ function A.animate(model,moving)
    local p=poses[name] or {}
    local frame=CFrame.new(p.translation or Vector3.zero)*(p.rotation or CFrame.identity)
    -- Keep the face forward; retain body, legs, ears and tail motion.
+   -- Center the original offset torso chain without changing the uploaded mesh/UVs.
+   local centerX=torsoCenterX[name]
    if name=="Head" or name=="Neck" then frame=CFrame.identity end
+   if centerX then frame=CFrame.new(centerX*scale,0,0)*frame end
+   if name=="Head" then frame=frame*CFrame.Angles(0,math.rad(-8.2),0) end
+   -- Explicit four-leg stride also covers imported rigs whose revision attribute is absent.
+   local legSide=name:sub(1,4)=="Left" and "Left" or name:sub(1,5)=="Right" and "Right" or nil
+   local legLimb=name:find("Front",1,true) and "Front" or name:find("Rear",1,true) and "Rear" or nil
+   if legSide and legLimb and moving then
+    local opposite=(legSide=="Left")~=(legLimb=="Front")
+    local beat=math.sin((now-c.started)*math.pi*6+(opposite and math.pi or 0))
+    if name:find("Upper",1,true) then frame=CFrame.Angles(beat*.65,0,0)
+    elseif name:find("Lower",1,true) then frame=CFrame.Angles(math.max(0,-beat)*.65,0,0)
+    elseif name:find("Paw",1,true) then frame=CFrame.Angles(-beat*.25,0,0) end
+   end
    b.Transform=(c.previous[name] or CFrame.identity):Lerp(frame,blend)
   end
  end

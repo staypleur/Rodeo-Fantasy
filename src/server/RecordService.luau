@@ -79,8 +79,8 @@ local function refresh(board,store)
  board:SetAttribute("HasRecords",true)
 end
 function Service.start()
- local boards=workspace.RodeoLobby.Leaderboards
- boards.Income.Ranking.Heading.Text="Collection discoveries"
+ local boards=require(script.Parent.LobbyRankings).ensure(workspace.RodeoLobby)
+ boards.Income.Ranking.Heading.Text="도감 수집"
  task.spawn(function()
   while true do
    refresh(boards.Distance,distance) refresh(boards.Income,collection)

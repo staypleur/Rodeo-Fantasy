@@ -1168,3 +1168,12 @@
 - NativeMossrat에서 승인 S1 외형만 추가180도 및 고정 revision으로 반복 누적/재생성 방지. authoritative root와 이동은 미변경. 머리/목 중립 애니메이션 유지. 실제 역방향 해결/정면 및 색상은 Studio 사용자 실행 필요.
 - RestoreLegacyHunt.commandbar.lua: 코드 허용 버전 검사, 이전 GreenStar/코드 백업, 새 코스 marker로 교체, 실패 롤백. 현재 Studio의 업로드 모델/재질/로비 수정 보존.
 - check_legacy_restore.py 통과: 구버전 코스 코드 일치, 호환 groundHeight 외 HuntWorld 일치, 35폭, 기존 메시/Bone/SurfaceAppearance 전체 속성 보존, 관련6개 Luau 컴파일. 실제 Studio 주행·모바일·PC 검증 미실시. 기존 Stud 전용 테스트는 복원된 코스에 적용하지 않음. 회색 모스랫은 미해결.
+
+## 2026-10-10 설치 로비·주행 수정과 중앙 랭킹/UI
+
+- 사용자 색상 표시 확인. NativeMossrat은 실제 관절 구조로 승인 Animator를 선택하도록 수정; 원본 메시/UV/텍스처 보존, 몸통 중심 및 Head 고정 yaw 보정, 네 다리 교차 stride. 실제 정면/다리 모습은 Studio 확인 필요.
+- 시작 보유 몬스터를 해당 플레이어의 이미 길들인 대상으로 표시하여 중복 지급 제외. ReturnLobby는 사망·이미 정리된 세션에서도 현재 캐릭터/필요시 재생성 사용, 개인 월드 정리와 재진입 방지.
+- 설치 로비 모든 면 Smooth, 512x512 불투명 천장, 8개 문 중앙 방향, 간판은 DisplayName만/퇴장 시 공백. 중앙 로켓 중심 38stud 거리와 시야 차단 없는 E 1초. 알려진 Workspace 미리보기는 SS 백업으로 이동.
+- 로비에 RecordService가 기대하는 Leaderboards가 누락된 것을 확인. 실제 Distance/Income(도감) 게시판을 로켓 양옆에 생성 및 연결, 기존 데이터 저장소 유지. 상점·룰렛 Activated 버튼/안내 창, 기존 가방·도감·설정 창과 상호 닫기, 사냥에서는 숨김. 품목/확률/보상 미구현.
+- 단일 FixCurrentLobbyHunt.commandbar.lua 준비: 허용 코드 버전/종류 사전 검사, 모델 색 보존, 기존 로비·스크립트 SS 백업, 실패 롤백. 현재 Studio에 자동 적용하지 않음. APPLY_CURRENT_FIXES.md 실행 순서와 성공 확인 추가.
+- check_current_fixes/check_lobby_entries/check_legacy_restore/check_lobby_update 통과: XML Smooth/천장/입구/랭킹, Luau 컴파일, 캐릭터 복귀·다리·UI 모의 동작, 모델 속성 보존, 소환 소유권 검사. 실제 Studio·PC·모바일·성능·게시 서버 랭킹 확인은 미실시.

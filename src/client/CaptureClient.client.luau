@@ -42,9 +42,11 @@ local bagUI=require(script.Parent:WaitForChild("BagUI")).new(gui,remote)
 local journalUI=require(script.Parent:WaitForChild("JournalUI")).new(gui,remote)
 local socialUI=require(script.Parent:WaitForChild("SocialUI")).new(gui,remote,bagUI,journalUI)
 local settingsUI=require(script.Parent:WaitForChild("SettingsUI")).new(gui,audio)
-settingsUI.onOpen=function() bagUI.close() journalUI.close() held=false pointerOrigin,pointerX=nil,nil end
-bagUI.onOpen=function() journalUI.close() settingsUI.close() end
-journalUI.onOpen=function() bagUI.close() settingsUI.close() end
+local lobbyMenus=require(script.Parent:WaitForChild("LobbyMenus")).new(gui)
+settingsUI.onOpen=function() bagUI.close() journalUI.close() lobbyMenus.close() held=false pointerOrigin,pointerX=nil,nil end
+bagUI.onOpen=function() journalUI.close() settingsUI.close() lobbyMenus.close() end
+journalUI.onOpen=function() bagUI.close() settingsUI.close() lobbyMenus.close() end
+lobbyMenus.onOpen=function() bagUI.close() journalUI.close() settingsUI.close() held=false pointerOrigin,pointerX=nil,nil end
 local locale=require(script.Parent:WaitForChild("LocalizationController"))
 locale.watch(gui) locale.watch(workspace.RodeoLobby)
 game:GetService("ProximityPromptService").PromptShown:Connect(function(prompt)
@@ -216,7 +218,7 @@ remote.OnClientEvent:Connect(function(kind,data)
  if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow(),data.monsterCrashFrame,data.monsterCrashId) end
  if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
- bagUI.state(data) journalUI.state(data) socialUI.state(data)
+ bagUI.state(data) journalUI.state(data) socialUI.state(data) lobbyMenus.state(data)
  if data.area=="Lobby" then
   bagUI.income(data.income)
   local slot=player:GetAttribute("LobbySlot")

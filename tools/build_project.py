@@ -53,6 +53,48 @@ def build():
  node(package,'RemoteEvent','CaptureRemote')
  lobby=copy.deepcopy(E.parse(R/'assets/maps/SpaceLobby.rbxmx').getroot().find('Item'));ws.append(lobby)
  expand(lobby,node,part)
+ boards=node(lobby,'Folder','Leaderboards')
+ for key,title,x in [('Distance','최고 거리',5946),('Income','도감 수집',6054)]:
+  board=part(boards,key,[x,23,-16],[26,30,2],(24,38,64))
+  gui=node(board,'SurfaceGui','Ranking');prop(gui,'token','Face',5)
+  composite(gui,'Vector2','CanvasSize',{'X':780,'Y':900})
+  for key,y,height,text,size in [('Heading',0,120,title,52),('Entries',140,740,'기록을 불러오는 중입니다.',34)]:
+   label=node(gui,'TextLabel',key);prop(label,'string','Text',text);prop(label,'float','TextSize',size)
+   prop(label,'float','BackgroundTransparency',1);prop(label,'bool','TextWrapped','true');prop(label,'token','TextYAlignment',0)
+   composite(label,'Color3','TextColor3',{'R':.9,'G':.95,'B':1})
+   composite(label,'UDim2','Position',{'XS':0,'XO':24,'YS':0,'YO':y})
+   composite(label,'UDim2','Size',{'XS':1,'XO':-48,'YS':0,'YO':height})
+ # All eight doors face the center, including the diagonal rooms.
+ for room in lobby.findall("Item/Item"):
+  if not (room.findtext("Properties/string[@name='Name']") or '').startswith('Plot_'):continue
+  def child(name):return next(c for c in room.findall('Item') if c.findtext("Properties/string[@name='Name']")==name)
+  base=child('RoomBase').find("Properties/CoordinateFrame[@name='CFrame']")
+  center=[float(base.find(k).text) for k in ('X','Y','Z')]
+  door=child('DoorSensor').find("Properties/CoordinateFrame[@name='CFrame']")
+  current=math.atan2(float(door.find('X').text)-center[0],float(door.find('Z').text)-center[2])
+  target=math.atan2(6000-center[0],-center[2]);angle=target-current
+  c,s=math.cos(angle),math.sin(angle)
+  import numpy as np
+  rotation=np.array([[c,0,s],[0,1,0],[-s,0,c]])
+  for item in room.iter('Item'):
+   cf=item.find("Properties/CoordinateFrame[@name='CFrame']")
+   if cf is None:continue
+   pos=np.array([float(cf.find(k).text) for k in ('X','Y','Z')]);pos=np.array(center)+rotation@(pos-np.array(center))
+   orientation=rotation@np.array([[float(cf.find(f'R{i}{j}').text) for j in range(3)] for i in range(3)])
+   for key,v in zip(('X','Y','Z'),pos):cf.find(key).text=str(v)
+   for i in range(3):
+    for j in range(3):cf.find(f'R{i}{j}').text=str(orientation[i,j])
+  for gui in child('OwnerBoard').iter('Item'):
+   if gui.get('class')=='TextLabel':prop(gui,'string','Text','')
+ roof=next((c for c in lobby.findall('Item') if c.findtext("Properties/string[@name='Name']")=='Roof'),None)
+ if roof is None:roof=node(lobby,'Model','Roof')
+ if not any(c.findtext("Properties/string[@name='Name']")=='FullOpaqueCeiling' for c in roof.findall('Item')):part(roof,'FullOpaqueCeiling',[6000,102,0],[512,8,512],(25,35,57))
+ # Latest request removes Studs from the installed lobby, not just a separate draft.
+ for p in lobby.iter('Item'):
+  if p.get('class')=='Part':
+   for face in ('TopSurface','BottomSurface','FrontSurface','BackSurface','LeftSurface','RightSurface'):prop(p,'token',face,0)
+   material=p.find("Properties/token[@name='Material']")
+   if material is not None and material.text=='256':material.text='272'
  prototype=node(ws,'Folder','RodeoPrototype');node(prototype,'Folder','Monsters')
  forest=node(ws,'Model','GreenStar')
  for b in data['blocks']:
@@ -92,6 +134,14 @@ lobby.Airport.Airship:SetAttribute("RocketDepartureActive",true)
    return clone
   old_ss=service('ServerStorage');old_rs=service('ReplicatedStorage');old_ws=service('Workspace')
   old_package=named(old_rs,'RodeoFantasy') if old_rs is not None else None
+  if old_ws is not None:
+   old_lobby=named(old_ws,'RodeoLobby')
+   old_airport=named(old_lobby,'Airport') if old_lobby is not None else None
+   old_rocket=named(old_airport,'Rocket') if old_airport is not None else None
+   if old_rocket is not None and any(n.get('class')=='MeshPart' for n in old_rocket.iter('Item')):
+    new_airport=named(lobby,'Airport');default=named(new_airport,'Rocket')
+    if default is not None:new_airport.remove(default)
+    new_airport.append(preserve(old_rocket))
   for old_parent,new_parent,names in [(old_ss,ss,['RodeoMonsterTemplate']),(old_package,package,['VisualTemplate','MeshyMossratHuntTemplate'])]:
    if old_parent is None:continue
    for key in names:
@@ -107,7 +157,9 @@ lobby.Airport.Airship:SetAttribute("RocketDepartureActive",true)
   if old_ws is not None:
    for key in ('MossratImport',):
     saved=named(old_ws,key)
-    if saved is not None:ws.append(preserve(saved))
+    if saved is not None:
+     backups=node(ss,'Folder','WorkspaceImportBackup')
+     backups.append(preserve(saved))
  assert_unique_ids(root)
  out=R/'dist/RodeoFantasy-New.rbxlx';out.parent.mkdir(exist_ok=True)
  E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)
