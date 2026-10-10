@@ -28,6 +28,22 @@
 
 ## 승인 모델을 현재 게임에 설치
 
+### 텍스처 파일을 읽을 수 없다고 나올 때
+
+사용자Studio스크린샷에서BakedMaterial의색상/금속성/거칠기파일을읽을수없다는오류를확인했다. 저장소의PNG2장은4096×4096/RGB의유효한PNG로실제디코드된다. 이미지누락/손상은로컬검사에서발견하지않았으며,Studio가상대경로를어떻게해석했는지는미확인이다. `모델만 가져오기`는단일자산묶음설정으로텍스처제외옵션이아니다.
+
+가져오기창의왼쪽 `MossratS1 → MossratS1Body → BakedMaterial`을선택한다. 오른쪽각행의폴더버튼을눌러아래실제파일을선택한다. 파일선택창의주소표시줄에 `C:\Users\wucha\OneDrive\바탕 화면\Project\Rodeo Fantasy\assets\models\MossratS1UserRig`를붙여넣고Enter하면해당폴더로이동한다.
+
+| Studio 항목 | 선택할 파일 |
+|---|---|
+| 색상 파일 경로 | MossratTexture0.png |
+| 금속성 파일 경로 | MossratMetalness.png |
+| 거칠기 파일 경로 | MossratRoughness.png |
+
+일반(Normal)/이미시브는원본에없으므로비워둔다. 세빨간느낌표가사라지고모델미리보기에초록색/얼굴색이나오면가져오기한다. 같은오류가남으면해당직접선택후의오류문구를확인한다. `영향이 없는 뼈 보관`도켜34관절을유지한다. 파일직접선택해결여부는아직사용자Studio에서확인전이다.
+
+금속성/거칠기는glTF2.0의packedRGB맵에서B/G채널을각각PNG로손실없이분리했다. 원본두PNG/UV/메시/리그/승인색은변경하지않는다. 실행도구 `tools/prepare_mossrat_material_maps.py`에서디코드/원본채널과픽셀완전일치를검사한다. [glTF 공식 재질 명세](https://registry.khronos.org/glTF/specs/2.0/glTF-2.0.html), [Studio Importer 공식 안내](https://create.roblox.com/docs/studio/importer).
+
 1. Studio에서 현재 로비 장소를 열고 **Stop**을 눌러 Play를 중지한다. **File → Save to File**로 장소 사본을 저장한다.
 2. **File → Import**에서 프로젝트의 `assets/models/MossratS1UserRig/MossratS1Rigged.gltf`를 선택한다. `.bin`과PNG2장을 같은 폴더에 둔다. Rig Type은Custom, 뼈 보존 옵션을 사용한다. Importer의 오류·경고는 확인한다.
 3. Explorer의Workspace 아래에 생긴 모스랫 전체 **Model** 이름을 `MossratImport`로 변경한다. 원본 정적Source.glb를 가져오는 단계가 아니다.

@@ -1046,3 +1046,10 @@
 - check_user_mossrat_connection: 실제Luau 런타임34관절 변환이 glTF Idle/Walk 샘플·루프에서 일치, 전환 시작포즈 유지. 지급/저장/제거후중복방지/기존계정보존/미승인모델지급차단 통과. check_user_mossrat_installer: 모형Instance에서3템플릿·백업·계층누락/모르는코드거부·재실행무변경·Source쓰기실패롤백 통과. 새모듈/수정소스/CommandBar Luau컴파일 및 기존원본/스키닝검사, 로켓출발 회귀검사 통과.
 - 위 검사는파일/코드/모형환경 검증이다. Studio실제가져오기/메시업로드/설치·Bone렌더·PC/모바일·실제성능/탑승접촉 검증 미완료. 10,294삼각형/4K상세원본 그대로며 사냥약3K간소화/텍스처축소 미완료. 로비동행·숲런타임은별도남음. 사용자메뉴/파일/순서/성공메시지/테스트방법을 MOSSRAT_S1_RIG_REVIEW에 기록.
 - 원래부터미커밋상태인 CaptureServer.server.luau 및 RodeoFantasy-Capture.rbxlx는 수정/재빌드/커밋하지 않음. 이번 변경은 로컬연결코드와적용스크립트 준비이며 실제Roblox게시가 아님.
+
+## 2026-10-10 Studio 재질 파일 읽기 오류 대응
+
+- 사용자Importer스크린샷에서BakedMaterial에색상/금속성/거칠기3개PNG파일읽기오류확인. 최초'모델만가져오기체크때문'이라는답변은오진으로정정했다. 공식Importer문서의해당옵션은여러자식을단일자산으로묶는설정이며텍스처제외가아니다.
+- 로컬MossratTexture0/1은PNG서명/4096²RGB/Pillowverify및load정상,원본파일/참조존재. Studio내부상대경로해석이나파일권한원인은아직확정하지않음. 사용자UI의폴더버튼으로실제PNG를직접선택하는단계별안내준비.
+- glTF공식채널규칙에맞춰원본packedMap의G=거칠기/B=금속성을각각MossratRoughness.png(2,771,317bytes)/MossratMetalness.png(1,394,211bytes)로손실없이분리. 4096²L/원본채널픽셀완전일치검사통과. 색상원본19,564,591bytes및기존PNG/리그/GLTF/UV미변경. 별도AI재생성/리사이즈없음.
+- MOSSRAT_S1_RIG_REVIEW에폴더경로/3행선택파일/비워둘맵/느낌표소멸과초록모델성공확인/34관절보존옵션기록. 실제사용자Studio에서직접선택후해결여부는미확인. 기존미커밋장소/서버파일은이번변경에포함하지않음.
