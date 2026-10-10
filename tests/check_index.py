@@ -73,13 +73,14 @@ p=(R/'src/client/MonsterPortrait.luau').read_text(encoding='utf-8')
 assert 'Vector3.new(0,0,-1)' in p and p.index('Mesh.posePortrait(model)')<p.index('model:GetBoundingBox()')
 print('PORTRAIT_FRONT_CONFIGURATION_PASS; live mesh/render verification pending')
 
-# Run the shipped retry body against an imported model, including the reset
-# interval; IDs must be restored before the one preload request is issued.
+# Installed models and nested imports must both be found; sharing a texture
+# across clones must not duplicate requests. Original IDs survive the reset.
 retry=(R/'dist/RetryLobbyTextures.commandbar.lua').read_text(encoding='utf-8')
-h="""
+for name in ['PlanetImport','CeilingPlanet','UserIncubator']:
+ h="""
 local map={ColorMap="rbxassetid://132065898109030",RoughnessMap="rbxassetid://129909987929379",NormalMap="",MetalnessMap="",IsA=function(_,k) return k=="SurfaceAppearance" end}
-local model={GetDescendants=function() return {map} end}
-local workspace={FindFirstChild=function(_,k) return k=="PlanetImport" and model or nil end}
+local model={Name="NAME",GetDescendants=function() return {map} end}
+local workspace={GetDescendants=function() return {model,model} end}
 local Enum={AssetFetchStatus={Success="OK"}}
 local pending,waypoints=0,0
 local game={GetService=function(_,k)
@@ -87,10 +88,10 @@ local game={GetService=function(_,k)
 end}
 local task={wait=function() assert(map.ColorMap=="" and map.RoughnessMap=="") end}
 local warn=function() end
-"""+retry+"""
+""".replace('NAME',name)+retry+"""
 assert(map.ColorMap=="rbxassetid://132065898109030" and map.RoughnessMap=="rbxassetid://129909987929379")
 assert(pending==2 and waypoints==2)
 print("TEXTURE_RETRY_PASS: original IDs restored, one request batch")
 """
-(R/'.tools/test_texture_retry.luau').write_text(h,encoding='utf-8')
-subprocess.run([str(R/'.tools/luau/luau.exe'),'.tools/test_texture_retry.luau'],cwd=R,check=True)
+ (R/'.tools/test_texture_retry.luau').write_text(h,encoding='utf-8')
+ subprocess.run([str(R/'.tools/luau/luau.exe'),'.tools/test_texture_retry.luau'],cwd=R,check=True)

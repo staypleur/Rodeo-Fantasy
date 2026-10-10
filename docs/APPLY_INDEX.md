@@ -42,6 +42,6 @@ p:SetAttribute("PawButtonImage","rbxassetid://0")
 4. `LOBBY_TEXTURE_RETRY_REQUESTED`와 로딩 성공/실패 수를 확인합니다. 부화기·문틀·콘솔·행성의 원래 텍스처 ID를 유지한 채 한 번 재요청합니다.
 5. 색상과 재질이 화면에 표시되는지 확인합니다. 502가 계속되면 재실행을 반복하지 말고 잠시 후 저장한 장소를 다시 열어 확인합니다.
 
-재시도 파일은 Workspace의 IncubatorImport / DoorImport / ConsoleImport / PlanetImport만 대상으로 합니다. 모델 및 SurfaceAppearance를 삭제하지 않습니다. 로딩 성공 수는 실제 재질 렌더링 검증과 구분합니다. 네 모델이 정상 표시되면 기존 `dist/InstallLobbyModules.commandbar.lua`로 8개 구역에 배치합니다.
+재시도 파일은 Workspace 안의 IncubatorImport / DoorImport / ConsoleImport / PlanetImport 및 설치된 UserIncubator / UserDoorFrame / UserDoorConsole / CeilingPlanet을 대상으로 합니다. RodeoLobby 아래에 중첩되어 있어도 찾으며, ServerStorage의 백업 원본은 건드리지 않습니다. `LOBBY_TEXTURE_TARGETS`의 모델/재질/업로드 맵/임시 맵 수로 찾은 대상을 확인할 수 있습니다. 모델 및 SurfaceAppearance를 삭제하지 않습니다. 로딩 성공 수는 실제 재질 렌더링 검증과 구분합니다. 네 모델이 정상 표시되면 기존 `dist/InstallLobbyModules.commandbar.lua`로 8개 구역에 배치합니다.
 
 코드·파일 검사와 모의 실행은 통과했지만 실제 Studio·PC·모바일 조작, 이미지 업로드, Roblox 텍스처 복구 여부와 성능 측정은 아직 확인하지 않았습니다.

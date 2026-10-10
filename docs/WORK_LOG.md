@@ -1199,3 +1199,11 @@
 - 사용자 로그: 부화기 RoughnessMap 120641170813912 및 행성 ColorMap 132065898109030 / RoughnessMap 129909987929379 HTTP 502. 서버 텍스처 요청 단계 오류, 모델 자체 실패/영구 손상으로 단정하지 않음. RetryLobbyTextures는 네 Import 모델의 업로드된 맵 ID를 보관/일시 초기화/복원/한 번 preload 요청하며 맵/모델 삭제 및 ID 교체 없음. Roblox 서버 오류 복구 성공은 확인하지 못했다.
 - dist/InstallIndex.commandbar.lua는 기존 장소의 7개 클라이언트 모듈만 백업 후 수정, 알려진 소스 사전검증 및 실패 시 복구. FixCurrentLobbyHunt 전체 설치 파일에도 반영하고 신규 메인 장소 재빌드. APPLY_INDEX에 초보자 적용·콘텐츠 ID·재시도 안내 기록.
 - 검증: Luau 컴파일, check_index 수집 카운트 1/4·선택·닫기·이동 복원·사냥 차단·화면 폭 분기 모의 실행, check_current_fixes 실제 ReturnLobby 분기 및 다리 교대/머리 중립/정지 포즈 모의 실행, check_lobby_entries, check_lobby_update, check_lobby_modules, check_legacy_restore 통과. 실제 Studio/PC/모바일/8인 성능 및 텍스처 로딩 검증은 미완료.
+
+
+## 2026-10-10 설치 후 텍스처 재시도 대상 수정
+
+- 사용자 Studio 로그로 INDEX_UPDATE_INSTALLED 및 저장 성공 확인. 텍스처 재시도는 CommandBar:22 '가져온 모델의 업로드된 텍스처가 없습니다'로 중단. 이전 스크립트가 Workspace 직속 …Import만 조회했으므로 설치 후 중첩/이름 변경된 모델을 놓치는 결함 수정. 로그만으로 실제 모델 위치/맵 상태를 확정하지 않았다.
+- RetryLobbyTextures는 Workspace 전체의 지정 Import 및 UserIncubator/UserDoorFrame/UserDoorConsole/CeilingPlanet을 찾는다. 중첩된 설치 모델을 지원하고 SurfaceAppearance 중복 조회와 공유 콘텐츠 요청을 제거. 원래 rbxassetid 및 HTTPS 맵 URL을 유지하고 임시 rbxtemp 맵은 따로 집계. 모델/재질/업로드/임시 맵 진단 후, 모델 없음과 업로드 맵 없음 오류를 구분한다. 백업은 ServerStorage에 있어 대상에서 제외된다.
+- Luau 컴파일 및 실제 재시도 본문 모의 실행: PlanetImport/CeilingPlanet/UserIncubator, 중복 조회, 원래 ID 복원 및 단일 preload 배치 통과. 인덱스 모의 검사도 통과. HTTP 502 해결·실제 재질 표시·Studio 조작은 미확인.
+- 사용자가 Studio에서 저장한 dist/RodeoFantasy-New.rbxlx 변경은 이번 수정에서 재빌드하거나 커밋하지 않는다. 텍스처 재시도 파일·검사·안내·작업 기록만 커밋한다.
