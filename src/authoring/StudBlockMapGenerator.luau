@@ -36,7 +36,7 @@ function Generator.create(parent, origin, backupParent)
  local model = Instance.new("Model")
  model.Name = "HuntStudBlockReview"
  model:SetAttribute("StudMapGenerator",true)
- model:SetAttribute("StudMapRevision",7)
+ model:SetAttribute("StudMapRevision",8)
  model:SetAttribute("TerrainSeed",Layout.Seed)
  model:SetAttribute("LengthMeters",Layout.LengthMeters)
  model:SetAttribute("LengthStuds",Layout.LengthStuds)

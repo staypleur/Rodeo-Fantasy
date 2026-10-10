@@ -7,7 +7,7 @@
 1. Roblox Studio를 실행하고 **New → Baseplate**로 별도 빈 장소를 엽니다.
 2. **View → Command Bar**를 켭니다. Studio 리본 버전에 따라 **Window → Command Bar**에 있을 수도 있습니다.
 3. 저장소의 `dist/ReviewModels/CreateStudBlockMap.commandbar.lua`를 메모장으로 열어 전체 복사하고 Command Bar에 붙여넣은 뒤 Enter를 누릅니다.
-4. Output에 `STUD_MAP_REVIEW_CREATED`와 `2190`가 보이면 생성 성공입니다. Explorer의 `Workspace.HuntStudBlockReview`를 선택하고 F로 맞춥니다. 바닥·벽·나무·바위·물 모두 Stud가 유지되는지 확인합니다.
+4. Output에 `STUD_MAP_REVIEW_CREATED`와 `2179`가 보이면 revision8 생성 성공입니다. Explorer의 `Workspace.HuntStudBlockReview`를 선택하고 F로 맞춥니다. 바닥·벽·나무·바위·물 모두 Stud가 유지되는지 확인합니다. 나무는 좌우 다른 군집/여백으로 배치하고 폭포는3단 절벽에서 내려와 물길로 연결한 최신 수정안입니다.
 5. **Play**를 누르면 가까운 잎 판이 조금 흔들리고 폭포 색층이 아래로 흐릅니다. 따뜻한 조명과 옅은 안개도 Play에서 표시됩니다. 캐릭터로 직접 걷는 환경 검토이며 사냥 게임·몬스터·후방 사냥 카메라는 연결하지 않았습니다.
 6. **Stop** 후 검토 장소만 저장합니다. 기존 게임 장소에는 외형 확인 전 설치하지 않습니다.
 

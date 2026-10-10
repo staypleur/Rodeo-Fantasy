@@ -106,6 +106,40 @@ for _,p in ipairs(fourth:GetChildren()) do
 end
 -- Adjacent gradient strips must not reintroduce overlapping top faces.
 local all=fourth:GetChildren()
+-- Each waterfall must connect from its cliff source down into its stream.
+local water={}
+for _,p in ipairs(all) do if p.Name:match("^Water") then table.insert(water,p) end end
+local function touching(a,b)
+ local positive=0
+ for _,axis in ipairs({"X","Y","Z"}) do
+  local overlap=math.min(a.Position[axis]+a.Size[axis]/2,b.Position[axis]+b.Size[axis]/2)-math.max(a.Position[axis]-a.Size[axis]/2,b.Position[axis]-b.Size[axis]/2)
+  if overlap<0 then return false end
+  if overlap>0 then positive+=1 end
+ end
+ return positive>=2
+end
+local visited={} local waterfalls=0
+for _,p in ipairs(water) do
+ if visited[p] then continue end
+ waterfalls+=1
+ local group={p} visited[p]=true
+ local index=1
+ while index<=#group do
+  for _,q in ipairs(water) do if not visited[q] and touching(group[index],q) then visited[q]=true table.insert(group,q) end end
+  index+=1
+ end
+ local hasFall,hasStream,hasSource=false,false,false
+ for _,q in ipairs(group) do
+  hasFall=hasFall or q.Name=="Waterfall" hasStream=hasStream or q.Name=="WaterStream"
+  if q.Name=="WaterPool" then
+   for _,cap in ipairs(all) do
+    if cap.Name=="GrassCap" and cap.Position.Y+cap.Size.Y/2==q.Position.Y-q.Size.Y/2 and touching(cap,q) then hasSource=true break end
+   end
+  end
+ end
+ assert(hasFall and hasStream and hasSource,"Disconnected waterfall/source/stream")
+end
+assert(waterfalls==4,"Water landmarks split or overlap")
 -- Thin decorative plates must sit on a supporting plate/trunk, not float.
 for _,a in ipairs(all) do
  if a.Size.Y==2 and a.Name~="LowRock" then
