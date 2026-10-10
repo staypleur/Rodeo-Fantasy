@@ -51,7 +51,8 @@ local function inspect(origin)
    assert(p.Anchored and p.CanCollide and not p.CanTouch)
    for _,axis in ipairs({"X","Y","Z"}) do
     local position,size=p.Position[axis],p.Size[axis]
-    assert(position%4==0 and size>0 and size%4==0)
+    local grid=axis=="Y" and 2 or 4
+    assert(position%grid==0 and size>0 and size%grid==0)
     if axis~="Y" then assert((position-size/2)%4==0 and (position+size/2)%4==0) end
    end
   end
@@ -104,7 +105,7 @@ end
 local all=fourth:GetChildren()
 -- Thin decorative plates must sit on a supporting plate/trunk, not float.
 for _,a in ipairs(all) do
- if a.Size.Y==4 and a.Name~="LowRock" then
+ if a.Size.Y==2 and a.Name~="LowRock" then
   local supported=false
   for _,b in ipairs(all) do
    if b~=a and b.Position.Y+b.Size.Y/2==a.Position.Y-a.Size.Y/2

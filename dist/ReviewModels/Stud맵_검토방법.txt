@@ -9,8 +9,8 @@
 6. Output(출력)에 STUD_MAP_REVIEW_CREATED 1566과1000m가 나오면 생성 성공입니다.
 7. 모델 안 MeadowPlate를 선택해 Properties에서 Material=Plastic, Shape=Block, TopSurface=Studs, BottomSurface=Inlet, Size.X=160을 확인하세요. 양쪽 MeadowShoulder 폭16씩을 포함한 전체 주행 폭은192입니다. 나무/옆 벽도 윗면과 네 옆면이 Studs인지 확인하세요.
 
-블록 나무/바위도 모두 Plastic Part이며 4studs 격자에 맞습니다.
-나뭇잎은 두께4studs의 넓은 판4층, 바위는 판5층입니다. 층마다 위치와 크기를 달리해 아래 판이 보이고 위로 갈수록 밝아집니다.
+블록 나무/바위도 모두 Plastic Part이며 수평4studs 격자에 맞습니다. 얇은 판의 높이만2studs 단위입니다.
+나뭇잎은 두께2studs의 넓은 판4층, 바위는 판5층입니다. 층마다 위치와 크기를 달리해 아래 판이 보이고 위로 갈수록 밝아집니다.
 이 검토 모델에는 몬스터·사냥 조작·후방 추적 카메라가 없습니다.
 실제 Studio 화면/모바일·PC 실행 검증은 별도로 필요합니다.
 맵 폭은160에서192studs로20% 넓어졌습니다. 길이/전체 폭은 일정하며 멀티 요소는 없습니다.

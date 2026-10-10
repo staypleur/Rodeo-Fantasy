@@ -36,7 +36,7 @@ function Generator.create(parent, origin, backupParent)
  local model = Instance.new("Model")
  model.Name = "HuntStudBlockReview"
  model:SetAttribute("StudMapGenerator",true)
- model:SetAttribute("StudMapRevision",5)
+ model:SetAttribute("StudMapRevision",6)
  model:SetAttribute("TerrainSeed",Layout.Seed)
  model:SetAttribute("LengthMeters",Layout.LengthMeters)
  model:SetAttribute("LengthStuds",Layout.LengthStuds)
@@ -48,12 +48,18 @@ function Generator.create(parent, origin, backupParent)
  model:SetAttribute("TargetObstacleScreenShare",Layout.ScreenComposition.Obstacles)
  model:SetAttribute("TargetMonsterScreenShare",Layout.ScreenComposition.Monsters)
  local function block(name, position, size, color, kind)
-  for _, value in ipairs({position.X, position.Y, position.Z}) do
+  local thinPlate = name=="CanopyLower" or name=="CanopyMiddle" or name=="CanopyUpper" or name=="LowRock" or name=="RockMiddle" or name=="RockCap"
+  local function onHalfGrid(value)
+   return value==value and math.abs(value)<math.huge and value%2==0
+  end
+  for _, value in ipairs({position.X, position.Z}) do
    assert(onGrid(value), "Block position must align to the 4-stud grid")
   end
-  for _, value in ipairs({size.X, size.Y, size.Z}) do
+  assert((thinPlate and onHalfGrid(position.Y)) or onGrid(position.Y), "Invalid block height")
+  for _, value in ipairs({size.X, size.Z}) do
    assert(onGrid(value) and value > 0, "Block dimensions must align to the 4-stud grid")
   end
+  assert(size.Y>0 and (((thinPlate or name=="TreeTrunk") and onHalfGrid(size.Y)) or onGrid(size.Y)), "Invalid block thickness")
   local part = Instance.new("Part")
   part.Name = name
   part.Shape = Enum.PartType.Block

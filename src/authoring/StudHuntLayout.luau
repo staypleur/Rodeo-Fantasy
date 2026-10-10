@@ -46,26 +46,26 @@ function Layout.build()
   local crown=large and 48 or 40
   put("TreeRoot",x,4,z,16,8,16,107,72,48,"Obstacle")
   for level=0,2 do
-   put("TreeTrunk",x,12+level*8,z,8,level==2 and 12 or 8,8,125+level*12,86+level*10,58+level*8,"Obstacle")
+   put("TreeTrunk",x,12+level*8,z,8,level==2 and 14 or 8,8,125+level*12,86+level*10,58+level*8,"Obstacle")
   end
   for _,side in ipairs({-1,1}) do
    put("TreeBranch",x+side*12,24,z,16,8,8,146,104,72,"Obstacle")
   end
-  -- Broad, four-stud-thick plates, shifted slightly like the user's stacked
+  -- Broad, two-stud-thick plates, shifted slightly like the user's stacked
   -- Lego reference. Each upper plate touches the lower one without a gap.
-  put("CanopyLower",x-4,36,z,crown,4,40,99,120,52,"Obstacle")
-  put("CanopyMiddle",x+4,40,z+4,crown-8,4,32,127,148,68,"Obstacle")
-  put("CanopyMiddle",x,44,z,crown-8,4,24,154,171,83,"Obstacle")
-  put("CanopyUpper",x+4,48,z+4,crown-16,4,16,182,193,104,"Obstacle")
+  put("CanopyLower",x-4,36,z,crown,2,40,99,120,52,"Obstacle")
+  put("CanopyMiddle",x+4,38,z+4,crown-8,2,32,127,148,68,"Obstacle")
+  put("CanopyMiddle",x,40,z,crown-8,2,24,154,171,83,"Obstacle")
+  put("CanopyUpper",x+4,42,z+4,crown-16,2,16,182,193,104,"Obstacle")
  end
  local function rock(x,z,large)
   local w=large and 48 or 32
-  -- Bottom plate embeds two studs into the floor; upper plates are flush stacked.
-  put("LowRock",x,0,z,w,4,32,106,91,94,"Obstacle")
-  put("RockMiddle",x+4,4,z+4,w-8,4,32,124,107,110,"Obstacle")
-  put("RockMiddle",x,8,z,w-8,4,24,143,124,127,"Obstacle")
-  put("RockCap",x+4,12,z+4,w-16,4,16,161,141,140,"Obstacle")
-  put("RockCap",x,16,z,w-16,4,16,178,157,151,"Obstacle")
+  -- Bottom plate embeds one stud into the floor; upper plates are flush stacked.
+  put("LowRock",x,0,z,w,2,32,106,91,94,"Obstacle")
+  put("RockMiddle",x+4,2,z+4,w-8,2,32,124,107,110,"Obstacle")
+  put("RockMiddle",x,4,z,w-8,2,24,143,124,127,"Obstacle")
+  put("RockCap",x+4,6,z+4,w-16,2,16,161,141,140,"Obstacle")
+  put("RockCap",x,8,z,w-16,2,16,178,157,151,"Obstacle")
  end
  -- Opening and final approach stay clear. Alternate splits with open recovery space.
  -- Rows have 160-stud spacing (~33 m); the full outer width stays constant.
