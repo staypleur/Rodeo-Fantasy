@@ -112,10 +112,11 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
    for _,part in ipairs(model:GetChildren()) do if part:IsA("BasePart") and part~=root then part.LocalTransparencyModifier=1 end end
    continue
   end
+  local ownCompanion=model:GetAttribute("BagItemId") and model:GetAttribute("OwnerUserId")==game.Players.LocalPlayer.UserId
   local nameplate = root:FindFirstChild("Nameplate")
   if nameplate then nameplate.Enabled = false end
 		if cameraPosition then
-   local hidden=(root.Position-cameraPosition).Magnitude>220 or (selected and not model:GetAttribute("Occupied") and not selected[model])
+   local hidden=not ownCompanion and ((root.Position-cameraPosition).Magnitude>220 or (selected and not model:GetAttribute("Occupied") and not selected[model]))
    local record=visibility[model]
    if not record then
     record={} visibility[model]=record
@@ -193,7 +194,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
 		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds,Catalog[model:GetAttribute("MonsterId") or "MeadowMouse"].TripleHop)
 		local facingFrame,straightFacing=Mesh.huntFrame(model,pose.frame)
 		local lean = not straightFacing and running and (model:GetAttribute("Steering") or 0) * -0.18 or 0
-  local moving=running and velocity.Magnitude>1
+  local moving=running and (model:GetAttribute("BagItemId")~=nil or velocity.Magnitude>1)
   Mesh.animate(model,phase,moving,angry)
   local flying=model:GetAttribute("Flying")==true
   local bounce=moving and (flying and (.55+math.sin(phase*.5)*.22) or (1-math.cos(phase))*.22) or 0
@@ -233,7 +234,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
    end
 			entry.part.CFrame = frame * localFrame
    local shown=visibility[model]
-   if shown and not shown.hidden then entry.part.LocalTransparencyModifier=math.clamp(1-(clock-(shown.revealed or clock-.3))/.25,0,1) end
+   if shown and not shown.hidden then entry.part.LocalTransparencyModifier=ownCompanion and 0 or math.clamp(1-(clock-(shown.revealed or clock-.3))/.25,0,1) end
 		end
 		-- Keep cached canonical poses while resting; late parts still align.
 	end

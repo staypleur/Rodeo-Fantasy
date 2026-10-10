@@ -22,12 +22,12 @@ function M.new(context)
  function api.summon(p,id)
   if not context.canAct(p) then return end
   if pets[p] and pets[p].id==id then api.clear(p) return end
-  if not context.canSummon(p) then P.CaptureRemote:FireClient(p,"SocialMessage","내 부화실 안에서 소환해주세요.") return end
+  if not context.canSummon(p) then P.CaptureRemote:FireClient(p,"SocialMessage","Summon your companion in the lobby.") return end
   local item=Rules.find(context.bag(p),id)
   local r=root(p) if not r or not Rules.available(item) then return end
   local source=P:FindFirstChild(Catalog.visual(item.monsterId,item.stars))
   if not source or source:GetAttribute("MossratUserRigRevision")~="ApprovedS1-v1" then
-   P.CaptureRemote:FireClient(p,"SocialMessage","이 몬스터의 모델을 준비 중입니다.") return
+   P.CaptureRemote:FireClient(p,"SocialMessage","This monster model is coming soon.") return
   end
   local position=r.Position+r.CFrame.RightVector*4-r.CFrame.LookVector*4
   local y=ground(position) if not y then return end
@@ -42,9 +42,9 @@ function M.new(context)
    elseif part:IsA("BillboardGui") then part:Destroy() end
   end
   for key,value in pairs({MonsterId=item.monsterId,Stars=item.stars,OwnerUserId=p.UserId,BagItemId=id,Running=false,RootHeight=height,RunStarted=workspace:GetServerTimeNow()}) do model:SetAttribute(key,value) end
-  api.clear(p) model.Parent=folder pets[p]={model=model,id=id,height=height,following=false}
+  api.clear(p) model.Parent=folder pets[p]={model=model,id=id,height=height,following=false,blocked=0}
   p:SetAttribute("SummonedId",id)
-  local prompt=Instance.new("ProximityPrompt") prompt.Name="PetOwnCompanion" prompt.ActionText="교감"
+  local prompt=Instance.new("ProximityPrompt") prompt.Name="PetOwnCompanion" prompt.ActionText="Bond"
   prompt.HoldDuration=1 prompt.MaxActivationDistance=10 prompt.RequiresLineOfSight=false prompt.Parent=model.PrimaryPart
   prompt.Style=Enum.ProximityPromptStyle.Custom
   local last=-math.huge
@@ -69,6 +69,21 @@ function M.new(context)
    if (pet.model:GetAttribute("PetBondUntil") or 0)>workspace:GetServerTimeNow() then pet.model:SetAttribute("Running",false) continue end
    local old=pet.model.PrimaryPart.CFrame
    local toOwner=Vector3.new(r.Position.X-old.X,0,r.Position.Z-old.Z)
+   -- A pet stranded behind a wall must not be left outside the visible lobby.
+   -- Recover only onto a collidable surface near its owner, never into the sky.
+   if toOwner.Magnitude>70 or pet.blocked>=1.5 then
+    for _,offset in ipairs({Vector3.new(4,0,4),Vector3.new(-4,0,4),Vector3.new(4,0,-4),Vector3.new(-4,0,-4)}) do
+     local position=r.Position+offset
+     local y=ground(position)
+     if y and math.abs(y-r.Position.Y)<10 then
+      local frame=CFrame.new(position.X,y+pet.height,position.Z)*old.Rotation
+      pet.model:PivotTo(frame*pet.model.PrimaryPart.CFrame:Inverse()*pet.model:GetPivot())
+      pet.following=false pet.blocked=0 old=frame
+      toOwner=Vector3.new(r.Position.X-old.X,0,r.Position.Z-old.Z)
+      break
+     end
+    end
+   end
    -- A start/stop band keeps a resting pet still when its owner turns nearby.
    if toOwner.Magnitude>11 then pet.following=true
    elseif toOwner.Magnitude<=6 then pet.following=false end
@@ -76,7 +91,10 @@ function M.new(context)
    local delta=Vector3.new(target.X-old.X,0,target.Z-old.Z)
    local moving=pet.following and delta.Magnitude>6
    if moving then
-    delta=delta.Unit*math.min(delta.Magnitude-6,32*step)
+    -- Match the owner's pace; the lobby player walks at 40 studs/sec.
+    local humanoid=p.Character:FindFirstChildOfClass("Humanoid")
+    local speed=humanoid and humanoid.WalkSpeed or 40
+    delta=delta.Unit*math.min(delta.Magnitude-6,speed*step)
     local position=old.Position+delta
     local y=ground(Vector3.new(position.X,r.Position.Y,position.Z))
     -- Lift the cast over the lobby's short steps, while still checking walls.
@@ -86,7 +104,9 @@ function M.new(context)
      position=Vector3.new(position.X,y+pet.height,position.Z)
      local frame=CFrame.lookAt(position,position+delta)
      pet.model:PivotTo(frame*pet.model.PrimaryPart.CFrame:Inverse()*pet.model:GetPivot())
+     pet.blocked=0
     else
+     pet.blocked+=step
      moving=false
     end
    end

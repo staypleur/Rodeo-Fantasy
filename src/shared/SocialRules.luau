@@ -16,13 +16,13 @@ function R.profile(bag,ids)
  return result
 end
 function R.pair(bag,ids)
- if type(ids)~="table" or #ids~=2 or ids[1]==ids[2] then return false,"암컷과 수컷을 한 마리씩 선택하세요." end
+ if type(ids)~="table" or #ids~=2 or ids[1]==ids[2] then return false,"Select one female and one male." end
  local a,b=find(bag,ids[1]),find(bag,ids[2])
- if not R.available(a) or not R.available(b) then return false,"선택한 몬스터가 다른 작업 중입니다." end
- if not ((a.sex=="Male" and b.sex=="Female") or (a.sex=="Female" and b.sex=="Male")) then return false,"암컷과 수컷이 필요합니다." end
+ if not R.available(a) or not R.available(b) then return false,"A selected monster is busy." end
+ if not ((a.sex=="Male" and b.sex=="Female") or (a.sex=="Female" and b.sex=="Male")) then return false,"A female and a male are required." end
  local teams=0 for _ in pairs(bag.breedingTeams or {}) do teams+=1 end
- if teams>=4 then return false,"교배는 최대 4팀까지 가능합니다." end
- return true,"시간·결과 설정 준비 중 · 교배는 아직 시작되지 않습니다."
+ if teams>=4 then return false,"Up to four breeding pairs are allowed." end
+ return true,"Breeding is coming soon. Pairing does not start breeding yet."
 end
 function R.egg(bag,id,slot,remove)
  if type(slot)~="number" or slot%1~=0 or slot<1 or slot>4 then return false end
@@ -50,9 +50,9 @@ function R.offer(bag,offer)
 end
 function R.exchange(a,b,offerA,offerB)
  local x,y=R.offer(a,offerA),R.offer(b,offerB)
- if not x or not y then return nil,"보유 수량 또는 몬스터 상태가 바뀌었습니다." end
- if (x.coins==0 and #x.ids==0) or (y.coins==0 and #y.ids==0) then return nil,"그냥 주기는 불가능합니다. 양쪽 모두 교환할 것을 넣으세요." end
- if #x.ids+#y.ids==0 then return nil,"몬스터가 포함된 거래만 가능합니다." end
+ if not x or not y then return nil,"Your inventory or monster status has changed." end
+ if (x.coins==0 and #x.ids==0) or (y.coins==0 and #y.ids==0) then return nil,"Both players must offer something." end
+ if #x.ids+#y.ids==0 then return nil,"A trade must include a monster." end
  local function transfer(bag,outgoing,incoming)
   local result=table.clone(bag) result.monsters={} result.profile={}
   local remove={} for _,id in ipairs(outgoing.ids) do remove[id]=true end

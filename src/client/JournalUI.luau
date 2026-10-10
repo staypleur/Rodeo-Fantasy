@@ -31,9 +31,10 @@ end
 local function gradient(parent,a,b)
  make("UIGradient",{Rotation=90,Color=ColorSequence.new(a,b)},parent)
 end
-local function T(v) return L.text(v,player.LocaleId) end
+local function T(v) return L.text(v,"en-us") end
 function J.new(gui,remote)
- local self={area="Lobby",page=1,seen={},data={},entries=Q.entries(C),perSpread=8,selected=1}
+ local allEntries=Q.entries(C)
+ local self={area="Lobby",planet="GreenStar",page=1,seen={},data={},entries=allEntries,perSpread=8,selected=1}
  local button=Buttons.iconButton(gui,"Journal","T",92)
  local book=make("Frame",{Name="FieldJournal",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.91,.82),BackgroundColor3=Color3.fromRGB(54,58,72),BorderSizePixel=0,ZIndex=40},gui)
  make("UISizeConstraint",{MaxSize=Vector2.new(1000,620)},book)
@@ -45,14 +46,14 @@ function J.new(gui,remote)
  end
  local header=panel(book,"IndexHeader",.008,.012,.984,.12,Color3.fromRGB(22,204,247))
  gradient(header,Color3.fromRGB(117,241,255),Color3.fromRGB(0,167,228))
- label(header,"Title","펫 인덱스",.02,.05,.7,.85,30).TextXAlignment=Enum.TextXAlignment.Left
+ label(header,"Title","Pet Index",.02,.05,.7,.85,30).TextXAlignment=Enum.TextXAlignment.Left
  local close=make("TextButton",{Name="CloseJournal",Text="X",AnchorPoint=Vector2.new(1,.5),Position=UDim2.new(1,-6,.5,0),Size=UDim2.fromOffset(44,44),BackgroundColor3=Color3.fromRGB(255,56,60),TextSize=30,BorderSizePixel=0,ZIndex=47},header)
  make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},close)
  gradient(close,Color3.fromRGB(255,131,129),Color3.fromRGB(241,24,34))
  local region=panel(book,"PlanetLandscape",.02,.16,.14,.68,Color3.fromRGB(37,93,29))
  gradient(region,Color3.fromRGB(127,186,62),Color3.fromRGB(24,73,39))
  label(region,"PlanetName","Green Star",.04,.04,.92,.2,23)
- label(region,"Biome","초원",.08,.66,.84,.18,22)
+ label(region,"Biome","Meadow",.08,.66,.84,.18,22)
  local planet=make("Frame",{Name="GreenStarPlanet",Position=UDim2.fromScale(.13,.30),Size=UDim2.fromScale(.74,.28),BackgroundColor3=Color3.fromRGB(98,209,45),BorderSizePixel=0,ZIndex=43},region)
  make("UICorner",{CornerRadius=UDim.new(1,0)},planet)
  make("UIAspectRatioConstraint",{AspectRatio=1},planet)
@@ -74,13 +75,22 @@ function J.new(gui,remote)
  local previous=make("TextButton",{Name="JournalPrevious",Text="‹",Size=UDim2.fromOffset(40,40),Position=UDim2.fromOffset(2,0),BackgroundTransparency=1,TextSize=30,ZIndex=46},bottom)
  local nextPage=make("TextButton",{Name="JournalNext",Text="›",AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-2,0,0),Size=UDim2.fromOffset(40,40),BackgroundTransparency=1,TextSize=30,ZIndex=46},bottom)
  local pageNumber=label(bottom,"JournalPage","",.79,0,.12,1,15)
- local planetTab=make("TextButton",{Name="Planet_GreenStar",Text="행성\nGreen Star",Position=UDim2.fromScale(1.025,.17),Size=UDim2.fromScale(.18,.18),BackgroundColor3=Color3.fromRGB(59,206,73),BorderSizePixel=0,TextScaled=true,ZIndex=46},book)
- make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},planetTab)
- make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=21},planetTab)
- gradient(planetTab,Color3.fromRGB(167,250,95),Color3.fromRGB(14,127,67))
- planetTab.Text=""
- local tabLabel=label(planetTab,"PlanetTabLabel","행성\nGreen Star",.36,.04,.62,.92,21) tabLabel.ZIndex=47
- make("ImageLabel",{Name="GreenStarTabArtwork",Image=Planets.GreenStar.Image,BackgroundTransparency=1,Position=UDim2.fromScale(.015,.08),Size=UDim2.fromScale(.34,.84),ScaleType=Enum.ScaleType.Fit,ZIndex=47},planetTab)
+ local planetTab=make("Frame",{Name="PlanetTabs",Position=UDim2.fromScale(1.025,.17),Size=UDim2.fromScale(.18,.68),BackgroundTransparency=1,ZIndex=46},book)
+ local planetButtons={}
+ for index,id in ipairs(Planets.Order) do
+  local p=Planets[id]
+  local tab=make("TextButton",{Name="Planet_"..id,Text="",Position=UDim2.fromScale(0,(index-1)/4),Size=UDim2.fromScale(1,.23),BackgroundColor3=Color3.fromRGB(42,99,112),BorderSizePixel=0,ZIndex=46},planetTab)
+  make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},tab)
+  local text=label(tab,"PlanetTabLabel",p.Name,.36,.04,.62,.92,21) text.ZIndex=47
+  make("ImageLabel",{Name=id.."TabArtwork",Image=p.Image,BackgroundTransparency=1,Position=UDim2.fromScale(.015,.08),Size=UDim2.fromScale(.34,.84),ScaleType=Enum.ScaleType.Fit,ZIndex=47},tab)
+  table.insert(planetButtons,tab)
+  tab.Activated:Connect(function()
+   self.planet=id self.page=1 self.selected=1 self.entries={}
+   for _,entry in ipairs(allEntries) do if (C[entry.monsterId].Planet or "GreenStar")==id then table.insert(self.entries,entry) end end
+   art.Image=p.Image region.PlanetName.Text=p.Name region.Biome.Visible=id=="GreenStar"
+   self.render()
+  end)
+ end
  local compact=false
  local lockedHumanoid,savedWalk,savedJump,savedRotate,savedHeight
  local function freeze()
@@ -105,9 +115,9 @@ function J.new(gui,remote)
   Portrait.fill(viewport,entry.monsterId,entry.stars,not revealed,1)
   label(detail,"SelectedName",revealed and T(entry.monsterId) or "???",.04,.63,.92,.16,22)
   label(detail,"SelectedStars",entry.stars.."★",.04,.79,.92,.08,17)
-  local income=label(detail,"SelectedIncome",revealed and L.income((species.IncomeAmount or 1)*2^(entry.stars-1),species.IncomeSeconds or 3,player.LocaleId) or "???",.04,.87,.92,.12,20)
+  local income=label(detail,"SelectedIncome",revealed and L.income((species.IncomeAmount or 1)*2^(entry.stars-1),species.IncomeSeconds or 3,"en-us") or "???",.04,.87,.92,.12,20)
   income.TextColor3=Color3.fromRGB(97,255,61)
-  label(info,"Acquisition",revealed and (entry.stars==1 and L.huntHint(species.UnlockMeters,species.TameSeconds,player.LocaleId) or L.evolutionHint(entry.stars,player.LocaleId)) or "수집하면 정보가 공개됩니다",.05,.05,.9,.58,16)
+  label(info,"Acquisition",revealed and (entry.stars==1 and L.huntHint(species.UnlockMeters,species.TameSeconds,"en-us") or L.evolutionHint(entry.stars,"en-us")) or "Collect to reveal details",.05,.05,.9,.58,16)
   label(info,"Caught",T("Caught").." "..(self.data.caught and self.data.caught[entry.key] or 0),.05,.67,.9,.26,17)
  end
  function self.render()
@@ -135,6 +145,8 @@ function J.new(gui,remote)
    card.Activated:Connect(function() self.selected=index self.render() end)
   end
   selectedDetail()
+  if #self.entries==0 then label(pages,"NoEntries","No entries here yet",.05,.35,.90,.25,22) end
+  for index,tab in ipairs(planetButtons) do tab.BackgroundColor3=Planets.Order[index]==self.planet and Color3.fromRGB(59,160,90) or Color3.fromRGB(42,99,112) end
  end
  function self.turn(direction)
   if not book.Visible then return end
@@ -167,17 +179,21 @@ function J.new(gui,remote)
   compact=camera and camera.ViewportSize.X<860 or false
   if compact then
    book.Position=UDim2.fromScale(.5,.5) book.Size=UDim2.fromScale(.92,.86)
-   region.Visible=false planetTab.Position=UDim2.fromScale(.70,.15) planetTab.Size=UDim2.fromScale(.28,.12)
-   pages.Position=UDim2.fromScale(.02,.16) pages.Size=UDim2.fromScale(.65,.52)
-   progress.Position=UDim2.fromScale(.02,.71) progress.Size=UDim2.fromScale(.65,.10)
+   region.Visible=false planetTab.Position=UDim2.fromScale(.02,.15) planetTab.Size=UDim2.fromScale(.96,.13)
+   pages.Position=UDim2.fromScale(.02,.30) pages.Size=UDim2.fromScale(.65,.44)
+   progress.Position=UDim2.fromScale(.02,.76) progress.Size=UDim2.fromScale(.65,.08)
    detail.Position=UDim2.fromScale(.70,.30) detail.Size=UDim2.fromScale(.28,.51)
    info.Visible=false
   else
    book.Position=UDim2.fromScale(.44,.5) book.Size=UDim2.fromScale(.76,.82)
-   region.Visible=true planetTab.Position=UDim2.fromScale(1.025,.17) planetTab.Size=UDim2.fromScale(.18,.18)
+   region.Visible=true planetTab.Position=UDim2.fromScale(1.025,.17) planetTab.Size=UDim2.fromScale(.18,.68)
    pages.Position=UDim2.fromScale(.18,.16) pages.Size=UDim2.fromScale(.50,.53)
    progress.Position=UDim2.fromScale(.18,.72) progress.Size=UDim2.fromScale(.50,.12)
    detail.Position=UDim2.fromScale(.70,.16) detail.Size=UDim2.fromScale(.28,.42) info.Visible=true
+  end
+  for index,tab in ipairs(planetButtons) do
+   tab.Position=compact and UDim2.fromScale((index-1)/4,0) or UDim2.fromScale(0,(index-1)/4)
+   tab.Size=compact and UDim2.fromScale(.24,1) or UDim2.fromScale(1,.23)
   end
   if book.Visible then self.render() end
  end
@@ -187,7 +203,6 @@ function J.new(gui,remote)
  end
  if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(screenLayout) end
  task.defer(screenLayout)
- planetTab.Activated:Connect(function() self.page=1 self.render() end)
  previous.Activated:Connect(function() self.turn(-1) end) nextPage.Activated:Connect(function() self.turn(1) end)
  close.Activated:Connect(self.close) button.Activated:Connect(function() self.other=false self.open() end)
  UIS.InputBegan:Connect(function(input,processed)

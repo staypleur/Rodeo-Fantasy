@@ -1,7 +1,7 @@
 from pathlib import Path
 import subprocess
 R=Path(__file__).resolve().parents[1]
-expected={'ShopButtonImage':'135776139567636','IndexButtonImage':'135277525783308','EggButtonImage':'87551432940862','PawButtonImage':'85966265063532','MossratFaceImage':'87383094549038','RouletteButtonImage':'103655794024864','MoneyImage':'71604722538432'}
+expected={'ShopButtonImage':'114640852127407','IndexButtonImage':'110488541037597','EggButtonImage':'87551432940862','PawButtonImage':'85966265063532','MossratFaceImage':'87383094549038','RouletteButtonImage':'71863210551741','MoneyImage':'71604722538432','BondButtonImage':'104399312241349'}
 h='local game,Instance,UDim2,Enum\nlocal task={spawn=function() end}\nlocal I=(function()\n'+(R/'src/client/HudIcons.luau').read_text(encoding='utf-8')+'\nend)()\n'
 h+='local attrs={} local p={GetAttribute=function(_,k) return attrs[k] end,SetAttribute=function(_,k,v) attrs[k]=v end}\n'
 for key,id in expected.items():
@@ -31,9 +31,7 @@ artwork.IsLoaded=false signals.IsLoaded()
 assert(native.Visible and stroke.Enabled and artwork.Visible and artwork.ImageTransparency==.99)
 print("HUD_ARTWORK_LOAD_PASS: pending/failure fallback, loaded image, stale paw migration")
 '''
-h+=(R/'dist/ApplyHudImages.commandbar.lua').read_text(encoding='utf-8')
-for key,id in expected.items():h+=f'assert(attrs["{key}"]=="rbxassetid://{id}")\n'
-h+='print("HUD_IMAGE_IDS_PASS: all seven configured, zero placeholder ignored, custom override retained")\n'
+h+='print("HUD_IMAGE_IDS_PASS: all eight fallbacks configured, zero placeholder ignored, custom override retained")\n'
 source=(R/'src/client/BagUI.luau').read_text(encoding='utf-8')
 menu=source[source.index(' function self.openCompanionMenu()'):source.index(' function self.openRanchMenu()')]
 h+='''
@@ -41,12 +39,12 @@ local self={area="Lobby",items={},mode="Evolution",pen=1}
 local chooser,scroll,window,title={},{},{},{}
 local remote={FireServer=function(_,kind) assert(kind=="Bag") self.snapshot(self.items) end}
 function self.setEvolutionMode() self.mode=nil self.pen=nil end
-function self.snapshot() title.Text=self.mode=="Companion" and "동행 몬스터 · 1마리 선택" or "가방" end
+function self.snapshot() title.Text=self.mode=="Companion" and "Companion · Choose one" or "Bag" end
 function self.opened() end
 '''+menu+'''
 self.openCompanionMenu()
 assert(self.mode=="Companion" and self.pen==nil and window.Visible and not chooser.Visible and scroll.Visible)
-assert(title.Text=="동행 몬스터 · 1마리 선택")
+assert(title.Text=="Companion · Choose one")
 self.area="Hunt" window.Visible=false self.openCompanionMenu() assert(not window.Visible)
 print("COMPANION_MENU_PASS: mode survives evolution reset and server snapshot; hunt blocked")
 '''

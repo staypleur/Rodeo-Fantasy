@@ -96,7 +96,7 @@ function Lobby.canSummon(player)
  return owned[player]~=nil and root and math.abs(root.Position.X-6000)<=256 and math.abs(root.Position.Z)<=256
 end
 function Lobby.canUsePen(player,index)
- return Lobby.getPen(player,index) and Lobby.canManage(player)
+ return Lobby.getPen(player,index) and Lobby.canSummon(player)
 end
 function Lobby.display(player,index,items)
  local pen=Lobby.getPen(player,index) if not pen then return end
@@ -114,7 +114,7 @@ function Lobby.connectPens(callback)
  for plotIndex=1,8 do
   local plot=plots["Plot_"..plotIndex]
   local prompt=Instance.new("ProximityPrompt")
-  prompt.Name="ManageRanch" prompt.ActionText="알 관리" prompt.ObjectText=""
+  prompt.Name="ManageRanch" prompt.ActionText="Manage eggs" prompt.ObjectText=""
   prompt.HoldDuration=1 prompt.MaxActivationDistance=10 prompt.RequiresLineOfSight=false
   prompt.KeyboardKeyCode=Enum.KeyCode.E prompt.Parent=plot.ManagePoint
   prompt.Triggered:Connect(function(player)
@@ -124,7 +124,7 @@ function Lobby.connectPens(callback)
 end
 function Lobby.connect(callback)
  local prompt=Instance.new("ProximityPrompt")
- prompt.Name="FlyToHunt" prompt.ActionText="행성 선택" prompt.ObjectText="로켓"
+ prompt.Name="FlyToHunt" prompt.ActionText="Planets" prompt.ObjectText="Rocket"
  prompt.HoldDuration=1 prompt.MaxActivationDistance=departureRadius prompt.RequiresLineOfSight=false
  prompt.KeyboardKeyCode=Enum.KeyCode.E
  prompt.Parent=Lobby.Departure

@@ -9,7 +9,7 @@ local bag=require(script.Parent.BagUI).new(gui,remote)
 local journal=require(script.Parent.JournalUI).new(gui,remote)
 local social=require(script.Parent.SocialUI).new(gui,remote,bag,journal)
 local animator=require(script.Parent.RideAnimator)
-local off=Instance.new("TextButton") off.Name="Dismount" off.Text="Q · 내려오기" off.AnchorPoint=Vector2.new(.5,1) off.Position=UDim2.new(.5,0,1,-24) off.Size=UDim2.fromOffset(170,45) off.BackgroundColor3=Color3.fromRGB(61,98,72) off.TextColor3=Color3.new(1,1,1) off.TextSize=18 off.Visible=false off.Parent=gui
+local off=Instance.new("TextButton") off.Name="Dismount" off.Text="Q · Dismount" off.AnchorPoint=Vector2.new(.5,1) off.Position=UDim2.new(.5,0,1,-24) off.Size=UDim2.fromOffset(170,45) off.BackgroundColor3=Color3.fromRGB(61,98,72) off.TextColor3=Color3.new(1,1,1) off.TextSize=18 off.Visible=false off.Parent=gui
 off.Activated:Connect(function() remote:FireServer("Dismount") end)
 bag.onOpen=function() journal.close() end journal.onOpen=function() bag.close() end
 remote.OnClientEvent:Connect(function(kind,data)

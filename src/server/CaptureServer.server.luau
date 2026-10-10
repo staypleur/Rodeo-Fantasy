@@ -162,7 +162,7 @@ local function start(player)
  if not previous and not rocketLaunchPermit[player] then return end
  local picked,reason=require(package.DepartureSelectionRules).validate(bags[player],"GreenStar",startingMounts[player],Catalog,rocketModelReady)
  if not picked or workspace.RodeoLobby:GetAttribute("GreenStarRuntimeReady")~=true then
-  send(player,"새 사냥터와 선택한 몬스터를 연결할 준비 중입니다.") return
+  send(player,"This hunt or monster is coming soon.") return
  end
  if not previous and not Lobby.canDepart(player) then send(player,"Approach the airship to start.") return end
  local rootFolder=Instance.new("Folder") rootFolder.Name=tostring(player.UserId) rootFolder:SetAttribute("OwnerUserId",player.UserId)
@@ -180,7 +180,7 @@ local function start(player)
  if not ok then
   rootFolder:Destroy()
   warn("HUNT_START_FAILED: "..tostring(model))
-  send(player,"사냥터를 준비하지 못했습니다. 다시 시도해 주세요.")
+  send(player,"Unable to prepare the hunt. Please try again.")
   return
  end
  if previous then
@@ -283,7 +283,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
  end
  if action=="Manage" then
   if not states[player] and Lobby.canUsePen(player,value) then remote:FireClient(player,"Eggs",{pen=value,eggs=bags[player].eggs or {}})
-  elseif not states[player] then remote:FireClient(player,"SocialMessage","알 배치는 내 부화실 안에서 이용해주세요.") end
+  elseif not states[player] then remote:FireClient(player,"SocialMessage","Manage your eggs in the lobby.") end
   return
  end
  if action=="Place" or action=="Remove" then return end -- Monster pens were replaced by egg incubators.
@@ -328,7 +328,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
    local humanoid=character and character:FindFirstChildOfClass("Humanoid")
    if not humanoid or humanoid.Health<=0 or (state and (state.phase=="GameOver" or state.phase=="CourseEnd")) then
     local ok,err=pcall(function() player:LoadCharacterAsync() end)
-    if not ok then states[player]=state player:SetAttribute("ReturningLobby",nil) warn("LOBBY_RESPAWN_FAILED: "..tostring(err)) send(player,"다시 로비로 돌아가기를 눌러 주세요.") return end
+    if not ok then states[player]=state player:SetAttribute("ReturningLobby",nil) warn("LOBBY_RESPAWN_FAILED: "..tostring(err)) send(player,"Please try Return to lobby again.") return end
     character=player.Character
    end
    local root=character and character:FindFirstChild("HumanoidRootPart")
@@ -338,7 +338,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
    setCharacterGroup(player,"Default")
    Lobby.prepareCharacter(character)
    player:SetAttribute("ReturningLobby",nil)
-   send(player,"로비로 돌아왔습니다.") sendBag(player)
+   send(player,"Welcome back to the lobby.") sendBag(player)
   end
   return
  end

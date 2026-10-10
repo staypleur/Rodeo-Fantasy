@@ -37,7 +37,7 @@ function S.start(bags,canAct,sendBag,beforeTrade)
    local _,message=R.pair(bag,value) remote:FireClient(player,"SocialMessage",message) return
   end
   if action=="ProfileSave" then
-   local ids=R.profile(bag,value) if ids and not S.trading(player) then bag.profile=ids remote:FireClient(player,"SocialMessage","프로필을 저장했습니다.") end return
+   local ids=R.profile(bag,value) if ids and not S.trading(player) then bag.profile=ids remote:FireClient(player,"SocialMessage","Profile saved.") end return
   end
   if player:GetAttribute("Area")~="Cafe" then return end
   if action=="Profile" or action=="OtherJournal" or action=="TradeRequest" then
@@ -77,7 +77,7 @@ function S.start(bags,canAct,sendBag,beforeTrade)
    if ok then
     for _,p in ipairs({a,b}) do
      for _,m in ipairs(bags[p].monsters) do if Catalog[m.monsterId] then Progress.discover(p,m.monsterId,m.stars) end end
-     sendBag(p) remote:FireClient(p,"SocialMessage","거래가 완료되었습니다.")
+     sendBag(p) remote:FireClient(p,"SocialMessage","Trade complete.")
     end
    end
   end

@@ -4,7 +4,8 @@ local player=game:GetService("Players").LocalPlayer
 local L=require(game.ReplicatedStorage.RodeoFantasy.Localization)
 local records=setmetatable({},{__mode="k"})
 local translator,cache,inflight=nil,{},{}
-function C.locale() return player.LocaleId end
+-- The user chose English for all current game UI, regardless of account locale.
+function C.locale() return "en-us" end
 function C.text(source)
  local localText=L.text(source,C.locale())
  if localText~=source or string.sub(C.locale(),1,2)=="en" then return localText end

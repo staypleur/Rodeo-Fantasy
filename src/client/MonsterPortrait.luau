@@ -7,7 +7,7 @@ function P.fill(viewport,id,stars,silhouette,distanceScale)
  local source=package:FindFirstChild(C.visual(id,stars))
  if not source or not source:GetAttribute("NativeMeshyMossrat") then
   local label=Instance.new("TextLabel") label.BackgroundTransparency=1 label.Size=UDim2.fromScale(1,1)
-  label.Text="모델 준비 중" label.TextScaled=true label.TextColor3=Color3.fromRGB(160,180,170) label.Parent=viewport
+  label.Text="Model pending" label.TextScaled=true label.TextColor3=Color3.fromRGB(160,180,170) label.Parent=viewport
   return nil
  end
  local model=source:Clone()

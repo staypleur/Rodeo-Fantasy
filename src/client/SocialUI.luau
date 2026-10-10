@@ -37,37 +37,37 @@ function S.new(gui,remote,bag,journal)
   make("UICorner",{CornerRadius=UDim.new(0,12)},frame)
   local v=make("ViewportFrame",{Size=UDim2.new(1,0,0,140),BackgroundTransparency=1,ZIndex=63},frame)
   Portrait.fill(v,m.monsterId,m.stars,false)
-  make("TextLabel",{Text=(mode=="Trade" and not fn and "상대 · " or "")..L.text(m.monsterId,player.LocaleId).." · "..m.stars.."★",Size=UDim2.new(1,0,0,24),Position=UDim2.fromOffset(0,139),BackgroundTransparency=1,TextSize=15,ZIndex=63},frame)
-  if fn then button((selected[m.id] and "✓ " or "")..(m.sex=="Male" and "♂ " or m.sex=="Female" and "♀ " or "").."선택",0,166,1,frame,fn) end
+  make("TextLabel",{Text=(mode=="Trade" and not fn and "Partner · " or "")..L.text(m.monsterId,"en-us").." · "..m.stars.."★",Size=UDim2.new(1,0,0,24),Position=UDim2.fromOffset(0,139),BackgroundTransparency=1,TextSize=15,ZIndex=63},frame)
+  if fn then button((selected[m.id] and "✓ " or "")..(m.sex=="Male" and "♂ " or m.sex=="Female" and "♀ " or "").."Select",0,166,1,frame,fn) end
  end
  local renderSelection
  renderSelection=function()
-  open(mode=="Breed" and "교배 · 최대 4팀 / 8마리" or "프로필 지정 · 최대 5마리")
-  button(mode=="Breed" and "암컷 + 수컷 · 시작 준비 중" or (#ids().." / 5 선택"),0,0,1,controls,function() end)
+  open(mode=="Breed" and "Breed · Up to 4 pairs / 8 monsters" or "Profile · Up to 5 monsters")
+  button(mode=="Breed" and "Female + Male · Coming soon" or (#ids().." / 5 selected"),0,0,1,controls,function() end)
   for _,m in ipairs(bag.items) do card(m,function()
    if selected[m.id] then selected[m.id]=nil elseif #ids()<(mode=="Breed" and 2 or 5) and not m.breedingTeam then selected[m.id]=true end renderSelection()
   end) end
-  button(mode=="Breed" and "준비 중 · 선택 조건 확인" or "프로필 저장",.5,0,.5,footer,function() remote:FireServer(mode=="Breed" and "Breed" or "ProfileSave",ids()) end)
+  button(mode=="Breed" and "Check pairing" or "Save profile",.5,0,.5,footer,function() remote:FireServer(mode=="Breed" and "Breed" or "ProfileSave",ids()) end)
  end
  function self.breed() mode="Breed" selected={} renderSelection() end
  function self.edit() mode="Profile" selected={} for _,id in ipairs(self.profile or {}) do selected[id]=true end renderSelection() end
  local close=button("×",.93,10,.07,window,function() window.Visible=false if trade then remote:FireServer("TradeDecline") end end)
  close.Size=UDim2.fromOffset(38,38)
  local function showTrade(data)
-  trade=data mode="Trade" open("거래 · "..data.name)
+  trade=data mode="Trade" open("Trade · "..data.name)
   selected={} for _,id in ipairs(data.mine.ids) do selected[id]=true end
-  local coins=make("TextBox",{Text=tostring(data.mine.coins),PlaceholderText="보낼 코인",ClearTextOnFocus=false,Size=UDim2.new(.28,0,0,36),TextSize=18,ZIndex=64},controls)
-  button("제안 갱신",.3,0,.23,controls,function() remote:FireServer("TradeOffer",{ids=ids(),coins=tonumber(coins.Text)}) end)
-  button("상대: "..data.theirs.coins.."코인 / "..#data.theirs.ids.."마리",.54,0,.46,controls,function() end)
+  local coins=make("TextBox",{Text=tostring(data.mine.coins),PlaceholderText="Coins to offer",ClearTextOnFocus=false,Size=UDim2.new(.28,0,0,36),TextSize=18,ZIndex=64},controls)
+  button("Update offer",.3,0,.23,controls,function() remote:FireServer("TradeOffer",{ids=ids(),coins=tonumber(coins.Text)}) end)
+  button("Partner: "..data.theirs.coins.." coins / "..#data.theirs.ids.." monsters",.54,0,.46,controls,function() end)
   for _,m in ipairs(bag.items) do card(m,function()
    if selected[m.id] then selected[m.id]=nil else selected[m.id]=true end
    remote:FireServer("TradeOffer",{ids=ids(),coins=tonumber(coins.Text) or 0})
   end) end
   for _,m in ipairs(data.theirs.monsters or {}) do card(m,nil) end
-  button(data.accepted and "취소" or "거래 거절",0,0,.3,footer,function() remote:FireServer("TradeDecline") window.Visible=false end)
-  if not data.accepted then button("거래 수락",.5,0,.5,footer,function() remote:FireServer("TradeAccept") end)
-  elseif data.ready and data.otherReady then button(data.final and "상대 최종 확인 대기" or "최종 확인 · 교환 실행",.5,0,.5,footer,function() remote:FireServer("TradeConfirm",data.revision) end)
-  else button(data.ready and "상대 확인 대기" or "제안 확인",.5,0,.5,footer,function() remote:FireServer("TradeReady",data.revision) end) end
+  button(data.accepted and "Cancel" or "Decline trade",0,0,.3,footer,function() remote:FireServer("TradeDecline") window.Visible=false end)
+  if not data.accepted then button("Accept trade",.5,0,.5,footer,function() remote:FireServer("TradeAccept") end)
+  elseif data.ready and data.otherReady then button(data.final and "Waiting for final confirmation" or "Confirm exchange",.5,0,.5,footer,function() remote:FireServer("TradeConfirm",data.revision) end)
+  else button(data.ready and "Waiting for partner" or "Confirm offer",.5,0,.5,footer,function() remote:FireServer("TradeReady",data.revision) end) end
  end
  function self.event(kind,data)
   if kind=="SocialMessage" then self.message(data)
@@ -76,17 +76,17 @@ function S.new(gui,remote,bag,journal)
    local avatar=make("ImageLabel",{BackgroundTransparency=1,Size=UDim2.fromOffset(170,205),ZIndex=63},content)
    task.spawn(function() local ok,url=pcall(function() return Players:GetUserThumbnailAsync(data.userId,Enum.ThumbnailType.AvatarThumbnail,Enum.ThumbnailSize.Size420x420) end) if ok and avatar.Parent then avatar.Image=url end end)
    for _,m in ipairs(data.monsters) do card(m,nil) end
-   button("도감 보기",0,0,.5,footer,function() remote:FireServer("OtherJournal",other) end)
-   button("거래 요청",.5,0,.5,footer,function() remote:FireServer("TradeRequest",other) end)
+   button("View index",0,0,.5,footer,function() remote:FireServer("OtherJournal",other) end)
+   button("Request trade",.5,0,.5,footer,function() remote:FireServer("TradeRequest",other) end)
   elseif kind=="OtherJournal" then window.Visible=false journal.viewOther(data)
   elseif kind=="Trade" then showTrade(data)
-  elseif kind=="TradeInvitation" then self.message(data.name.."님이 거래를 요청했습니다.")
+  elseif kind=="TradeInvitation" then self.message(data.name.." requested a trade.")
   elseif kind=="TradeClosed" then trade=nil if mode=="Trade" then window.Visible=false end
   elseif kind=="Eggs" then
-   mode="Eggs" open("알 관리 · 부화소 "..data.pen.." · 한 칸에 알 1개")
-   if #data.eggs==0 then self.message("아직 알이 없습니다. 교배 시간·결과 설정 후 이용할 수 있습니다.") end
+   mode="Eggs" open("Eggs · Hatchery "..data.pen.." · One egg per slot")
+   if #data.eggs==0 then self.message("No eggs yet. Breeding is coming soon.") end
    for _,egg in ipairs(data.eggs) do
-    button("알 "..tostring(egg.id)..(egg.assignedPen and " · 배치됨" or " · 가방"),0,0,1,content,function() remote:FireServer(egg.assignedPen==data.pen and "RemoveEgg" or "PlaceEgg",{id=egg.id,pen=data.pen}) end)
+    button("Egg "..tostring(egg.id)..(egg.assignedPen and " · Placed" or " · Bag"),0,0,1,content,function() remote:FireServer(egg.assignedPen==data.pen and "RemoveEgg" or "PlaceEgg",{id=egg.id,pen=data.pen}) end)
    end
   end
  end
@@ -94,7 +94,7 @@ function S.new(gui,remote,bag,journal)
  UIS.InputBegan:Connect(function(input,processed) if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and self.area=="Cafe" then tStart=os.clock() end end)
  UIS.InputEnded:Connect(function(input) if input.KeyCode==Enum.KeyCode.T then tStart=nil end end)
  Run.RenderStepped:Connect(function() if tStart and os.clock()-tStart>=1 then tStart=nil self.edit() end end)
- local edit=button("T 길게 · 프로필 지정",.02,14,.24,gui,self.edit)
+ local edit=button("Hold T · Edit profile",.02,14,.24,gui,self.edit)
  function self.state(data) self.area=data.area self.profile=data.profile or self.profile edit.Visible=data.area=="Cafe" end
  edit.Visible=false bag.onBreed=self.breed
  return self
