@@ -1148,3 +1148,8 @@
 - 상단 간판 요청: Galaxy Pets → Rodeo Planeture. 새로운 매끄러운 설계에 RODEO / PLANETURE 및 행성 아이콘 반영. 저장소/데이터 이름은 보존.
 - tools/build_smooth_lobby.py 및 assets/maps/SmoothLobby/SmoothLobbyDraft.rbxmx / .rbxlx / layout.json 생성. 곡면 원형 데크·로켓·실린더 부화기·캡슐, 8개 개인실/8개 부화소/32개 빈 새끼 캡슐. .rbxlx는 게임 시스템 없는 독립 검토용 장소. 기존 dist 메인 맵·플레이어 데이터에는 아직 적용하지 않음.
 - 모든 면 Smooth, 실제 Cylinder의 축 변환, XML 참조, 8x(1+4), 간판 문자열 검사 통과. 실제 Studio 조명/외관·모바일·PC 검토 및 디자인 완성/승인은 남음. 이전 회색 모스랫도 미해결 상태 유지.
+
+## 2026-10-10 매끄러운 로비 형상 공개
+
+- 사용자 디자인 공개 요청에 따라 tools/render_smooth_lobby.py로 저장된 layout.json의 실제 Part 형상을 전체/개인 부화실 이미지로 렌더링하고 두 이미지를 확인. 천장과 입구 벽은 배치를 볼 수 있도록 숨긴 단면 표현. Studio 스크린샷이나 게임의 실제 유리·조명 결과가 아님.
+- 현재는 기본 배치와 곡면 형상 초안이며 참고 이미지 수준의 프레임·제어판·우주 배경·장식 디테일은 미완료. 메인 게임에 적용하지 않음. 기기 성능 검증도 미실시.
