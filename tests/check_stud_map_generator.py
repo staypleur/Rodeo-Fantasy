@@ -13,7 +13,7 @@ local Vector3={}
 local vectorMeta={__add=function(a,b) return Vector3.new(a.X+b.X,a.Y+b.Y,a.Z+b.Z) end}
 function Vector3.new(x,y,z) return setmetatable({X=x,Y=y,Z=z},vectorMeta) end
 local Color3={fromRGB=function(r,g,b) return {r,g,b} end}
-local Enum={PartType={Block="Block"},Material={Plastic="Plastic"},SurfaceType={Studs="Studs",Smooth="Smooth"}}
+local Enum={PartType={Block="Block"},Material={Plastic="Plastic"},SurfaceType={Studs="Studs",Inlet="Inlet",Smooth="Smooth"}}
 local registry={}
 local function children(self)
  local result={} for _,node in ipairs(registry) do if node.Parent==self then table.insert(result,node) end end return result
@@ -41,11 +41,12 @@ local function inspect(origin)
  created={} partCount=0
  local model=Generator.create(workspace,origin)
  assert(model.Parent==workspace)
- assert(#created>600 and #created<1500)
+ assert(#created>600 and #created<2500)
  for _,p in ipairs(created) do
   if p.ClassName=="Part" then
    assert(p.Parent==model and p.Shape==Enum.PartType.Block)
    assert(p.Material==Enum.Material.Plastic and p.TopSurface==Enum.SurfaceType.Studs)
+   assert(p.BottomSurface==Enum.SurfaceType.Inlet)
    for _,face in ipairs({"FrontSurface","BackSurface","LeftSurface","RightSurface"}) do assert(p[face]==Enum.SurfaceType.Studs) end
    assert(p.Anchored and p.CanCollide and not p.CanTouch)
    for _,axis in ipairs({"X","Y","Z"}) do
@@ -55,7 +56,7 @@ local function inspect(origin)
    end
   end
  end
- assert(model:FindFirstChild("MeadowPlate").Size.X==192)
+ assert(model:FindFirstChild("MeadowPlate").Size.X==160)
  assert(model:GetAttribute("LengthStuds")==4800 and model:GetAttribute("LengthMeters")==1000)
  assert(model:GetAttribute("PrivateHunt") and model:GetAttribute("MonsterModelsPending"))
  assert(model:GetAttribute("TargetEmptyScreenShare")==0.4 and model:GetAttribute("TargetObstacleScreenShare")==0.2 and model:GetAttribute("TargetMonsterScreenShare")==0.4)
@@ -97,7 +98,7 @@ for z=0,-4800,-16 do
 end
 local ground={}
 for _,p in ipairs(fourth:GetChildren()) do
- if p:GetAttribute("MapKind")=="Ground" then table.insert(ground,p) end
+ if p.Name=="MeadowPlate" then table.insert(ground,p) end
 end
 -- Adjacent gradient strips must not reintroduce overlapping top faces.
 local all=fourth:GetChildren()
@@ -116,8 +117,28 @@ table.sort(ground,function(a,b) return a.Position.Z>b.Position.Z end)
 assert(ground[1].Position.Z+ground[1].Size.Z/2==0)
 assert(ground[30].Position.Z-ground[30].Size.Z/2==-4800)
 for i,p in ipairs(ground) do
- assert(p.Size.X==192 and p.Size.Z==160)
+ assert(p.Size.X==160 and p.Size.Z==160)
  if i>1 then assert(ground[i-1].Position.Z-ground[i-1].Size.Z/2==p.Position.Z+p.Size.Z/2) end
+end
+local heights={}
+for _,p in ipairs(all) do
+ if p.Name=="MeadowShoulder" then heights[p.Size.Y]=true end
+ if p.Name=="GrassCap" then assert(math.abs(p.Position.X)-p.Size.X/2>=96,"Wall narrows course") end
+end
+assert(heights[8] and heights[16],"Missing floor relief")
+for _,p in ipairs(ground) do
+ local shoulders=0
+ local tops={}
+ for _,q in ipairs(all) do
+  if q.Position.Z==p.Position.Z and q.Name=="MeadowShoulder" then
+   assert(math.abs(q.Position.X)==88 and q.Size.X==16 and q.Size.Z==160)
+   shoulders+=1
+  elseif q.Position.Z==p.Position.Z and q.Name=="GrassCap" and q.Position.X>0 then
+   tops[q.Position.X]=q.Position.Y
+  end
+ end
+ assert(shoulders==2,"Missing full width floor coverage")
+ assert(tops[104]<tops[120] and tops[120]<tops[136],"Canyon terraces not ascending")
 end
 for _,origin in ipairs({Vector3.new(1,0,0),Vector3.new(0,2,0),Vector3.new(0,0,0/0),Vector3.new(math.huge,0,0)}) do
  created={}

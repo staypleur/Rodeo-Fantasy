@@ -36,7 +36,8 @@ function Generator.create(parent, origin, backupParent)
  local model = Instance.new("Model")
  model.Name = "HuntStudBlockReview"
  model:SetAttribute("StudMapGenerator",true)
- model:SetAttribute("StudMapRevision",3)
+ model:SetAttribute("StudMapRevision",4)
+ model:SetAttribute("TerrainSeed",Layout.Seed)
  model:SetAttribute("LengthMeters",Layout.LengthMeters)
  model:SetAttribute("LengthStuds",Layout.LengthStuds)
  model:SetAttribute("WidthStuds",Layout.WidthStuds)
@@ -59,7 +60,7 @@ function Generator.create(parent, origin, backupParent)
   part.Shape = Enum.PartType.Block
   part.Material = Enum.Material.Plastic
   part.TopSurface = Enum.SurfaceType.Studs
-  part.BottomSurface = Enum.SurfaceType.Smooth
+  part.BottomSurface = Enum.SurfaceType.Inlet
   part.FrontSurface = Enum.SurfaceType.Studs
   part.BackSurface = Enum.SurfaceType.Studs
   part.LeftSurface = Enum.SurfaceType.Studs

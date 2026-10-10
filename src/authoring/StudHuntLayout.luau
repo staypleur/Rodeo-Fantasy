@@ -3,6 +3,19 @@ local Layout = {WidthStuds=192,LengthStuds=4800,LengthMeters=1000,MetersPerStud=
 -- Latest user target is screen composition, not spawn counts or exact pixel masks.
 -- Tune against the rear-follow camera after the user supplies new monster models.
 Layout.ScreenComposition = {Empty=0.40,Obstacles=0.20,Monsters=0.40}
+Layout.Seed = 317
+
+-- Coherent, seeded height variation, also reproducible outside Studio.
+local function relief(index, channel)
+ local cell=math.floor(index/4)
+ local t=(index%4)/4
+ t=t*t*(3-2*t)
+ local function sample(n)
+  local v=math.sin(n*127.1+channel*311.7+Layout.Seed)*43758.5453
+  return v-math.floor(v)
+ end
+ return math.floor((sample(cell)*(1-t)+sample(cell+1)*t)*3)
+end
 
 function Layout.build()
  local blocks = {}
@@ -13,14 +26,20 @@ function Layout.build()
  for index=0,29 do
   local z=-80-index*160
   local tint=index%3
-  put("MeadowPlate",0,-4,z,192,8,160,224-tint*3,199-tint*3,151-tint*2,"Ground")
+  put("MeadowPlate",0,-4,z,160,8,160,224-tint*3,199-tint*3,151-tint*2,"Ground")
   for _,side in ipairs({-1,1}) do
-   local height=24+(index%3)*8
-   put("CliffFoot",side*104,4,z,16,8,160,113,73,48)
-   for level=0,height/8-1 do
-    put("CliffWall",side*120,12+level*8,z,16,8,160,119+level*10,76+level*9,48+level*7)
+   local edgeHeight=relief(index,side+3)==2 and 8 or 0
+   put("MeadowShoulder",side*88,-4+edgeHeight/2,z,16,8+edgeHeight,160,218-tint*3,193-tint*3,145-tint*2,"Ground")
+   -- Three terraces start OUTSIDE the full 192-stud course, never squeeze it.
+   -- Vertical colour bands retain the block silhouette without buried cubes.
+   for terrace=0,2 do
+    local height=16+terrace*16+relief(index,side+7)*8
+    local x=side*(104+terrace*16)
+    for level=0,height/8-1 do
+     put("CliffWall",x,4+level*8,z,16,8,160,113+level*5,73+level*5,48+level*4)
+    end
+    put("GrassCap",x,height+4,z,16,8,160,146+terrace*12,159+terrace*10,77+terrace*8)
    end
-   put("GrassCap",side*120,12+height,z,16,8,160,154,170,89)
   end
  end
  local function tree(x,z,large)

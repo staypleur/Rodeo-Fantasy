@@ -6,8 +6,8 @@
 3. 이 폴더의 CreateStudBlockMap.commandbar.lua를 메모장으로 열어 전체 내용을 복사하세요.
 4. Studio 명령 모음에 붙여넣고 Enter를 누르세요. Play 중이 아닌 편집 상태에서 실행하세요.
 5. Explorer의 Workspace 안에 HuntStudBlockReview 모델이 생기고 시작 구간 바닥이 선택됩니다. 마우스를3D 화면에놓고F를누르면시작구간이보입니다. 전체모델선택후F를누르면1000m전체가작게보입니다.
-6. Output(출력)에 STUD_MAP_REVIEW_CREATED 838과1000m가 나오면 생성 성공입니다.
-7. 모델 안 MeadowPlate를 선택해 Properties에서 Material=Plastic, Shape=Block, TopSurface=Studs, Size.X=192를 확인하세요. 나무/옆 벽도 윗면과 네 옆면이 Studs인지 확인하세요.
+6. Output(출력)에 STUD_MAP_REVIEW_CREATED 1594과1000m가 나오면 생성 성공입니다.
+7. 모델 안 MeadowPlate를 선택해 Properties에서 Material=Plastic, Shape=Block, TopSurface=Studs, BottomSurface=Inlet, Size.X=160을 확인하세요. 양쪽 MeadowShoulder 폭16씩을 포함한 전체 주행 폭은192입니다. 나무/옆 벽도 윗면과 네 옆면이 Studs인지 확인하세요.
 
 블록 나무/바위도 모두 Plastic Part이며 4studs 격자에 맞습니다.
 이 검토 모델에는 몬스터·사냥 조작·후방 추적 카메라가 없습니다.
@@ -20,6 +20,8 @@
 최신 목표는 플레이 화면 기준 빈 공간40%·장애물20%·몬스터40%입니다. 개수 비율이 아닙니다.
 현재 검토 맵에는 새 몬스터가 없으므로 이 화면 비율을 검증할 수 없습니다. 모델과 후방 카메라 연결 후 실제 화면으로 조정합니다.
 기본 바닥 윗면은Y=8로 올려 Baseplate와 분리합니다.
+중앙160studs는 평평하고, 양쪽 가장자리16studs씩에는0/8studs 단차가 있습니다.
+양옆 벽은 주행 구역 밖에서3단으로 높아집니다. 고정 시드317로 매번 같은 지형을 만듭니다.
 재실행 시 기존 생성기의 검토 모델은 ServerStorage에 보관하고 새 맵만 Workspace에 남깁니다.
 모델을 삭제하지 않으며 Baseplate/다른 게임 모델은 그대로 둡니다. Ctrl+Z로 되돌릴 수 있습니다.
 기존 생성 코드를 여러 번 실행한 경우에도 새 코드를 한 번 실행하세요.
