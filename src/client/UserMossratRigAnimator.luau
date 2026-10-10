@@ -1,18 +1,21 @@
 -- Plays the exact approved glTF samples through Bone.Transform; never blinks.
 local A={}
 local data=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigData"))
+local dataS3=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigDataS3"))
+local function rigData(model) return model:GetAttribute("MossratUserRigRevision")=="UserS3-v1" and dataS3 or data end
 local cache=setmetatable({},{__mode="k"})
 local torsoCenterX={Pelvis=-.04,Spine=.02,Chest=.035,Neck=.025,Head=.015}
 -- Portraits do not run the walking animation loop. Apply the same neutral
 -- torso/head correction immediately so their first frame matches the game.
 function A.poseFront(model)
+ local s3=rigData(model)==dataS3
  local body=model:FindFirstChild("Body") if not body then return end
  local scale=model:GetAttribute("MossratRigTranslationScale") or 2.5/data.height
  for _,b in ipairs(body:GetDescendants()) do
   if b:IsA("Bone") then
-   local x=torsoCenterX[b.Name]
+   local x=not s3 and torsoCenterX[b.Name]
    b.Transform=CFrame.new((x or 0)*scale,0,0)
-   if b.Name=="Head" then b.Transform=b.Transform*CFrame.Angles(0,math.rad(-8.2),0) end
+   if b.Name=="Head" and not s3 then b.Transform=b.Transform*CFrame.Angles(0,math.rad(-8.2),0) end
   end
  end
 end
@@ -22,6 +25,8 @@ local function rotation(v)
  return CFrame.new(0,0,0,1-2*(y*y+z*z),2*(x*y-z*w),2*(x*z+y*w),2*(x*y+z*w),1-2*(x*x+z*z),2*(y*z-x*w),2*(x*z-y*w),2*(y*z+x*w),1-2*(x*x+y*y))
 end
 function A.animate(model,moving)
+ local data=rigData(model)
+ local s3=data==dataS3
  local body=model:FindFirstChild("Body") if not body then return end
  local c=cache[model]
  if not c or c.body~=body then
@@ -56,10 +61,10 @@ function A.animate(model,moving)
    local frame=CFrame.new(p.translation or Vector3.zero)*(p.rotation or CFrame.identity)
    -- Keep the face forward; retain body, legs, ears and tail motion.
    -- Center the original offset torso chain without changing the uploaded mesh/UVs.
-   local centerX=torsoCenterX[name]
+   local centerX=not s3 and torsoCenterX[name]
    if name=="Head" or name=="Neck" then frame=CFrame.identity end
    if centerX then frame=CFrame.new(centerX*scale,0,0)*frame end
-   if name=="Head" then frame=frame*CFrame.Angles(0,math.rad(-8.2),0) end
+   if name=="Head" and not s3 then frame=frame*CFrame.Angles(0,math.rad(-8.2),0) end
    -- Explicit four-leg stride also covers imported rigs whose revision attribute is absent.
    local legSide=name:sub(1,4)=="Left" and "Left" or name:sub(1,5)=="Right" and "Right" or nil
    local legLimb=name:find("Front",1,true) and "Front" or name:find("Rear",1,true) and "Rear" or nil
@@ -78,7 +83,7 @@ function A.animate(model,moving)
     elseif legLimb=="Front" and name:find("Upper",1,true) then pose=CFrame.Angles(math.rad(-50),0,0)
     elseif legLimb=="Front" and name:find("Lower",1,true) then pose=CFrame.Angles(math.rad(40),0,0) end
     frame=frame*CFrame.identity:Lerp(pose,ease)
-   elseif legSide and legLimb and moving then
+   elseif legSide and legLimb and moving and not s3 then
     local opposite=(legSide=="Left")~=(legLimb=="Front")
     local beat=math.sin((now-c.started)*math.pi*6+(opposite and math.pi or 0))
     if name:find("Upper",1,true) then frame=CFrame.Angles(beat*.65,0,0)

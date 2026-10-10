@@ -1,0 +1,11 @@
+{
+  "source": "Meshy_AI_Mossrat_6Star_Remesh__1010095559_texture.glb",
+  "sha256": "3e9b36121a303c42f79eb77db6a444db02eb384c4d365a56c469cbb63535f7ee",
+  "skins": 0,
+  "animations": 0,
+  "vertices": 20409,
+  "triangles": 10218,
+  "heightMetres": 1.71,
+  "targetHeightStuds": 4.75,
+  "status": "Received source has no rig; no replacement installed"
+}

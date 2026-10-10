@@ -5,13 +5,16 @@ local C=require(package:WaitForChild("MonsterCatalog"))
 local rigAnimator
 local boneCache=setmetatable({},{__mode="k"})
 function M.isTarget(model)
- local visual=package:FindFirstChild("VisualTemplate")
- return model:GetAttribute("MonsterId")=="MeadowMouse" and C.stage(model:GetAttribute("Stars") or 1)==1 and visual~=nil and visual:GetAttribute("NativeMeshyMossrat")==true
+ local stage=C.stage(model:GetAttribute("Stars") or 1)
+ local visual=package:FindFirstChild(C.visual("MeadowMouse",stage))
+ return model:GetAttribute("MonsterId")=="MeadowMouse" and (stage==1 or stage==3) and visual~=nil and visual:GetAttribute("NativeMeshyMossrat")==true
 end
 function M.apply(model)
  if not M.isTarget(model) or not model.PrimaryPart then return false end
  local stars=model:GetAttribute("Stars") or 1
- local source=model:GetAttribute("VisualDeferred") and package:FindFirstChild("MeshyMossratHuntTemplate") or package.VisualTemplate
+ local stage=C.stage(stars)
+ local suffix=stage==1 and "" or "_S"..stage
+ local source=model:GetAttribute("VisualDeferred") and package:FindFirstChild("MeshyMossratHuntTemplate"..suffix) or package:FindFirstChild(C.visual("MeadowMouse",stars))
  if not source then return false end
  local facingRevision=source:GetAttribute("MeshyFacingRevision") or "Original"
  local yaw=source:GetAttribute("MeshyVisualYawDegrees") or 0
@@ -22,7 +25,7 @@ function M.apply(model)
   facingRevision..="-ForwardV2"
  end
  if model:GetAttribute("NativeMeshyReady") and model:GetAttribute("NativeMeshyStars")==stars and model:GetAttribute("NativeMeshyFacingRevision")==facingRevision and model:FindFirstChild("Body") then return true end
- local scale=C.scale(model:GetAttribute("Stars") or 1)
+ local scale=C.scale(stars)/C.Scales[stage]
  local staged={}
  for _,original in ipairs(source:GetChildren()) do
   if original:IsA("MeshPart") then
@@ -64,7 +67,8 @@ function M.posePortrait(model)
  rigAnimator.poseFront(model)
 end
 function M.huntFrame(model,frame)
- local hunt=package:FindFirstChild("MeshyMossratHuntTemplate")
+ local stage=C.stage(model:GetAttribute("Stars") or 1)
+ local hunt=package:FindFirstChild("MeshyMossratHuntTemplate"..(stage==1 and "" or "_S"..stage))
  if model:GetAttribute("VisualDeferred") and M.isTarget(model) and hunt and hunt:GetAttribute("FaceCourseForward") then
   return CFrame.new(frame.Position),true
  end

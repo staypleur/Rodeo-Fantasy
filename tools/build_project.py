@@ -151,7 +151,7 @@ lobby.Airport.Airship:SetAttribute("RocketDepartureActive",true)
     new_airport=named(lobby,'Airport');default=named(new_airport,'Rocket')
     if default is not None:new_airport.remove(default)
     new_airport.append(preserve(old_rocket))
-  for old_parent,new_parent,names in [(old_ss,ss,['RodeoMonsterTemplate']),(old_package,package,['VisualTemplate','MeshyMossratHuntTemplate'])]:
+  for old_parent,new_parent,names in [(old_ss,ss,['RodeoMonsterTemplate','RodeoMonsterTemplate_S3']),(old_package,package,['VisualTemplate','MeshyMossratHuntTemplate','VisualTemplate_S3','MeshyMossratHuntTemplate_S3'])]:
    if old_parent is None:continue
    for key in names:
     saved=named(old_parent,key)
@@ -162,7 +162,7 @@ lobby.Airport.Airship:SetAttribute("RocketDepartureActive",true)
   if old_ss is not None:
    for saved in old_ss.findall('Item'):
     key=saved.findtext("Properties/string[@name='Name']") or ''
-    if key.startswith(('MossratRigBackup_',)):ss.append(preserve(saved))
+    if key.startswith(('MossratRigBackup_','MossratS3RigBackup_')):ss.append(preserve(saved))
   if old_ws is not None:
    for key in ('MossratImport',):
     saved=named(old_ws,key)

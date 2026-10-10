@@ -1,0 +1,31 @@
+{
+  "source": "Meshy_AI_Mossrat_3Star_Remesh__1010095539_texture.glb",
+  "sourceSha256": "db41ce805303eacff7e6565e58aef96b7dc25708b332350904789e2136acbda0",
+  "sourceTriangles": 10038,
+  "riggedTriangles": 10038,
+  "vertices": 19734,
+  "bones": 34,
+  "maxInfluences": 4,
+  "clips": [
+    "Idle",
+    "Walk",
+    "LookAround",
+    "RigRange"
+  ],
+  "originalGeometryNormalsUVPreserved": true,
+  "originalTextureBytesPreserved": true,
+  "addedEyelidTriangles": 0,
+  "blinkEnabled": false,
+  "eyeMotion": "Eyes/whiskers remain part of the head skin; four reserved zero-influence bones preserved; no blink",
+  "heightMetres": 1.26,
+  "targetHeightStuds": 3.5,
+  "frontAxis": "+Z",
+  "rigReviewApproved": false,
+  "installedInGame": true,
+  "studioVerified": true,
+  "mobilePerformanceMeasured": false,
+  "studioMeshId": "84769472611145",
+  "studioColorMap": "128825675013452",
+  "pcRuntimeFrames": 240,
+  "pcLegTransformChanges": 93
+}

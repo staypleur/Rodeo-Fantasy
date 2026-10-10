@@ -10,3 +10,6 @@ dist/ImportRecovery/
 assets/models/LobbyModules/*/*.bin
 assets/models/LobbyModules/*/*.gltf
 assets/models/LobbyModules/*/Texture*
+assets/models/MossratS3UserRig/*.gltf
+assets/models/MossratS3UserRig/*.bin
+assets/models/MossratS3UserRig/MossratTexture*.png
