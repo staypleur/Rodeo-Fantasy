@@ -20,9 +20,9 @@ for b in blocks:
 assert sum(b['name']=='HullWall' for b in blocks)==8
 assert data['departureFacility']=='Rocket'
 assert not any(b['name']=='AirshipReservation' for b in blocks)
-rocket=[b for b in blocks if b['group']=='Rocket']
-assert sum(b['name']=='RocketFin' for b in rocket)==4
-assert max(b['pos'][1]+b['size'][1]/2 for b in rocket)<88, 'Rocket intersects ceiling'
+assert data['rocketModelPending']
+assert not any(b['group']=='Rocket' for b in blocks)
+assert sum(b['name']=='RocketModelPending' for b in blocks)==1
 source=(ROOT/'src/shared/DepartureSelectionRules.luau').read_text(encoding='utf-8')
 harness='local R=(function()\n'+source+'\nend)()\n'+'''
 local owned={id=3,monsterId="MeadowMouse",stars=1}
