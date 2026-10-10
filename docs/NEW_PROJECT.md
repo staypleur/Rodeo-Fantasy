@@ -121,3 +121,18 @@ print("METALNESS_CONNECTED", image)
 기존 로켓 메시 가져오기 절차는 더 이상 사용하지 않습니다. 사용자가 맵으로 새로 제작하기로 변경했습니다. 중앙 출발 기능은 유지합니다.
 
 회색 모스랫은 Play 중지 후 dist/MossratTextureFallback.commandbar.lua 전체를 Command Bar에 실행합니다. 기존 웹 업로드 색상 이미지의 로딩 상태를 MOSSRAT_IMAGE_FETCH로 출력합니다. 실패하면 모델을 변경하지 않습니다. 성공하면 원래 UV를 사용하는 MeshPart.TextureID로 색상을 연결하고 기존 PBR은 ServerStorage의 MossratTextureBackup에 보관합니다. 초록색·크림색 표시를 확인한 뒤 Ctrl+S. 주소만 연결된 메시지는 실제 표시 완료를 뜻하지 않습니다. 실패 시 MOSSRAT_IMAGE_FETCH 문장과 이어지는 오류가 진단 근거입니다.
+
+## 최신 적용: 승인한 새 우주선 로비
+
+사용자가 검토안 배치를 승인하고 이미지에 가까운 디자인 보완을 요청했습니다. 저장된 메인 맵에는 새 로비를 연결했습니다. 현재 Studio 작업을 유지하려면 다음 설치 코드를 사용합니다. 기존 모델 가져오기는 필요하지 않습니다.
+
+1. Play를 중지하고 **파일 → 다른 이름으로 파일에 저장**으로 현재 작업의 사본을 저장합니다.
+2. `C:\Users\wucha\OneDrive\바탕 화면\Project\Rodeo Fantasy\dist\InstallOrbitalLobby.commandbar.lua`를 메모장으로 열고 **Ctrl+A → Ctrl+C**.
+3. Studio **창 → 명령 모음(Command Bar)**에 붙여넣고 Enter.
+4. **ORBITAL_LOBBY_INSTALLED**가 나오면 **Ctrl+S**. 기존 로비와 변경 전 코드는 ServerStorage의 OrbitalLobbyBackup 폴더에 보관됩니다. 기존 업로드 모스랫/이미지 주소는 수정하지 않습니다.
+5. Play를 눌러 중앙 Stud 로켓 앞의 **E 1초 → Green Star → 보유 몬스터 → 출발**을 확인합니다. 개인실 자동문, 자신의 이름표, 알 관리에 부화소 1개만 보이는지 확인합니다. 옛 2~4번 알은 다음 접속 때 가방으로 돌아갑니다. 빈 새끼 캡슐은 외형만 있고 상호작용 버튼/성장·수입 기능은 없습니다.
+6. 자기 방에서 가방의 모스랫 소환을 확인합니다. 부화실마다 알 부화기 1개, 빈 캡슐 4개가 있어야 합니다. 사냥·가방·도감·수입도 기존대로 확인합니다.
+
+Studio에 보관할 작업이 없다면 파일 → 파일 열기로 `dist/RodeoFantasy-New.rbxlx`를 열어도 됩니다. 두 방식 중 하나만 사용하세요. 이전 UpdateCurrentProject.commandbar.lua는 이제 동일한 새 로비 설치 코드의 호환 사본입니다.
+
+맵에는 닫힌 천장, 투명 우주 창, 메시 업로드가 필요 없는 블록 로켓과 행성, 상점/랭킹/룰렛/배틀패스 외형 자리가 포함됩니다. 실제 플레이 시 조명·유리·글자·자동문과 모바일/PC 화면 및 프레임을 확인해야 합니다. 검토 이미지는 일부 벽·천장을 숨긴 기하 렌더이며 실제 Studio 스크린샷이 아닙니다. 모스랫 회색 문제는 별도 텍스처 검사 결과가 남아 있으며 로비 설치로 해결됐다고 보장하지 않습니다.

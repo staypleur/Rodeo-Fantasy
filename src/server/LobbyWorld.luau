@@ -51,7 +51,9 @@ function Lobby.release(player)
  player:SetAttribute("LobbySlot",nil)
  plots["Plot_"..index]:SetAttribute("OwnerUserId",nil)
  for _,pen in ipairs(plots["Plot_"..index].Pens:GetChildren()) do
-  local display=pen:FindFirstChild("DisplayMonsters") if display then display:Destroy() end
+  for _,name in ipairs({"DisplayMonsters","DisplayEggs"}) do
+   local display=pen:FindFirstChild(name) if display then display:Destroy() end
+  end
  end
  label(index,"빈 부화실")
 end
@@ -60,7 +62,7 @@ function Lobby.canDepart(player)
  return owned[player]~=nil and root and (root.Position-Lobby.Departure.Position).Magnitude<=16
 end
 function Lobby.getPen(player,index)
- if type(index)~="number" or index~=index or index%1~=0 or index<1 or index>4 or not owned[player] then return nil end
+ if index~=1 or not owned[player] then return nil end
  return plots["Plot_"..owned[player]].Pens["Pen_"..index]
 end
 function Lobby.canManage(player)

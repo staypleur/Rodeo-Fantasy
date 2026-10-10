@@ -3,6 +3,7 @@ import math
 import xml.etree.ElementTree as E
 def name(n):return n.findtext("Properties/string[@name='Name']")
 def expand(lobby,node,part):
+ if any(name(n)=='OrbitalLobbyV2' for n in lobby.findall('Item')):return
  def snap(v):return math.floor(v/4+.5)*4
  def walk(n,in_rocket=False):
   in_rocket=in_rocket or name(n) in ('Rocket','LobbyCompanions')

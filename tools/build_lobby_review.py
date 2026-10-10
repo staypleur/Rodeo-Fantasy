@@ -1,6 +1,7 @@
-"""Uninstalled design review. XML and images use the same generated block list."""
+"""Approved orbital lobby and geometry review, generated from one block list."""
 from pathlib import Path
 import math,json,xml.etree.ElementTree as E
+import copy
 from PIL import Image,ImageDraw,ImageFont
 from place_identity import assert_unique_ids
 R=Path(__file__).resolve().parents[1]
@@ -33,6 +34,15 @@ def brick(parent,name,pos,size,color=WHITE,kind='architecture',glass=False,neon=
  prop(p,'token','BottomSurface',4)
  blocks.append(dict(name=name,position=pos,size=size,color=color,kind=kind,glass=glass,neon=neon,hidden=hidden))
  return p
+def ring(parent,name,cx,cy,cz,radius,color,kind='hatchery',neon=False):
+ # Four straight edges and stepped corners; no decorative meshes or smooth cylinders.
+ length=2*(radius-8) if radius>8 else 2*radius-4
+ for dx,dz,sx,sz in [(-radius,0,4,length),(radius,0,4,length),(0,-radius,length,4),(0,radius,length,4)]:
+  brick(parent,name,[cx+dx,cy,cz+dz],[sx,2,sz],color,kind,neon=neon)
+ if radius<=8:return
+ for signx in [-1,1]:
+  for signz in [-1,1]:
+   brick(parent,name,[cx+signx*(radius-4),cy,cz+signz*(radius-4)],[8,2,8],color,kind,neon=neon)
 def sign(parent,name,pos,size,text,color=BLUE):
  p=brick(parent,name,pos,size,DARK)
  gui=node(p,'SurfaceGui','Sign');prop(gui,'token','Face',5);prop(gui,'float','PixelsPerStud',24)
@@ -49,24 +59,39 @@ for x in range(-224,225,32):
    brick(floor,'DeckTile',[x,0,z],[32,4,32],c,'floor')
 # Segmented luminous guide ring, wide walkways and low central dock.
 airport=node(model,'Model','Airport')
-for layer,radius in enumerate([40,32,24]):
+for layer,radius in enumerate([40,36,32]):
+ # The edge tapers in thin steps. No overlaps with neighboring floor surfaces.
  brick(airport,'DockLayer',[0,3+layer*2,0],[radius*2,2,radius*2],MID,'dock')
-for n in range(64):
- a=n*math.tau/64
+ ring(airport,'DockRim',0,4+layer*2,0,radius,(123,140,160),'dock')
+ring(airport,'DockLight',0,8.2,0,36,GOLD,'dock',True)
+spawn=brick(model,'LobbySpawn',[0,0,-72],[8,4,8],MID,'spawn',hidden=True)
+spawn.set('class','SpawnLocation');prop(spawn,'bool','Neutral','true');prop(spawn,'float','Duration',0)
+guide_positions=set()
+for n in range(192):
+ a=n*math.tau/192
  for radius,color in [(48,GOLD),(112,BLUE),(216,BLUE)]:
-  brick(floor,'GuideLight',[snap(math.cos(a)*radius),2.2,snap(math.sin(a)*radius)],[4,1,4],color,'guide',neon=True)
+  x,z=snap(math.cos(a)*radius),snap(math.sin(a)*radius)
+  if (radius,x,z) not in guide_positions:
+   guide_positions.add((radius,x,z));brick(floor,'GuideLight',[x,2.2,z],[4,1,4],color,'guide',neon=True)
 brick(airport,'Departure',[0,4,-44],[8,4,8],BLUE,hidden=True)
 airship=node(airport,'Model','Airship') # compatibility anchor for the existing departure system
 rocket=node(airport,'Model','Rocket')
 for y in range(10,58,4):
  for x,z,w,d in [(0,0,16,24),(-12,0,8,16),(12,0,8,16)]:
   brick(rocket,'Hull',[x,y,z],[w,4,d],(238,238,222) if y%12 else (230,66,65),'rocket')
+for y in [12,16,56]:ring(rocket,'RocketBand',0,y,0,16,GOLD,'rocket')
+for x in [-8,0,8]:
+ for y in [24,28]:brick(rocket,'Vent',[x,y,-16],[4,2,2],BLUE,'rocket',neon=True)
 for layer in range(7):
  width=max(4,28-layer*4);brick(rocket,'Nose',[0,60+layer*4,0],[width,4,width],(235,53,62),'rocket')
 for x,z in [(-20,0),(20,0),(0,20),(0,-20)]:
  for y in range(12,34,4):
   w=4 if y>24 else 8
   brick(rocket,'Fin',[x,y,z],[w,4,w],(226,57,70),'rocket')
+ for step in range(4):
+  dx,dz=(step*4*(1 if x>0 else -1),0) if x else (0,step*4*(1 if z>0 else -1))
+  brick(rocket,'SteppedFin',[x+dx,10+step*4,z+dz],[8,4,8],(235,58,64),'rocket')
+  brick(rocket,'FinTrim',[x+dx,12+step*4,z+dz],[4,1,4],GOLD,'rocket',neon=True)
 brick(rocket,'WindowFrame',[0,44,-16],[16,16,4],GOLD,'rocket')
 brick(rocket,'Window',[0,44,-20],[8,8,4],BLUE,'rocket',neon=True)
 sign(airport,'DepartureSign',[0,8,-32],[24,8,4],'GREEN STAR')
@@ -96,9 +121,15 @@ for index in range(8):
   brick(pen,'IncubatorCap',[cx,y,cz+4],[28,4,28],MID,'hatchery')
   brick(pen,'RimLight',[cx,y+2.2,cz-8],[20,1,2],accent,'hatchery',neon=True)
  brick(pen,'IncubatorGlass',[cx,19,cz-8],[20,20,2],accent,'glass',glass=True)
+ for y in [8.2,30.2]:ring(pen,'IncubatorGlow',cx,y,cz+4,12,accent,'hatchery',True)
+ for dx in [-12,12]:
+  for dz in [-8,16]:
+   brick(pen,'CornerPillar',[cx+dx,20,cz+dz],[4,20,4],MID,'hatchery')
+   brick(pen,'PillarSegment',[cx+dx,26,cz+dz],[8,4,8],WHITE,'hatchery')
+   brick(pen,'PillarSegment',[cx+dx,14,cz+dz],[8,4,8],WHITE,'hatchery')
  # Layered machinery and display plinth; the egg itself is supplied by inventory.
  for height,width in [(5,32),(7,28),(31,32),(33,28)]:
-  for dx,dz,sx,sz in [(-width//2,0,4,width),(width//2,0,4,width),(0,-width//2,width,4),(0,width//2,width,4)]:
+  for dx,dz,sx,sz in [(-width//2,0,4,width),(width//2,0,4,width),(0,-width//2,width-4,4),(0,width//2,width-4,4)]:
    brick(pen,'SteppedCasing',[cx+snap(dx),height,cz+4+snap(dz)],[sx,2,sz],WHITE,'hatchery')
  for dx in [-12,12]:
   for y in [12,24]:brick(pen,'CasingJoint',[cx+dx,y,cz-12],[8,4,4],MID,'hatchery')
@@ -114,6 +145,8 @@ for index in range(8):
   brick(cap,'CapLight',[cx+dx,26.2,cz+dz],[8,1,8],accent,'capsule',neon=True)
   for side in [-8,8]:brick(cap,'Rail',[cx+dx+side,16,cz+dz],[4,16,12],WHITE,'capsule')
   brick(cap,'EmptySocket',[cx+dx,10.2,cz+dz],[8,1,8],accent,'capsule',neon=True)
+  for y in [6,26]:ring(cap,'CapsuleRim',cx+dx,y,cz+dz,8,WHITE,'capsule')
+  sign(cap,'CapsuleNumber',[cx+dx,28,cz+dz-8],[8,4,2],str(slot),accent)
  for dx in [-32,32]:
   for dz in [-24]:
    brick(room,'Planter',[cx+dx,6,cz+dz],[8,4,8],WHITE,'plant')
@@ -134,9 +167,11 @@ for index in range(8):
   r=56+t*8;brick(floor,'RadialPath',[snap(math.cos(a)*r),2.4,snap(math.sin(a)*r)],[8,1,8],(131,155,184),'path')
 shell=node(model,'Model','ShipShell')
 for x,z,sx,sz in [(0,240,320,8),(0,-240,320,8),(240,0,8,320),(-240,0,8,320)]:
- brick(shell,'WindowSpace',[x,48,z],[sx,64,sz],(16,23,54),'space')
+ window=brick(shell,'WindowSpace',[x,48,z],[sx,64,sz],(84,126,173),'space',glass=True)
+ window.find("Properties/bool[@name='CanCollide']").text='true'
  brick(shell,'Sill',[x,12,z],[sx,8,sz],WHITE,'shell')
  brick(shell,'TopBeam',[x,84,z],[sx,8,sz],WHITE,'shell')
+ for y in [16,80]:brick(shell,'WindowLight',[x,y,z],[sx,2,sz],BLUE,'shell',neon=True)
 for x,z in [(x,z) for x in [-160,-80,0,80,160] for z in [-240,240]]+[(x,z) for x in [-240,240] for z in [-160,-80,0,80,160]]:
  brick(shell,'Column',[x,48,z],[8,80,8],WHITE,'shell')
  brick(shell,'ColumnLight',[x,40,z-4],[4,12,2],GOLD,'shell',neon=True)
@@ -146,6 +181,8 @@ for signx in [-1,1]:
    brick(shell,'CornerHull',[signx*x,48,signz*z],[32,80,32],MID,'shell')
 # Low-cost outer space diorama outside windows (no external texture dependency).
 space=node(model,'Model','SpaceDiorama')
+for x,z,sx,sz in [(0,268,560,4),(0,-268,560,4),(268,0,4,560),(-268,0,4,560)]:
+ brick(space,'DeepSpace',[x,48,z],[sx,96,sz],(7,10,32),'backdrop')
 for n in range(64):
  a=n*math.tau/64;r=248
  brick(space,'Star',[snap(math.cos(a)*r),24+(n*17)%52,snap(math.sin(a)*r)],[2,2,2],(177,211,255),'star',neon=True)
@@ -153,19 +190,37 @@ for cx,cz,color in [(80,248,(107,146,239)),(-112,248,(182,119,230)),(248,48,(112
  for y in range(32,72,4):
   width=snap(math.sqrt(max(0,20**2-(y-52)**2))*2)
   if width:brick(space,'PlanetLayer',[cx,y,cz],[max(4,width),4,8],color,'planet')
+ for i in range(12):
+  a=i*math.tau/12
+  brick(space,'PlanetRing',[cx+snap(math.cos(a)*28),52+math.sin(a)*5,cz-4],[12,2,4],(211,161,248),'planet',neon=True)
 roof=node(model,'Model','Roof')
 for x in range(-224,225,32):
  for z in range(-224,225,32):
   if abs(x)+abs(z)<=352:brick(roof,'Ceiling',[x,96,z],[32,4,32],DARK,'roof')
+for x in [-160,-80,0,80,160]:
+ brick(roof,'RoofBeam',[x,90,0],[8,8,416],WHITE,'roof')
+ brick(roof,'RoofLight',[x,85,0],[4,2,400],BLUE,'roof',neon=True)
+for x,z in [(-80,0),(80,0),(0,-80),(0,80)]:
+ lightPart=brick(roof,'LightFixture',[x,82,z],[8,2,8],(204,226,255),'roof',neon=True)
+ light=node(lightPart,'PointLight','InteriorFill');prop(light,'float','Brightness',1.5);prop(light,'float','Range',100);prop(light,'bool','Shadows','false')
+ composite(light,'Color3','Color',dict(zip('RGB',[.75,.84,1])))
 amenities=node(model,'Model','Amenities')
 for name,x,z,text in [('ShopA',-64,-216,'SHOP 01'),('ShopB',64,-216,'SHOP 02'),('DistanceRank',-216,-64,'DISTANCE'),('JournalRank',-216,64,'JOURNAL'),('Roulette',216,-64,'ROULETTE'),('BattlePass',216,64,'BATTLE PASS')]:
  booth=node(amenities,'Model',name);brick(booth,'Base',[x,4,z],[32,4,16],MID)
  sign(booth,'Board',[x,20,z],[32,20,4],text)
  for dx in [-16,16]:brick(booth,'FrameLight',[x+dx,20,z],[4,20,4],BLUE,neon=True)
+ brick(booth,'Header',[x,32,z],[40,4,8],WHITE)
+ brick(booth,'Console',[x,8,z-8],[24,8,8],WHITE)
+ brick(booth,'ConsoleScreen',[x,13,z-8],[16,2,8],BLUE,neon=True)
 sign(shell,'GameTitle',[0,72,232],[64,16,4],'RODEO FANTASY',GOLD)
+for key in ['LargerLobbyV1','OrbitalLobbyV2']:
+ marker=node(model,'BoolValue',key);prop(marker,'bool','Value','true')
 assert_unique_ids(root)
 E.ElementTree(root).write(OUT/'LobbyDesignReview.rbxmx',encoding='utf-8',xml_declaration=True)
-(OUT/'layout.json').write_text(json.dumps({'reviewOnly':True,'rooms':8,'incubatorsPerRoom':1,'babyCapsulesPerRoom':4,'blocks':blocks},indent=2),encoding='utf-8')
+production=copy.deepcopy(root)
+production.find("Item/Properties/string[@name='Name']").text='RodeoLobby'
+E.ElementTree(production).write(R/'assets/maps/SpaceLobby.rbxmx',encoding='utf-8',xml_declaration=True)
+(OUT/'layout.json').write_text(json.dumps({'approvedDirection':True,'rooms':8,'incubatorsPerRoom':1,'babyCapsulesPerRoom':4,'blocks':blocks},indent=2),encoding='utf-8')
 # Geometry review renderer: block colors and shapes, not Studio lighting/PBR.
 def render(filename,room=False):
  w,h=1800,1300;im=Image.new('RGB',(w,h),(12,18,34));d=ImageDraw.Draw(im)
@@ -174,7 +229,7 @@ def render(filename,room=False):
  def project(p):
   x,y,z=p;x-=focus[0];z=-(z-focus[1])
   return (w/2+(x-z)*.72*scale,h*.56+(x+z)*.32*scale-y*.88*scale)
- visible=[b for b in blocks if not b['hidden'] and b['kind']!='roof']
+ visible=[b for b in blocks if not b['hidden'] and b['kind'] not in ('roof','backdrop')]
  if room:visible=[b for b in visible if abs(b['position'][0])<44 and abs(b['position'][2]-168)<44 and b['kind'] not in ('roomwall','door')]
  else:visible=[b for b in visible if b['kind'] not in ('roomwall','door') and (b['kind'] not in ('space','shell','star','planet') or b['position'][2]>=200 or b['position'][0]<-200)]
  for b in sorted(visible,key=lambda b:b['position'][0]-b['position'][2]+b['position'][1]*.5):
@@ -196,4 +251,4 @@ def render(filename,room=False):
  d.rectangle((0,h-72,w,h),fill=(12,18,34));d.text((40,h-54),'Actual block layout cutaway. Roof/walls hidden for review. Not a Studio render.',font=font,fill=(172,185,212))
  im.save(OUT/filename)
 render('LobbyGeometryReview.png');render('HatcheryGeometryReview.png',True)
-print('LOBBY_REVIEW_BUILT',len(blocks),'parts; not installed')
+print('ORBITAL_LOBBY_GEOMETRY_BUILT',len(blocks),'parts; Studio application and device checks pending')

@@ -16,12 +16,15 @@ assert not any(name(n)=='RodeoCafe' for n in ws.iter('Item'))
 assert len(forest.findall('Item'))==2179
 plots=child(lobby,'Plots');assert len(plots.findall('Item'))==8
 for i in range(1,9):
- p=child(plots,f'Plot_{i}');pens=child(p,'Pens');assert len(pens.findall('Item'))==4
+ p=child(plots,f'Plot_{i}');pens=child(p,'Pens');assert len(pens.findall('Item'))==1
+ capsules=child(p,'BabyCapsules');assert len(capsules.findall('Item'))==4
  for k in ('OwnerBoard','ManagePoint','DoorLeft','DoorRight','DoorSensor'):child(p,k)
- for j in range(1,5):child(child(pens,f'Pen_{j}'),'PenGrass')
+ child(child(pens,'Pen_1'),'PenGrass')
 for part in list(lobby.iter('Item'))+list(forest.iter('Item')):
  if part.get('class') not in ('Part','SpawnLocation'):continue
- props=part.find('Properties');assert props.findtext("token[@name='Material']")=='256'
+ props=part.find('Properties');material=props.findtext("token[@name='Material']");assert material in ('256','288','1568')
+ if material=='1568':assert float(props.findtext("float[@name='Transparency']"))>=.7
+ if part in list(forest.iter('Item')):assert material=='256'
  for face in ('TopSurface','FrontSurface','BackSurface','LeftSurface','RightSurface'):assert props.findtext(f"token[@name='{face}']")=='3'
  assert props.findtext("token[@name='BottomSurface']")=='4'
  # Floor plates exactly meet their neighbors, no coplanar imitation studs.
@@ -32,6 +35,7 @@ child(lobby,'LargerLobbyV1')
 roof=child(lobby,'Roof')
 ceilings=[n for n in roof.findall('Item') if name(n)=='Ceiling']
 assert len(ceilings)==201
+child(lobby,'OrbitalLobbyV2')
 assert child(child(lobby,'Airport'),'Departure').findtext("Properties/CoordinateFrame[@name='CFrame']/Z")=='-44'
 rs=next(n for n in root.findall('Item') if n.get('class')=='ReplicatedStorage')
 visual=child(child(rs,'RodeoFantasy'),'VisualTemplate')
@@ -93,4 +97,4 @@ print("NEW_PROJECT_RULES_PASS: constant 192 width, borders, ownership, locks, ba
 '''
 p=R/'.tools/test_new_project.luau';p.write_text(h,encoding='utf-8')
 subprocess.run([str(R/'.tools/luau/luau.exe'),str(p.relative_to(R))],cwd=R,check=True)
-print('NEW_PROJECT_PASS: unique XML, new lobby/2179-part forest, 8 rooms/32 sockets, Plastic/Studs, no legacy models/cafe map, all embedded scripts compile; Studio/device verification pending')
+print('NEW_PROJECT_PASS: unique XML, new lobby/2179-part forest, 8 rooms/8 egg sockets/32 empty baby capsules, Studs, no legacy models/cafe map, all embedded scripts compile; Studio/device verification pending')
