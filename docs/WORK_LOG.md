@@ -1,5 +1,13 @@
 # 작업 기록
 
+## 2026-10-10 — 기본 Stud 표면과 4stud 격자 맵 생성기
+
+- 사용자 정정: 두 번째 시안도 영상보다 과밀하며 레고 블록(Stud) 디자인을 원한다. 이어 Plastic Block Part만 사용/Smooth Terrain 금지/모든 Part TopSurface Studs/4studs 격자를 명시. 간격을 임의 조정한 두 개별 돌기 렌더는 최종 기준에서 제외.
+- StudBlockMapGenerator는 검토용160x320 초원/블록 외곽·나무·바위를71개 Plastic Block Part로 생성. 모든 윗면 Studs, Anchored, 회전 없음. 중심/크기/각 면4stud 격자 검사. 유효하지 않은 origin은 생성 전 거부하고 생성 오류는 임시 모델을 정리해 기존 맵 보존. Terrain API/메시/돌기용 추가 Part 없음.
+- 검토 Command Bar 번들 생성. 사냥터 런타임·개인 Place·기존 사용자 수정 서버 파일에는 미적용. PC/모바일 기존 조작 유지. 실제 Studio Stud 렌더/조작/성능 검증과 사용자 디자인 적용 승인은 미완료.
+- 실제 생성기 Instance shim 실행으로71개Part의 재질/모양/Studs/격자/원점 이동, 비정렬·NaN·무한 원점 거부, 생성 실패 정리 검사 통과. 생성기 및 번들 Luau 컴파일/번들 소스 일치 검증. 파일 검사이며 Studio 실행 검증이 아님.
+- 공식 표면 근거: https://create.roblox.com/docs/reference/engine/enums/SurfaceType (Studs=3, square studs). Roblox 배포 없음.
+
 ## 2026-10-10 — 바닥 돌기 밀도 수정 / 기존 사냥 조작 유지 확정
 
 - 사용자 의견: 영상 바닥은 첫 검토안보다 더 촘촘한 레고 블록 모양이다. 검토용 돌기 중심 간격4→1.5studs, 폭1.15→1stud, 높이0.18→0.14stud로 수정. 나무/바위/외곽/길 크기와 초원색·카메라 구도는 유지. 수정 렌더 `assets/previews/HuntDenseBlockCameraReview.png`를 준비하며 첫 후방 렌더는 비교용 보존.
