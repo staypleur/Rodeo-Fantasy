@@ -1076,3 +1076,7 @@
 - 사용자가 ColorMap/RoughnessMap/MetalnessMap rbxtemp 임시 이미지 로드 실패와 SurfaceAppearance 생성 실패의 전체 오류를 제공. 미리보기 임시 텍스처 단계 실패는 확인했으나 원인 및 업로드 성공은 미확정.
 - 복구 생성기에 MossratMeshOnly.gltf/RocketMeshOnly.gltf 추가. 재질 참조만 제외하고 메시·UV·스킨·관절·버퍼 동일성 검사 통과. 원본 PNG 별도 업로드 후 SurfaceAppearance 연결 안내 작성. 원본 모델 및 기존 재질 포함 가져오기 파일은 유지.
 - 복구 ZIP 재생성 완료. 실제 Studio 업로드/렌더/모바일 검증 미완료.
+
+## 2026-10-10 웹 데칼 ID 안내 정정
+
+- 사용자 웹 Metalness 업로드 성공 후 SurfaceAppearance 자산 종류 불일치 오류 확인. 업로드 항목 ID를 이미지 ID로 직접 안내한 실수 정정. 데칼 내부 이미지 참조를 InsertService로 읽어 연결하는 Command Bar 코드 추가. PNG 단독 Studio 업로드 실패의 근본 원인은 여전히 미확정. 코드 컴파일 확인, 실제 자산 로드·Studio 렌더 성공 미확인.

@@ -44,3 +44,26 @@
 - 사냥간소화모델·텍스처최적화·실제모바일·PC렌더/조작/FPS·메모리. 40/20/40화면비중실제검증전.
 
 삭제전523개전체파일을 `.local-backup/pre-reset-files.zip`에보관하고SHA256검증했다. 미커밋서버·장소사본도복구폴더에있다. 로컬복구폴더는GitHub에올리지않는다. 이전Git작업은이력으로도복구가능. 플레이어DataStore삭제·초기화없음.
+
+## 웹 업로드 ID의 자산 종류 오류
+
+웹 데칼 업로드 항목의 ID와 그 안의 이미지 ID는 다를 수 있습니다. `Asset type does not match requested type`이면 데칼 ID를 PBR 맵에 직접 넣지 않습니다. 앞서 Metalness 업로드 ID를 바로 사용하도록 안내한 것은 잘못된 안내였습니다.
+
+Studio에서 Play를 중지하고 **창 → 명령 모음(Command Bar)**에 아래 코드를 붙여넣고 Enter를 누릅니다. 자신의 데칼을 로드하여 이미지 참조를 읽고, 임시 객체는 작업공간에 넣지 않고 제거합니다. 성공 시 `METALNESS_CONNECTED`와 이미지 주소가 출력됩니다. 이는 코드 컴파일만 확인했으며 실제 계정의 자산 로드는 아직 미확인입니다.
+
+```lua
+local asset = game:GetService("InsertService"):LoadAsset(113223833745998)
+local decal = asset:FindFirstChildWhichIsA("Decal", true)
+assert(decal, "Loaded asset has no Decal")
+local image = decal.ColorMap
+if image == "" then image = decal.Texture end
+asset:Destroy()
+assert(image ~= "", "Decal has no image reference")
+local model = assert(workspace:FindFirstChild("MossratImport"), "MossratImport not found")
+local body = assert(model:FindFirstChild("MossratS1Body", true), "MossratS1Body not found")
+local surface = assert(body:FindFirstChildOfClass("SurfaceAppearance"), "SurfaceAppearance not found")
+surface.MetalnessMap = image
+print("METALNESS_CONNECTED", image)
+```
+
+[Decal 맵 속성](https://create.roblox.com/docs/reference/engine/classes/Decal)과 [InsertService](https://create.roblox.com/docs/reference/engine/classes/InsertService)는 Roblox 공식 문서를 기준으로 합니다. ColorMap과 RoughnessMap도 각각의 데칼 안 이미지 참조를 사용해야 합니다.
