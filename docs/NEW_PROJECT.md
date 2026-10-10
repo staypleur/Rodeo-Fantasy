@@ -136,3 +136,7 @@ print("METALNESS_CONNECTED", image)
 Studio에 보관할 작업이 없다면 파일 → 파일 열기로 `dist/RodeoFantasy-New.rbxlx`를 열어도 됩니다. 두 방식 중 하나만 사용하세요. 이전 UpdateCurrentProject.commandbar.lua는 이제 동일한 새 로비 설치 코드의 호환 사본입니다.
 
 맵에는 닫힌 천장, 투명 우주 창, 메시 업로드가 필요 없는 블록 로켓과 행성, 상점/랭킹/룰렛/배틀패스 외형 자리가 포함됩니다. 실제 플레이 시 조명·유리·글자·자동문과 모바일/PC 화면 및 프레임을 확인해야 합니다. 검토 이미지는 일부 벽·천장을 숨긴 기하 렌더이며 실제 Studio 스크린샷이 아닙니다. 모스랫 회색 문제는 별도 텍스처 검사 결과가 남아 있으며 로비 설치로 해결됐다고 보장하지 않습니다.
+
+## 최신 상태: 기존 Stud 로비 디자인 철회
+
+사용자가 디자인을 거부하고 로비를 매끄러운 형태로 재설계하도록 변경했습니다. 위 InstallOrbitalLobby 절차는 이전 Stud 디자인이므로 지금 다시 적용하지 마세요. 새 간판은 Rodeo Planeture입니다. assets/maps/SmoothLobby/SmoothLobbyDraft.rbxlx는 시스템 없는 독립 형태 초안이며 완성 맵이 아닙니다. 확인하려면 현재 게임 작업을 사본으로 저장하고 파일 → 파일 열기로 이 초안을 별도로 연 뒤 Explorer에서 Workspace → SmoothLobbyDesignDraft 선택, 화면 위에서 F를 누릅니다. 기존 게임 파일 교체/저장은 하지 않습니다. 실제 Studio 외관 확인과 추가 디자인 보완 후 연결합니다.

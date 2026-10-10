@@ -1141,3 +1141,10 @@
 - Lobby.getPen/UI/초기 표시를 한 부화소로 변경. LobbyIncubatorRules는 알 객체·ID·재화·몬스터를 보존하면서 옛 2~4번 및 중복 1번 배치만 가방에 반환. 반복 실행 무변경. 룸 해제 시 DisplayEggs도 정리. 캡슐 기능·부화 보상/시간 추가 없음.
 - check_new_project.py, check_lobby_update.py, check_orbital_lobby.py 통과: XML/Stud/천장/8x(1+4), 룸 입구 경로, 중복 유도등 없음, 4개 비그림자 조명, 플레이어 슬롯 권한/잘못된 인덱스, 알 이전·중복/반복·재화 보존, 기존 몬스터 업로드 속성 보존, startup/소환/가방·진화·수입 및 Luau 컴파일. 물리 충돌·렌더링·실제 UI/모바일·PC/성능 측정은 별도.
 - 기존 모스랫 회색 문제는 이미지 로딩 검사 사용자 결과 미수령으로 남음. 이번 맵 변경에서 해결 완료로 표시하지 않음.
+
+## 2026-10-10 매끄러운 로비 재설계 시작 / Rodeo Planeture
+
+- 사용자가 기존 디자인이 형편없다고 지적하며 Stud 없이 매끄럽게 제작하도록 변경. 기존 결과를 참고 이미지와 충분히 가까운 완성 디자인처럼 설명한 것은 부정확했음을 인정. 기존 Stud 설치안 사용을 재권장하지 않음.
+- 상단 간판 요청: Galaxy Pets → Rodeo Planeture. 새로운 매끄러운 설계에 RODEO / PLANETURE 및 행성 아이콘 반영. 저장소/데이터 이름은 보존.
+- tools/build_smooth_lobby.py 및 assets/maps/SmoothLobby/SmoothLobbyDraft.rbxmx / .rbxlx / layout.json 생성. 곡면 원형 데크·로켓·실린더 부화기·캡슐, 8개 개인실/8개 부화소/32개 빈 새끼 캡슐. .rbxlx는 게임 시스템 없는 독립 검토용 장소. 기존 dist 메인 맵·플레이어 데이터에는 아직 적용하지 않음.
+- 모든 면 Smooth, 실제 Cylinder의 축 변환, XML 참조, 8x(1+4), 간판 문자열 검사 통과. 실제 Studio 조명/외관·모바일·PC 검토 및 디자인 완성/승인은 남음. 이전 회색 모스랫도 미해결 상태 유지.
