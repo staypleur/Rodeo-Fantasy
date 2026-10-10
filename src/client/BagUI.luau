@@ -138,13 +138,11 @@ function UI.new(gui,remote)
  function self.opened() Audio.ui("BagOpen") if self.onOpen then self.onOpen() end end
  chooser=make("Frame",{Name="RanchChooser",Visible=false,BackgroundTransparency=1,Position=UDim2.fromOffset(20,110),Size=UDim2.new(1,-40,1,-130),ZIndex=23},window)
  make("UIGridLayout",{CellSize=UDim2.new(.45,0,0,90),CellPadding=UDim2.fromOffset(18,18)},chooser)
- for index=1,1 do
+ for index=1,4 do
   local choice=make("TextButton",{Name="RanchChoice"..index,Text="부화소".." "..index,BackgroundColor3=Color3.fromRGB(147,182,154),TextColor3=Color3.fromRGB(37,61,46),TextSize=22,ZIndex=24},chooser)
   make("UICorner",{CornerRadius=UDim.new(0,14)},choice)
   choice.Activated:Connect(function() if self.area=="Lobby" then remote:FireServer("Manage",index) end end)
  end
- local babies=make("TextButton",{Name="BabyCapsules",Text="새끼 캡슐 4칸 · 설정 준비 중",BackgroundColor3=Color3.fromRGB(147,182,154),TextColor3=Color3.fromRGB(37,61,46),TextSize=18,TextWrapped=true,ZIndex=24},chooser)
- make("UICorner",{CornerRadius=UDim.new(0,14)},babies)
  function self.openCompanionMenu()
   if self.area=="Hunt" then return end
   self.setEvolutionMode(false) self.mode="Companion" self.pen=nil chooser.Visible=false scroll.Visible=true

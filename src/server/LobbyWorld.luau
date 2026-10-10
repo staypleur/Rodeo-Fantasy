@@ -53,7 +53,8 @@ for index=1,8 do
  for _,pen in ipairs(plot.Pens:GetChildren()) do pen:SetAttribute("Capacity",1) end
 end
 local function label(index,name)
- local board=plots["Plot_"..index].OwnerBoard
+ local board=plots["Plot_"..index]:FindFirstChild("OwnerBoard")
+ if not board then return end
  for _,gui in ipairs(board:GetChildren()) do
   if gui:IsA("SurfaceGui") then gui.Text.Text=name end
  end
@@ -90,7 +91,7 @@ function Lobby.canDepart(player)
  return owned[player]~=nil and root and (root.Position-Lobby.Departure.Position).Magnitude<=departureRadius
 end
 function Lobby.getPen(player,index)
- if index~=1 or not owned[player] then return nil end
+ if type(index)~="number" or index%1~=0 or index<1 or index>4 or not owned[player] then return nil end
  return plots["Plot_"..owned[player]].Pens["Pen_"..index]
 end
 function Lobby.canManage(player)

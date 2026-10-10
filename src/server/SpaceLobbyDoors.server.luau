@@ -6,10 +6,13 @@ local Tween=game:GetService("TweenService")
 local doors={}
 for slot=1,8 do
  local room=model.Plots:WaitForChild("Plot_"..slot)
- local left,right,sensor=room.DoorLeft,room.DoorRight,room.DoorSensor
+ local left,right,sensor=room:FindFirstChild("DoorLeft"),room:FindFirstChild("DoorRight"),room:FindFirstChild("DoorSensor")
+ if left and right and sensor then
  left.CanCollide=false right.CanCollide=false
  table.insert(doors,{left=left,right=right,sensor=sensor,lc=left.CFrame,rc=right.CFrame,open=false,tweens={}})
+ end
 end
+if #doors==0 then return end
 local elapsed=0
 local connection=Run.Heartbeat:Connect(function(dt)
  elapsed+=dt if elapsed<.2 then return end elapsed=0

@@ -461,7 +461,7 @@ local function added(player)
  if not bag then Lobby.release(player) player:Kick(message) return end
  bags[player]=bag player:SetAttribute("Area","Lobby") Progress.join(player)
  require(game.ReplicatedStorage.RodeoFantasy.LobbyIncubatorRules).migrate(bag)
- Lobby.display(player,1,bag.eggs or {})
+ for index=1,4 do Lobby.display(player,index,bag.eggs or {}) end
  player.CharacterRemoving:Connect(function()
   companions.clear(player) finish(player,"Hunt ended") states[player]=nil
   if worldRoots[player] then worldRoots[player]:Destroy() end

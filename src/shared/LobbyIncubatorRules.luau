@@ -1,11 +1,12 @@
--- Retain every egg when moving from four lobby incubators to one.
+-- Preserve one egg in each of the four open hatchery stands.
 local R={}
 function R.migrate(bag)
- local occupied=false
+ local occupied={}
  local returned=0
  for _,egg in ipairs(bag.eggs or {}) do
-  if egg.assignedPen==1 and not occupied then occupied=true
-  elseif egg.assignedPen~=nil then egg.assignedPen=nil returned+=1 end
+  local slot=egg.assignedPen
+  if type(slot)=="number" and slot%1==0 and slot>=1 and slot<=4 and not occupied[slot] then occupied[slot]=true
+  elseif slot~=nil then egg.assignedPen=nil returned+=1 end
  end
  return returned
 end
