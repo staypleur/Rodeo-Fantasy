@@ -212,7 +212,7 @@ def build():
  root.append(shared)
  skyfile=R/'assets/maps/CafeSky.rbxmx'
  if skyfile.exists():lighting.append(copy.deepcopy(E.parse(skyfile).getroot().find('Item')))
- out=R/'dist/ReviewModels/CafeIslands-DesignReview.rbxlx';E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)
+ out=R/'dist/ReviewModels/CafeSpacedIslands-DesignReview.rbxlx';E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)
  asset=E.Element('roblox',version='4');asset.append(copy.deepcopy(cafe));asset.append(copy.deepcopy(shared));E.ElementTree(asset).write(R/'assets/maps/SpaceCafeReview.rbxmx',encoding='utf-8',xml_declaration=True)
  print('CAFE_FANTASY_REVIEW',len(list(cafe.iter('Item'))),'instances; scripts in furniture:',sum(n.get('class') in ['Script','LocalScript','ModuleScript'] for n in furniture.iter('Item')))
  return out

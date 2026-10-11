@@ -10,6 +10,6 @@ Unpublished layout draft. Final visual approval and a configured Cafe Place are 
 
 These were acquired as free Creator Store items through the user's signed-in account. Attribution records the source; it is not a claim that marketplace availability grants unrestricted rights outside Roblox.
 
-Run `python tools/build_cafe_review.py` to generate `dist/ReviewModels/CafeIslands-DesignReview.rbxlx`. `tools/cafe_island_layout.py` arranges the islands, keeps the curated cafe furniture, and opens perimeter guards at bridge entrances. Earlier review places are superseded. The review is unpublished, and the build does not change the main lobby or hunting place.
+Run `python tools/build_cafe_review.py` to generate `dist/ReviewModels/CafeSpacedIslands-DesignReview.rbxlx`. `tools/cafe_island_layout.py` arranges the islands, keeps the curated cafe furniture, and opens perimeter guards at bridge entrances. Island-centre distances are now 1.4 times the initial reference-layout draft; island sizes and bridge widths are unchanged. Earlier review places are superseded. The review is unpublished, and the build does not change the main lobby or hunting place.
 
 Distance streaming is enabled in the review place. The furniture's PBR textures, triangle totals, actual mobile memory, 20-player networking and 20 giant pets remain unmeasured. The garden's size is a layout proposal, not a performance guarantee.

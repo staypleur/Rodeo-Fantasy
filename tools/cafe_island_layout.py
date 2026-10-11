@@ -4,6 +4,7 @@ from build_project import node, prop
 
 WHITE=(247,232,229); GOLD=(235,188,101); PINK=(246,164,201)
 DARK=(38,25,47); RED=(199,47,78); PURPLE=(126,69,161)
+SPACING=1.4
 
 def arrange(cafe,p,disk,rotate,ring):
  folders={n.findtext("Properties/string[@name='Name']"):n for n in cafe.findall('Item')}
@@ -16,12 +17,12 @@ def arrange(cafe,p,disk,rotate,ring):
    cf=n.find("Properties/CoordinateFrame[@name='CFrame']")
    tower=name.startswith('Tower') and cf is not None and abs(float(cf.find('Z').text)+121)<12 and 190<abs(float(cf.find('X').text))<315
    if name in keep or tower:
-    x=float(cf.find('X').text);cf.find('X').text=str(x+(-800 if x<0 else 800));cf.find('Z').text=str(float(cf.find('Z').text)-400)
+    x=float(cf.find('X').text);cf.find('X').text=str(x+(-(1055*SPACING-255) if x<0 else 1055*SPACING-255));cf.find('Z').text=str(float(cf.find('Z').text)-(400+450*(SPACING-1)))
    else:folder.remove(n)
  for n in furniture.iter('Item'):
   cf=n.find("Properties/CoordinateFrame[@name='CFrame']")
   if cf is not None:
-   x=float(cf.find('X').text);cf.find('X').text=str(x+(-800 if x<0 else 800));cf.find('Z').text=str(float(cf.find('Z').text)-400)
+   x=float(cf.find('X').text);cf.find('X').text=str(x+(-(1055*SPACING-255) if x<0 else 1055*SPACING-255));cf.find('Z').text=str(float(cf.find('Z').text)-(400+450*(SPACING-1)))
  old=folders.get('GiantGarden')
  if old is not None:cafe.remove(old)
  layout=node(cafe,'Folder','IslandLayout')
@@ -34,6 +35,8 @@ def arrange(cafe,p,disk,rotate,ring):
   'RoseFountain':(-650,460,180,False),'ShadowFountain':(650,460,180,True),
   'RoseGiantGarden':(-1450,1500,1020,False),'ShadowGiantGarden':(1450,1500,1020,True),
  }
+ # Spread centres without inflating islands, furniture, trees or bridge widths.
+ zones={name:(x*SPACING,z*SPACING,r,dark) for name,(x,z,r,dark) in zones.items()}
  routes=[('Central','RoseCafe',280),('Central','ShadowCafe',280),('Central','RoseFountain',280),('Central','ShadowFountain',280),('RoseCafe','RosePalace',280),('ShadowCafe','ShadowPalace',280),('RoseCafe','Conservatory',220),('ShadowCafe','ArcaneLounge',220),('Conservatory','RoseGiantGarden',320),('ArcaneLounge','ShadowGiantGarden',320),('RoseFountain','RoseGiantGarden',320),('ShadowFountain','ShadowGiantGarden',320)]
  gates={k:[] for k in zones}
  for a,b,w in routes:
@@ -115,12 +118,14 @@ def arrange(cafe,p,disk,rotate,ring):
   a=i*math.tau/32;v=p('OrbOrbit',(math.cos(a)*48,70+math.sin(a)*15,-50+math.sin(a)*35),(10,1,2),GOLD,parent=layout);rotate(v,y=-a)
  # Small vista islands lie in the gap, without interactive collision or scripts.
  for x,z,r in [(-420,-900,65),(430,-880,65),(0,-1350,70),(-220,1050,55),(240,950,55),(0,1950,70)]:
+  x,z=x*SPACING,z*SPACING
   v=disk('VistaIsland',x,45,z,r,25,PURPLE);decor.remove(v);space.append(v)
   p('VistaCrystal',(x,110,z),(10,80,10),PURPLE if z>0 else GOLD,parent=space,mat=288)
  for x,col in [(-1900,(160,128,213)),(1900,(36,19,43))]:
-  p('BackgroundPlanet',(x,700,-2250),(620,620,620),col,parent=space,shape=0)
+  x=x*SPACING;planet_z=-2250*SPACING
+  p('BackgroundPlanet',(x,700,planet_z),(620,620,620),col,parent=space,shape=0)
   for i in range(40):
    a=i*math.tau/40
-   v=p('BackgroundOrbit',(x+math.cos(a)*410,700+math.sin(a)*110,-2250+math.sin(a)*180),(68,3,5),RED if x>0 else GOLD,parent=space,mat=288);rotate(v,y=-a)
+   v=p('BackgroundOrbit',(x+math.cos(a)*410,700+math.sin(a)*110,planet_z+math.sin(a)*180),(68,3,5),RED if x>0 else GOLD,parent=space,mat=288);rotate(v,y=-a)
  spawn=p('CafeArrival',(0,1,220),(16,1,16),WHITE,False,parent=layout);spawn.set('class','SpawnLocation');prop(spawn,'float','Transparency',1);prop(spawn,'float','Duration',0);prop(spawn,'bool','Neutral','true')
  return zones,routes
