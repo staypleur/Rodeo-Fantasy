@@ -22,7 +22,9 @@ monsters.DescendantAdded:Connect(function(part) if part:IsA("BasePart") then par
 local isolation=require(script.Parent:WaitForChild("HuntIsolation"))
 local state={phase="Idle",started=0,count=0,pending=0,distance=0}
 local held,left,right=false,false,false
-local pointerOrigin,pointerX,lastSteer=nil,nil,0
+local inputFocused=true
+local pointerOrigin,pointerX=nil,nil
+local steerSender=require(script.Parent:WaitForChild("HuntSteerSender")).new(function(value) remote:FireServer("Steer",value) end)
 local notice,noticeUntil="",0
 local menuBound=false local returnHeld=nil local suppressJumpUntilRelease=false
 local flightFrame=nil
@@ -118,15 +120,22 @@ end
 local function active() return state.phase~="Idle" and state.phase~="GameOver" and state.phase~="CourseEnd" end
 local function steering()
  if settingsUI.isOpen() then return 0 end
- if state.phase~="Riding" then return 0 end
+ if state.phase~="Riding" or not inputFocused then return 0 end
  local keyLeft=not UIS:GetFocusedTextBox() and UIS:IsKeyDown(Enum.KeyCode.A)
  local keyRight=not UIS:GetFocusedTextBox() and UIS:IsKeyDown(Enum.KeyCode.D)
- if keyRight or keyLeft then return (keyRight and 1 or 0)-(keyLeft and 1 or 0) end
+ if right or left or keyRight or keyLeft then return ((right or keyRight) and 1 or 0)-((left or keyLeft) and 1 or 0) end
  if held and pointerOrigin and pointerX then
   local dx=pointerX-pointerOrigin
   return math.abs(dx)<14 and 0 or math.clamp(dx/120,-1,1)
  end
  return 0
+end
+local function sendSteer(force,override)
+ if state.phase~="Riding" then return end
+ local value=override or steering()
+ local clock=os.clock()
+ -- Key edges bypass the old 100ms polling delay. Analog drag is capped at 20Hz.
+ steerSender(value,clock,force)
 end
 local function keyAction(_,inputState,input)
  if UIS:GetFocusedTextBox() then return Enum.ContextActionResult.Pass end
@@ -136,6 +145,7 @@ local function keyAction(_,inputState,input)
   if input.KeyCode==Enum.KeyCode.A then left=down end
   if input.KeyCode==Enum.KeyCode.D then right=down end
  end
+ sendSteer(true,(right and 1 or 0)-(left and 1 or 0))
  return Enum.ContextActionResult.Sink
 end
 local function jumpAction(_,inputState)
@@ -204,11 +214,15 @@ UIS.InputEnded:Connect(function(input)
  if input.UserInputType==Enum.UserInputType.MouseButton1 or input.UserInputType==Enum.UserInputType.Touch then
   held=false
   pointerOrigin,pointerX=nil,nil
+  sendSteer(true)
  end
 end)
 UIS.WindowFocusReleased:Connect(function()
+ inputFocused=false
  held,left,right=false,false,false returnHeld=nil
+ if state.phase=="Riding" then steerSender(0,os.clock(),true) end
 end)
+UIS.WindowFocused:Connect(function() inputFocused=true end)
 remote.OnClientEvent:Connect(function(kind,data)
  if kind=="RanchMenu" then bagUI.openRanchMenu() return end
  if kind=="Pen" then bagUI.openPen(data) return end
@@ -253,17 +267,11 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
  local aspect=size.Y>0 and math.clamp(size.X/size.Y,0.4,4) or 1
  if not lastAspect or math.abs(aspect-lastAspect)>0.05 then remote:FireServer("View",aspect) lastAspect=aspect end
  local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
- local candidates={}
- for _,model in ipairs(monsters:GetChildren()) do
-  if model.PrimaryPart and not model:GetAttribute("Occupied") then
-   local p=model.PrimaryPart.Position table.insert(candidates,{key=model,x=p.X,y=p.Y,z=p.Z,serial=model:GetAttribute("SpawnSerial") or 0,emerging=model:GetAttribute("Emerging")})
-  end
- end
  local selected={}
  local ids={}
  for _,id in ipairs(state.wildIds or {}) do ids[id]=true end
- for _,candidate in ipairs(candidates) do
-  if ids[candidate.serial] then selected[candidate.key]=true end
+ for _,model in ipairs(monsters:GetChildren()) do
+  if model.PrimaryPart and ids[model:GetAttribute("SpawnSerial")] then selected[model]=true end
  end
  isolation.update(player,state.area=="Hunt")
  local frames=animator.update(monsters,clock,root and root.Position,dt,selected)
@@ -316,7 +324,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   workspace.CurrentCamera.FieldOfView=t.CameraFieldOfView+catchFov
   workspace.CurrentCamera.CFrame=target
   workspace.CurrentCamera.Focus=CFrame.new(groundFocus)
-  if os.clock()-lastSteer>=0.1 then remote:FireServer("Steer",steering()) lastSteer=os.clock() end
+  sendSteer(false)
  end
  if state.phase=="Airborne" and root then
   ring.Position=Vector3.new(visualFrame.Position.X,0.15,visualFrame.Position.Z)

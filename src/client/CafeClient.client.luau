@@ -8,12 +8,13 @@ local journal=require(script.Parent.JournalUI).new(gui,remote)
 local social=require(script.Parent.SocialUI).new(gui,remote,bag,journal)
 local menus=require(script.Parent.LobbyMenus).new(gui,bag,journal,remote)
 local stats=require(script.Parent.HudStats).new(gui)
+local activities=require(script.Parent:WaitForChild("CafeActivityUI")).new(gui,function() bag.close() journal.close() social.close() menus.close() end)
 require(script.Parent.LocalizationController).watch(gui)
 require(script.Parent.PetPromptUI).new(gui,player)
-bag.onOpen=function() journal.close() social.close() menus.close() end
-journal.onOpen=function() bag.close() social.close() menus.close() end
-menus.onOpen=function() bag.close() journal.close() social.close() end
-social.onOpen=function() bag.close() journal.close() menus.close() end
+bag.onOpen=function() activities.close() journal.close() social.close() menus.close() end
+journal.onOpen=function() activities.close() bag.close() social.close() menus.close() end
+menus.onOpen=function() activities.close() bag.close() journal.close() social.close() end
+social.onOpen=function() activities.close() bag.close() journal.close() menus.close() end
 remote.OnClientEvent:Connect(function(kind,data)
  if kind=="Bag" then bag.snapshot(data)
  elseif kind=="State" then bag.state(data) journal.state(data) social.state(data) menus.state(data) stats.state(data) bag.income(data.income)

@@ -194,7 +194,9 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
   if (target.Position-pose.frame.Position).Magnitude>30 or not running then
    pose.frame = target
   else
-   local blended=pose.frame:Lerp(target,1-math.exp(-22*dt))
+   -- The player's mount should not inherit the herd's deliberately soft follow.
+   local response=model:GetAttribute("Occupied") and 45 or 22
+   local blended=pose.frame:Lerp(target,1-math.exp(-response*dt))
    if not model:GetAttribute("Occupied") and not clearHerdPath(pose.frame.Position,blended.Position,root) then blended=pose.sample end
    pose.frame = blended
   end

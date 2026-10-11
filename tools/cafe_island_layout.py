@@ -4,7 +4,7 @@ from build_project import node, prop
 
 WHITE=(247,232,229); GOLD=(235,188,101); PINK=(246,164,201)
 DARK=(38,25,47); RED=(199,47,78); PURPLE=(126,69,161)
-SPACING=1.4
+SPACING=1.15
 
 def arrange(cafe,p,disk,rotate,ring):
  folders={n.findtext("Properties/string[@name='Name']"):n for n in cafe.findall('Item')}

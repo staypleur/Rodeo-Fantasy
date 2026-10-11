@@ -19,6 +19,7 @@ local function canAct(p)
  local h=p.Character and p.Character:FindFirstChildOfClass("Humanoid")
  return active(p) and not Store.busy(p) and not Social.trading(p) and h and h.Health>0
 end
+local activities=require(script.Parent.CafeActivities).start(map,canAct)
 local pets=require(script.Parent.LobbyCompanions).new({map=map,streamingMode=Enum.ModelStreamingMode.Atomic,
  bag=function(p) return bags[p] end,inLobby=active,canAct=canAct,canSummon=canAct})
 local function accrue(b)

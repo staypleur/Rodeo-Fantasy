@@ -60,3 +60,9 @@ dist/ReviewModels/CafePlanet-Inspection.rbxlx
 dist/ReviewModels/CafeRefined-Inspection.rbxlx
 dist/ReviewModels/RodeoPlaneture-Lobby.rbxlx
 dist/ReviewModels/RodeoPlaneture-Cafe.rbxlx
+
+# Generated cafe activity review and place-specific installers.
+dist/ReviewModels/CafeGamesReview.commandbar.lua
+dist/ReviewModels/CafeGamesService.commandbar.lua
+dist/ReviewModels/HuntResponse.commandbar.lua
+dist/ReviewModels/CafePiano-Source.rbxlx

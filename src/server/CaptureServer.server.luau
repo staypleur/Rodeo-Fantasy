@@ -287,7 +287,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
- local interval=action=="RideInput" and .05 or action=="Jump" and 0.08 or action=="Steer" and 0.04 or 0.25
+ local interval=action=="RideInput" and .05 or action=="Jump" and 0.08 or action=="Steer" and 0.01 or 0.25
  if now()-(stamps[action] or -math.huge)<interval then return end
  stamps[action]=now()
  if action=="GoCafe" then

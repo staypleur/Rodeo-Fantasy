@@ -7,12 +7,29 @@ from pathlib import Path
 import copy
 import sys
 import xml.etree.ElementTree as E
-from build_project import node, prop
+from build_project import node, prop, script
 
 R = Path(__file__).resolve().parents[1]
 CHANGED = {'LobbyMenus', 'BagUI', 'JournalUI', 'PetPromptUI', 'HudIcons',
            'LobbyCompanions', 'SocialConfig', 'PlaceTravel', 'CafeWorld',
-           'CafeServer', 'CafeClient', 'CaptureServer', 'ProgressService'}
+           'CafeServer', 'CafeClient', 'CaptureServer', 'CaptureClient', 'RideAnimator',
+           'HuntSteerSender', 'ProgressService'}
+
+def install_activity_modules(root):
+    package = next(v for v in service(root, 'ReplicatedStorage').findall('Item') if name(v) == 'RodeoFantasy')
+    server = service(root, 'ServerScriptService')
+    client = service(root, 'StarterPlayer').find("Item[@class='StarterPlayerScripts']")
+    for parent, keys in [(package, ('GomokuRules', 'PianoNotes')),
+                         (server, ('CafeActivities', 'CafeMapLayout')),
+                         (client, ('CafeActivityUI', 'HuntSteerSender'))]:
+        for key in keys:
+            existing = next((v for v in parent.findall('Item') if name(v) == key), None)
+            if existing is None:
+                existing = script(parent, 'ModuleScript', key, source_for(key).read_text(encoding='utf-8'))
+                # Distinct from source-file referents before final remapping.
+                existing.set('referent', 'CafeActivity_' + key)
+            else:
+                prop(existing, 'ProtectedString', 'Source', source_for(key).read_text(encoding='utf-8'))
 
 def name(v):
     return v.findtext("Properties/string[@name='Name']")
@@ -36,7 +53,7 @@ def refresh(root, all_modules=False):
 def clean_authoring(root):
     storage = service(root, 'ServerStorage')
     for v in list(storage.findall('Item')):
-        if not (name(v) or '').startswith('RodeoMonsterTemplate'):
+        if not (name(v) or '').startswith('RodeoMonsterTemplate') and name(v) != 'CafePianoVisual':
             storage.remove(v)
 
 def finalize(root, out):
@@ -57,16 +74,20 @@ def finalize(root, out):
     E.ElementTree(root).write(out, encoding='utf-8', xml_declaration=True)
     print(out.name, len(list(root.iter('Item'))), 'items')
 
-def build(current):
+def build(current, cafe_review=None):
     original = E.parse(current).getroot()
     lobby = copy.deepcopy(original)
     clean_authoring(lobby)
     refresh(lobby)
+    install_activity_modules(lobby)
     prop(service(lobby, 'Players'), 'int', 'MaxPlayers', 8)
     out = R/'dist/ReviewModels/RodeoPlaneture-Lobby.rbxlx'
     finalize(lobby, out)
 
-    cafe = E.parse(R/'dist/ReviewModels/CafeRefined-Inspection.rbxlx').getroot()
+    # This review contains the approved 1.15 island spacing. The old refined
+    # map uses 1.4 and would put the new activity stations outside its cafes.
+    cafe_path = cafe_review or R/'dist/ReviewModels/CafePiano-Source.rbxlx'
+    cafe = E.parse(cafe_path).getroot()
     # Remap the independent source document before combining XML trees.
     for v in original.iter('Item'):
         v.set('referent', 'Original_' + v.get('referent'))
@@ -92,6 +113,11 @@ def build(current):
         if v.get('class') == 'Model' and not (name(v) or '').startswith('VisualTemplate'):
             package.remove(v)
     refresh(cafe, all_modules=True)
+    install_activity_modules(cafe)
+    storage = service(cafe, 'ServerStorage')
+    if not any(name(v) == 'CafePianoVisual' for v in storage.findall('Item')):
+        piano = copy.deepcopy(E.parse(R/'assets/maps/CafePianoVisual.rbxmx').getroot().find('Item'))
+        storage.append(piano)
     server = service(cafe, 'ServerScriptService')
     for v in server.findall('Item'):
         if v.get('class') == 'Script':
@@ -100,7 +126,7 @@ def build(current):
     for v in client.findall('Item'):
         if v.get('class') == 'LocalScript':
             prop(v, 'bool', 'Disabled', str(name(v) != 'CafeClient').lower())
-    review = E.parse(R/'dist/ReviewModels/CafeRefined-Inspection.rbxlx').getroot()
+    review = E.parse(cafe_path).getroot()
     rotation = next(v for v in review.iter('Item') if name(v) == 'CafePlanetRotation')
     rotation = copy.deepcopy(rotation)
     rotation.set('referent', 'CafeServiceRotation')
@@ -109,4 +135,4 @@ def build(current):
     finalize(cafe, R/'dist/ReviewModels/RodeoPlaneture-Cafe.rbxlx')
 
 if __name__ == '__main__':
-    build(Path(sys.argv[1]))
+    build(Path(sys.argv[1]), Path(sys.argv[2]) if len(sys.argv)>2 else None)
