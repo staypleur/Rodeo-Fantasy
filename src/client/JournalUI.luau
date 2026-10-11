@@ -207,7 +207,7 @@ function J.new(gui,remote)
  previous.Activated:Connect(function() self.turn(-1) end) nextPage.Activated:Connect(function() self.turn(1) end)
  close.Activated:Connect(self.close) button.Activated:Connect(function() self.other=false self.open() end)
  UIS.InputBegan:Connect(function(input,processed)
-  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and self.area=="Lobby" then self.other=false self.open() end
+  if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.T and (self.area=="Lobby" or self.area=="Cafe") then self.other=false self.open() end
  end)
  Run.RenderStepped:Connect(function() if book.Visible then freeze() end end)
  return self

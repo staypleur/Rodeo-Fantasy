@@ -42,6 +42,7 @@ end
 function UI.new(gui,remote)
  local self={area="Lobby",items={},count=-1,pen=nil,region="All",page=1,query="",evolutionMode=false,selected={}}
  local button=UI.iconButton(gui,"Bag","R",18)
+ button.Visible=false
  local window=make("Frame",{Name="BagWindow",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.92,.84),BackgroundColor3=Color3.new(1,1,1),ZIndex=20},gui)
  make("UIGradient",{Rotation=90,Color=ColorSequence.new({ColorSequenceKeypoint.new(0,Color3.fromRGB(240,208,143)),ColorSequenceKeypoint.new(.48,Color3.fromRGB(213,166,99)),ColorSequenceKeypoint.new(1,Color3.fromRGB(169,116,65))})},window)
  make("UISizeConstraint",{MaxSize=Vector2.new(1100,720)},window)
@@ -140,7 +141,7 @@ function UI.new(gui,remote)
  for index=1,4 do
   local choice=make("TextButton",{Name="RanchChoice"..index,Text="Hatchery".." "..index,BackgroundColor3=Color3.fromRGB(147,182,154),TextColor3=Color3.fromRGB(37,61,46),TextSize=22,ZIndex=24},chooser)
   make("UICorner",{CornerRadius=UDim.new(0,14)},choice)
-  choice.Activated:Connect(function() if self.area=="Lobby" then remote:FireServer("Manage",index) end end)
+  choice.Activated:Connect(function() if self.area=="Lobby" or self.area=="Cafe" then remote:FireServer("Manage",index) end end)
  end
  function self.openCompanionMenu()
   if self.area=="Hunt" then return end
@@ -168,7 +169,7 @@ function UI.new(gui,remote)
   self.area=state.area
   local nextSummoned=state.summonedId
   if self.summonedId~=nextSummoned then self.summonedId=nextSummoned self.snapshot(self.items) end
-  button.Visible=state.area~="Hunt"
+  button.Visible=false -- The paw menu is the single visible bag entry.
   if state.area=="Hunt" then window.Visible=false self.pen=nil self.setEvolutionMode(false) end
   money.Text=tostring((state.pending or 0)+(state.balance or 0))
   button.Text=""
@@ -236,7 +237,7 @@ function UI.new(gui,remote)
    make("TextLabel",{Name="Seconds",Text=tostring(item.incomeSeconds),BackgroundTransparency=1,Position=UDim2.new(.5,33,0,0),Size=UDim2.fromOffset(32,30),TextSize=17,TextColor3=Color3.fromRGB(43,74,55),ZIndex=24},income)
    if self.mode=="Companion" then
     local choose=make("TextButton",{Name="ChooseCompanion",Text=self.summonedId==item.id and "Dismiss" or "Summon",Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,32),TextSize=16,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},card)
-    choose.Activated:Connect(function() if self.area=="Lobby" then remote:FireServer("Summon",item.id) end end)
+    choose.Activated:Connect(function() if self.area=="Lobby" or self.area=="Cafe" then remote:FireServer("Summon",item.id) end end)
    elseif self.pen then
     local mine=item.assignedPen==self.pen
     local allowed=mine or (not item.assignedPen and placed<2)
@@ -262,9 +263,7 @@ function UI.new(gui,remote)
      self.snapshot(self.items)
     end)
    elseif self.area=="Cafe" or self.area=="Lobby" then
-    if item.id==self.summonedId and self.area=="Cafe" then
-     make("TextLabel",{Text="Summoned",BackgroundTransparency=1,Position=UDim2.fromOffset(4,208),Size=UDim2.new(1,-8,0,29),TextSize=14,ZIndex=23},card)
-    elseif not item.breedingTeam then
+    if not item.breedingTeam then
      local summon=make("TextButton",{Text=item.id==self.summonedId and "Dismiss" or "Summon",Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,29),TextSize=14,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},card)
      summon.Activated:Connect(function() if self.area=="Lobby" or self.area=="Cafe" then remote:FireServer("Summon",item.id) end end)
     end

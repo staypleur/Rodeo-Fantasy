@@ -330,6 +330,7 @@ remote.OnServerEvent:Connect(function(player,action,value)
    return
   end
   companions.clear(player)
+  Progress.discover(player,evolved.monsterId,evolved.stars)
   for pen in pairs(affected) do Lobby.display(player,pen,bags[player].monsters) end
   remote:FireClient(player,"EvolutionResult",{ok=true,monsterId=evolved.monsterId,stars=evolved.stars})
   send(player)
@@ -491,7 +492,7 @@ local function added(player)
  if player.UserId>0 then player.CharacterAppearanceId=player.UserId end
  local bag,message=Store.open(player)
  if not bag then Lobby.release(player) player:Kick(message) return end
- bags[player]=bag player:SetAttribute("Area","Lobby") Progress.join(player)
+ bags[player]=bag player:SetAttribute("Area","Lobby") Progress.join(player,bag)
  require(game.ReplicatedStorage.RodeoFantasy.LobbyIncubatorRules).migrate(bag)
  for index=1,4 do Lobby.display(player,index,bag.eggs or {}) end
  player.CharacterRemoving:Connect(function()

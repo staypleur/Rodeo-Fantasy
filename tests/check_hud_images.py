@@ -1,7 +1,7 @@
 from pathlib import Path
 import subprocess
 R=Path(__file__).resolve().parents[1]
-expected={'ShopButtonImage':'114640852127407','IndexButtonImage':'110488541037597','EggButtonImage':'87551432940862','PawButtonImage':'85966265063532','MossratFaceImage':'87383094549038','RouletteButtonImage':'71863210551741','MoneyImage':'71604722538432','BondButtonImage':'104399312241349'}
+expected={'LobbyReturnImage':'93242550774132','ShopButtonImage':'114640852127407','IndexButtonImage':'110488541037597','EggButtonImage':'87551432940862','PawButtonImage':'85966265063532','MossratFaceImage':'97843855045095','RouletteButtonImage':'71863210551741','MoneyImage':'71604722538432','BondButtonImage':'104399312241349'}
 h='local game,Instance,UDim2,Enum\nlocal task={spawn=function() end}\nlocal I=(function()\n'+(R/'src/client/HudIcons.luau').read_text(encoding='utf-8')+'\nend)()\n'
 h+='local attrs={} local p={GetAttribute=function(_,k) return attrs[k] end,SetAttribute=function(_,k,v) attrs[k]=v end}\n'
 for key,id in expected.items():
@@ -16,12 +16,13 @@ h+='''
 attrs.PawButtonImage="rbxassetid://8596625063532"
 assert(I.imageId(p,"PawButtonImage")=="rbxassetid://85966265063532")
 local changed
-function p:GetAttributeChangedSignal() return {Connect=function(_,f) changed=f end} end
+local connections=0
+function p:GetAttributeChangedSignal() return {Connect=function(_,f) changed=f connections+=1 return {Disconnect=function() connections-=1 end} end} end
 local native={Visible=true,IsA=function(_,k) return k=="GuiObject" end}
 local stroke={Enabled=true,IsA=function(_,k) return k=="UIStroke" end}
 local button={ZIndex=1,BackgroundTransparency=0,GetChildren=function() return {native,stroke} end}
 local artwork,signals
-Instance={new=function() signals={} artwork={IsLoaded=false,GetPropertyChangedSignal=function(_,k) return {Connect=function(_,f) signals[k]=f end} end}; return artwork end}
+Instance={new=function() signals={} artwork={IsLoaded=false,Destroying={Connect=function() end},GetPropertyChangedSignal=function(_,k) return {Connect=function(_,f) signals[k]=f end} end}; return artwork end}
 UDim2={fromScale=function() return {} end}; Enum={ScaleType={Fit=1}}
 I.bindArtwork(button,"PawButtonImage")
 assert(native.Visible and stroke.Enabled and artwork.Visible and artwork.ImageTransparency==.99 and button.BackgroundTransparency==0)
@@ -30,6 +31,15 @@ assert(not native.Visible and not stroke.Enabled and artwork.Visible and button.
 artwork.IsLoaded=false signals.IsLoaded()
 assert(native.Visible and stroke.Enabled and artwork.Visible and artwork.ImageTransparency==.99)
 print("HUD_ARTWORK_LOAD_PASS: pending/failure fallback, loaded image, stale paw migration")
+local travel=I.bindArtwork(button,"CafeButtonImage")
+local before=connections
+travel.setKey("LobbyReturnImage")
+assert(artwork.Image==I.ImageIds.LobbyReturnImage and connections==before)
+travel.setKey("LobbyReturnImage") assert(connections==before)
+artwork.IsLoaded=true signals.IsLoaded()
+assert(artwork.ImageTransparency==0 and not native.Visible)
+travel.setKey("CafeButtonImage") assert(artwork.Image==I.ImageIds.CafeButtonImage)
+print("TRAVEL_ARTWORK_PASS: cafe to lobby image switches without stacking listeners")
 '''
 h+='print("HUD_IMAGE_IDS_PASS: all eight fallbacks configured, zero placeholder ignored, custom override retained")\n'
 source=(R/'src/client/BagUI.luau').read_text(encoding='utf-8')

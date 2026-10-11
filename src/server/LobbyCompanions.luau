@@ -6,7 +6,7 @@ local Rules=require(P.SocialRules)
 local RideRules=require(P.LobbyRideRules)
 function M.new(context)
  local pets={}
- local map=workspace:WaitForChild("RodeoLobby")
+ local map=context.map or workspace:WaitForChild("RodeoLobby")
  local folder=Instance.new("Folder") folder.Name="LobbyCompanions" folder.Parent=map
  local params=RaycastParams.new() params.FilterType=Enum.RaycastFilterType.Include
  params.FilterDescendantsInstances={map} params.RespectCanCollide=true
@@ -89,7 +89,7 @@ function M.new(context)
   local frame=CFrame.new(position.X,y+height,position.Z)
   model:PivotTo(frame*model.PrimaryPart.CFrame:Inverse()*model:GetPivot())
   model.Name="Companion_"..p.UserId
-  model.ModelStreamingMode=Enum.ModelStreamingMode.Persistent
+  model.ModelStreamingMode=context.streamingMode or Enum.ModelStreamingMode.Persistent
   for _,part in ipairs(model:GetDescendants()) do
    if part:IsA("BasePart") then part.Anchored=true part.CanCollide=false part.CanTouch=false part.CanQuery=false
    elseif part:IsA("BillboardGui") then part:Destroy() end

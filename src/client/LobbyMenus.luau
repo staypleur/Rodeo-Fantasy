@@ -46,12 +46,13 @@ function M.new(gui,bag,journal,remote)
  end
  local cafeButton=make("TextButton",{Name="OpenCafe",Text="",Position=UDim2.new(0,8,.42,118),Size=UDim2.fromOffset(64,64),BackgroundColor3=Color3.fromRGB(255,203,35),BorderSizePixel=0,Visible=false},gui)
  make("UICorner",{CornerRadius=UDim.new(0,5)},cafeButton)
- make("TextLabel",{Text="☕",BackgroundTransparency=1,Size=UDim2.fromScale(1,1),TextSize=36},cafeButton)
- Icons.bindArtwork(cafeButton,"CafeButtonImage")
+ local travelFallback=make("TextLabel",{Text="☕",BackgroundTransparency=1,Size=UDim2.fromScale(1,1),TextSize=36},cafeButton)
+ local travelArtwork=Icons.bindArtwork(cafeButton,"CafeButtonImage")
+ local destination="GoCafe"
  local cafeStamp=0
  cafeButton.Activated:Connect(function()
   if not cafeButton.Visible or os.clock()-cafeStamp<1 then return end
-  cafeStamp=os.clock() remote:FireServer("GoCafe")
+  cafeStamp=os.clock() remote:FireServer(destination)
  end)
  table.insert(buttons,cafeButton)
  for i,kind in ipairs({"Egg","Paw"}) do
@@ -86,9 +87,12 @@ function M.new(gui,bag,journal,remote)
  if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout) end
  layout()
  function api.state(data)
-  local lobby=data.area=="Lobby" and (data.phase=="Idle" or data.phase=="Lobby")
+  local lobby=(data.area=="Lobby" or data.area=="Cafe") and (data.phase=="Idle" or data.phase=="Lobby")
+  destination=data.area=="Cafe" and "GoLobby" or "GoCafe"
+  travelFallback.Text=data.area=="Cafe" and "🚀" or "☕"
+  travelArtwork.setKey(data.area=="Cafe" and "LobbyReturnImage" or "CafeButtonImage")
   local oldBag=gui:FindFirstChild("OpenBag")
-  if oldBag then oldBag.Visible=not lobby and data.area~="Hunt" end
+  if oldBag then oldBag.Visible=false end
   for _,button in ipairs(buttons) do button.Visible=lobby end
   if not lobby then api.close() end
  end

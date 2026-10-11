@@ -25,10 +25,14 @@ local function hideNameplate(player)
  end
 end
 
-function S.join(player)
+function S.join(player,bag)
  local e={session=game:GetService("HttpService"):GenerateGUID(false),count=0,ack=0,saved=0,caught={},savedCaught={},ackCaught={},seen={},dirty=false,loading=enabled,loaded=not enabled,status=enabled and "Loading progress" or "Session progress"}
  entries[player]=e
  if player:GetAttribute("StarterMossratGranted")==true then S.discover(player,"MeadowMouse",1) end
+ -- Repair missing discoveries from existing inventory without counting captures.
+ for _,monster in ipairs(bag and bag.monsters or {}) do
+  S.discover(player,monster.monsterId,monster.stars)
+ end
  if enabled then task.spawn(function()
   local ok,data=pcall(function() return store:GetAsync(tostring(player.UserId)) end)
   if entries[player]~=e then return end

@@ -14,7 +14,7 @@ function M.new(gui,player)
  local ring=Instance.new("UIStroke") ring.Color=Color3.fromRGB(255,217,88) ring.Thickness=3 ring.Enabled=false ring.Parent=ride
  local current local elapsed=0
  local function nearby()
-  local map=workspace:FindFirstChild("RodeoLobby")
+  local map=workspace:FindFirstChild("RodeoCafe") or workspace:FindFirstChild("RodeoLobby")
   local folder=map and map:FindFirstChild("LobbyCompanions")
   local pet=folder and folder:FindFirstChild("Companion_"..player.UserId)
   local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")

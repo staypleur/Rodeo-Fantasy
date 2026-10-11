@@ -1488,3 +1488,12 @@
 - 정적 맵5040인스턴스/658MeshPart/575SurfaceAppearance/32Seat, 수입 실행 코드0. 이전3809보다1231 증가했고 모바일 성능이 개선되었다고 주장하지 않는다. XML 참조·SharedString·축2048이하 검사와 생성 스크립트2개 Luau 컴파일 통과. 서비스 맵 게시 없음, 사용자 dist/RodeoFantasy-New.rbxlx 변경 제외.
 - 실제 PC Studio Play: 지구2초간 약2.92도 회전, LocalScript 설치true. 핑크 카페 입구 밖(-1437,4,-580)에서 안(-1437,4.80,-624.26)까지 WalkSpeed16으로 보행 성공/HP100. 점검 속도180 복구. cafe-rotation-entry-pc.png 기록. 모든 충돌/모바일/20명·거대펫 성능은 미검증.
 - CafeRefined-Inspection.rbxlx 생성·Studio 열기·로컬 저장 및 실제 실행 확인. 이전 점검본을 대체한다. 최종 비주얼 승인/카페 서비스 연결과 게시·성 세부 건축은 남아 있다.
+
+## 2026-10-12 카페 연결 및 중복 가방·진화 인덱스·복귀 그림 수정
+- 로비131121026461681 / 카페133084853508719 / 동일 비공개 체험10770388358. 사용자 에셋 권한 및 게시 승인 후 같은 체험 안에 게시된 카페를 확인했고 SocialConfig 양방향 ID를 적용해 두 장소 게시 성공 문구를 확인했다. 브라우저에서 카페 이름 Rodeo Planeture Cafe, 정원20 저장. 체험 Private 확인. 실제 왕복 이동은 이전 원격조종 중단으로 미검증이며 사용자 캡처에서 카페 도착 확인.
+- CafeServer/Client를 공통 InventoryStore·ProgressService·가방/인덱스/메뉴/펫/HUD로 통합, 접속 중 AFK 생산 유지. 제공 복귀 이미지 Decal113241675212156의 실제 Texture93242550774132를 HudIcons에 사용. 이미지 파일 assets/ui/LobbyReturn.png 보관. 새 build_cafe_service.py는 원본 authoring save/dist 사용자 변경을 보존하고 게시용 사본만 정리한다. NetAssetRef SharedString 보존.
+- 아래 가방을 재표시하던 BagUI.state/LobbyMenus.state를 수정, 생성 시에도 숨겨 첫 화면 깜빡임 방지. 발바닥 그림/R 입력 유지. 로비 Evolve 성공 시 Progress.discover 누락 수정, Progress.join(player,bag)로 기존 보유 발견만 복구하고 catches 수치를 늘리지 않는다.
+- HudIcons.bindArtwork가 변경 가능한 setKey 컨트롤러를 반환하도록 수정. 카페 상태에서 LobbyReturnImage 로딩/대체 표시를 갱신하고 기존 커피 Attribute 연결을 해제한다. 동일 키 반복 상태에서 연결/폴링을 추가하지 않는다. 우주선 대체 그림도 사용. 두 live Studio 장소에 수정 모듈 적용 완료 및 게시 요청.
+- 변경6개 Luau 컴파일, HUD 이미지 로딩/교체·연결 중복·발바닥 메뉴 회귀 검사와 보유3성 인덱스 복구/사냥횟수 보존 검사 통과. PC Studio Cafe Play는 Studio API access disabled로 InventoryStore 테스트 저장이 거부되어 안전하게 종료됐다. 공개 게임 DataStore 장애가 아니며 API 접근 설정은 변경하지 않았다. 수정본의 실제 앱/모바일 화면 검증은 아직 미완료.
+- 기존 사용자 dist/RodeoFantasy-New.rbxlx 변경 및 과거 미추적 디자인 캡처는 커밋에서 제외한다.
+- 최종 양쪽 Studio 출력에서 01:22:50 로비 및 01:28:32 카페 Roblox 게시 성공을 확인했다. docs/evidence/lobby-cafe-ui-fix-published.png와 cafe-ui-fix-published.png 보관. 기존 실행 서버는 이전 코드를 사용하므로 나간 뒤 새 서버 재접속 필요.
