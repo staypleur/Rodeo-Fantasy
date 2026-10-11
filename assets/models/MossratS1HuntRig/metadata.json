@@ -1,0 +1,32 @@
+{
+  "source": "Meshy_AI_Mossrat_1Star_Remesh__1011063500_texture.glb",
+  "sourceSha256": "4ebded703de65ada8c905d942881ac73e40136037a5fcef6162a92a9ea92c412",
+  "sourceTriangles": 2951,
+  "riggedTriangles": 2951,
+  "vertices": 5800,
+  "bones": 34,
+  "maxInfluences": 4,
+  "clips": [
+    "Idle",
+    "Walk",
+    "LookAround",
+    "RigRange"
+  ],
+  "originalGeometryNormalsUVPreserved": true,
+  "originalTextureBytesPreserved": true,
+  "addedEyelidTriangles": 0,
+  "blinkEnabled": false,
+  "eyeMotion": "Restrained textured eye-patch translation; eyes remain open, no eyelid geometry or blink animation",
+  "heightMetres": 0.9,
+  "targetHeightStuds": 2.5,
+  "frontAxis": "+Z",
+  "rigReviewApproved": false,
+  "installedInGame": true,
+  "installedMeshId": "rbxassetid://99776208354146",
+  "savedPlaceTemplateVerified": true,
+  "studioVerified": false,
+  "mobilePerformanceMeasured": false,
+  "usage": "Hunting grounds only; lobby and cafe retain the detailed model",
+  "sharedRig": "MossratS1UserRig:34 bones",
+  "texturesOptimized": false
+}
