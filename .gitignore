@@ -39,3 +39,4 @@ assets/models/MossratNeutral/*/MossratNeutral*.glb
 assets/models/MossratNeutral/*/Right.glb
 dist/RigReviewNeutral/
 dist/ReviewModels/NeutralMossrat.commandbar.lua
+dist/ReviewModels/Gems.commandbar.lua

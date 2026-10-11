@@ -2,7 +2,7 @@
 local BagRules = {}
 
 function BagRules.new()
- return { monsters = {}, eggs={}, breedingTeams={}, profile={}, pending = 0, balance = 0, serial = 0, totalProduced = 0 }
+ return { monsters = {}, eggs={}, breedingTeams={}, profile={}, pending = 0, balance = 0, gems = 0, serial = 0, totalProduced = 0 }
 end
 
 function BagRules.grant(session, monsterId, clock, incomeSeconds, incomeAmount)

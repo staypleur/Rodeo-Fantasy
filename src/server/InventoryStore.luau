@@ -31,6 +31,7 @@ end
 local function normalize(data)
  data=data or Rules.new()
  data.eggs=data.eggs or {} data.profile=data.profile or {} data.breedingTeams=data.breedingTeams or {}
+ data.gems=data.gems or 0
  data.balance=data.balance or 0 data.pending=data.pending or 0 data.serial=data.serial or 0
  -- No unapproved offline income; begin the next interval on this server.
  for _,m in ipairs(data.monsters) do m.lastIncome=workspace:GetServerTimeNow() m.assignedPen=nil m.tradeLock=nil end

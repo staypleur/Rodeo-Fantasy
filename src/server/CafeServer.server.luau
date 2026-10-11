@@ -118,7 +118,7 @@ Run.Heartbeat:Connect(function(dt)
  for p,b in pairs(bags) do
   if Store.busy(p) or p:GetAttribute("Travelling") then continue end
   local gains=Bag.accrue(b,clock,3,1)
-  remote:FireClient(p,"State",{area="Cafe",phase="Idle",count=#b.monsters,pending=b.pending,balance=b.balance,income=gains,summonedId=p:GetAttribute("SummonedId"),profile=b.profile})
+  remote:FireClient(p,"State",{area="Cafe",phase="Idle",count=#b.monsters,pending=b.pending,balance=b.balance,gems=b.gems or 0,income=gains,summonedId=p:GetAttribute("SummonedId"),profile=b.profile})
  end
 end)
 Progress.start()

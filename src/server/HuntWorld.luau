@@ -391,19 +391,21 @@ function World.hit(from, to, flying,mount,dashing)
 end
 
 function World.crateHit(from,to,mount,sizeClass,dashing)
- if mount:GetAttribute("Flying") then return false end
+ if mount:GetAttribute("Flying") then return false,0 end
+ local broken=0
  for _,box in ipairs(obstacles:GetChildren()) do
   if not box:GetAttribute("BreakableCrate") or box:GetAttribute("Broken") then continue end
   local p,s=box.Position,box.Size+mount.PrimaryPart.Size
   if Rules.sweptBox(from.X,from.Y,from.Z,to.X,to.Y,to.Z,p.X,p.Y,p.Z,s.X,s.Y,s.Z,0) then
-   if not Rules.canBreakCrate(sizeClass) then return true end
+   if not Rules.canBreakCrate(sizeClass) then return true,broken end
    box.CanQuery=false box.CanTouch=false
    box:SetAttribute("Broken",true) box:SetAttribute("BrokenAt",workspace:GetServerTimeNow())
    for _,piece in ipairs(box:GetDescendants()) do if piece:IsA("BasePart") then piece.Transparency=1 piece.CanQuery=false end end
-   -- Loot is deliberately pending the user's item design.
+   -- Marked Broken before counting; later frames cannot reward this crate again.
+   broken+=1
   end
  end
- return false
+ return false,broken
 end
 
 -- Preserve each active runner's vicinity, and avoid unlimited course/animal growth.

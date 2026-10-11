@@ -1,7 +1,7 @@
 -- Small native shapes: no external images are required for the menu symbols.
 local I={}
 -- IDs supplied by the user from their uploaded image list.
-I.ImageIds={RideButtonImage="rbxassetid://120607489729893",ClockImage="rbxassetid://87364518179349",ShopButtonImage="rbxassetid://114640852127407",RouletteButtonImage="rbxassetid://71863210551741",IndexButtonImage="rbxassetid://110488541037597",BondButtonImage="rbxassetid://104399312241349",
+I.ImageIds={GemImage="rbxassetid://128056611527669",RideButtonImage="rbxassetid://120607489729893",ClockImage="rbxassetid://87364518179349",ShopButtonImage="rbxassetid://114640852127407",RouletteButtonImage="rbxassetid://71863210551741",IndexButtonImage="rbxassetid://110488541037597",BondButtonImage="rbxassetid://104399312241349",
  EggButtonImage="rbxassetid://87551432940862",PawButtonImage="rbxassetid://85966265063532",MossratFaceImage="rbxassetid://97843855045095",MoneyImage="rbxassetid://71604722538432"}
 function I.imageId(package,key)
  local id=package:GetAttribute(key)
@@ -63,6 +63,8 @@ function I.draw(parent,kind,size)
  elseif kind=="Journal" then
   shape(.18,.17,.64,.66,white,.07,-8)
   for _,y in ipairs({.33,.48,.63}) do shape(.32,y,.36,.025,Color3.fromRGB(60,74,82),0) end
+ elseif kind=="Gem" then
+  shape(.22,.22,.56,.56,Color3.fromRGB(35,170,255),.04,45)
  elseif kind=="Money" then
   shape(.06,.25,.78,.52,Color3.fromRGB(92,226,39),.05,-12)
   shape(.2,.12,.75,.5,Color3.fromRGB(130,255,59),.05,-12)
