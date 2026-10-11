@@ -44,6 +44,16 @@ function M.new(gui,bag,journal,remote)
   make("TextLabel",{Text="Index",BackgroundTransparency=1,Position=UDim2.fromOffset(54,0),Size=UDim2.new(1,-58,1,0),Font=Enum.Font.GothamBlack,TextSize=24,TextColor3=Color3.new(1,1,1),TextStrokeColor3=Color3.new(0,0,0),TextStrokeTransparency=0},journalButton)
   Icons.bindArtwork(journalButton,"IndexButtonImage")
  end
+ local cafeButton=make("TextButton",{Name="OpenCafe",Text="",Position=UDim2.new(0,8,.42,118),Size=UDim2.fromOffset(64,64),BackgroundColor3=Color3.fromRGB(255,203,35),BorderSizePixel=0,Visible=false},gui)
+ make("UICorner",{CornerRadius=UDim.new(0,5)},cafeButton)
+ make("TextLabel",{Text="☕",BackgroundTransparency=1,Size=UDim2.fromScale(1,1),TextSize=36},cafeButton)
+ Icons.bindArtwork(cafeButton,"CafeButtonImage")
+ local cafeStamp=0
+ cafeButton.Activated:Connect(function()
+  if not cafeButton.Visible or os.clock()-cafeStamp<1 then return end
+  cafeStamp=os.clock() remote:FireServer("GoCafe")
+ end)
+ table.insert(buttons,cafeButton)
  for i,kind in ipairs({"Egg","Paw"}) do
   local button=make("TextButton",{Name="Open"..kind,Text="",AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-8,.42,i==1 and -26 or 38),Size=UDim2.fromOffset(56,56),BorderSizePixel=0,BackgroundColor3=i==1 and Color3.fromRGB(255,83,80) or Color3.fromRGB(255,160,54),Visible=false},gui)
   make("UICorner",{CornerRadius=UDim.new(0,5)},button) make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},button)
@@ -58,25 +68,25 @@ function M.new(gui,bag,journal,remote)
  end
  local function layout()
   local camera=workspace.CurrentCamera
-  local compact=camera and camera.ViewportSize.Y<420
+  local compact=camera and camera.ViewportSize.Y<500
   local factor=compact and .8 or 1
   for _,button in ipairs(buttons) do
    local scale=button:FindFirstChild("ResponsiveScale")
    if not scale then scale=make("UIScale",{Name="ResponsiveScale"},button) end
    scale.Scale=factor
-   local left=button.Name=="OpenShop" or button.Name=="OpenRoulette"
-   local offset=button.Name=="OpenRoulette" and -98 or button.Name=="OpenPaw" and 38 or -26
-   button.Position=UDim2.new(left and 0 or 1,left and 8 or -8,compact and .36 or .42,offset*factor)
+   local left=button.Name=="OpenShop" or button.Name=="OpenRoulette" or button.Name=="OpenCafe"
+   local offset=button.Name=="OpenCafe" and 118 or button.Name=="OpenRoulette" and -98 or button.Name=="OpenPaw" and 38 or -26
+   button.Position=UDim2.new(left and 0 or 1,left and 8 or -8,compact and (left and .25 or .36) or .42,offset*factor)
   end
   if journalButton then
    local scale=journalButton:FindFirstChild("ResponsiveScale") or make("UIScale",{Name="ResponsiveScale"},journalButton)
-   scale.Scale=factor journalButton.Position=UDim2.new(0,8,compact and .36 or .42,46*factor)
+   scale.Scale=factor journalButton.Position=UDim2.new(0,8,compact and .25 or .42,46*factor)
   end
  end
  if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout) end
  layout()
  function api.state(data)
-  local lobby=data.phase=="Idle" or data.phase=="Lobby"
+  local lobby=data.area=="Lobby" and (data.phase=="Idle" or data.phase=="Lobby")
   local oldBag=gui:FindFirstChild("OpenBag")
   if oldBag then oldBag.Visible=not lobby and data.area~="Hunt" end
   for _,button in ipairs(buttons) do button.Visible=lobby end

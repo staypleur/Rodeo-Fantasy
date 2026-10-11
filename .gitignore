@@ -40,3 +40,9 @@ assets/models/MossratNeutral/*/Right.glb
 dist/RigReviewNeutral/
 dist/ReviewModels/NeutralMossrat.commandbar.lua
 dist/ReviewModels/Gems.commandbar.lua
+dist/ReviewModels/CafeEntry.commandbar.lua
+dist/ReviewModels/RodeoCafe-DesignReview.rbxlx
+dist/ReviewModels/CafeGarden-DesignReview.rbxlx
+dist/ReviewModels/CafeFantasy-DesignReview.rbxlx
+dist/ReviewModels/CafeGrandGarden-DesignReview.rbxlx
+dist/ReviewModels/CafeGardenReady-DesignReview.rbxlx

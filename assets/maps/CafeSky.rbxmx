@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='utf8'?>
+<roblox version="4"><Item class="Sky" referent="RBXAB0F79EC79C54908875356FF7E510CB7">
+				<Properties>
+					<bool name="CelestialBodiesShown">false</bool>
+					<float name="MoonAngularSize">11</float>
+					<Content name="MoonTextureId"><url>rbxasset://sky/moon.jpg</url></Content>
+					<Content name="SkyboxBk"><url>rbxassetid://10725382707</url></Content>
+					<Content name="SkyboxDn"><url>rbxassetid://10725361481</url></Content>
+					<Content name="SkyboxFt"><url>rbxassetid://10725385555</url></Content>
+					<Content name="SkyboxLf"><url>rbxassetid://10725365751</url></Content>
+					<Vector3 name="SkyboxOrientation">
+						<X>0</X>
+						<Y>0</Y>
+						<Z>0</Z>
+					</Vector3>
+					<Content name="SkyboxRt"><url>rbxassetid://10725363761</url></Content>
+					<Content name="SkyboxUp"><url>rbxassetid://10725359840</url></Content>
+					<int name="StarCount">3000</int>
+					<float name="SunAngularSize">21</float>
+					<Content name="SunTextureId"><url>rbxasset://sky/sun.jpg</url></Content>
+					<BinaryString name="AttributesSerialize" />
+					<SecurityCapabilities name="Capabilities">0</SecurityCapabilities>
+					<bool name="DefinesCapabilities">false</bool>
+					<UniqueId name="HistoryId">00000000000000000000000000000000</UniqueId>
+					<string name="Name">Sombrero Galaxy Sky</string>
+					<BinaryString name="SerializedOverrides" />
+					<int64 name="SourceAssetId">9016402918</int64>
+					<SharedString name="Tags">yuZpQdnvvUBOTYh1jqZ2cA==</SharedString>
+					<UniqueId name="UniqueId">34da8d2b2356fc840add0e3200000f6b</UniqueId>
+				</Properties>
+			</Item>
+		</roblox>

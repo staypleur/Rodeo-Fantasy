@@ -283,13 +283,18 @@ Lobby.connectPens(function(player)
 end)
 remote.OnServerEvent:Connect(function(player,action,value)
  if type(action)~="string" or not bags[player] or Store.busy(player) or player:GetAttribute("Travelling") then return end
- if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" and action~="PlaceEgg" and action~="RemoveEgg" and action~="Summon" and action~="BondPet" and action~="RidePet" and action~="RideInput" then return end
+ if action~="GoCafe" and action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" and action~="PlaceEgg" and action~="RemoveEgg" and action~="Summon" and action~="BondPet" and action~="RidePet" and action~="RideInput" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
  local interval=action=="RideInput" and .05 or action=="Jump" and 0.08 or action=="Steer" and 0.04 or 0.25
  if now()-(stamps[action] or -math.huge)<interval then return end
  stamps[action]=now()
+ if action=="GoCafe" then
+  local hum=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
+  if player:GetAttribute("Area")~="Lobby" or states[player] or Social.trading(player) or not hum or hum.Health<=0 then return end
+  Travel.go(player,true) return
+ end
  if action=="BondPet" then companions.bond(player,value) return end
  if action=="RidePet" then companions.ride(player,value) return end
  if action=="RideInput" then companions.input(player,value) return end

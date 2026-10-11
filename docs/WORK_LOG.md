@@ -1408,3 +1408,13 @@
 - check_crate_gems.py: 실제 파괴 함수와 지급 분기를 실행하여 다중상자/반복접촉/경로밖/소형/비행/신규·기존보석 보존/돈잔액 불변 검사 통과. 변경7파일 컴파일 및 저장 Studio 소스 일치 확인.
 - 실제 PC Studio Play에서 제공 아이콘 로딩, 파란0 표시, 몬스터→보석→돈 순서 확인. 약493px 폭 게임뷰에서도 겹침 없이 표시됨(docs/evidence/gem-hud-pc.png). 이는 실제 모바일 검증이 아니며 사냥터 직접 주행 파괴→잔액 증가 전체 경로는 코드 검사와 구분한다.
 - Studio 적용본 Temp/RodeoOwnerReview.rbxlx 저장. 테스트 종료, dist/ReviewModels 사본 갱신. 사용자 변경 dist/RodeoFantasy-New.rbxlx 제외, Roblox 게임 게시 없음.
+
+## 2026-10-11 카페 버튼 및 초대형 정원 디자인 검토본
+- 커피 그림을 Index 아래에 표시하고 GoCafe 요청에 연결했다. 실제 이미지122761932145346. 로비에서만 표시하며 연속 클릭을 제한한다. 서버는 로비/생존/사냥·거래·이동 상태를 검사한다. CafePlaceId는0이며 클릭 시 영어 준비 안내를 표시한다. 카페 게시·실제 서버 이동은 완료하지 않았다.
+- PlaceTravel 저장 실패 때 Travelling 속성을 복원하도록 수정. 실제 모듈을 사용한 누락ID/Studio/저장실패/성공/중복요청 회귀 검사 통과. 변경4파일 컴파일 통과, Temp/RodeoOwnerReview.rbxlx 저장 소스4개 일치. 실제 PC Play에서 커피 그림과 안내 확인, 약493px 폭에서도 HUD와 겹치지 않음. 실제 모바일 기기·터치는 미검증.
+- 사용자의 최종 지시대로 큰 정원, 핑크색 카페, 우주 배경과 밝은/어두운 구역을 디자인 방향에 반영. 3,600×3,600스터드 정원,540스터드 입구를 별도 휴식 섬 앞에 마련했다. 행성 장식보다 큰 몬스터20마리의 실제 크기·성능을 검증한 수치가 아니다. 정원 풍경·건축은 여전히 초안이며 참고 이미지 수준의 세부 디자인이 완성됐다고 보고하지 않는다.
+- 실제 무료 Creator Store 가구를 획득: Roblox House Furniture Pack–Duvall Drive10847897579. ServerStorage에서101개 스크립트 제거 후9모델/26MeshPart/4Seat만 템플릿으로 선별했다. 맵에는 소파·원목 테이블·의자·램프·쿠션·디스플레이를 배치. 전체 가구 묶음을 게임에 넣지 않았다. Aesthetic Potted Table Plant12032209888은 실행 코드0, 선택한3개 형상만 추출해4개 테이블에 배치. 상점 표시2,132삼각형/1MeshPart와 실제 추가 화분Union/Part를 구분한다. 출처는 assets/maps/README.md.
+- 큰 정원에 가구를 반복 배치하지 않고 가까운 카페에 집중했다. review Workspace 거리 로딩64/256, 지형 타일900스터드, 모든 파츠 축2048이하. 고유ID·참조 중복 검사 통과. 최종 정적 맵885인스턴스, 수입 실행 코드0. PBR 텍스처 메모리/실기기 성능은 측정하지 않았다.
+- 실제 PC 검토본 Play: 광장→왼쪽 다리 보행 true/체력100. 첫 큰 정원 입구 보행은 광장 난간에 막혀 false, 입구 난간9개 제거 후 재검사 true/체력100/도착Z178.09. 수정은 작성 도구와 저장된 검토본에 반영. 소파 Seat.Sit와 Occupant 일치 확인. 이는 전체 경계/모바일/20명 서버/거대펫 탑승 검증이 아니다.
+- 실제 실행/편집 증거: cafe-button-pc.png, cafe-furniture-pc.png, cafe-islands-studio.png, cafe-giant-garden-studio.png. 초기 가구 폴더 이름 누락과 잘못된 조명 방향을 수정하고 재생성한 검토본에서 확인. Studio 내장 MaterialManager의 React 오류는 게임 스크립트 오류와 구분한다.
+- tools/build_cafe_review.py는 메인 place를 변경하지 않는 별도 초안 생성 도구다. 실제 검토본 CafeGardenReady-DesignReview.rbxlx를 Studio에 저장. 최종 배치·색감 사용자 승인, 건물/정원 세부 완성, CafePlace 게시/20명 용량 설정/이동, 카페 펫 연동이 남아 있다. 기존 dist/RodeoFantasy-New.rbxlx 사용자 변경은 제외한다.

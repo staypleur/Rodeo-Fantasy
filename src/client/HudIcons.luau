@@ -1,7 +1,7 @@
 -- Small native shapes: no external images are required for the menu symbols.
 local I={}
 -- IDs supplied by the user from their uploaded image list.
-I.ImageIds={GemImage="rbxassetid://128056611527669",RideButtonImage="rbxassetid://120607489729893",ClockImage="rbxassetid://87364518179349",ShopButtonImage="rbxassetid://114640852127407",RouletteButtonImage="rbxassetid://71863210551741",IndexButtonImage="rbxassetid://110488541037597",BondButtonImage="rbxassetid://104399312241349",
+I.ImageIds={CafeButtonImage="rbxassetid://122761932145346",GemImage="rbxassetid://128056611527669",RideButtonImage="rbxassetid://120607489729893",ClockImage="rbxassetid://87364518179349",ShopButtonImage="rbxassetid://114640852127407",RouletteButtonImage="rbxassetid://71863210551741",IndexButtonImage="rbxassetid://110488541037597",BondButtonImage="rbxassetid://104399312241349",
  EggButtonImage="rbxassetid://87551432940862",PawButtonImage="rbxassetid://85966265063532",MossratFaceImage="rbxassetid://97843855045095",MoneyImage="rbxassetid://71604722538432"}
 function I.imageId(package,key)
  local id=package:GetAttribute(key)
