@@ -15,7 +15,7 @@ def apply_collisions(cafe,p,rotate):
   cf=v.find("Properties/CoordinateFrame[@name='CFrame']");size=v.find("Properties/Vector3[@name='size']")
   if cf is None or size is None:continue
   names=path(v);name=names[0]
-  tree='CafeSakuraSource' in names and name=='Trunk'
+  tree=('CafeSakuraSource' in names or 'CafeDarkTreeSource' in names) and name=='Trunk'
   furniture=any(k in names for k in ['Couch_Single','Couch_Double','Kitchen_DiningChair','Kitchen_DiningTable','Furniture_CoffeeTable'])
   rock=any(k in names for k in ['MediumMossBoulder01','SmallRock01'])
   building=any(k in names for k in ['CafeGazeboSource','CafeBenchSource','CafeFountainSource'])

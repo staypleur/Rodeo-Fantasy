@@ -210,6 +210,7 @@ def build(inspection_speed=180):
  # One textured Creator Store mesh replaces the court and primitive neon orb.
  planetlib=E.parse(R/'assets/maps/CafePlanet.rbxmx').getroot()
  planet=copy.deepcopy(planetlib.find('Item'));planet.set('referent','CafeCentralPlanet')
+ prop(planet,'string','Name','CentralPlanet')
  for i,v in enumerate(planet.findall('Item')):v.set('referent',f'CafeCentralPlanetChild{i}')
  composite(planet,'CoordinateFrame','CFrame',{'X':0,'Y':220,'Z':0,'R00':1,'R01':0,'R02':0,'R10':0,'R11':1,'R12':0,'R20':0,'R21':0,'R22':1})
  composite(planet,'Vector3','size',{'X':240,'Y':240,'Z':240})
@@ -221,6 +222,30 @@ def build(inspection_speed=180):
  lighting=node(root,'Lighting','Lighting');prop(lighting,'float','ClockTime',12);prop(lighting,'float','Brightness',1.5);prop(lighting,'float','ExposureCompensation',0)
  composite(lighting,'Color3','Ambient',dict(zip('RGB',[115/255,115/255,125/255])));composite(lighting,'Color3','OutdoorAmbient',dict(zip('RGB',[145/255,140/255,150/255])));prop(lighting,'bool','GlobalShadows','true');prop(lighting,'float','EnvironmentDiffuseScale',.5);prop(lighting,'float','EnvironmentSpecularScale',.5)
  players=node(root,'Players','Players');prop(players,'int','MaxPlayers',20);starter=node(root,'StarterPlayer','StarterPlayer');prop(starter,'float','CameraMaxZoomDistance',120);prop(starter,'float','CameraMinZoomDistance',.5);node(starter,'StarterPlayerScripts','StarterPlayerScripts');node(root,'StarterGui','StarterGui')
+ starter_scripts=starter.find('Item')
+ script(starter_scripts,'LocalScript','CafePlanetRotation','''-- One client-only decorative mesh. No server replication of rotation.
+local RunService = game:GetService("RunService")
+local PERIOD = 240
+local planet, scan, step = nil, 0, 0
+RunService.Heartbeat:Connect(function(dt)
+ scan += dt
+ step += dt
+ if scan >= .5 then
+  scan = 0
+  local cafe = workspace:FindFirstChild("RodeoCafe")
+  local view = cafe and cafe:FindFirstChild("SpaceView")
+  planet = view and view:FindFirstChild("CentralPlanet")
+ end
+ if step < .05 then return end
+ step = 0
+ if not planet or not planet:IsDescendantOf(workspace) then return end
+ local camera = workspace.CurrentCamera
+ if not camera or (camera.CFrame.Position - planet.Position).Magnitude > 3000 then return end
+ local point, visible = camera:WorldToViewportPoint(planet.Position)
+ if not visible or point.Z <= 0 then return end
+ local angle = (workspace:GetServerTimeNow() % PERIOD) / PERIOD * math.pi * 2
+ planet.CFrame = CFrame.new(planet.Position) * CFrame.Angles(0, angle, 0)
+end)''')
  server=node(root,'ServerScriptService','ServerScriptService');script(server,'Script','CafeReviewCapacity','''-- Inspection only. Set INSPECTION_MODE=false to restore normal cafe walking.
 local INSPECTION_MODE = true
 local INSPECTION_WALK_SPEED = %s
@@ -244,7 +269,7 @@ for _,p in game.Players:GetPlayers() do added(p) end''' % inspection_speed)
  root.append(shared)
  skyfile=R/'assets/maps/CafeSky.rbxmx'
  if skyfile.exists():lighting.append(copy.deepcopy(E.parse(skyfile).getroot().find('Item')))
- out=R/'dist/ReviewModels/CafePlanet-Inspection.rbxlx';E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)
+ out=R/'dist/ReviewModels/CafeRefined-Inspection.rbxlx';E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)
  asset=E.Element('roblox',version='4');asset.append(copy.deepcopy(cafe));asset.append(copy.deepcopy(shared));E.ElementTree(asset).write(R/'assets/maps/SpaceCafeReview.rbxmx',encoding='utf-8',xml_declaration=True)
  print('CAFE_FANTASY_REVIEW',len(list(cafe.iter('Item'))),'instances; scripts in furniture:',sum(n.get('class') in ['Script','LocalScript','ModuleScript'] for n in furniture.iter('Item')))
  return out

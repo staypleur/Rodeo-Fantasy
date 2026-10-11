@@ -8,7 +8,7 @@ R=Path(__file__).resolve().parents[1]
 
 def decorate(cafe,zones,p,rotate):
  libraries=[E.parse(R/'assets/maps'/f).getroot() for f in
-            ['CafeSakura.rbxmx','CafeNatureCurated.rbxmx','CafeCuratedFurniture.rbxmx','CafeTablePlant.rbxmx','CafeScenicCurated.rbxmx']]
+            ['CafeSakura.rbxmx','CafeNatureCurated.rbxmx','CafeCuratedFurniture.rbxmx','CafeTablePlant.rbxmx','CafeScenicCurated.rbxmx','CafeBuildingTree.rbxmx']]
  templates={v.findtext("Properties/string[@name='Name']"):v for lib in libraries for v in lib.findall('Item')}
  landscape=node(cafe,'Folder','CuratedLandscape')
  # Replace the primitive tree placeholders rather than layering new trees over them.
@@ -28,6 +28,10 @@ def decorate(cafe,zones,p,rotate):
     for y in [-1,1]:
      for z in [-1,1]:corners.append(pos+mat@(half*np.array([x,y,z])))
   lo=np.min(corners,axis=0);hi=np.max(corners,axis=0)
+  # The gazebo roof Union has an oversized rotated box extending below ground.
+  # Use the actual lowest flat foundation/stair slab, not that empty roof box.
+  if model.findtext("Properties/string[@name='Name']")=='CafeGazeboSource':
+   lo[1]=-1.466882706
   return np.array([(lo[0]+hi[0])/2,lo[1],(lo[2]+hi[2])/2])
 
  def place(name,pos,scale=1,yaw=0,purple=False,seating=False):
@@ -51,6 +55,17 @@ def decorate(cafe,zones,p,rotate):
     prop(n,'bool','Anchored','true');prop(n,'bool','CanCollide',str(seating and n.get('class') in ['Seat','UnionOperation']).lower())
     prop(n,'bool','CanTouch',str(n.get('class')=='Seat').lower());prop(n,'bool','CanQuery','false');prop(n,'bool','CastShadow','false')
     if n.get('class')=='UnionOperation':prop(n,'token','CollisionFidelity',1)
+    if name=='CafeDarkTreeSource':
+     prop(n,'Color3uint8','Color3uint8',0xff392c44)
+    if name=='CafeBuildingSource':
+     glass=float(n.findtext("Properties/float[@name='Transparency']") or 0)>0
+     oldcol=int(n.findtext("Properties/Color3uint8[@name='Color3uint8']") or 0xffffffff)
+     rgb=((oldcol>>16)&255,(oldcol>>8)&255,oldcol&255)
+     bright=sum(rgb)/3>180
+     col=((63,46,79) if purple else (250,223,235)) if bright else ((91,67,103) if purple else (194,144,167))
+     if glass:col=(122,98,149) if purple else (224,200,218)
+     prop(n,'Color3uint8','Color3uint8',0xff000000+(col[0]<<16)+(col[1]<<8)+col[2])
+     prop(n,'bool','CanCollide','true');prop(n,'bool','CanQuery','true')
     if name=='CafeSakuraSource' and n.findtext("Properties/string[@name='Name']")=='Leaves' and purple:
      prop(n,'Color3uint8','Color3uint8',0xff9e71c5)
     if name in ['CafeGazeboSource','CafeFountainSource']:
@@ -79,7 +94,7 @@ def decorate(cafe,zones,p,rotate):
    a=(i+.5)*math.tau/count
    if any(abs(math.atan2(math.sin(a-g),math.cos(a-g)))<.27 for g in near):continue
    tx,tz=x+math.cos(a)*r*.83,z+math.sin(a)*r*.83
-   place('CafeSakuraSource',(tx,0,tz),2.8 if 'Giant' in name else 1.6,a,dark)
+   place('CafeDarkTreeSource' if dark else 'CafeSakuraSource',(tx,0,tz),4.5 if dark and 'Giant' in name else 2.6 if dark else 2.8 if 'Giant' in name else 1.6,a,dark)
    # Two distinct rock shapes reuse the same meshes and materials across beds.
    if i%2==0:
     place('MediumMossBoulder01',(tx-18,0,tz+12),2.3,a)
@@ -119,7 +134,7 @@ def decorate(cafe,zones,p,rotate):
    for j in range(3):
     b=(j+.5)*math.pi/3+a
     tx,tz=gx+math.cos(b)*120,gz+math.sin(b)*120
-    place('CafeSakuraSource',(tx,0,tz),1.3,b,dark)
+    place('CafeDarkTreeSource' if dark else 'CafeSakuraSource',(tx,0,tz),2.1 if dark else 1.3,b,dark)
     place('RhododendronVar01',(tx,0,tz+12),1.8,b)
     place('MediumMossBoulder01',(tx+20,0,tz-8),2,b)
    for dx in [-32,32]:
@@ -144,6 +159,21 @@ def decorate(cafe,zones,p,rotate):
  # These are display-only props; no source scripts, sounds or item dispensers.
  for name in ['RoseCafe','ShadowCafe']:
   x,z,r,dark=zones[name]
+  # Replace the old blockout envelope with the curated free cafe. Its floor
+  # sits at the same 1.8-stud level as the existing human-scale furniture.
+  for folder in cafe.findall('Item'):
+   if folder.findtext("Properties/string[@name='Name']") not in ['Structure','Decor']:continue
+   for n in list(folder.findall('Item')):
+    cf=n.find("Properties/CoordinateFrame[@name='CFrame']")
+    if cf is None:continue
+    nx,nz=float(cf.findtext('X')),float(cf.findtext('Z'))
+    nm=n.findtext("Properties/string[@name='Name']") or ''
+    if abs(nx-x)<100 and z-110<nz<z+10 and (nm.startswith(('Cafe','Facade','Column','Tower','Pendant')) or nm=='WarmCeiling'):
+     folder.remove(n)
+  building=place('CafeBuildingSource',(x,1.4,z-47),purple=dark)
+  p('CafeFoundation',(x,.7,z-47),(160,1.4,160),(63,46,79) if dark else (231,192,208),True,parent=landscape)
+  # A short stair avoids an unsupported raised floor at the public facade.
+  for i in range(3):p('CafeEntryStep',(x+40,(i+1)*.3,z+40-i*3),(30,(i+1)*.6,3),(91,67,103) if dark else (231,192,208),True,parent=landscape)
   place('CafeCoffeeMachineSource',(x+25,3.4,z-67),1.1)
   for side in [-1,1]:
    cx,cz=x+side*95,z+38
