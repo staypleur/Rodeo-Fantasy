@@ -13,13 +13,7 @@ function Service.new(ctx)
   if not bag then return false end
   local token=ctx.token()
   pending[player]={token=token,expires=ctx.now()+60}
-  local items={}
-  for _,item in ipairs(bag.monsters or {}) do
-   local owned,reason=Rules.validate(bag,"GreenStar",item.id,ctx.catalog,ctx.modelReady)
-   table.insert(items,{id=item.id,monsterId=item.monsterId,stars=item.stars or 1,
-    ready=owned~=nil,reason=reason})
-  end
-  ctx.send(player,"DepartureMenu",{token=token,items=items,planet="GreenStar",name="Green Star",lengthMeters=1000})
+  ctx.send(player,"DepartureMenu",{token=token,planet="GreenStar",name="Green Star"})
   return true
  end
  function api.submit(player,value)
@@ -31,12 +25,12 @@ function Service.new(ctx)
    result(player,false,"MenuExpired") return false
   end
   if not ctx.canOpen(player) then result(player,false,"ApproachRocket") return false end
-  local item,reason=Rules.validate(ctx.bag(player),value.planet,value.itemId,ctx.catalog,ctx.modelReady)
+  local item,reason=Rules.starter(value.planet,ctx.catalog,ctx.modelReady)
   if not item then result(player,false,reason) return false end
   if not ctx.courseReady() then result(player,false,"CoursePending") return false end
-  -- Revalidate the live bag immediately before launch, and consume the menu
+  -- Validate the planet starter immediately before launch and consume the menu
   -- only after a successful hunt creation. A failed launch can be retried.
-  local ok=ctx.launch(player,item.id)==true
+  local ok=ctx.launch(player,nil)==true
   if ok then pending[player]=nil end
   result(player,ok,ok and nil or "LaunchFailed")
   return ok

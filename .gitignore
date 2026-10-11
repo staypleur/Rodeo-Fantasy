@@ -21,3 +21,6 @@ assets/models/MossratS6UserRig/Texture*.png
 dist/ReviewModels/RodeoOwnerReview.rbxlx
 
 assets/models/MossratS6UserRig/MossratTexture*.png
+assets/models/MossratS9UserRig/*.gltf
+assets/models/MossratS9UserRig/*.bin
+assets/models/MossratS9UserRig/MossratTexture*.png

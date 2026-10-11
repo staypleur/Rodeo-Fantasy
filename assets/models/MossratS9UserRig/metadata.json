@@ -1,0 +1,31 @@
+{
+  "source": "Source.glb",
+  "sourceSha256": "827655b15a275659105def5a41fbaa73dcd40444f669714b6a3665a90256d40d",
+  "sourceTriangles": 9151,
+  "riggedTriangles": 9151,
+  "vertices": 21787,
+  "bones": 34,
+  "maxInfluences": 4,
+  "clips": [
+    "Idle",
+    "Walk",
+    "LookAround",
+    "RigRange"
+  ],
+  "originalGeometryNormalsUVPreserved": true,
+  "originalTextureBytesPreserved": true,
+  "addedEyelidTriangles": 0,
+  "blinkEnabled": false,
+  "eyeMotion": "Eyes/whiskers remain part of the head skin; four reserved zero-influence bones are preserved on Studio import; no blink",
+  "heightMetres": 3.4,
+  "targetHeightStuds": 12,
+  "frontAxis": "+Z",
+  "rigReviewApproved": false,
+  "installedInGame": true,
+  "studioVerified": true,
+  "mobilePerformanceMeasured": false,
+  "studioVerification": "PC Studio: 34 bones, 12-stud height, color, idle tail, silent bond chest/jaw pose, ride button, seated piggyback and movement checked. User visual approval and physical-mobile/multiplayer validation pending.",
+  "studioColorMap": "rbxassetid://102088380784982",
+  "studioMaterialFallback": "Reuploaded original color losslessly; failed HTTP 502 metalness and roughness maps disabled; original GLB/PBR bytes preserved.",
+  "doubleSided": true
+}

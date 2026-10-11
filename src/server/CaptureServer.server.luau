@@ -177,7 +177,7 @@ local function start(player)
  local humanoid=character and character:FindFirstChildOfClass("Humanoid")
  if not root or not humanoid or humanoid.Health<=0 then return end
  if not previous and not rocketLaunchPermit[player] then return end
- local picked,reason=require(package.DepartureSelectionRules).validate(bags[player],"GreenStar",startingMounts[player],Catalog,rocketModelReady)
+ local picked,reason=require(package.DepartureSelectionRules).starter("GreenStar",Catalog,rocketModelReady)
  if not picked or workspace.RodeoLobby:GetAttribute("GreenStarRuntimeReady")~=true then
   send(player,"This hunt or monster is coming soon.") return
  end
@@ -215,8 +215,8 @@ local function start(player)
  model:SetAttribute("Angry",false) model:SetAttribute("InitialLanding",true)
  model:SetAttribute("StartingOwnedMount",true)
  model:SetAttribute("Tamed_"..player.UserId,true)
- states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,initialLanding=true,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),distance=0,tamed=true}
  companions.clear(player)
+ states[player]={phase="Lassoing",started=now(),landingSeconds=tuning.IntroSeconds,initialLanding=true,monster=model,root=root,humanoid=humanoid,wasAnchored=root.Anchored,autoRotate=humanoid.AutoRotate,platformStand=humanoid.PlatformStand,steer=0,steerAt=now(),distance=0,tamed=true}
  root.Anchored,humanoid.AutoRotate,humanoid.PlatformStand=true,false,true
  root.CFrame=model:GetPivot()*CFrame.new(0,model:GetAttribute("SaddleHeight") or tuning.RideHeightStuds,8)
  states[player].origin=root.CFrame
@@ -283,14 +283,16 @@ Lobby.connectPens(function(player)
 end)
 remote.OnServerEvent:Connect(function(player,action,value)
  if type(action)~="string" or not bags[player] or Store.busy(player) or player:GetAttribute("Travelling") then return end
- if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" and action~="PlaceEgg" and action~="RemoveEgg" and action~="Summon" and action~="BondPet" then return end
+ if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" and action~="PlaceEgg" and action~="RemoveEgg" and action~="Summon" and action~="BondPet" and action~="RidePet" and action~="RideInput" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
- local interval=action=="Jump" and 0.08 or action=="Steer" and 0.04 or 0.25
+ local interval=action=="RideInput" and .05 or action=="Jump" and 0.08 or action=="Steer" and 0.04 or 0.25
  if now()-(stamps[action] or -math.huge)<interval then return end
  stamps[action]=now()
  if action=="BondPet" then companions.bond(player,value) return end
+ if action=="RidePet" then companions.ride(player,value) return end
+ if action=="RideInput" then companions.input(player,value) return end
  if action=="Summon" then
   if not states[player] then companions.summon(player,value) send(player) end
   return

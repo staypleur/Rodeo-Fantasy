@@ -52,40 +52,17 @@ local function hide(cancel)
  if cancel and menu then remote:FireServer("CancelDeparture") end
  gui.Enabled=false menu=nil busy=false clear()
 end
-local function chooseMonster()
- step=2 selected=nil clear() list.CanvasPosition=Vector2.zero
- title.Text="Choose Your Mount" hint.Text=""
- nextButton.Text="Next" status.Text="Select one monster."
- if #menu.items==0 then status.Text="No monsters available." end
- for index,item in ipairs(menu.items) do
-  local id=item.monsterId
-  local name=L.text(id,"en-us")
-  local b
-  b=button(name.." · "..tostring(item.stars).."★"..(item.ready and "" or " · Coming soon"),index,function()
-   if busy then return end
-   if not item.ready then status.Text=messages[item.reason] or "Unavailable." return end
-   selected=item.id status.Text=name
-   for _,row in ipairs(rows) do row.BackgroundColor3=Color3.fromRGB(35,69,82) end
-   b.BackgroundColor3=Color3.fromRGB(47,125,112)
-  end)
- end
-end
 close.Activated:Connect(function() hide(true) end)
 nextButton.Activated:Connect(function()
  if not menu or busy then return end
- if step==1 then
-  if not selected then status.Text="Select a planet." return end
-  if not Planets[selected].Available then status.Text="Coming soon" return end
-  selectedPlanet=selected
-  chooseMonster()
- elseif selected then
-  busy=true status.Text="Preparing hunt…"
-  local launchMenu=menu
-  remote:FireServer("LaunchSelection",{token=menu.token,planet=selectedPlanet,itemId=selected})
-  task.delay(8,function()
-   if gui.Enabled and menu==launchMenu and busy then busy=false status.Text="Waiting for a response. Try again or close this window." end
-  end)
- end
+ if not selected then status.Text="Select a planet." return end
+ if not Planets[selected].Available then status.Text="Coming soon" return end
+ busy=true status.Text="Preparing hunt…"
+ local launchMenu=menu
+ remote:FireServer("LaunchSelection",{token=menu.token,planet=selected})
+ task.delay(8,function()
+  if gui.Enabled and menu==launchMenu and busy then busy=false status.Text="Please try again." end
+ end)
 end)
 UIS.InputBegan:Connect(function(input,processed)
  if not processed and gui.Enabled and input.KeyCode==Enum.KeyCode.Escape then hide(true) end

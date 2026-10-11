@@ -7,7 +7,7 @@ local boneCache=setmetatable({},{__mode="k"})
 function M.isTarget(model)
  local stage=C.stage(model:GetAttribute("Stars") or 1)
  local visual=package:FindFirstChild(C.visual("MeadowMouse",stage))
- return model:GetAttribute("MonsterId")=="MeadowMouse" and (stage==1 or stage==3 or stage==6) and visual~=nil and visual:GetAttribute("NativeMeshyMossrat")==true
+ return model:GetAttribute("MonsterId")=="MeadowMouse" and (stage==1 or stage==3 or stage==6 or stage==9) and visual~=nil and visual:GetAttribute("NativeMeshyMossrat")==true
 end
 function M.apply(model)
  if not M.isTarget(model) or not model.PrimaryPart then return false end
@@ -23,7 +23,7 @@ function M.apply(model)
  if source:GetAttribute("MossratUserRigRevision")=="ApprovedS1-v1" then
   yaw+=180
   facingRevision..="-ForwardV2"
- elseif source:GetAttribute("MossratUserRigRevision")=="UserS3-v1" or source:GetAttribute("MossratUserRigRevision")=="UserS6-v1" then
+ elseif source:GetAttribute("MossratUserRigRevision")=="UserS3-v1" or source:GetAttribute("MossratUserRigRevision")=="UserS6-v1" or source:GetAttribute("MossratUserRigRevision")=="UserS9-v1" then
   yaw+=180
   facingRevision..="-ForwardV3"
  end

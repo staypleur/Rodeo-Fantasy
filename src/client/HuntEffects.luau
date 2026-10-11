@@ -46,20 +46,53 @@ function M.update(state,frame,clock)
  end
  for _,line in ipairs(lines) do line.beam.Enabled=active or false end
 end
+local activeBonds=setmetatable({},{__mode="k"}) local activeBondCount=0
 function M.pet(data)
  local model=type(data)=="table" and data.model
  if typeof(model)~="Instance" or not model:IsA("Model") or not model.PrimaryPart then return end
- local tween=game:GetService("TweenService")
- for i=1,8 do
-  local angle=i*math.pi/4
-  local gui=Instance.new("BillboardGui") gui.Name="LocalPetHeart" gui.Size=UDim2.fromOffset(38,38)
-  gui.StudsOffsetWorldSpace=Vector3.new(math.cos(angle)*1.6,.4+(i%3)*.4,math.sin(angle)*1.6)
-  gui.AlwaysOnTop=false gui.MaxDistance=100 gui.Parent=model.PrimaryPart
-  local label=Instance.new("TextLabel") label.Size=UDim2.fromScale(1,1) label.BackgroundTransparency=1
-  label.Text="♥" label.TextColor3=Color3.fromRGB(255,130,190) label.TextSize=30 label.Parent=gui
-  tween:Create(gui,TweenInfo.new(3),{StudsOffsetWorldSpace=gui.StudsOffsetWorldSpace+Vector3.new(0,2.2,0)}):Play()
-  tween:Create(label,TweenInfo.new(3),{TextTransparency=1}):Play()
-  game:GetService("Debris"):AddItem(gui,3)
+ local camera=workspace.CurrentCamera
+ if not camera or (model.PrimaryPart.Position-camera.CFrame.Position).Magnitude>80 or activeBonds[model] or activeBondCount>=4 then return end
+ activeBonds[model]=true activeBondCount+=1
+ local rs=game:GetService("RunService") local debris=game:GetService("Debris")
+ local body=model:FindFirstChild("Body") local height=body and body.Size.Y or 3
+ local center=body or model.PrimaryPart
+ local container=Instance.new("Folder") container.Name="LocalBondAura" container.Parent=center
+ local glow=Instance.new("Attachment") glow.Name="PinkBondGlow" glow.Parent=center
+ local mist=Instance.new("ParticleEmitter") mist.Texture="rbxasset://textures/particles/smoke_main.dds"
+ mist.Color=ColorSequence.new(Color3.fromRGB(255,105,191),Color3.fromRGB(255,199,230))
+ mist.LightEmission=.6 mist.Rate=UIS.TouchEnabled and 6 or 8 mist.Speed=NumberRange.new(.1,.3) mist.SpreadAngle=Vector2.new(180,180)
+ mist.Lifetime=NumberRange.new(.7,1.2) mist.Size=NumberSequence.new(height*.95)
+ mist.Transparency=NumberSequence.new({NumberSequenceKeypoint.new(0,1),NumberSequenceKeypoint.new(.25,.72),NumberSequenceKeypoint.new(1,1)})
+ mist.Parent=glow
+ local hearts={}
+ local heartCount=UIS.TouchEnabled and 6 or 10
+ for i=1,heartCount do
+  local gui=Instance.new("BillboardGui") gui.Name="BondHeartAura" gui.Size=UDim2.fromOffset(22,22)
+  gui.Adornee=center gui.AlwaysOnTop=false gui.MaxDistance=80 gui.Parent=container
+  local shapes={}
+  local function shape(x,y,w,h,round,angle)
+   local f=Instance.new("Frame") f.BackgroundColor3=Color3.fromRGB(255,145,202) f.BorderSizePixel=0
+   f.Position=UDim2.fromScale(x,y) f.Size=UDim2.fromScale(w,h) f.Rotation=angle or 0 f.Parent=gui
+   if round then local c=Instance.new("UICorner") c.CornerRadius=UDim.new(.5,0) c.Parent=f end
+   table.insert(shapes,f)
+  end
+  shape(.25,.30,.5,.5,false,45) shape(.08,.12,.5,.5,true) shape(.42,.12,.5,.5,true)
+  hearts[i]={gui=gui,shapes=shapes,angle=i*math.pi*2/heartCount}
  end
+ local started=os.clock() local connection local lastFrame=0
+ connection=rs.RenderStepped:Connect(function()
+  local t=os.clock()-started
+  if t>=3 or not center.Parent then
+   connection:Disconnect() container:Destroy() glow:Destroy() activeBonds[model]=nil activeBondCount-=1 return
+  end
+  if t-lastFrame<1/30 then return end lastFrame=t
+  mist.Enabled=t<2.1
+  for i,h in ipairs(hearts) do
+   local angle=h.angle+t*.45 local pulse=.5+.5*math.sin(t*3+i)
+   h.gui.StudsOffsetWorldSpace=Vector3.new(math.cos(angle)*height*.65,math.sin(i*2.3)*height*.33+math.sin(t*2+i)*.15,math.sin(angle)*height*.65)
+   for _,f in ipairs(h.shapes) do f.BackgroundTransparency=math.max(.12+(.18*pulse),1-math.min(t/.25,(3-t)/.5,1)) end
+  end
+ end)
+ debris:AddItem(container,3.2) debris:AddItem(glow,3.2)
 end
 return M

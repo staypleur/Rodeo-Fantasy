@@ -1,8 +1,9 @@
--- One owned companion per lobby player. No mounting and no invented bond rewards.
+-- One owned companion per lobby player; riding remains server authoritative.
 local M={}
 local P=game.ReplicatedStorage.RodeoFantasy
 local Catalog=require(P.MonsterCatalog)
 local Rules=require(P.SocialRules)
+local RideRules=require(P.LobbyRideRules)
 function M.new(context)
  local pets={}
  local map=workspace:WaitForChild("RodeoLobby")
@@ -15,9 +16,46 @@ function M.new(context)
   return hit and hit.Position.Y
  end
  local api={}
+ function api.dismount(p)
+  local pet=pets[p] local ride=pet and pet.ride
+  if not ride then return end
+  pet.ride=nil pet.input=Vector3.zero
+  p:SetAttribute("LobbyRiding",nil) pet.model:SetAttribute("RiderUserId",nil)
+  local r,h=ride.root,ride.humanoid
+  if r.Parent and h.Parent then
+   local frame=pet.model.PrimaryPart.CFrame
+   for _,offset in ipairs({Vector3.new(5,0,0),Vector3.new(-5,0,0),Vector3.new(0,0,6)}) do
+    local pos=frame:PointToWorldSpace(offset) local y=ground(pos)
+    if y and not workspace:Blockcast(CFrame.new(frame.Position),Vector3.new(2,2,2),pos-frame.Position,params) then
+     r.CFrame=CFrame.new(pos.X,y+h.HipHeight+r.Size.Y/2,pos.Z)*frame.Rotation break
+    end
+   end
+   r.Anchored=ride.anchored h.AutoRotate=ride.autoRotate h.PlatformStand=ride.platformStand h.Sit=ride.sit
+   r.AssemblyLinearVelocity=Vector3.zero
+  end
+ end
+ function api.ride(p,id)
+  local pet=pets[p] local r=root(p)
+  if pet and pet.ride then api.dismount(p) return true end
+  local h=p.Character and p.Character:FindFirstChildOfClass("Humanoid")
+  if not pet or pet.id~=id or not r or not h or h.Health<=0 or not context.canAct(p) or not context.inLobby(p)
+   or not Rules.available(Rules.find(context.bag(p),id)) or (r.Position-pet.model.PrimaryPart.Position).Magnitude>10
+   or (pet.model:GetAttribute("PetBondUntil") or 0)>workspace:GetServerTimeNow() then return false end
+  pet.ride={root=r,humanoid=h,anchored=r.Anchored,autoRotate=h.AutoRotate,platformStand=h.PlatformStand,sit=h.Sit}
+  pet.input=Vector3.zero pet.inputAt=os.clock()
+  r.Anchored=true h.AutoRotate=false h.PlatformStand=false h.Sit=true
+  h:ChangeState(Enum.HumanoidStateType.Seated)
+  pet.model:SetAttribute("RiderUserId",p.UserId) p:SetAttribute("LobbyRiding",true)
+  return true
+ end
+ function api.input(p,value)
+  local pet=pets[p] if not pet or not pet.ride then return end
+  local direction=RideRules.direction(value) if not direction then return end
+  pet.input=direction pet.inputAt=os.clock()
+ end
  function api.bond(p,id)
   local pet=pets[p] local rr=root(p)
-  if not pet or pet.id~=id or not context.canAct(p) or not context.inLobby(p)
+  if not pet or pet.ride or pet.id~=id or not context.canAct(p) or not context.inLobby(p)
    or not Rules.available(Rules.find(context.bag(p),id)) or not rr
    or (rr.Position-pet.model.PrimaryPart.Position).Magnitude>10 or os.clock()-(pet.lastBond or -math.huge)<3.5 then return false end
   pet.lastBond=os.clock()
@@ -27,6 +65,7 @@ function M.new(context)
   return true
  end
  function api.clear(p)
+  api.dismount(p)
   local pet=pets[p] if pet then pet.model:Destroy() end
   pets[p]=nil p:SetAttribute("SummonedId",nil)
  end
@@ -38,7 +77,7 @@ function M.new(context)
   local r=root(p) if not r or not Rules.available(item) then return end
   local source=P:FindFirstChild(Catalog.visual(item.monsterId,item.stars))
   local revision=source and source:GetAttribute("MossratUserRigRevision")
-  if revision~="ApprovedS1-v1" and revision~="UserS3-v1" and revision~="UserS6-v1" then
+  if revision~="ApprovedS1-v1" and revision~="UserS3-v1" and revision~="UserS6-v1" and revision~="UserS9-v1" then
    P.CaptureRemote:FireClient(p,"SocialMessage","This monster model is coming soon.") return
   end
   local position=r.Position+r.CFrame.RightVector*4-r.CFrame.LookVector*4
@@ -66,6 +105,30 @@ function M.new(context)
    -- Saving/trading locks and character replacement are transient. Only clear
    -- on leaving the lobby or actually losing ownership; never on Store.busy.
    if not p.Parent or not context.inLobby(p) or not Rules.find(context.bag(p),pet.id) then api.clear(p) continue end
+   if pet.ride then
+    local ride=pet.ride
+    if r~=ride.root or not ride.humanoid.Parent or ride.humanoid.Health<=0 then api.dismount(p) continue end
+    local direction=context.canAct(p) and Rules.available(Rules.find(context.bag(p),pet.id)) and os.clock()-pet.inputAt<.5 and pet.input or Vector3.zero
+    local old=pet.model.PrimaryPart.CFrame local delta=direction*RideRules.speed(pet.model:GetAttribute("Stars"))*step
+    local position=old.Position+delta
+    local frame=old local moving=delta.Magnitude>.01
+    if moving then
+     local y=ground(position)
+     local hit=workspace:Blockcast(CFrame.new(old.X,old.Y+1,old.Z),Vector3.new(2.5,2.5,2.5),delta,params)
+     if y and not hit and math.abs(y+pet.height-old.Y)<=3 then
+      position=Vector3.new(position.X,y+pet.height,position.Z) frame=CFrame.lookAt(position,position+direction)
+      pet.model:PivotTo(frame*pet.model.PrimaryPart.CFrame:Inverse()*pet.model:GetPivot())
+     else moving=false end
+    end
+    local stage=Catalog.stage(pet.model:GetAttribute("Stars"))
+    local body=pet.model:FindFirstChild("Body") local tall=body and body.Size.Y or pet.height*2
+    local offset=stage>=6 and Vector3.new(0,tall*.62-pet.height,1.35) or Vector3.new(0,tall*.62-pet.height+1.25,.15)
+    local riderFrame=frame*CFrame.new(offset)
+    if r.CFrame~=riderFrame then r.CFrame=riderFrame end
+    if r.AssemblyLinearVelocity~=Vector3.zero then r.AssemblyLinearVelocity=Vector3.zero end
+    pet.model:SetAttribute("Running",moving) pet.model:SetAttribute("HerdVelocity",moving and delta/step or Vector3.zero)
+    continue
+   end
    if not r or not context.canAct(p) or not Rules.available(Rules.find(context.bag(p),pet.id)) then pet.model:SetAttribute("Running",false) continue end
    if (pet.model:GetAttribute("PetBondUntil") or 0)>workspace:GetServerTimeNow() then pet.model:SetAttribute("Running",false) continue end
    local old=pet.model.PrimaryPart.CFrame

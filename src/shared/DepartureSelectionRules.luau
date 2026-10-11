@@ -15,4 +15,9 @@ function Rules.validate(bag,destinationId,itemId,catalog,availableModels)
  end
  return nil,"NotOwned"
 end
+function Rules.starter(destinationId,catalog,availableModels)
+ if destinationId~="GreenStar" then return nil,"UnknownDestination" end
+ if not catalog.MeadowMouse or not availableModels("MeadowMouse",1) then return nil,"ModelPending" end
+ return {monsterId="MeadowMouse",stars=1}
+end
 return Rules

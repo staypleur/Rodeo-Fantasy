@@ -13,6 +13,22 @@ local Mesh=require(script.Parent:WaitForChild("CreatureMesh"))
 local Crash=require(script.Parent:WaitForChild("CrashEffect"))
 local dust={}
 local contexts=setmetatable({},{__mode="k"})
+local function lobbyModels(root,context)
+ if context.models then return context.models end
+ local models,indices={},{}
+ context.models=models
+ local function add(node)
+  if node:IsA("Model") and not indices[node] then models[#models+1]=node indices[node]=#models end
+ end
+ local function remove(node)
+  local index=indices[node] if not index then return end
+  local last=models[#models] models[index]=last indices[last]=index models[#models]=nil indices[node]=nil
+ end
+ for _,node in ipairs(root:GetDescendants()) do add(node) end
+ -- Track late imports/summons without scanning every lobby part each frame.
+ root.DescendantAdded:Connect(add) root.DescendantRemoving:Connect(remove)
+ return models
+end
 local function clearHerdPath(from,to,root)
  local world=root:FindFirstAncestor("RodeoPrototype") or root:FindFirstAncestorWhichIsA("Folder")
  if world and world.Name=="Monsters" then world=world.Parent end
@@ -78,9 +94,17 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
   else puff.part.Transparency=0.45+age/0.6*0.55 puff.part.Size=Vector3.one*(0.75+age*1.5) puff.part.Position+=Vector3.new(0,dt*0.7,0) end
  end
  local displayed = {}
- for model in pairs(visibility) do if not model:IsDescendantOf(monsters) then visibility[model]=nil end end
+ for model,record in pairs(visibility) do
+  if not model:IsDescendantOf(monsters) then
+   if record.connection then record.connection:Disconnect() end
+   visibility[model]=nil
+  end
+ end
 	for model, pose in pairs(poses) do
-		if not model:IsDescendantOf(monsters) then poses[model] = nil end
+		if not model:IsDescendantOf(monsters) then
+   if pose.watch then pose.watch:Disconnect() end
+   poses[model] = nil
+  end
 	end
 	for model, warning in pairs(warnings) do
 		if not model:IsDescendantOf(monsters) then warning:Destroy() warnings[model] = nil end
@@ -102,7 +126,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
   end
  end
  local outlineCount=0
-	for _, model in ipairs(monsters.Name=="RodeoLobby" and monsters:GetDescendants() or monsters:GetChildren()) do
+	for _, model in ipairs(monsters.Name=="RodeoLobby" and lobbyModels(monsters,context) or monsters:GetChildren()) do
   if not model:IsA("Model") then continue end
   if not model:GetAttribute("MonsterId") or model:GetAttribute("NativeMeshyAirship") then continue end
 		local root = model.PrimaryPart
