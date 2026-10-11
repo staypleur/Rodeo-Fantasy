@@ -1433,3 +1433,11 @@
 - PC Studio Play에서 새 양쪽 정원 입구 통과: 왼쪽true/HP100/(-1507.69,3.50,1416.97), 오른쪽true/HP100/(1507.29,3.50,1416.52). 검사 시작점을 옮긴 후 MoveTo를 사용했다. 실기기 모바일/거대펫20마리는 미검증이다.
 - 늘어난 중앙→왼쪽 카페 다리 전 구간도 검사 속도180스터드/초로 통과: true/HP100/(-1289.91,3.50,-549.70). 검사 속도는 이동 제한 시간이 있는 MoveTo 검사용으로만 사용했으며 게임 이동 속도를 바꾸지 않았다.
 - 실제 수정 화면cafe-spaced-top-studio.png와 게임뷰만 자른preview, 입구 검사cafe-spaced-route-pc.png 저장. 최신 검토본CafeSpacedIslands-DesignReview.rbxlx. 세부 디자인 승인·건축/조경 완성과 카페 게시/이동/펫 연동은 남아 있다. 메인 장소와 기존dist/RodeoFantasy-New.rbxlx 사용자 변경은 제외한다.
+
+## 2026-10-11 무료 자연 소스 조경·야외 가구 배치
+- 사용자 지시에 따라 실제 무료 Creator Store 소스를 Studio로 가져왔다. Sakura Tree105144995503983에서 실행 코드2개/카메라 제거 후 나무 형상만 선별했다. Roblox Forest Pack6432306802는13개 스크립트를 제거한 뒤 관목·이끼 바위·작은 바위·꽃4템플릿/5MeshPart/5SurfaceAppearance만 보관했다. 전체 원본 팩은 최종 맵에 포함하지 않는다. 출처 assets/maps/README.md.
+- Forest 소스의 캐시 TexturePack 읽기 오류가 있어 해당 캐시 속성을 제외하고 원래 PBR 텍스처 맵 참조를 보존했다. Synty 후보6933438443은 예상한 묶음이 아닌 단일 메시로 반환되어 사용하지 않았다. 최종 검토본의 선택된 조경 ContentProvider.PreloadAsync 실패0, 실제 메시·텍스처 표시 확인. 출처 팩의 오류와 최종 검토본 로딩을 구분한다.
+- tools/cafe_landscape.py: 기존 구형 나무를 메시 벚꽃40그루로 대체, 어두운 쪽 잎은 보라색. 카페 앞 야외 테라스4곳에 기존 Roblox 무료 소파·테이블·램프·화분과 관목·꽃 배치. 거대 정원 중앙과 다리 방향은 비워둔다. 장식 Anchored/충돌·접촉·쿼리·그림자 비활성, 사용 Seat와 테라스 바닥만 필요한 상호작용 유지. 조명·입자·매프레임 실행 추가 없음.
+- 정적 맵2,142인스턴스/346MeshPart/32Seat/기존2SurfaceLight. 최종 모델 및 두 새 소스의 UniqueId·XML참조·SharedString·축2048이하 검사 통과, 수입 실행 코드0. 동일 메시·텍스처 ID 반복 사용. 삼각형 총합·텍스처 메모리·실기기 모바일·20명/거대펫 성능은 미측정이며 최적화 완료를 주장하지 않는다.
+- 실제 PC Studio Play: 검사 시작점으로 이동 후 새 야외 소파 Seat.Occupant 일치 true/앉음 true/HP100. 테라스 앞→두 좌석 사이 MoveTo true/HP100/(-1382,4,-590.83). 전체 맵·터치·모바일·카페 펫 기능 검증이 아니다.
+- 실제 Studio 조경·가구·정원 화면 cafe-landscape-lounge/garden-studio.png, 게임뷰만 자른 preview 및 cafe-landscape-pc-check.png 저장. CafeLandscape-DesignReview.rbxlx 별도 검토본 저장, 메인 로비/사냥터 및 dist/RodeoFantasy-New.rbxlx 사용자 변경은 제외한다. 게임 게시 없음. 성·파빌리온 세부 건축, 최종 디자인 승인, 카페 서버 게시/20명 설정/이동/펫 연동은 남아 있다.
