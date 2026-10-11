@@ -10,7 +10,7 @@ def arrange(cafe,p,disk,rotate,ring):
  folders={n.findtext("Properties/string[@name='Name']"):n for n in cafe.findall('Item')}
  structure,decor,furniture,space=(folders[k] for k in ['Structure','Decor','Furniture','SpaceView'])
  # Preserve selected furniture and the two cafe buildings, not the superseded ground.
- keep={'CafeFloor','CafeRoof','CafeBack','CafeSide','CafeColumn','ColumnGold','FacadeBeam','CafeAwning','CoffeeCounter','CounterMarble','CoffeeMachine','MachineGlow','PendantCable','Pendant','WarmCeiling','FacadeArch','CafePlanter','CafeShrub'}
+ keep={'CafeFloor','CafeRoof','CafeBack','CafeSide','CafeColumn','ColumnGold','FacadeBeam','CafeAwning','CoffeeCounter','CounterMarble','PendantCable','Pendant','WarmCeiling','FacadeArch','CafePlanter','CafeShrub'}
  for folder in [structure,decor,space]:
   for n in folder.findall('Item'):
    name=n.findtext("Properties/string[@name='Name']") or ''
@@ -112,11 +112,31 @@ def arrange(cafe,p,disk,rotate,ring):
    for dx in range(-70,71,28):p('PavilionWindow',(x+dx,38,z-84),(20,48,1),trim,parent=zone,mat=288)
  # Landmark at the arrival hub; lanes around it remain unobstructed.
  ring('HubInlay',0,.15,0,250,GOLD,segments=48,width=3,height=.2)
- p('HubOrb',(0,70,-50),(55,55,55),(172,130,246),parent=layout,shape=0,mat=288)
- p('HubStem',(0,31,-50),(3,60,3),WHITE,parent=layout,mat=288)
+ p('HubOrb',(0,70,-250),(55,55,55),(172,130,246),parent=layout,shape=0,mat=288)
+ p('HubStem',(0,31,-250),(3,60,3),WHITE,parent=layout,mat=288)
  for i in range(32):
-  a=i*math.tau/32;v=p('OrbOrbit',(math.cos(a)*48,70+math.sin(a)*15,-50+math.sin(a)*35),(10,1,2),GOLD,parent=layout);rotate(v,y=-a)
+  a=i*math.tau/32;v=p('OrbOrbit',(math.cos(a)*48,70+math.sin(a)*15,-250+math.sin(a)*35),(10,1,2),GOLD,parent=layout);rotate(v,y=-a)
  # Small vista islands lie in the gap, without interactive collision or scripts.
+ # Original monster duel court. Flush markings do not obstruct mounts or bridges.
+ arena=node(layout,'Folder','MonsterCourt')
+ for x,col in [(-60,(249,221,236)),(60,(215,211,226))]:
+  p('CourtHalf',(x,.04,0),(118,.08,180),col,parent=arena)
+ for x in [-122,122]:p('CourtSideline',(x,.15,0),(2,.1,184),WHITE,parent=arena)
+ for z in [-92,92]:p('CourtEndline',(0,.15,z),(246,.1,2),WHITE,parent=arena)
+ p('CourtMidline',(0,.15,0),(2,.1,180),WHITE,parent=arena)
+ ring('CourtCentre',0,.15,0,24,WHITE,segments=24,width=2,height=.1)
+ for x in [-75,75]:ring('MonsterStartingCircle',x,.15,0,26,WHITE,segments=24,width=2,height=.1)
+ # Giant playgrounds: readable pitch borders and a running circuit, kept open.
+ for name in ['RoseGiantGarden','ShadowGiantGarden']:
+  x,z,r,dark=zones[name];field=node(layout,'Folder',name+'SportsMarkings')
+  col=(179,155,202) if dark else (255,242,249)
+  for dx in [-410,410]:p('SportsSideline',(x+dx,.12,z),(5,.1,980),col,parent=field)
+  for dz in [-490,490]:p('SportsEndline',(x,.12,z+dz),(825,.1,5),col,parent=field)
+  p('SportsHalfway',(x,.12,z),(825,.1,5),col,parent=field)
+  ring('SportsCentreCircle',x,.12,z,110,col,segments=32,width=5,height=.1)
+  for dz in [-400,400]:
+   p('SportsGoalLine',(x,.12,z+dz),(300,.1,5),col,parent=field)
+   for dx in [-150,150]:p('SportsGoalSide',(x+dx,.12,z+dz+(45 if dz>0 else -45)),(5,.1,90),col,parent=field)
  for x,z,r in [(-420,-900,65),(430,-880,65),(0,-1350,70),(-220,1050,55),(240,950,55),(0,1950,70)]:
   x,z=x*SPACING,z*SPACING
   v=disk('VistaIsland',x,45,z,r,25,PURPLE);decor.remove(v);space.append(v)

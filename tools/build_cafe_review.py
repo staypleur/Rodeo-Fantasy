@@ -4,6 +4,7 @@ import math,copy,xml.etree.ElementTree as E
 from build_project import node,prop,composite,part,script
 from cafe_island_layout import arrange
 from cafe_landscape import decorate
+from cafe_palette import apply_palette
 R=Path(__file__).resolve().parents[1]
 WHITE=(247,232,229);PINK=(241,158,195);GOLD=(235,188,101);DARK=(43,31,61);VIOLET=(126,69,161)
 def build(inspection_speed=180):
@@ -203,8 +204,9 @@ def build(inspection_speed=180):
  spawn=p('CafeArrival',(0,1,46),(14,1,12),WHITE,False);spawn.set('class','SpawnLocation');prop(spawn,'float','Transparency',1);prop(spawn,'float','Duration',0);prop(spawn,'bool','Neutral','true')
  zones,routes=arrange(cafe,p,disk,rotate,ring)
  landscape_shared=decorate(cafe,zones,p,rotate)
+ apply_palette(cafe)
  lighting=node(root,'Lighting','Lighting');prop(lighting,'float','ClockTime',12);prop(lighting,'float','Brightness',1.5);prop(lighting,'float','ExposureCompensation',0)
- composite(lighting,'Color3','Ambient',dict(zip('RGB',[100/255,86/255,115/255])));composite(lighting,'Color3','OutdoorAmbient',dict(zip('RGB',[118/255,107/255,134/255])));prop(lighting,'bool','GlobalShadows','true');prop(lighting,'float','EnvironmentDiffuseScale',.5);prop(lighting,'float','EnvironmentSpecularScale',.5)
+ composite(lighting,'Color3','Ambient',dict(zip('RGB',[115/255,115/255,125/255])));composite(lighting,'Color3','OutdoorAmbient',dict(zip('RGB',[145/255,140/255,150/255])));prop(lighting,'bool','GlobalShadows','true');prop(lighting,'float','EnvironmentDiffuseScale',.5);prop(lighting,'float','EnvironmentSpecularScale',.5)
  players=node(root,'Players','Players');prop(players,'int','MaxPlayers',20);starter=node(root,'StarterPlayer','StarterPlayer');prop(starter,'float','CameraMaxZoomDistance',120);prop(starter,'float','CameraMinZoomDistance',.5);node(starter,'StarterPlayerScripts','StarterPlayerScripts');node(root,'StarterGui','StarterGui')
  server=node(root,'ServerScriptService','ServerScriptService');script(server,'Script','CafeReviewCapacity','''-- Inspection only. Set INSPECTION_MODE=false to restore normal cafe walking.
 local INSPECTION_MODE = true
@@ -227,7 +229,7 @@ for _,p in game.Players:GetPlayers() do added(p) end''' % inspection_speed)
  root.append(shared)
  skyfile=R/'assets/maps/CafeSky.rbxmx'
  if skyfile.exists():lighting.append(copy.deepcopy(E.parse(skyfile).getroot().find('Item')))
- out=R/'dist/ReviewModels/CafeUnified-Inspection.rbxlx';E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)
+ out=R/'dist/ReviewModels/CafeThemed-Inspection.rbxlx';E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)
  asset=E.Element('roblox',version='4');asset.append(copy.deepcopy(cafe));asset.append(copy.deepcopy(shared));E.ElementTree(asset).write(R/'assets/maps/SpaceCafeReview.rbxmx',encoding='utf-8',xml_declaration=True)
  print('CAFE_FANTASY_REVIEW',len(list(cafe.iter('Item'))),'instances; scripts in furniture:',sum(n.get('class') in ['Script','LocalScript','ModuleScript'] for n in furniture.iter('Item')))
  return out
