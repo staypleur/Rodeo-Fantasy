@@ -1450,3 +1450,8 @@
 - 최종 CafeScenicV2 검토본 실제 소스 PreloadAsync 실패0, 쉼터/카페 소품 렌더링 확인. PC Play 스폰 WalkSpeed40, 쉼터 옆160스터드 경로 MoveTo true/HP100/3.984초/(-1315,3,2207.83). 검사 시작점 이동 후 검사했으며 전체 맵·재스폰·모바일·20명/거대펫 성능 검증은 아니다. Studio MaterialManager React 오류는 앞선 별도 검토본에 발생한 내장 플러그인 오류와 구분한다.
 - 실제 화면 cafe-scenic-retreat/courtyard-studio.png 및 게임뷰 자른preview, cafe-scenic-walk-pc.png 기록. 건축물은 여전히 세부 디자인 초안이며 새 카페맵은 미게시·최종 승인 전 검토본이다. CafePlaceId0, 카페 이동/펫 연결/최대20명 서비스 설정은 남아 있다. 기존dist/RodeoFantasy-New.rbxlx 사용자 변경은 제외한다.
 - 메인 로비 PC Play에서도 실제 Humanoid.WalkSpeed48 확인(lobby-walk-speed-pc.png). 검사 종료 후 카페 검토본으로 복귀했다. 실제 보행 조작감·모바일 및 사냥터 회귀 주행 검사는 아니다.
+
+## 2026-10-11 카페 통합 점검본·임시 고속 이동
+- 전체11개 주요 섬/12개 연결 다리와 최신 조경·가구를 한 Workspace.RodeoCafe 모델 안에 포함한 CafeUnified-Inspection.rbxlx 생성/Studio 열기/저장. 정적 맵3,654인스턴스 유지, 새 지형 합성이나 장식 중복 없음. 거리 로딩 유지. 기존 사용자 dist/RodeoFantasy-New.rbxlx 변경 제외.
+- build_cafe_review.py 점검 속도180, 정상 속도40 및 INSPECTION_MODE 토글로 분리. 스폰/재스폰 핸들러에 적용. 메인 Config 변경 없음. README/기획 갱신. Luau 컴파일 및 저장 XML의 모델/속도 구성 검사 통과.
+- 실제 PC Studio Play: Humanoid.WalkSpeed180 확인, 중앙 광장에서180스터드 MoveTo true/HP100/1.0496초. 증거 cafe-unified-inspection-pc.png. 전체 다리의 고속 주행, 모바일/20명/거대펫 검증은 하지 않았다. 점검 플레이 상태로 열어둔다. 카페는 로컬 미게시 점검본이며 서비스 Place/펫 연동/세부 건축 작업은 남아 있다.

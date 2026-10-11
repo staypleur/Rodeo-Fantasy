@@ -6,7 +6,7 @@ from cafe_island_layout import arrange
 from cafe_landscape import decorate
 R=Path(__file__).resolve().parents[1]
 WHITE=(247,232,229);PINK=(241,158,195);GOLD=(235,188,101);DARK=(43,31,61);VIOLET=(126,69,161)
-def build():
+def build(inspection_speed=180):
  root=E.Element('roblox',version='4');ws=node(root,'Workspace','Workspace');node(ws,'Terrain','Terrain');prop(ws,'bool','StreamingEnabled','true');prop(ws,'int','StreamingMinRadius',64);prop(ws,'int','StreamingTargetRadius',256);cafe=node(ws,'Model','RodeoCafe')
  structure=node(cafe,'Folder','Structure');dec=node(cafe,'Folder','Decor');furniture=node(cafe,'Folder','Furniture');space=node(cafe,'Folder','SpaceView')
  def p(name,pos,size,col,solid=False,parent=None,mat=256,shape=1):
@@ -206,14 +206,18 @@ def build():
  lighting=node(root,'Lighting','Lighting');prop(lighting,'float','ClockTime',12);prop(lighting,'float','Brightness',1.5);prop(lighting,'float','ExposureCompensation',0)
  composite(lighting,'Color3','Ambient',dict(zip('RGB',[100/255,86/255,115/255])));composite(lighting,'Color3','OutdoorAmbient',dict(zip('RGB',[118/255,107/255,134/255])));prop(lighting,'bool','GlobalShadows','true');prop(lighting,'float','EnvironmentDiffuseScale',.5);prop(lighting,'float','EnvironmentSpecularScale',.5)
  players=node(root,'Players','Players');prop(players,'int','MaxPlayers',20);starter=node(root,'StarterPlayer','StarterPlayer');prop(starter,'float','CameraMaxZoomDistance',120);prop(starter,'float','CameraMinZoomDistance',.5);node(starter,'StarterPlayerScripts','StarterPlayerScripts');node(root,'StarterGui','StarterGui')
- server=node(root,'ServerScriptService','ServerScriptService');script(server,'Script','CafeReviewCapacity','''local function added(p)
+ server=node(root,'ServerScriptService','ServerScriptService');script(server,'Script','CafeReviewCapacity','''-- Inspection only. Set INSPECTION_MODE=false to restore normal cafe walking.
+local INSPECTION_MODE = true
+local INSPECTION_WALK_SPEED = %s
+local NORMAL_WALK_SPEED = 40
+local function added(p)
  if #game.Players:GetPlayers()>20 then p:Kick("Cafe is full.") return end
- local function spawned(c) local h=c:WaitForChild("Humanoid",10) if h then h.WalkSpeed=40 end end
+ local function spawned(c) local h=c:WaitForChild("Humanoid",10) if h then h.WalkSpeed=if INSPECTION_MODE then INSPECTION_WALK_SPEED else NORMAL_WALK_SPEED end end
  p.CharacterAdded:Connect(spawned)
  if p.Character then task.spawn(spawned,p.Character) end
 end
 game.Players.PlayerAdded:Connect(added)
-for _,p in game.Players:GetPlayers() do added(p) end''')
+for _,p in game.Players:GetPlayers() do added(p) end''' % inspection_speed)
  shared=copy.deepcopy(library.find('SharedStrings'))
  known={n.get('md5') for n in shared}
  for n in plantlib.find('SharedStrings'):
@@ -223,7 +227,7 @@ for _,p in game.Players:GetPlayers() do added(p) end''')
  root.append(shared)
  skyfile=R/'assets/maps/CafeSky.rbxmx'
  if skyfile.exists():lighting.append(copy.deepcopy(E.parse(skyfile).getroot().find('Item')))
- out=R/'dist/ReviewModels/CafeScenicV2-DesignReview.rbxlx';E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)
+ out=R/'dist/ReviewModels/CafeUnified-Inspection.rbxlx';E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)
  asset=E.Element('roblox',version='4');asset.append(copy.deepcopy(cafe));asset.append(copy.deepcopy(shared));E.ElementTree(asset).write(R/'assets/maps/SpaceCafeReview.rbxmx',encoding='utf-8',xml_declaration=True)
  print('CAFE_FANTASY_REVIEW',len(list(cafe.iter('Item'))),'instances; scripts in furniture:',sum(n.get('class') in ['Script','LocalScript','ModuleScript'] for n in furniture.iter('Item')))
  return out
