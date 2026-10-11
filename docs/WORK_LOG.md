@@ -1325,3 +1325,16 @@
 - 기존 OneDrive/한글 경로 rbxlx 덮어쓰기에서 boost filesystem rename 오류. native Save As로 ASCII Temp/RodeoOwnerReview.rbxlx 별도 저장 성공 후 dist/ReviewModels/RodeoOwnerReview.rbxlx에 복사. 기존 dist/RodeoFantasy-New.rbxlx의 사용자 변경은 덮어쓰거나 커밋하지 않음. 최종 Play 종료 후 Ctrl+S, 변경7개 소스 일치 및 TextChatService ChatVersion1 확인. 로컬 장소 검토본은 대용량으로 Git 제외. Roblox 게시하지 않음.
 - 검증: 변경7개 Luau 컴파일 통과. tests/check_owner_chat.py의 modern/legacy 운영자 허용·타인 거부·잘못된 별/수량/몬스터 거부 통과. tests/check_pet_bond.py 소유권/거리/로비/잠금/쿨다운 통과. 기존 check_companion_polish.py에 장소 인자 지원, 최신 검토본16개 모듈 일치/컴파일 및 잠금500회·루트없음50회 펫 유지 회귀 통과. 실기기 모바일 터치, 게시 서버, 멀티플레이/여러 화면비 검증 미실시.
 - 재적용용 OwnerPolish.commandbar.lua 및 OwnerCommands.commandbar.lua 저장. 순서대로 기존 소스 일치 확인 후 부분 적용하며 ServerStorage 백업 생성. 두 번째는 가져온6성 Scene과 설치된3성 필요. 최신 ChatVersion 편집기 설정은 장소 검토본에 보관.
+
+## 2026-10-11 직접 적용: 버튼 영역 교감·6성 리깅·수입 그림
+
+- PetPromptUI의 64px ImageButton.Activated만 BondPet을 요청하도록 변경. 소유 펫과 10스터드 거리를 확인한다. LobbyCompanions의 ProximityPrompt 생성/Triggered 연결을 제거했다. 서버의 소유권·거리·로비·잠금·쿨다운 검증은 유지한다.
+- 실제 PC Studio Play에서 그림 밖 클릭 후 PetBondUntil=nil, ProximityPrompt=nil 확인. 그림 버튼 클릭은 하트 오라를 생성했다. 전체 화면 터치 입력 연결 없음. 실기기 모바일 터치는 미검증이다.
+- 제공 6성 원본은 skin/animation이 없었다. 원본 정점/노멀/UV/인덱스/텍스처 bytes를 유지하며 34관절·최대4가중치, Idle/Walk 및 검토용 LookAround/RigRange를 추가. 전용 6성 샘플과 두 발 stride, 팔 스윙, 교감 고개/가슴 모션을 연결했다. 높이4.75스터드. 원본 SHA256 보관.
+- 직접 native Studio 가져오기 완료, 34관절 보존 확인. 5개 변경 소스·신규 S6 데이터와 3개 S6 템플릿만 부분 설치, 이전 소스/템플릿은 ServerStorage의 MossratS6RigBackup에 보관. 정적 UserS6Preview 제한을 UserS6-v1 허용으로 대체했다.
+- 실제 /monster Mossrat 6 지급→Companion 창→Summon/Dismiss 확인. 따라오기 240 Heartbeat 관찰에서 Running227프레임, 다리와 팔 Transform 각87회 변화, 펫 Parent 유지. 이는 짧은 PC 실행 확인이며 장시간 사라짐 문제가 모든 상황에서 해결되었다는 보장은 아니다.
+- 초상화에서 뒤를 보는 문제를 발견해 NativeMossrat의 UserS6-v1에 S3과 같은 180도 교정을 추가. 재실행 후 6성 정면 얼굴/색상 및 소환 펫 방향 확인. 최종 PC 화면에서 오류 로그 없음.
+- 카드의 coin every 문구를 제공 돈 이미지(71604722538432)+수입 숫자, 시계 그림+주기 숫자로 교체. 실제 1성은 돈1/시계3, 6성은 돈32/시계3 표시와 카드 내부 배치를 확인했다. 시계는 UI 도형으로 표현했다.
+- 검사: 6성 원본 보존·바인드 포즈·가중치·68개 애니메이션 샘플 통과. 변경6개 런타임 Luau와 부분 설치기 컴파일 통과. Bond 서버 검증 회귀 통과. 사냥 탑승 흐름/실기기 모바일/성능/멀티플레이는 미검증.
+- Play 종료 후 현재 Temp/RodeoOwnerReview.rbxlx를 Ctrl+S로 저장하고 dist/ReviewModels/RodeoOwnerReview.rbxlx에 검토본 복사. 기존 dist/RodeoFantasy-New.rbxlx의 사용자 변경은 유지하고 커밋 제외한다. Roblox 게시하지 않는다. 이미지 우선 표시 방침을 GAME_DESIGN에 기록했다.
+- 저장 검증: 검토 장소의 변경6개 소스가 로컬 원문과 일치하고 3개6성 템플릿 각각34 Bone 유지. 기존16개 모듈 일치/컴파일 및 일시 잠금500회·루트없음50회 펫 유지 회귀 통과. Git diff 공백 오류 없음.

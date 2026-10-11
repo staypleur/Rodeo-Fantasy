@@ -2,13 +2,17 @@
 local A={}
 local data=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigData"))
 local dataS3=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigDataS3"))
-local function rigData(model) return model:GetAttribute("MossratUserRigRevision")=="UserS3-v1" and dataS3 or data end
+local dataS6=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigDataS6"))
+local function rigData(model)
+ local revision=model:GetAttribute("MossratUserRigRevision")
+ return revision=="UserS6-v1" and dataS6 or revision=="UserS3-v1" and dataS3 or data
+end
 local cache=setmetatable({},{__mode="k"})
 local torsoCenterX={Pelvis=-.04,Spine=.02,Chest=.035,Neck=.025,Head=.015}
 -- Portraits do not run the walking animation loop. Apply the same neutral
 -- torso/head correction immediately so their first frame matches the game.
 function A.poseFront(model)
- local s3=rigData(model)==dataS3
+ local s3=rigData(model)~=data
  local body=model:FindFirstChild("Body") if not body then return end
  local scale=model:GetAttribute("MossratRigTranslationScale") or 2.5/data.height
  for _,b in ipairs(body:GetDescendants()) do
@@ -26,7 +30,8 @@ local function rotation(v)
 end
 function A.animate(model,moving)
  local data=rigData(model)
- local s3=data==dataS3
+ local s6=data==dataS6
+ local s3=data==dataS3 or s6
  local body=model:FindFirstChild("Body") if not body then return end
  local c=cache[model]
  if not c or c.body~=body then
@@ -68,7 +73,7 @@ function A.animate(model,moving)
    -- Explicit four-leg stride also covers imported rigs whose revision attribute is absent.
    local legSide=name:sub(1,4)=="Left" and "Left" or name:sub(1,5)=="Right" and "Right" or nil
    local legLimb=name:find("Front",1,true) and "Front" or name:find("Rear",1,true) and "Rear" or nil
-   if bonding then
+   if bonding and not s6 then
     -- Settle onto the rear paws, raise the front paws and gently tilt the face.
     local t=workspace:GetServerTimeNow()-(model:GetAttribute("PetBondStarted") or 0)
     local ease=math.min(math.clamp(t/.3,0,1),math.clamp((bondUntil-workspace:GetServerTimeNow())/.35,0,1))
@@ -86,9 +91,14 @@ function A.animate(model,moving)
    elseif legSide and legLimb and moving then
     local opposite=(legSide=="Left")~=(legLimb=="Front")
     local beat=math.sin((now-c.started)*math.pi*6+(opposite and math.pi or 0))
-    if name:find("Upper",1,true) then frame=CFrame.Angles(beat*.65,0,0)
-    elseif name:find("Lower",1,true) then frame=CFrame.Angles(math.max(0,-beat)*.65,0,0)
+    if name:find("Upper",1,true) then frame=CFrame.Angles(beat*(s6 and (legLimb=="Front" and .22 or .45) or .65),0,0)
+    elseif name:find("Lower",1,true) then frame=CFrame.Angles(math.max(0,-beat)*(s6 and .28 or .65),0,0)
     elseif name:find("Paw",1,true) then frame=CFrame.Angles(-beat*.25,0,0) end
+   end
+   if bonding and s6 then
+    local t=workspace:GetServerTimeNow()-(model:GetAttribute("PetBondStarted") or 0)
+    if name=="Head" then frame=frame*CFrame.Angles(0,math.sin(t*4)*.10,math.sin(t*4)*.12)
+    elseif name=="Chest" then frame=frame*CFrame.Angles(0,0,math.sin(t*3)*.04) end
    end
    b.Transform=(c.previous[name] or CFrame.identity):Lerp(frame,blend)
   end

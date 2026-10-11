@@ -1,0 +1,308 @@
+[
+  {
+    "name": "Root",
+    "parent": null,
+    "worldPosition": [
+      0.0,
+      0.0,
+      0.0
+    ]
+  },
+  {
+    "name": "Pelvis",
+    "parent": 0,
+    "worldPosition": [
+      0.0,
+      0.62,
+      -0.03
+    ]
+  },
+  {
+    "name": "Spine",
+    "parent": 1,
+    "worldPosition": [
+      0.0,
+      0.85,
+      0.0
+    ]
+  },
+  {
+    "name": "Chest",
+    "parent": 2,
+    "worldPosition": [
+      0.0,
+      1.08,
+      0.0
+    ]
+  },
+  {
+    "name": "Neck",
+    "parent": 3,
+    "worldPosition": [
+      0.0,
+      1.24,
+      0.05
+    ]
+  },
+  {
+    "name": "Head",
+    "parent": 4,
+    "worldPosition": [
+      0.0,
+      1.4,
+      0.09
+    ]
+  },
+  {
+    "name": "Jaw",
+    "parent": 5,
+    "worldPosition": [
+      0.0,
+      1.26,
+      0.27
+    ]
+  },
+  {
+    "name": "EyeLeft",
+    "parent": 5,
+    "worldPosition": [
+      0.14,
+      1.43,
+      0.29
+    ]
+  },
+  {
+    "name": "EarLeft",
+    "parent": 5,
+    "worldPosition": [
+      0.23,
+      1.52,
+      0.04
+    ]
+  },
+  {
+    "name": "EarTipLeft",
+    "parent": 8,
+    "worldPosition": [
+      0.29,
+      1.63,
+      0.04
+    ]
+  },
+  {
+    "name": "WhiskerLeft",
+    "parent": 5,
+    "worldPosition": [
+      0.25,
+      1.33,
+      0.27
+    ]
+  },
+  {
+    "name": "LeftFrontUpper",
+    "parent": 3,
+    "worldPosition": [
+      0.37,
+      1.1,
+      0.02
+    ]
+  },
+  {
+    "name": "LeftFrontLower",
+    "parent": 11,
+    "worldPosition": [
+      0.52,
+      0.81,
+      0.06
+    ]
+  },
+  {
+    "name": "LeftFrontPaw",
+    "parent": 12,
+    "worldPosition": [
+      0.68,
+      0.61,
+      0.13
+    ]
+  },
+  {
+    "name": "LeftRearUpper",
+    "parent": 1,
+    "worldPosition": [
+      0.2,
+      0.6,
+      0.0
+    ]
+  },
+  {
+    "name": "LeftRearLower",
+    "parent": 14,
+    "worldPosition": [
+      0.25,
+      0.29,
+      -0.02
+    ]
+  },
+  {
+    "name": "LeftRearPaw",
+    "parent": 15,
+    "worldPosition": [
+      0.27,
+      0.075,
+      0.18
+    ]
+  },
+  {
+    "name": "EyeRight",
+    "parent": 5,
+    "worldPosition": [
+      -0.14,
+      1.43,
+      0.29
+    ]
+  },
+  {
+    "name": "EarRight",
+    "parent": 5,
+    "worldPosition": [
+      -0.23,
+      1.52,
+      0.04
+    ]
+  },
+  {
+    "name": "EarTipRight",
+    "parent": 18,
+    "worldPosition": [
+      -0.29,
+      1.63,
+      0.04
+    ]
+  },
+  {
+    "name": "WhiskerRight",
+    "parent": 5,
+    "worldPosition": [
+      -0.25,
+      1.33,
+      0.27
+    ]
+  },
+  {
+    "name": "RightFrontUpper",
+    "parent": 3,
+    "worldPosition": [
+      -0.37,
+      1.1,
+      0.02
+    ]
+  },
+  {
+    "name": "RightFrontLower",
+    "parent": 21,
+    "worldPosition": [
+      -0.52,
+      0.81,
+      0.06
+    ]
+  },
+  {
+    "name": "RightFrontPaw",
+    "parent": 22,
+    "worldPosition": [
+      -0.68,
+      0.61,
+      0.13
+    ]
+  },
+  {
+    "name": "RightRearUpper",
+    "parent": 1,
+    "worldPosition": [
+      -0.2,
+      0.6,
+      0.0
+    ]
+  },
+  {
+    "name": "RightRearLower",
+    "parent": 24,
+    "worldPosition": [
+      -0.25,
+      0.29,
+      -0.02
+    ]
+  },
+  {
+    "name": "RightRearPaw",
+    "parent": 25,
+    "worldPosition": [
+      -0.27,
+      0.075,
+      0.18
+    ]
+  },
+  {
+    "name": "Sprout",
+    "parent": 5,
+    "worldPosition": [
+      0.0,
+      1.57,
+      0.04
+    ]
+  },
+  {
+    "name": "SproutTip",
+    "parent": 27,
+    "worldPosition": [
+      0.0,
+      1.7,
+      0.04
+    ]
+  },
+  {
+    "name": "Tail1",
+    "parent": 1,
+    "worldPosition": [
+      -0.22,
+      0.63,
+      -0.25
+    ]
+  },
+  {
+    "name": "Tail2",
+    "parent": 29,
+    "worldPosition": [
+      -0.45,
+      0.7,
+      -0.29
+    ]
+  },
+  {
+    "name": "Tail3",
+    "parent": 30,
+    "worldPosition": [
+      -0.65,
+      0.88,
+      -0.3
+    ]
+  },
+  {
+    "name": "Tail4",
+    "parent": 31,
+    "worldPosition": [
+      -0.72,
+      1.13,
+      -0.24
+    ]
+  },
+  {
+    "name": "Tail5",
+    "parent": 32,
+    "worldPosition": [
+      -0.7,
+      1.43,
+      -0.14
+    ]
+  }
+]

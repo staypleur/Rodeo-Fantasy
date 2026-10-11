@@ -38,7 +38,7 @@ function M.new(context)
   local r=root(p) if not r or not Rules.available(item) then return end
   local source=P:FindFirstChild(Catalog.visual(item.monsterId,item.stars))
   local revision=source and source:GetAttribute("MossratUserRigRevision")
-  if revision~="ApprovedS1-v1" and revision~="UserS3-v1" then
+  if revision~="ApprovedS1-v1" and revision~="UserS3-v1" and revision~="UserS6-v1" then
    P.CaptureRemote:FireClient(p,"SocialMessage","This monster model is coming soon.") return
   end
   local position=r.Position+r.CFrame.RightVector*4-r.CFrame.LookVector*4
@@ -56,12 +56,7 @@ function M.new(context)
   for key,value in pairs({MonsterId=item.monsterId,Stars=item.stars,OwnerUserId=p.UserId,BagItemId=id,Running=false,RootHeight=height,RunStarted=workspace:GetServerTimeNow()}) do model:SetAttribute(key,value) end
   api.clear(p) model.Parent=folder pets[p]={model=model,id=id,height=height,following=false,blocked=0}
   p:SetAttribute("SummonedId",id)
-  local prompt=Instance.new("ProximityPrompt") prompt.Name="PetOwnCompanion" prompt.ActionText="Bond"
-  prompt.HoldDuration=0 prompt.KeyboardKeyCode=Enum.KeyCode.Unknown prompt.MaxActivationDistance=10 prompt.RequiresLineOfSight=false prompt.Parent=model.PrimaryPart
-  prompt.Style=Enum.ProximityPromptStyle.Custom
-  prompt.Triggered:Connect(function(who)
-   if who==p then api.bond(p,id) end
-  end)
+
  end
  local elapsed=0
  game:GetService("RunService").Heartbeat:Connect(function(dt)
