@@ -5,7 +5,7 @@ function A.apply(model,moving,dt)
  local body=model:FindFirstChild("Body") if not body then return end
  local c=cache[model]
  if not c or c.body~=body then
-  c={body=body,legs={},phase=0,weight=0}
+  c={body=body,legs={},phase=0,weight=0,gait=0}
   for _,side in ipairs({"Left","Right"}) do
    for _,limb in ipairs({"Front","Rear"}) do
     local name=side..limb
@@ -27,12 +27,16 @@ function A.apply(model,moving,dt)
  local velocity=model:GetAttribute("HerdVelocity")
  local speed=typeof(velocity)=="Vector3" and velocity.Magnitude or 0
  local running=speed>18
+ c.gait+=((running and 1 or 0)-c.gait)*(1-math.exp(-8*dt))
  c.weight+=( (moving and 1 or 0)-c.weight)*(1-math.exp(-12*dt))
- c.phase=(c.phase+dt*(running and 2.2 or 1.35))%1
+ if moving then c.phase=(c.phase+dt*math.clamp(speed/math.max(body.Size.Y*2,1),.7,2.8))%1 end
  for _,leg in ipairs(c.legs) do
   local length=leg.a+leg.b
-  local z,lift=motion.foot(c.phase,leg.name,running)
-  local a,b=motion.solve(leg.y+length*(.06+lift*.22),leg.z+z*length*(running and .65 or .45),leg.a,leg.b,leg.bend)
+  local walkZ,walkLift=motion.foot(c.phase,leg.name,false)
+  local runZ,runLift=motion.foot(c.phase,leg.name,true)
+  local z=walkZ+(runZ-walkZ)*c.gait
+  local lift=walkLift+(runLift-walkLift)*c.gait
+  local a,b=motion.solve(leg.y+length*(.06+lift*.22),leg.z+z*length*(.45+.20*c.gait),leg.a,leg.b,leg.bend)
   local upper=-(a-leg.restA)
   local lower=-(b-leg.restB)-upper
   leg.upper.Transform=CFrame.identity:Lerp(CFrame.Angles(upper,0,0),c.weight)

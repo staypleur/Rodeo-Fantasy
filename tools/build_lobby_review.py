@@ -60,8 +60,8 @@ for x in range(-224,225,32):
 # Segmented luminous guide ring, wide walkways and low central dock.
 airport=node(model,'Model','Airport')
 for layer,radius in enumerate([40,36,32]):
- # The edge tapers in thin steps. No overlaps with neighboring floor surfaces.
- brick(airport,'DockLayer',[0,3+layer*2,0],[radius*2,2,radius*2],MID,'dock')
+ # Inset the buried core from the rim's vertical faces to avoid z-fighting.
+ brick(airport,'DockLayer',[0,3+layer*2,0],[radius*2-.08,2,radius*2-.08],MID,'dock')
  ring(airport,'DockRim',0,4+layer*2,0,radius,(123,140,160),'dock')
 ring(airport,'DockLight',0,8.2,0,36,GOLD,'dock',True)
 spawn=brick(model,'LobbySpawn',[0,0,-72],[8,4,8],MID,'spawn',hidden=True)

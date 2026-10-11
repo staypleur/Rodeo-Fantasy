@@ -7,6 +7,7 @@ def service(key):return next(v for v in doc.findall('Item') if v.get('class')==k
 p=child(service('ReplicatedStorage'),'RodeoFantasy');c=child(service('StarterPlayer'),'StarterPlayerScripts')
 paths=['src/client/BagUI.luau','src/client/HudIcons.luau','src/client/HuntEffects.luau','src/client/NativeMossrat.luau','src/client/PetPromptUI.luau','src/client/RocketDeparture.client.luau','src/client/UserMossratRigAnimator.luau','src/client/RideAnimator.luau','src/server/CaptureServer.server.luau','src/server/LobbyCompanions.luau','src/server/RocketDepartureService.luau','src/shared/DepartureSelectionRules.luau','src/shared/LobbyRideRules.luau','src/shared/UserMossratRigDataS9.luau']
 paths += ['src/client/BipedAnimator.luau','src/client/QuadrupedAnimator.luau','src/shared/BipedMotionData.luau','src/shared/QuadrupedMotion.luau','src/client/MonsterPortrait.luau','src/client/JournalUI.luau','src/client/SocialUI.luau']
+paths += ['src/shared/BagRules.luau']
 for path in paths:
  key=Path(path).name.replace('.client.luau','').replace('.server.luau','').replace('.luau','')
  parent=c if '/client/' in path else p if '/shared/' in path else service('ServerScriptService')

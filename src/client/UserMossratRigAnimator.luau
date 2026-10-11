@@ -54,7 +54,7 @@ function A.animate(model,moving)
  local dt=c.last>0 and math.min(now-c.last,.15) or 1/30 c.last=now
  local serverNow=workspace:GetServerTimeNow()
  local bondUntil=model:GetAttribute("PetBondUntil") or 0
- local bonding=bondUntil>serverNow
+ local bonding=not s3 and bondUntil>serverNow
  local mode=bonding and "Bond" or moving and "Walk" or "Idle"
  if c.mode~=mode then c.mode=mode c.started=now c.blendStarted=now c.previous={} table.clear(c.poses)
   for name,b in pairs(c.bones) do c.previous[name]=b.Transform end
@@ -108,7 +108,9 @@ function A.animate(model,moving)
     elseif name:find("Paw",1,true) then frame=CFrame.Angles(-beat*.25,0,0) end
    end
    local tailIndex=tonumber(name:match("^Tail(%d+)$"))
-   if tailIndex then
+   if tailIndex and s3 then
+    frame=CFrame.identity
+   elseif tailIndex then
     frame=frame*CFrame.Angles(0,math.sin(now*1.6-tailIndex*.45)*.12,math.sin(now*1.3-tailIndex*.3)*.035)
    end
    if bonding and data==dataS3 then

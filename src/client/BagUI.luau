@@ -49,7 +49,8 @@ function UI.new(gui,remote)
  make("UIStroke",{Color=Color3.fromRGB(177,151,108),Thickness=1},window)
  local title=make("TextLabel",{Text="Bag",BackgroundTransparency=1,Position=UDim2.fromOffset(20,10),Size=UDim2.new(1,-100,0,40),TextSize=26,TextColor3=Color3.fromRGB(43,74,55),ZIndex=21},window)
  local close=make("TextButton",{Name="CloseBag",Text="×",Position=UDim2.new(1,-54,0,12),Size=UDim2.fromOffset(38,34),BackgroundTransparency=1,TextSize=26,TextColor3=Color3.fromRGB(70,58,40),ZIndex=21},window)
- local money=make("TextLabel",{Name="BagMoney",BackgroundTransparency=1,Position=UDim2.fromOffset(20,55),Size=UDim2.new(.31,-24,0,34),TextScaled=true,TextColor3=Color3.fromRGB(43,74,55),TextXAlignment=Enum.TextXAlignment.Left,ZIndex=21},window)
+ make("ImageLabel",{Name="BagMoneyIcon",Image=require(script.Parent.HudIcons).imageId(game.ReplicatedStorage.RodeoFantasy,"MoneyImage"),BackgroundTransparency=1,Position=UDim2.fromOffset(20,55),Size=UDim2.fromOffset(34,34),ScaleType=Enum.ScaleType.Fit,ZIndex=21},window)
+ local money=make("TextLabel",{Name="BagMoney",BackgroundTransparency=1,Position=UDim2.fromOffset(58,55),Size=UDim2.new(.31,-62,0,34),TextScaled=true,TextColor3=Color3.fromRGB(43,74,55),TextXAlignment=Enum.TextXAlignment.Left,ZIndex=21},window)
  make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=20},money)
  local evolveToggle=make("TextButton",{Name="EvolutionMode",Text=L.text("Evolve","en-us"),Position=UDim2.new(.81,0,0,55),Size=UDim2.new(.17,0,0,34),TextSize=16,BackgroundColor3=Color3.fromRGB(110,133,91),TextColor3=Color3.new(1,1,1),ZIndex=23},window)
  make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},evolveToggle)
@@ -169,7 +170,7 @@ function UI.new(gui,remote)
   if self.summonedId~=nextSummoned then self.summonedId=nextSummoned self.snapshot(self.items) end
   button.Visible=state.area~="Hunt"
   if state.area=="Hunt" then window.Visible=false self.pen=nil self.setEvolutionMode(false) end
-  money.Text="Coins: "..tostring((state.pending or 0)+(state.balance or 0))
+  money.Text=tostring((state.pending or 0)+(state.balance or 0))
   button.Text=""
   if state.area~="Hunt" and self.count~=state.count then self.count=state.count remote:FireServer("Bag") end
  end
@@ -187,6 +188,11 @@ function UI.new(gui,remote)
   title.Text=L.text(self.mode=="Companion" and "Companion · Choose one" or self.mode=="RanchMenu" and "Choose ranch" or self.pen and "Ranch" or "Bag","en-us")..(self.pen and (" "..self.pen.." · "..placed.."/2") or "")
   for _,node in ipairs(scroll:GetChildren()) do if node:IsA("Frame") then node:Destroy() end end
   local filtered=Query.filter(items,Catalog,self.region,self.query,function(id) return L.text(id,"en-us") end)
+  table.sort(filtered,function(a,b)
+   if a.stars~=b.stars then return a.stars>b.stars end
+   if a.monsterId~=b.monsterId then return a.monsterId<b.monsterId end
+   return tostring(a.id)<tostring(b.id)
+  end)
   local pages=math.max(1,math.ceil(#filtered/12)) self.page=math.clamp(self.page,1,pages)
   pageLabel.Text=self.page.." / "..pages
   local show=self.mode~="RanchMenu"
@@ -224,7 +230,8 @@ function UI.new(gui,remote)
    make("TextLabel",{Text=L.text(item.monsterId,"en-us").." · "..tostring(item.stars).."★",BackgroundTransparency=1,Position=UDim2.fromOffset(4,140),Size=UDim2.new(1,-8,0,28),TextSize=18,TextColor3=Color3.fromRGB(43,74,55),ZIndex=23},card)
    local income=make("Frame",{Name="Income",BackgroundTransparency=1,Position=UDim2.fromOffset(4,172),Size=UDim2.new(1,-8,0,30),ZIndex=23},card)
    make("ImageLabel",{Name="Money",Image=require(script.Parent.HudIcons).imageId(game.ReplicatedStorage.RodeoFantasy,"MoneyImage"),BackgroundTransparency=1,Position=UDim2.new(.5,-66,0,0),Size=UDim2.fromOffset(30,30),ScaleType=Enum.ScaleType.Fit,ZIndex=24},income)
-   make("TextLabel",{Name="Amount",Text=tostring(item.incomeAmount),BackgroundTransparency=1,Position=UDim2.new(.5,-34,0,0),Size=UDim2.fromOffset(38,30),TextSize=17,TextColor3=Color3.fromRGB(43,74,55),ZIndex=24},income)
+   local amount=make("TextLabel",{Name="Amount",Text=tostring(item.incomeAmount),BackgroundTransparency=1,Position=UDim2.new(.5,-34,0,0),Size=UDim2.fromOffset(38,30),TextScaled=true,TextColor3=Color3.fromRGB(43,74,55),ZIndex=24},income)
+   make("UITextSizeConstraint",{MinTextSize=10,MaxTextSize=17},amount)
    make("ImageLabel",{Name="Clock",Image=require(script.Parent.HudIcons).imageId(game.ReplicatedStorage.RodeoFantasy,"ClockImage"),BackgroundTransparency=1,Position=UDim2.new(.5,5,0,0),Size=UDim2.fromOffset(30,30),ScaleType=Enum.ScaleType.Fit,ZIndex=24},income)
    make("TextLabel",{Name="Seconds",Text=tostring(item.incomeSeconds),BackgroundTransparency=1,Position=UDim2.new(.5,33,0,0),Size=UDim2.fromOffset(32,30),TextSize=17,TextColor3=Color3.fromRGB(43,74,55),ZIndex=24},income)
    if self.mode=="Companion" then
@@ -243,6 +250,10 @@ function UI.new(gui,remote)
     local anchor=selectionAnchor()
     local compatible=not anchor or (anchor.monsterId==item.monsterId and anchor.stars==item.stars)
     local selected=self.selected[item.id]==true
+    if selected then
+     make("UIStroke",{Name="SelectedOutline",Color=Color3.fromRGB(32,184,128),Thickness=4},card)
+     make("TextLabel",{Name="SelectedCheck",Text="✓",BackgroundColor3=Color3.fromRGB(32,184,128),Position=UDim2.fromOffset(6,6),Size=UDim2.fromOffset(30,30),TextSize=24,TextColor3=Color3.new(1,1,1),ZIndex=28},card)
+    end
     local choose=make("TextButton",{Name="SelectForEvolution",Text=selected and L.text("Selected","en-us") or L.text("Select","en-us"),Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,29),TextSize=14,BackgroundColor3=selected and Color3.fromRGB(80,134,104) or compatible and Color3.fromRGB(147,182,154) or Color3.fromRGB(184,181,168),TextColor3=Color3.new(1,1,1),Active=compatible and (selected or selectedCount()<3),ZIndex=24},card)
     make("UICorner",{CornerRadius=UDim.new(0,8)},choose)
     choose.Activated:Connect(function()

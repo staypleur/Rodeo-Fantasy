@@ -12,7 +12,7 @@ end
 function BagRules.sexForRoll(roll) return roll<.5 and "Male" or "Female" end
 
 function BagRules.income(monster, fallback)
- return (monster.incomeAmount or fallback or 1)*2^(math.clamp(math.floor(monster.stars or 1),1,10)-1)
+ return (monster.incomeAmount or fallback or 1)*3^(math.clamp(math.floor(monster.stars or 1),1,10)-1)
 end
 
 function BagRules.accrue(session, clock, seconds, amount)

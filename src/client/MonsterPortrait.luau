@@ -2,7 +2,7 @@
 local P={}
 local package=game.ReplicatedStorage.RodeoFantasy
 local C=require(package.MonsterCatalog)
-local defaults={[1]="rbxassetid://136157716828140",[3]="rbxassetid://132856650627155",[6]="rbxassetid://117627702063447",[9]="rbxassetid://127579346809789"}
+local defaults={[1]="rbxassetid://136157716828140",[3]="rbxassetid://132856650627155",[6]="rbxassetid://105207783752500",[9]="rbxassetid://85299683248138"}
 function P.fill(container,id,stars,silhouette,_distanceScale)
  local stage=C.stage(stars)
  local imageId=id=="MeadowMouse" and (package:GetAttribute("MossratPortraitS"..stage) or defaults[stage]) or nil

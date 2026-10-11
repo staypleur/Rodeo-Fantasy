@@ -12,7 +12,10 @@ h='''local Vector3={zero={}}
 local player={Character={}}
 local attrs={}
 function player:SetAttribute(k,v) attrs[k]=v end
-local modelAttrs={}
+local modelAttrs={Stars=3}
+local RideRules=(function()
+'''+rules+'''
+end)()
 local model={PrimaryPart={Position=0},GetAttribute=function(_,k) return modelAttrs[k] end,SetAttribute=function(_,k,v) modelAttrs[k]=v end}
 local distance=5 local alive=true local r={Anchored=false,Position=setmetatable({},{__sub=function() return {Magnitude=distance} end})}
 local hum={Health=100,AutoRotate=true,PlatformStand=false,Sit=false,ChangeState=function(self,state) self.state=state end}
@@ -27,6 +30,9 @@ local time=10 local workspace={GetServerTimeNow=function() return time end}
 local Enum={HumanoidStateType={Seated='Seated'}}
 local removed=0 local api={dismount=function() removed+=1 pets[player].ride=nil end}
 '''+ride+'''
+modelAttrs.Stars=1 assert(not api.ride(player,1))
+modelAttrs.Stars=2 assert(not api.ride(player,1))
+modelAttrs.Stars=3
 assert(not api.ride(player,2))
 distance=11 assert(not api.ride(player,1)) distance=5
 canAct=false assert(not api.ride(player,1)) canAct=true

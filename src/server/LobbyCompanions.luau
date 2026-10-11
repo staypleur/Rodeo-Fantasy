@@ -39,6 +39,7 @@ function M.new(context)
   if pet and pet.ride then api.dismount(p) return true end
   local h=p.Character and p.Character:FindFirstChildOfClass("Humanoid")
   if not pet or pet.id~=id or not r or not h or h.Health<=0 or not context.canAct(p) or not context.inLobby(p)
+   or not RideRules.canRide(pet.model:GetAttribute("Stars"))
    or not Rules.available(Rules.find(context.bag(p),id)) or (r.Position-pet.model.PrimaryPart.Position).Magnitude>10
    or (pet.model:GetAttribute("PetBondUntil") or 0)>workspace:GetServerTimeNow() then return false end
   pet.ride={root=r,humanoid=h,anchored=r.Anchored,autoRotate=h.AutoRotate,platformStand=h.PlatformStand,sit=h.Sit}
@@ -56,6 +57,7 @@ function M.new(context)
  function api.bond(p,id)
   local pet=pets[p] local rr=root(p)
   if not pet or pet.ride or pet.id~=id or not context.canAct(p) or not context.inLobby(p)
+   or not RideRules.canBond(pet.model:GetAttribute("Stars"))
    or not Rules.available(Rules.find(context.bag(p),id)) or not rr
    or (rr.Position-pet.model.PrimaryPart.Position).Magnitude>10 or os.clock()-(pet.lastBond or -math.huge)<3.5 then return false end
   pet.lastBond=os.clock()
@@ -109,16 +111,22 @@ function M.new(context)
     local ride=pet.ride
     if r~=ride.root or not ride.humanoid.Parent or ride.humanoid.Health<=0 then api.dismount(p) continue end
     local direction=context.canAct(p) and Rules.available(Rules.find(context.bag(p),pet.id)) and os.clock()-pet.inputAt<.5 and pet.input or Vector3.zero
-    local old=pet.model.PrimaryPart.CFrame local delta=direction*RideRules.speed(pet.model:GetAttribute("Stars"))*step
+    local old=pet.model.PrimaryPart.CFrame
+    local heading=RideRules.turn(old.LookVector,direction,step)
+    local delta=heading*direction.Magnitude*RideRules.speed(pet.model:GetAttribute("Stars"))*step
     local position=old.Position+delta
     local frame=old local moving=delta.Magnitude>.01
     if moving then
      local y=ground(position)
      local hit=workspace:Blockcast(CFrame.new(old.X,old.Y+1,old.Z),Vector3.new(2.5,2.5,2.5),delta,params)
      if y and not hit and math.abs(y+pet.height-old.Y)<=3 then
-      position=Vector3.new(position.X,y+pet.height,position.Z) frame=CFrame.lookAt(position,position+direction)
-      pet.model:PivotTo(frame*pet.model.PrimaryPart.CFrame:Inverse()*pet.model:GetPivot())
-     else moving=false end
+      position=Vector3.new(position.X,y+pet.height,position.Z) frame=CFrame.lookAt(position,position+heading)
+     else
+      moving=false
+      -- Keep steering when translation is blocked, so a wall cannot trap a rider.
+      frame=CFrame.lookAt(old.Position,old.Position+heading)
+     end
+     if frame~=old then pet.model:PivotTo(frame*pet.model.PrimaryPart.CFrame:Inverse()*pet.model:GetPivot()) end
     end
     local stage=Catalog.stage(pet.model:GetAttribute("Stars"))
     local body=pet.model:FindFirstChild("Body") local tall=body and body.Size.Y or pet.height*2

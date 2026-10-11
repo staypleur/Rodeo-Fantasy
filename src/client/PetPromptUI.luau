@@ -2,6 +2,7 @@
 local M={}
 function M.new(gui,player)
  local package=game.ReplicatedStorage.RodeoFantasy
+ local rules=require(package.LobbyRideRules)
  local presentation=require(script.Parent.RideAnimator)
  local button=Instance.new("ImageButton") button.Name="PetInteract" button.Visible=false
  button.AnchorPoint=Vector2.new(.5,1) button.Position=UDim2.new(.5,-38,1,-76) button.Size=UDim2.fromOffset(64,64)
@@ -23,15 +24,17 @@ function M.new(gui,player)
  local connection=game:GetService("RunService").Heartbeat:Connect(function(dt)
   elapsed+=dt if elapsed<.1 then return end elapsed=0
   current=nearby() local mounted=player:GetAttribute("LobbyRiding")==true
-  button.Visible=current~=nil and not mounted ride.Visible=current~=nil or mounted ring.Enabled=mounted
+  button.Visible=current~=nil and rules.canBond(current:GetAttribute("Stars")) and not mounted
+  ride.Visible=mounted or current~=nil and rules.canRide(current:GetAttribute("Stars"))
+  button.Position=UDim2.new(.5,0,1,-76) ride.Position=button.Position ring.Enabled=mounted
  end)
  button.Activated:Connect(function()
   local pet=nearby()
-  if pet and pet==current then package.CaptureRemote:FireServer("BondPet",pet:GetAttribute("BagItemId")) end
+  if pet and pet==current and rules.canBond(pet:GetAttribute("Stars")) then package.CaptureRemote:FireServer("BondPet",pet:GetAttribute("BagItemId")) end
  end)
  ride.Activated:Connect(function()
   local pet=nearby()
-  if pet or player:GetAttribute("LobbyRiding") then package.CaptureRemote:FireServer("RidePet",pet and pet:GetAttribute("BagItemId")) end
+  if player:GetAttribute("LobbyRiding") or pet and rules.canRide(pet:GetAttribute("Stars")) then package.CaptureRemote:FireServer("RidePet",pet and pet:GetAttribute("BagItemId")) end
  end)
  local rs=game:GetService("RunService") local oldCamera local inputTime=0 local lastInput
  local cameraTarget local cameraHeading local cameraPet

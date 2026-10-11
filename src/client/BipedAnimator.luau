@@ -60,7 +60,7 @@ function A.animate(model,moving)
  if not moving then hip=Vector3.zero end
  local bondUntil=model:GetAttribute("PetBondUntil") or 0
  local bondTime=workspace:GetServerTimeNow()
- local bonding=bondUntil>bondTime
+ local bonding=(model:GetAttribute("Stars") or 6)<3 and bondUntil>bondTime
  local stage=model:GetAttribute("Stars") or 6
  local ease=bonding and math.min(math.clamp((bondTime-(model:GetAttribute("PetBondStarted") or bondTime))/.4,0,1),math.clamp((bondUntil-bondTime)/.4,0,1)) or 0
  for _,e in ipairs(c.bones) do
@@ -84,7 +84,7 @@ function A.animate(model,moving)
   end
   local transform=e.localRest.Rotation:Inverse()*parentRotation:Inverse()*desired
   local tailIndex=tonumber(name:match("^Tail(%d+)$"))
-  if tailIndex then transform*=CFrame.Angles(0,math.sin(now*1.6-tailIndex*.45)*.12,math.sin(now*1.3-tailIndex*.3)*.035) end
+  if tailIndex then transform=CFrame.identity end
   if name=="Hips" or name=="Pelvis" then
    transform=CFrame.new(e.localRest.Rotation:VectorToObjectSpace(parentRotation:VectorToObjectSpace(hip)))*transform
   end
