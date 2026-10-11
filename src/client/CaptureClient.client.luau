@@ -30,7 +30,7 @@ local savedType,savedSubject,savedFieldOfView=nil,nil,nil
 local wasFirstPerson=false
 RunService:BindToRenderStep("RodeoLobbyFirstPerson",Enum.RenderPriority.Camera.Value+1,function()
  local camera=workspace.CurrentCamera
- local first=state.area=="Lobby" and camera.CameraType==Enum.CameraType.Custom and (camera.CFrame.Position-camera.Focus.Position).Magnitude<2.5
+ local first=state.area=="Lobby" and not player:GetAttribute("LobbyRiding") and camera.CameraType==Enum.CameraType.Custom and (camera.CFrame.Position-camera.Focus.Position).Magnitude<2.5
  if (first or wasFirstPerson) and player.Character then
   -- Large avatar accessories and our helmet can otherwise block the lens.
   for _,p in ipairs(player.Character:GetDescendants()) do if p:IsA("BasePart") then p.LocalTransparencyModifier=first and 1 or 0 end end
@@ -167,7 +167,9 @@ local function cameraMode(enabled)
   savedType,savedSubject,savedFieldOfView=nil,nil,nil
   held,left,right=false,false,false
  end
- if not enabled and state.area=="Lobby" then
+ -- PetPromptUI owns the camera for the entire mount. Sync/income messages
+ -- must not reactivate Roblox's first-person transparency controller mid-ride.
+ if not enabled and state.area=="Lobby" and not player:GetAttribute("LobbyRiding") then
   player.CameraMode=Enum.CameraMode.Classic
   player.CameraMinZoomDistance=.5 player.CameraMaxZoomDistance=48
   local humanoid=player.Character and player.Character:FindFirstChildOfClass("Humanoid")

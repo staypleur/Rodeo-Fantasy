@@ -44,7 +44,13 @@ function M.new(gui,player)
   local root=player.Character and player.Character:FindFirstChild("HumanoidRootPart")
   local hum=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
   if mounted and root and hum then
-   if not oldCamera then oldCamera={type=camera.CameraType,subject=camera.CameraSubject,fov=camera.FieldOfView} end
+   if not oldCamera then
+    oldCamera={type=camera.CameraType,subject=camera.CameraSubject,fov=camera.FieldOfView}
+    -- Clear any first-person fade left by the default camera on mounting.
+    for _,node in ipairs(player.Character:GetDescendants()) do
+     if node:IsA("BasePart") then node.LocalTransparencyModifier=0 end
+    end
+   end
    camera.CameraType=Enum.CameraType.Scriptable
    local pet=current and current.Parent and current local part=pet and pet.PrimaryPart
    -- Match rider and camera to the pet's interpolated visual frame, not its
@@ -72,6 +78,7 @@ function M.new(gui,player)
     cameraHeading=cameraHeading:Lerp(heading,1-math.exp(-8*dt))
    end
    camera.CFrame=CFrame.lookAt(cameraTarget-cameraHeading.LookVector*math.max(12,height*2)+Vector3.new(0,math.max(4,height*.6),0),cameraTarget)
+   camera.Focus=CFrame.new(cameraTarget)
    inputTime+=dt
    local direction=hum.MoveDirection
    if inputTime>=.08 and (not lastInput or (direction-lastInput).Magnitude>.02 or inputTime>=.25) then

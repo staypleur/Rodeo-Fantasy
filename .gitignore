@@ -30,3 +30,12 @@ assets/models/MossratS1HuntRig/MossratTexture*.png
 assets/models/MossratS6ProvidedRig/*.gltf
 assets/models/MossratS6ProvidedRig/*.bin
 assets/models/MossratS6ProvidedRig/Texture*.png
+
+# Neutral rig outputs are reproducible from Source.glb and rig_neutral_mossrat.py.
+assets/models/MossratNeutral/*/*.gltf
+assets/models/MossratNeutral/*/*.bin
+assets/models/MossratNeutral/*/MossratTexture*.png
+assets/models/MossratNeutral/*/MossratNeutral*.glb
+assets/models/MossratNeutral/*/Right.glb
+dist/RigReviewNeutral/
+dist/ReviewModels/NeutralMossrat.commandbar.lua

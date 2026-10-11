@@ -4,6 +4,7 @@ local package=game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy")
 local C=require(package:WaitForChild("MonsterCatalog"))
 local rigAnimator
 local bipedAnimator
+local neutralAnimator
 local boneCache=setmetatable({},{__mode="k"})
 function M.isTarget(model)
  local stage=C.stage(model:GetAttribute("Stars") or 1)
@@ -67,6 +68,7 @@ end
 -- Hunt presentation faces the course while the authoritative root still avoids obstacles.
 function M.posePortrait(model)
  if not M.isTarget(model) then return end
+ if model:GetAttribute("MossratUserRigRevision")=="NeutralQuadruped-v1" then return end
  rigAnimator=rigAnimator or require(script.Parent:WaitForChild("UserMossratRigAnimator"))
  rigAnimator.poseFront(model)
 end
@@ -81,6 +83,11 @@ end
 function M.animate(model,phase,moving,angry)
  if not M.isTarget(model) then return end
  local body=model:FindFirstChild("Body")
+ if body and model:GetAttribute("MossratUserRigRevision")=="NeutralQuadruped-v1" then
+  neutralAnimator=neutralAnimator or require(script.Parent.NeutralMossratAnimator)
+  neutralAnimator.animate(model,moving)
+  return
+ end
  -- Legacy S9 weights stretch under the full clip. Keep its existing playback
  -- until its skin is fitted to the shared skeleton; name mapping is not enough.
  if body and model:GetAttribute("MossratUserRigRevision")=="ProvidedBiped-v1" then

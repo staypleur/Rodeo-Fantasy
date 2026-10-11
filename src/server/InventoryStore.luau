@@ -17,7 +17,7 @@ local entries={}
 local function freshBag()
  local bag=Rules.new()
  local model=game:GetService("ServerStorage"):FindFirstChild("RodeoMonsterTemplate")
- if model and model:GetAttribute("MossratUserRigRevision")=="ApprovedS1-v1" then
+ if model and (model:GetAttribute("MossratUserRigRevision")=="ApprovedS1-v1" or model:GetAttribute("MossratUserRigRevision")=="NeutralQuadruped-v1") then
   local species=Catalog.MeadowMouse
   Rules.grant(bag,"MeadowMouse",workspace:GetServerTimeNow(),species.IncomeSeconds,species.IncomeAmount)
   bag.profile.starterMossratGranted=true
