@@ -1313,3 +1313,15 @@
 - 파일 검사: 68 skin-animation 샘플 유한값/변형 범위, 원본 유지/바인드 포즈/가중치 통과. 기존1성 리그 회귀 검사 통과. 저장된16개 기존 소스 일치/컴파일 검사 통과. 이번 변경 소스도 별도 컴파일한다.
 - 운영자 명령어는 Git10641e2 프로젝트 초기화에서 빠졌다. 현재 소스/Studio에 Operator 모듈0개. 이전10641e2^ 코드 기록은 존재한다. 사용자 질문에 상태를 알리고 이번 작업에서는 인증/비밀번호/명령어를 복원하거나 변경하지 않았다.
 - 최종 Play 중지 후 Ctrl+S로 로컬 장소 저장. 신규 S3 데이터/NativeMossrat/Animator의 저장 소스 일치, 이번6개 Luau 컴파일 통과. 큰 사용자 장소 파일은 커밋에서 제외하고 소스·모델·검토 이미지·기록만 저장한다. Roblox 게시하지 않았다.
+
+
+## 2026-10-11 직접 적용: 운영자 채팅·클릭 교감·3성 방향
+
+- 사용자 답변: puller3313 계정 확인만 사용. 실제 Studio 플레이어 이름/UserId 3116679300 확인 후 서버 고정 ID 검사. OperatorCommands 추가, TextChatCommand 및 기존 LegacyChat fallback, 입력 범위 검증. 운영자 버튼/비밀번호 없음. Hunt/저장/거래/여행 중 지급 차단. 실제 최신 채팅으로 `/monster Mossrat 3`, `/monster Mossrat 6` 각각 Added 메시지와 보유 수 증가 확인.
+- 기존 장소 ChatVersion이 LegacyChatService여서 Play 채팅 입력창이 나타나지 않았다. native Properties에서 TextChatService로 변경하고 직접 저장. 스크립트에서 ChatVersion 변경 시 RobloxScript capability 거부되므로 편집기에서 변경했다. 이것은 검토 장소 설정이며 전체 장소 재생성은 하지 않았다.
+- BagUI의 예전 Hold E 표시·홀드 이벤트·E 단축키 제거, Activated 클릭/터치 소환 통일. PetPromptUI는 하단 64px 제공 이미지(104399312241349), E 입력/홀드 진행 없음. 서버 BondPet 소유 펫/ID/10스터드/로비/잠금/3.5초 쿨다운 검증. 실제 PC에서 가까운 그림을 한 번 클릭해 하트 오라 생성 확인.
+- UserS3-v1 방향 180도 교정, 기존 S1 보정 유지. S3에도 명시적 네 다리 stride 적용. 실제 운영자 명령으로 받은 3성을 Companion 창에서 소환하고 앞면 초상화 확인. 실제 소환 펫의 RightFrontUpper를 240 Heartbeat 관찰: 주인을 25스터드 옮겨 따라오게 했을 때 Running 118프레임 중 Transform 변화45회, 펫 Parent 유지. 최초 진단은 잘못된 관절 이름 RightFrontUpperLeg로 assertion, 실제 구조를 조회해 수정했다. Humanoid MoveTo는 실행 중 입력 처리 때문에 Running0으로 측정되어 따라오기 검사로 대체; 임시 복제나 수동 애니메이터 호출을 사용하지 않았다.
+- 제공 6성 원본 직접 가져오기, VisualTemplate_S6에 원본 메시 외형 미리보기 설치. skins/animations0이라는 검사 결과는 동일하다. UserS6Preview는 동행 허용 목록에서 제외; 아직 걷기 리깅되지 않았으며 소환은 Coming soon. 원본 가져오기와 이전6성 템플릿은 ServerStorage 백업 보관. 원본 Source.glb 유지, 파생 glTF/bin/PNG는 Git 제외.
+- 기존 OneDrive/한글 경로 rbxlx 덮어쓰기에서 boost filesystem rename 오류. native Save As로 ASCII Temp/RodeoOwnerReview.rbxlx 별도 저장 성공 후 dist/ReviewModels/RodeoOwnerReview.rbxlx에 복사. 기존 dist/RodeoFantasy-New.rbxlx의 사용자 변경은 덮어쓰거나 커밋하지 않음. 최종 Play 종료 후 Ctrl+S, 변경7개 소스 일치 및 TextChatService ChatVersion1 확인. 로컬 장소 검토본은 대용량으로 Git 제외. Roblox 게시하지 않음.
+- 검증: 변경7개 Luau 컴파일 통과. tests/check_owner_chat.py의 modern/legacy 운영자 허용·타인 거부·잘못된 별/수량/몬스터 거부 통과. tests/check_pet_bond.py 소유권/거리/로비/잠금/쿨다운 통과. 기존 check_companion_polish.py에 장소 인자 지원, 최신 검토본16개 모듈 일치/컴파일 및 잠금500회·루트없음50회 펫 유지 회귀 통과. 실기기 모바일 터치, 게시 서버, 멀티플레이/여러 화면비 검증 미실시.
+- 재적용용 OwnerPolish.commandbar.lua 및 OwnerCommands.commandbar.lua 저장. 순서대로 기존 소스 일치 확인 후 부분 적용하며 ServerStorage 백업 생성. 두 번째는 가져온6성 Scene과 설치된3성 필요. 최신 ChatVersion 편집기 설정은 장소 검토본에 보관.

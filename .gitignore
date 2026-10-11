@@ -13,3 +13,9 @@ assets/models/LobbyModules/*/Texture*
 assets/models/MossratS3UserRig/*.gltf
 assets/models/MossratS3UserRig/*.bin
 assets/models/MossratS3UserRig/MossratTexture*.png
+
+assets/models/MossratS6UserRig/*.gltf
+assets/models/MossratS6UserRig/*.bin
+assets/models/MossratS6UserRig/Texture*.png
+
+dist/ReviewModels/RodeoOwnerReview.rbxlx

@@ -79,6 +79,23 @@ local function sendBag(player)
  end
  remote:FireClient(player,"Bag",items)
 end
+require(script.Parent:WaitForChild("OperatorCommands")).register({
+ message=function(player,message) remote:FireClient(player,"SocialMessage",message) end,
+ grant=function(player,id,stars,count)
+  local bag=bags[player]
+  if not bag or states[player] or Store.busy(player) or Social.trading(player) or player:GetAttribute("Travelling") then
+   remote:FireClient(player,"SocialMessage","Use this command in the lobby when your bag is ready.") return
+  end
+  local species=Catalog[id]
+  for _=1,count do
+   BagRules.grant(bag,id,now(),species.IncomeSeconds,species.IncomeAmount)
+   bag.monsters[#bag.monsters].stars=stars
+   Progress.caught(player,id,stars)
+  end
+  sendBag(player) send(player)
+  remote:FireClient(player,"SocialMessage","Added "..count.." Mossrat ("..stars.." stars).")
+ end,
+})
 local function clearRope(state)
  for _,item in ipairs(state.rope or {}) do item:Destroy() end
  state.rope=nil
@@ -266,13 +283,14 @@ Lobby.connectPens(function(player)
 end)
 remote.OnServerEvent:Connect(function(player,action,value)
  if type(action)~="string" or not bags[player] or Store.busy(player) or player:GetAttribute("Travelling") then return end
- if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" and action~="PlaceEgg" and action~="RemoveEgg" and action~="Summon" then return end
+ if action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" and action~="PlaceEgg" and action~="RemoveEgg" and action~="Summon" and action~="BondPet" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
  local interval=action=="Jump" and 0.08 or action=="Steer" and 0.04 or 0.25
  if now()-(stamps[action] or -math.huge)<interval then return end
  stamps[action]=now()
+ if action=="BondPet" then companions.bond(player,value) return end
  if action=="Summon" then
   if not states[player] then companions.summon(player,value) send(player) end
   return

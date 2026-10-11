@@ -23,6 +23,9 @@ function M.apply(model)
  if source:GetAttribute("MossratUserRigRevision")=="ApprovedS1-v1" then
   yaw+=180
   facingRevision..="-ForwardV2"
+ elseif source:GetAttribute("MossratUserRigRevision")=="UserS3-v1" then
+  yaw+=180
+  facingRevision..="-ForwardV3"
  end
  if model:GetAttribute("NativeMeshyReady") and model:GetAttribute("NativeMeshyStars")==stars and model:GetAttribute("NativeMeshyFacingRevision")==facingRevision and model:FindFirstChild("Body") then return true end
  local scale=C.scale(stars)/C.Scales[stage]

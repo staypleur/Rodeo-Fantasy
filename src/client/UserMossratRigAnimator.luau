@@ -83,7 +83,7 @@ function A.animate(model,moving)
     elseif legLimb=="Front" and name:find("Upper",1,true) then pose=CFrame.Angles(math.rad(-50),0,0)
     elseif legLimb=="Front" and name:find("Lower",1,true) then pose=CFrame.Angles(math.rad(40),0,0) end
     frame=frame*CFrame.identity:Lerp(pose,ease)
-   elseif legSide and legLimb and moving and not s3 then
+   elseif legSide and legLimb and moving then
     local opposite=(legSide=="Left")~=(legLimb=="Front")
     local beat=math.sin((now-c.started)*math.pi*6+(opposite and math.pi or 0))
     if name:find("Upper",1,true) then frame=CFrame.Angles(beat*.65,0,0)

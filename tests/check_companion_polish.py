@@ -1,5 +1,5 @@
 from pathlib import Path
-import subprocess
+import subprocess,sys
 R=Path(__file__).resolve().parents[1]
 rules=(R/'src/shared/HuntRules.luau').read_text(encoding='utf8')
 records=(R/'src/shared/RecordRules.luau').read_text(encoding='utf8')
@@ -47,7 +47,7 @@ subprocess.run([str(R/'.tools/luau/luau.exe'),'.tools/test_companion_polish.luau
 import ast,xml.etree.ElementTree as E
 build=ast.parse((R/'tools/build_companion_polish.py').read_text(encoding='utf8'))
 paths=next(ast.literal_eval(n.value) for n in build.body if isinstance(n,ast.Assign) and any(isinstance(t,ast.Name) and t.id=='paths' for t in n.targets))
-root=E.parse(R/'dist/RodeoFantasy-New.rbxlx').getroot()
+root=E.parse(Path(sys.argv[1]) if len(sys.argv)>1 else R/'dist/RodeoFantasy-New.rbxlx').getroot()
 name=lambda n:n.findtext("Properties/string[@name='Name']")
 child=lambda n,key:next(v for v in n.findall('Item') if name(v)==key)
 service=lambda key:next(v for v in root.findall('Item') if v.get('class')==key)

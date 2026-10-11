@@ -15,6 +15,17 @@ function M.new(context)
   return hit and hit.Position.Y
  end
  local api={}
+ function api.bond(p,id)
+  local pet=pets[p] local rr=root(p)
+  if not pet or pet.id~=id or not context.canAct(p) or not context.inLobby(p)
+   or not Rules.available(Rules.find(context.bag(p),id)) or not rr
+   or (rr.Position-pet.model.PrimaryPart.Position).Magnitude>10 or os.clock()-(pet.lastBond or -math.huge)<3.5 then return false end
+  pet.lastBond=os.clock()
+  local at=workspace:GetServerTimeNow()
+  pet.model:SetAttribute("PetBondStarted",at) pet.model:SetAttribute("PetBondUntil",at+3)
+  P.CaptureRemote:FireAllClients("LobbyPet",{model=pet.model,at=at})
+  return true
+ end
  function api.clear(p)
   local pet=pets[p] if pet then pet.model:Destroy() end
   pets[p]=nil p:SetAttribute("SummonedId",nil)
@@ -46,16 +57,10 @@ function M.new(context)
   api.clear(p) model.Parent=folder pets[p]={model=model,id=id,height=height,following=false,blocked=0}
   p:SetAttribute("SummonedId",id)
   local prompt=Instance.new("ProximityPrompt") prompt.Name="PetOwnCompanion" prompt.ActionText="Bond"
-  prompt.HoldDuration=1 prompt.MaxActivationDistance=10 prompt.RequiresLineOfSight=false prompt.Parent=model.PrimaryPart
+  prompt.HoldDuration=0 prompt.KeyboardKeyCode=Enum.KeyCode.Unknown prompt.MaxActivationDistance=10 prompt.RequiresLineOfSight=false prompt.Parent=model.PrimaryPart
   prompt.Style=Enum.ProximityPromptStyle.Custom
-  local last=-math.huge
   prompt.Triggered:Connect(function(who)
-   local rr=root(who)
-   if who~=p or not context.canAct(p) or not Rules.available(Rules.find(context.bag(p),id)) or not rr or (rr.Position-model.PrimaryPart.Position).Magnitude>12 or os.clock()-last<3.5 then return end
-   last=os.clock()
-   local at=workspace:GetServerTimeNow()
-   model:SetAttribute("PetBondStarted",at) model:SetAttribute("PetBondUntil",at+3)
-   P.CaptureRemote:FireAllClients("LobbyPet",{model=model,at=at})
+   if who==p then api.bond(p,id) end
   end)
  end
  local elapsed=0

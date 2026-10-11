@@ -83,10 +83,6 @@ function UI.new(gui,remote)
  local breed=make("TextButton",{Name="Breed",Text="Breed",Position=UDim2.new(.62,0,0,55),Size=UDim2.new(.17,0,0,34),TextSize=16,BackgroundColor3=Color3.fromRGB(110,133,91),TextColor3=Color3.new(1,1,1),ZIndex=23},window)
  make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},breed)
  breed.Activated:Connect(function() if self.onBreed then self.onBreed() end end)
- local hovered,hold
- UIS.InputBegan:Connect(function(input,processed) if not processed and not UIS:GetFocusedTextBox() and input.KeyCode==Enum.KeyCode.E and hovered and window.Visible and (self.area=="Cafe" or self.area=="Lobby") then hold={id=hovered,at=os.clock()} end end)
- UIS.InputEnded:Connect(function(input) if input.KeyCode==Enum.KeyCode.E then hold=nil end end)
- game:GetService("RunService").RenderStepped:Connect(function() if hold and window.Visible and hovered==hold.id and os.clock()-hold.at>=1 then remote:FireServer("Summon",hold.id) hold=nil end end)
  local chooser
  local revision=0
  local function selectedCount() local n=0 for _ in pairs(self.selected) do n+=1 end return n end
@@ -183,7 +179,7 @@ function UI.new(gui,remote)
   self.pen=index self.snapshot(self.items) window.Visible=true self.opened()
  end
  function self.snapshot(items)
-  self.items=items self.cards={} hovered=nil hold=nil
+  self.items=items self.cards={}
   local present={} for _,item in ipairs(items) do present[item.id]=true end
   for id in pairs(self.selected) do if not present[id] then self.selected[id]=nil end end
   local placed=0
@@ -254,10 +250,8 @@ function UI.new(gui,remote)
     if item.id==self.summonedId and self.area=="Cafe" then
      make("TextLabel",{Text="Summoned",BackgroundTransparency=1,Position=UDim2.fromOffset(4,208),Size=UDim2.new(1,-8,0,29),TextSize=14,ZIndex=23},card)
     elseif not item.breedingTeam then
-     local summon=make("TextButton",{Text=item.id==self.summonedId and "Hold E · Dismiss" or "Hold E · Summon",Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,29),TextSize=14,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},card)
-     card.MouseEnter:Connect(function() hovered=item.id end) card.MouseLeave:Connect(function() if hovered==item.id then hovered=nil hold=nil end end)
-     summon.InputBegan:Connect(function(input) if input.UserInputType==Enum.UserInputType.Touch or input.UserInputType==Enum.UserInputType.MouseButton1 then hovered=item.id hold={id=item.id,at=os.clock()} end end)
-     summon.InputEnded:Connect(function() hold=nil end)
+     local summon=make("TextButton",{Text=item.id==self.summonedId and "Dismiss" or "Summon",Position=UDim2.fromOffset(8,208),Size=UDim2.new(1,-16,0,29),TextSize=14,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},card)
+     summon.Activated:Connect(function() if self.area=="Lobby" or self.area=="Cafe" then remote:FireServer("Summon",item.id) end end)
     end
    elseif item.assignedPen then
     make("TextLabel",{Text=L.text("Placed","en-us").." · "..item.assignedPen,BackgroundTransparency=1,Position=UDim2.fromOffset(4,208),Size=UDim2.new(1,-8,0,29),TextSize=14,ZIndex=23},card)
