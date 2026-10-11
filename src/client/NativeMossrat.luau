@@ -3,6 +3,7 @@ local M={}
 local package=game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy")
 local C=require(package:WaitForChild("MonsterCatalog"))
 local rigAnimator
+local bipedAnimator
 local boneCache=setmetatable({},{__mode="k"})
 function M.isTarget(model)
  local stage=C.stage(model:GetAttribute("Stars") or 1)
@@ -80,6 +81,13 @@ end
 function M.animate(model,phase,moving,angry)
  if not M.isTarget(model) then return end
  local body=model:FindFirstChild("Body")
+ -- Legacy S9 weights stretch under the full clip. Keep its existing playback
+ -- until its skin is fitted to the shared skeleton; name mapping is not enough.
+ if body and model:GetAttribute("MossratUserRigRevision")=="ProvidedBiped-v1" then
+  bipedAnimator=bipedAnimator or require(script.Parent.BipedAnimator)
+  bipedAnimator.animate(model,moving)
+  return
+ end
  if body and body:FindFirstChild("LeftFrontUpper",true) and body:FindFirstChild("Head",true) then
   rigAnimator=rigAnimator or require(script.Parent:WaitForChild("UserMossratRigAnimator"))
   rigAnimator.animate(model,moving)

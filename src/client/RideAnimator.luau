@@ -13,6 +13,11 @@ local Mesh=require(script.Parent:WaitForChild("CreatureMesh"))
 local Crash=require(script.Parent:WaitForChild("CrashEffect"))
 local dust={}
 local contexts=setmetatable({},{__mode="k"})
+local renderedFrames=setmetatable({},{__mode="k"})
+local travelFrames=setmetatable({},{__mode="k"})
+function RideAnimator.frame(model) return renderedFrames[model] end
+-- Camera tracks locomotion only; stride bounce/pitch belong to the creature.
+function RideAnimator.travelFrame(model) return travelFrames[model] end
 local function lobbyModels(root,context)
  if context.models then return context.models end
  local models,indices={},{}
@@ -217,12 +222,15 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
   end
 		local _,_,pitch=Rules.buck(clock-(model:GetAttribute("AngerStarted") or clock),tuning.BuckCycleSeconds,tuning.BuckHeightStuds,Catalog[model:GetAttribute("MonsterId") or "MeadowMouse"].TripleHop)
 		local facingFrame,straightFacing=Mesh.huntFrame(model,pose.frame)
+  travelFrames[model]=facingFrame
 		local lean = not straightFacing and running and (model:GetAttribute("Steering") or 0) * -0.18 or 0
   local moving=running and (model:GetAttribute("BagItemId")~=nil or velocity.Magnitude>1)
   Mesh.animate(model,phase,moving,angry)
   local flying=model:GetAttribute("Flying")==true
   local bounce=moving and (flying and (.55+math.sin(phase*.5)*.22) or (1-math.cos(phase))*.22) or 0
   local gallopPitch=moving and math.sin(phase)*0.085 or 0
+  -- The supplied biped clip already contains its own hip travel.
+  if model:GetAttribute("MossratUserRigRevision")=="ProvidedBiped-v1" then bounce=0 gallopPitch=0 end
 		local frame = facingFrame * CFrame.new(0,bounce,0)*CFrame.Angles(angry and not flying and pitch or gallopPitch, 0, lean)
     if monsters.Name~="RodeoLobby" and monsters.Name~="CafePets" and moving and not flying and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)>0.18 and #dust<80 then
    pose.lastDust=clock
@@ -233,6 +241,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
    puff.Parent=workspace table.insert(dust,{part=puff,started=clock})
   end
   displayed[model] = frame
+  renderedFrames[model] = frame
 		for _, entry in ipairs(pose) do
 			if not entry.part.Parent then continue end
 			local localFrame = entry.rest

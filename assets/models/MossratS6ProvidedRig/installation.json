@@ -1,0 +1,13 @@
+{
+  "meshId": "95452286447649",
+  "colorMapImageId": "122822919155461",
+  "colorMapDecalId": "110037972222864",
+  "colorTexturePixels": [2048, 2048],
+  "bodyHeightStuds": 7,
+  "bones": 23,
+  "tailBones": 0,
+  "revision": "ProvidedBiped-v1",
+  "facingRevision": "ProvidedBiped-Forward-v2",
+  "installedInLocalReview": true,
+  "published": false
+}

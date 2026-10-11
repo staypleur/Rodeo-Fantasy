@@ -2,6 +2,7 @@
 local M={}
 function M.new(gui,player)
  local package=game.ReplicatedStorage.RodeoFantasy
+ local presentation=require(script.Parent.RideAnimator)
  local button=Instance.new("ImageButton") button.Name="PetInteract" button.Visible=false
  button.AnchorPoint=Vector2.new(.5,1) button.Position=UDim2.new(.5,-38,1,-76) button.Size=UDim2.fromOffset(64,64)
  button.BackgroundTransparency=1 button.ScaleType=Enum.ScaleType.Fit
@@ -33,6 +34,7 @@ function M.new(gui,player)
   if pet or player:GetAttribute("LobbyRiding") then package.CaptureRemote:FireServer("RidePet",pet and pet:GetAttribute("BagItemId")) end
  end)
  local rs=game:GetService("RunService") local oldCamera local inputTime=0 local lastInput
+ local cameraTarget local cameraHeading local cameraPet
  local stepName="LobbyRideCamera_"..player.UserId
  rs:BindToRenderStep(stepName,Enum.RenderPriority.Camera.Value+3,function(dt)
   local camera=workspace.CurrentCamera local mounted=player:GetAttribute("LobbyRiding")==true
@@ -42,10 +44,31 @@ function M.new(gui,player)
    if not oldCamera then oldCamera={type=camera.CameraType,subject=camera.CameraSubject,fov=camera.FieldOfView} end
    camera.CameraType=Enum.CameraType.Scriptable
    local pet=current and current.Parent and current local part=pet and pet.PrimaryPart
-   local frame=part and part.CFrame or root.CFrame
+   -- Match rider and camera to the pet's interpolated visual frame, not its
+   -- server root, which intentionally arrives at a lower network frequency.
+   local frame=pet and presentation.frame(pet) or (part and part.CFrame or root.CFrame)
    local height=pet and pet:FindFirstChild("Body") and pet.Body.Size.Y or 4
-   local target=root.Position+Vector3.new(0,1,0)
-   camera.CFrame=CFrame.lookAt(target-frame.LookVector*math.max(12,height*2)+Vector3.new(0,math.max(4,height*.6),0),target)
+   if pet and part and root.Anchored then
+    local rootHeight=pet:GetAttribute("RootHeight") or 2
+    local upright=(pet:GetAttribute("Stars") or 1)>=6
+    local offset=upright and Vector3.new(0,height*.62-rootHeight,1.35) or Vector3.new(0,height*.62-rootHeight+1.25,.15)
+    root.CFrame=frame*CFrame.new(offset)
+   end
+   local travel=pet and presentation.travelFrame(pet) or (part and part.CFrame or root.CFrame)
+   local forward=Vector3.new(travel.LookVector.X,0,travel.LookVector.Z)
+   if forward.Magnitude<.001 then forward=Vector3.new(0,0,-1) else forward=forward.Unit end
+   local rootHeight=pet and pet:GetAttribute("RootHeight") or 2
+   local upright=pet and (pet:GetAttribute("Stars") or 1)>=6
+   local offset=upright and Vector3.new(0,height*.62-rootHeight,1.35) or Vector3.new(0,height*.62-rootHeight+1.25,.15)
+   local target=(travel*CFrame.new(offset)).Position+Vector3.new(0,1,0)
+   local heading=CFrame.lookAt(Vector3.zero,forward)
+   if cameraPet~=pet or not cameraTarget or (target-cameraTarget).Magnitude>30 then
+    cameraTarget=target cameraHeading=heading cameraPet=pet
+   else
+    cameraTarget=cameraTarget:Lerp(target,1-math.exp(-14*dt))
+    cameraHeading=cameraHeading:Lerp(heading,1-math.exp(-8*dt))
+   end
+   camera.CFrame=CFrame.lookAt(cameraTarget-cameraHeading.LookVector*math.max(12,height*2)+Vector3.new(0,math.max(4,height*.6),0),cameraTarget)
    inputTime+=dt
    local direction=hum.MoveDirection
    if inputTime>=.08 and (not lastInput or (direction-lastInput).Magnitude>.02 or inputTime>=.25) then
@@ -53,7 +76,7 @@ function M.new(gui,player)
    end
   elseif oldCamera then
    camera.CameraType=oldCamera.type camera.CameraSubject=hum or oldCamera.subject camera.FieldOfView=oldCamera.fov oldCamera=nil
-   inputTime=0 lastInput=nil
+   inputTime=0 lastInput=nil cameraTarget=nil cameraHeading=nil cameraPet=nil
   end
  end)
  gui.Destroying:Connect(function() connection:Disconnect() rs:UnbindFromRenderStep(stepName) current=nil end)

@@ -27,3 +27,6 @@ assets/models/MossratS9UserRig/MossratTexture*.png
 assets/models/MossratS1HuntRig/*.gltf
 assets/models/MossratS1HuntRig/*.bin
 assets/models/MossratS1HuntRig/MossratTexture*.png
+assets/models/MossratS6ProvidedRig/*.gltf
+assets/models/MossratS6ProvidedRig/*.bin
+assets/models/MossratS6ProvidedRig/Texture*.png

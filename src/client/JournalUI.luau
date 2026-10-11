@@ -111,7 +111,7 @@ function J.new(gui,remote)
   for _,n in ipairs(info:GetChildren()) do if n:IsA("GuiObject") then n:Destroy() end end
   local entry=self.entries[self.selected] if not entry then return end
   local species=C[entry.monsterId] local revealed=self.seen[entry.key]==true
-  local viewport=make("ViewportFrame",{Name="SelectedPortrait",Position=UDim2.fromScale(.1,.02),Size=UDim2.fromScale(.8,.60),BackgroundTransparency=1,Ambient=Color3.fromRGB(210,215,211),LightColor=Color3.new(1,1,1),ZIndex=44},detail)
+  local viewport=make("Frame",{Name="SelectedPortrait",Position=UDim2.fromScale(.1,.02),Size=UDim2.fromScale(.8,.60),BackgroundTransparency=1,ZIndex=44},detail)
   Portrait.fill(viewport,entry.monsterId,entry.stars,not revealed,1)
   label(detail,"SelectedName",revealed and T(entry.monsterId) or "???",.04,.63,.92,.16,22)
   label(detail,"SelectedStars",entry.stars.."★",.04,.79,.92,.08,17)
@@ -138,7 +138,7 @@ function J.new(gui,remote)
    local card=make("TextButton",{Name="JournalEntry",Text="",Position=UDim2.fromScale(((slot-1)%columns)/columns+.01,math.floor((slot-1)/columns)/rows+.015),Size=UDim2.fromScale(1/columns-.02,1/rows-.03),BackgroundColor3=colors[((slot-1)%4)+1],BorderSizePixel=0,ZIndex=44},pages)
    make("UIStroke",{Color=index==self.selected and Color3.fromRGB(232,250,255) or Color3.new(0,0,0),Thickness=index==self.selected and 3 or 2},card)
    gradient(card,Color3.fromRGB(218,230,235),Color3.fromRGB(50,86,108))
-   local viewport=make("ViewportFrame",{Name="JournalPortrait",Position=UDim2.fromScale(.04,.17),Size=UDim2.fromScale(.92,.65),BackgroundTransparency=1,Ambient=Color3.fromRGB(205,213,200),LightColor=Color3.new(1,1,1),ZIndex=45},card)
+   local viewport=make("Frame",{Name="JournalPortrait",Position=UDim2.fromScale(.04,.17),Size=UDim2.fromScale(.92,.65),BackgroundTransparency=1,ZIndex=45},card)
    Portrait.fill(viewport,entry.monsterId,entry.stars,not revealed,1)
    label(card,"EntryName",revealed and T(entry.monsterId) or "???",.02,.01,.96,.19,17)
    label(card,"Stars",entry.stars.."★",0,.82,1,.18,16)

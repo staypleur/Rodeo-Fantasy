@@ -1,0 +1,19 @@
+{
+  "bones": 23,
+  "triangles": 10218,
+  "sources": {
+    "Walking": "aabf508654364bd1f6ec0e1482950a00b2d92c72084da315427e69a30336c309",
+    "Running": "63254d361993570576e3315ebe672f03f39b0d3e088b57a2a0d8808bec6f0219"
+  },
+  "clips": {
+    "Walking": {
+      "duration": 1.0833333730697632,
+      "samples": 34
+    },
+    "Running": {
+      "duration": 0.7083333134651184,
+      "samples": 22
+    }
+  },
+  "installationManifest": "installation.json"
+}

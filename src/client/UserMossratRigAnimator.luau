@@ -1,5 +1,6 @@
 -- Plays the exact approved glTF samples through Bone.Transform; never blinks.
 local A={}
+local quadruped=require(script.Parent.QuadrupedAnimator)
 local data=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigData"))
 local dataS3=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigDataS3"))
 local dataS6=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigDataS6"))
@@ -49,7 +50,8 @@ function A.animate(model,moving)
   if distance>150 then return end
   if distance>70 then interval=1/10 end
  end
- if c.mode and now-c.last<interval then return end c.last=now
+ if c.mode and now-c.last<interval then return end
+ local dt=c.last>0 and math.min(now-c.last,.15) or 1/30 c.last=now
  local serverNow=workspace:GetServerTimeNow()
  local bondUntil=model:GetAttribute("PetBondUntil") or 0
  local bonding=bondUntil>serverNow
@@ -98,7 +100,7 @@ function A.animate(model,moving)
     elseif legLimb=="Front" and name:find("Upper",1,true) then pose=CFrame.Angles(math.rad(-50),0,0)
     elseif legLimb=="Front" and name:find("Lower",1,true) then pose=CFrame.Angles(math.rad(40),0,0) end
     frame=frame*CFrame.identity:Lerp(pose,ease)
-   elseif legSide and legLimb and moving then
+   elseif legSide and legLimb and moving and s6 then
     local opposite=(legSide=="Left")~=(legLimb=="Front")
     local beat=math.sin((now-c.started)*math.pi*6+(opposite and math.pi or 0))
     if name:find("Upper",1,true) then frame=CFrame.Angles(beat*(s6 and (legLimb=="Front" and .22 or .45) or .65),0,0)
@@ -142,5 +144,6 @@ function A.animate(model,moving)
    b.Transform=(c.previous[name] or CFrame.identity):Lerp(frame,blend)
   end
  end
+ if not s6 and not bonding then quadruped.apply(model,moving,dt) end
 end
 return A
