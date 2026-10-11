@@ -8,7 +8,7 @@ R=Path(__file__).resolve().parents[1]
 
 def decorate(cafe,zones,p,rotate):
  libraries=[E.parse(R/'assets/maps'/f).getroot() for f in
-            ['CafeSakura.rbxmx','CafeNatureCurated.rbxmx','CafeCuratedFurniture.rbxmx','CafeTablePlant.rbxmx']]
+            ['CafeSakura.rbxmx','CafeNatureCurated.rbxmx','CafeCuratedFurniture.rbxmx','CafeTablePlant.rbxmx','CafeScenicCurated.rbxmx']]
  templates={v.findtext("Properties/string[@name='Name']"):v for lib in libraries for v in lib.findall('Item')}
  landscape=node(cafe,'Folder','CuratedLandscape')
  # Replace the primitive tree placeholders rather than layering new trees over them.
@@ -53,6 +53,13 @@ def decorate(cafe,zones,p,rotate):
     if n.get('class')=='UnionOperation':prop(n,'token','CollisionFidelity',1)
     if name=='CafeSakuraSource' and n.findtext("Properties/string[@name='Name']")=='Leaves' and purple:
      prop(n,'Color3uint8','Color3uint8',0xff9e71c5)
+    if name in ['CafeGazeboSource','CafeFountainSource']:
+     # Keep the source silhouette but match the approved pastel/twilight palette.
+     col=(92,58,110) if purple else (245,227,233)
+     if name=='CafeGazeboSource' and new[1]-pos[1]>24*scale:
+      col=(92,44,119) if purple else (226,153,184)
+     prop(n,'Color3uint8','Color3uint8',0xff000000+(col[0]<<16)+(col[1]<<8)+col[2])
+     if n.get('class')=='UnionOperation':prop(n,'bool','UsePartColor','true')
    if n.get('class')=='SpecialMesh':
     size=n.find("Properties/Vector3[@name='Scale']")
     if size is not None:
@@ -98,6 +105,51 @@ def decorate(cafe,zones,p,rotate):
   # Approach stones and planted borders use a few repeated source meshes.
   for dx in [-57,57]:
    for dz in [-72,-38,-4]:place('RhododendronVar01',(x+dx,0,z+dz),1.8)
+
+ # Scenic destinations rather than isolated props on a bare lawn. Keep the centre
+ # and northern bridge approaches open for the largest pets.
+ for name in ['RoseGiantGarden','ShadowGiantGarden']:
+  x,z,r,dark=zones[name];pathcol=(94,61,108) if dark else (226,206,183)
+  for i,a in enumerate([0,math.pi,math.pi/2]):
+   gx,gz=x+math.cos(a)*r*.76,z+math.sin(a)*r*.76
+   p('GardenRetreat',(gx,.05,gz),(180,.1,170),pathcol,parent=landscape)
+   place('CafeGazeboSource',(gx,0,gz),1.5,yaw=a,purple=dark)
+   place('CafeFountainSource',(gx-62,0,gz+30),8,purple=dark)
+   # Grove wraps the retreat; the near side opens onto the circular path.
+   for j in range(3):
+    b=(j+.5)*math.pi/3+a
+    tx,tz=gx+math.cos(b)*120,gz+math.sin(b)*120
+    place('CafeSakuraSource',(tx,0,tz),1.3,b,dark)
+    place('RhododendronVar01',(tx,0,tz+12),1.8,b)
+    place('MediumMossBoulder01',(tx+20,0,tz-8),2,b)
+   for dx in [-32,32]:
+    place('CafeBenchSource',(gx+dx,0,gz+45),yaw=a)
+    for dz in [-46,46]:place('WildFlower03',(gx+dx,0,gz+dz),2)
+   # A low planting ribbon follows a short stretch of the riding path.
+   for j in range(9):
+    b=a+(j-4)*.045
+    tx,tz=x+math.cos(b)*r*.61,z+math.sin(b)*r*.61
+    place('RhododendronVar01',(tx,0,tz),2.4,b)
+
+ # Fill cafe courtyards and palace approaches without cluttering travel lanes.
+ for name in ['RoseCafe','ShadowCafe','RosePalace','ShadowPalace']:
+  x,z,r,dark=zones[name]
+  for side in [-1,1]:
+   gx=x+side*(r*.62);gz=z+60
+   place('CafeFountainSource',(gx,0,gz),10,purple=dark)
+   for j in range(4):
+    a=j*math.pi/2
+    place('RhododendronVar01',(gx+math.cos(a)*38,0,gz+math.sin(a)*38),1.5,a)
+   place('CafeBenchSource',(gx,0,gz+50))
+ # These are display-only props; no source scripts, sounds or item dispensers.
+ for name in ['RoseCafe','ShadowCafe']:
+  x,z,r,dark=zones[name]
+  place('CafeCoffeeMachineSource',(x+25,3.4,z-67),1.1)
+  for side in [-1,1]:
+   cx,cz=x+side*95,z+38
+   place('plate',(cx-2,2.6,cz),.8)
+   place('waffle',(cx-2,2.8,cz),.6)
+   place('coffee',(cx+2,2.6,cz),.8)
  # Shared payloads needed by imported geometry only; no full source pack remains.
  shared={}
  for lib in libraries:

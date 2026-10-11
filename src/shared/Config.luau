@@ -1,6 +1,7 @@
 -- Confirmed rules and adjustable prototype presentation values are kept separate.
 local Config = {}
-Config.LobbyWalkSpeed=40 -- Adjustable presentation tuning for the larger lobby.
+Config.LobbyWalkSpeed=48 -- Adjustable presentation tuning for the larger lobby.
+Config.CafeWalkSpeed=40 -- Faster walking across the large cafe islands.
 
 -- Creator Store music/hoof recording plus Roblox bundled action sounds.
 Config.Audio = {

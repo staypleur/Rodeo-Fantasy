@@ -1441,3 +1441,12 @@
 - 정적 맵2,142인스턴스/346MeshPart/32Seat/기존2SurfaceLight. 최종 모델 및 두 새 소스의 UniqueId·XML참조·SharedString·축2048이하 검사 통과, 수입 실행 코드0. 동일 메시·텍스처 ID 반복 사용. 삼각형 총합·텍스처 메모리·실기기 모바일·20명/거대펫 성능은 미측정이며 최적화 완료를 주장하지 않는다.
 - 실제 PC Studio Play: 검사 시작점으로 이동 후 새 야외 소파 Seat.Occupant 일치 true/앉음 true/HP100. 테라스 앞→두 좌석 사이 MoveTo true/HP100/(-1382,4,-590.83). 전체 맵·터치·모바일·카페 펫 기능 검증이 아니다.
 - 실제 Studio 조경·가구·정원 화면 cafe-landscape-lounge/garden-studio.png, 게임뷰만 자른 preview 및 cafe-landscape-pc-check.png 저장. CafeLandscape-DesignReview.rbxlx 별도 검토본 저장, 메인 로비/사냥터 및 dist/RodeoFantasy-New.rbxlx 사용자 변경은 제외한다. 게임 게시 없음. 성·파빌리온 세부 건축, 최종 디자인 승인, 카페 서버 게시/20명 설정/이동/펫 연동은 남아 있다.
+
+## 2026-10-11 보행 속도 증가·썰렁한 정원 보완
+- 사용자 요청대로 Config.LobbyWalkSpeed40→48, CafeWalkSpeed40 신설, CafeServer 기존24 상수를 Config값으로 대체. 메인 Temp/RodeoOwnerReview.rbxlx에는 Config만 원문 충돌 검사 후 부분 적용/저장, 저장 소스 일치 검사 통과 및 ReviewModels 사본 갱신. 사냥터/몬스터 탑승 속도 변경 없음. 카페 검토본은 스폰/재스폰에40을 설정한다. 변경 런타임2파일 Luau 컴파일 통과.
+- 무료 소스 추가 조사/Studio 획득: Gazebo4079425387, fountain8428072500, Park Bench5708639035, Classic Cafeteria Kit14318178739, Coffee Machine5219913669. source 머신 스크립트2개 제거, 소리·조명·디스펜서·트리거를 제외한110개 형상/소품만 CafeScenicCurated.rbxmx에 보관. 키트에서는 커피·접시·와플만 선택. 출처와 생성 도구 README 기록. SyntyCastle6934021345는 예상 전체 팩이 아닌 단일MeshPart로 반환되어 사용하지 않았다. 상점 전체를 조사/사용 완료했다는 의미가 아니다.
+- 정원 쉼터6곳에 정자·분수·벚꽃 숲·바위·화단을 묶어 배치. 카페/성 앞 분수8곳과 꽃 테두리, 테이블 디저트/머신 소품 추가. 첫 검토에서 나무가 정자를 가려3그루/낮은 크기로 조정, Union UsePartColor로 테마 색 반영. 중앙과 북쪽 다리 접근은 열린 공간 유지. 새 벤치는 장식이며 기존 소파32Seat의 상호작용 유지.
+- 정적 맵3,654인스턴스: MeshPart628/SurfaceAppearance516/Union114/58벚꽃/기존조명2/Seat32. 실행 코드0, 참조·SharedString·고유ID·축2048이하 검사 통과. 앵커/장식 충돌·접촉·쿼리·그림자 제외, 메시/텍스처 반복 재사용, 효과·새 조명 추가 없음. 인스턴스 증가로 실제 모바일 메모리/렌더링 성능 측정은 필요하며 비용 없는 개선이라고 주장하지 않는다.
+- 최종 CafeScenicV2 검토본 실제 소스 PreloadAsync 실패0, 쉼터/카페 소품 렌더링 확인. PC Play 스폰 WalkSpeed40, 쉼터 옆160스터드 경로 MoveTo true/HP100/3.984초/(-1315,3,2207.83). 검사 시작점 이동 후 검사했으며 전체 맵·재스폰·모바일·20명/거대펫 성능 검증은 아니다. Studio MaterialManager React 오류는 앞선 별도 검토본에 발생한 내장 플러그인 오류와 구분한다.
+- 실제 화면 cafe-scenic-retreat/courtyard-studio.png 및 게임뷰 자른preview, cafe-scenic-walk-pc.png 기록. 건축물은 여전히 세부 디자인 초안이며 새 카페맵은 미게시·최종 승인 전 검토본이다. CafePlaceId0, 카페 이동/펫 연결/최대20명 서비스 설정은 남아 있다. 기존dist/RodeoFantasy-New.rbxlx 사용자 변경은 제외한다.
+- 메인 로비 PC Play에서도 실제 Humanoid.WalkSpeed48 확인(lobby-walk-speed-pc.png). 검사 종료 후 카페 검토본으로 복귀했다. 실제 보행 조작감·모바일 및 사냥터 회귀 주행 검사는 아니다.

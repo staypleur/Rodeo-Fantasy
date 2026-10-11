@@ -87,7 +87,7 @@ local function added(p)
  bags[p]=bag p:SetAttribute("Area","Cafe") Progress.join(p)
  local function character(c)
   clear(p) local r=c:WaitForChild("HumanoidRootPart",10) if r then c:PivotTo(World.Spawn) end
-  local h=c:FindFirstChildOfClass("Humanoid") if h then h.WalkSpeed=24 end
+  local h=c:FindFirstChildOfClass("Humanoid") if h then h.WalkSpeed=require(P.Config).CafeWalkSpeed end
   if r then
    local prompt=Instance.new("ProximityPrompt") prompt.Name="ViewCafeProfile" prompt.ActionText="프로필 보기" prompt.ObjectText=p.DisplayName prompt.HoldDuration=1 prompt.MaxActivationDistance=12 prompt.RequiresLineOfSight=false prompt.Parent=r
   end
