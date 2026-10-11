@@ -5,6 +5,7 @@ from build_project import node,prop,composite,part,script
 from cafe_island_layout import arrange
 from cafe_landscape import decorate
 from cafe_palette import apply_palette
+from cafe_collision import apply_collisions
 R=Path(__file__).resolve().parents[1]
 WHITE=(247,232,229);PINK=(241,158,195);GOLD=(235,188,101);DARK=(43,31,61);VIOLET=(126,69,161)
 def build(inspection_speed=180):
@@ -176,14 +177,14 @@ def build(inspection_speed=180):
   library=oldlib
  for cx,dark in [(-255,False),(255,True)]:
   for dx in [-25,25]:
-   curated_at('Kitchen_DiningTable',(cx+dx,3.37,-76),dark=dark)
-   for ox,oz,rot in [(-3,-4,0),(3,-4,0),(-3,4,math.pi),(3,4,math.pi)]:curated_at('Kitchen_DiningChair',(cx+dx+ox,3.91,-76+oz),rot,dark)
+   curated_at('Kitchen_DiningTable',(cx+dx,3.37,-76),math.pi/2,dark)
+   for ox,oz,rot in [(-3,-4,math.pi),(3,-4,math.pi),(-3,4,0),(3,4,0)]:curated_at('Kitchen_DiningChair',(cx+dx+ox,3.91,-76+oz),rot,dark)
   for dx in [-16,14]:
    p('LoungeRug',(cx+dx,1.85,-100),(22,.1,20),(196,153,189) if dark else (240,207,211),False,parent=furniture,mat=1312)
-   curated_at('Couch_Double',(cx+dx,3.82,-103),0,dark)
+   curated_at('Couch_Double',(cx+dx,3.82,-103),math.pi,dark)
    curated_at('Furniture_CoffeeTable',(cx+dx,2.74,-96),0,dark)
    curated_at('Furniture_FloorLamp_Off',(cx+dx+6,5.02,-104),0,dark)
-   curated_at('Pillow_SmallWide_PlainQuilt',(cx+dx+1.8,4.2,-103),0,dark)
+   curated_at('Pillow_SmallWide_PlainQuilt',(cx+dx-1.8,4.2,-103),math.pi,dark)
   curated_at('Display_Case_Desk_Top',(cx-18,8.57,-117),0,dark)
  plantlib=E.parse(R/'assets/maps/CafeTablePlant.rbxmx').getroot()
  for cx,dark in [(-255,False),(255,True)]:
@@ -205,6 +206,18 @@ def build(inspection_speed=180):
  zones,routes=arrange(cafe,p,disk,rotate,ring)
  landscape_shared=decorate(cafe,zones,p,rotate)
  apply_palette(cafe)
+ apply_collisions(cafe,p,rotate)
+ # One textured Creator Store mesh replaces the court and primitive neon orb.
+ planetlib=E.parse(R/'assets/maps/CafePlanet.rbxmx').getroot()
+ planet=copy.deepcopy(planetlib.find('Item'));planet.set('referent','CafeCentralPlanet')
+ for i,v in enumerate(planet.findall('Item')):v.set('referent',f'CafeCentralPlanetChild{i}')
+ composite(planet,'CoordinateFrame','CFrame',{'X':0,'Y':220,'Z':0,'R00':1,'R01':0,'R02':0,'R10':0,'R11':1,'R12':0,'R20':0,'R21':0,'R22':1})
+ composite(planet,'Vector3','size',{'X':240,'Y':240,'Z':240})
+ for key,value in [('Anchored','true'),('CanCollide','false'),('CanTouch','false'),('CanQuery','false'),('CastShadow','false')]:prop(planet,'bool',key,value)
+ prop(planet,'token','Material',256);space.append(planet)
+ # Static orbital halo, clear above all pedestrian routes; no particle emitters.
+ for i in range(48):
+  a=i*math.tau/48;v=p('CentralPlanetOrbit',(math.cos(a)*155,220+math.sin(a)*35,math.sin(a)*100),(21,1.5,2),(205,214,241),parent=space,mat=288);rotate(v,y=math.pi/2-a)
  lighting=node(root,'Lighting','Lighting');prop(lighting,'float','ClockTime',12);prop(lighting,'float','Brightness',1.5);prop(lighting,'float','ExposureCompensation',0)
  composite(lighting,'Color3','Ambient',dict(zip('RGB',[115/255,115/255,125/255])));composite(lighting,'Color3','OutdoorAmbient',dict(zip('RGB',[145/255,140/255,150/255])));prop(lighting,'bool','GlobalShadows','true');prop(lighting,'float','EnvironmentDiffuseScale',.5);prop(lighting,'float','EnvironmentSpecularScale',.5)
  players=node(root,'Players','Players');prop(players,'int','MaxPlayers',20);starter=node(root,'StarterPlayer','StarterPlayer');prop(starter,'float','CameraMaxZoomDistance',120);prop(starter,'float','CameraMinZoomDistance',.5);node(starter,'StarterPlayerScripts','StarterPlayerScripts');node(root,'StarterGui','StarterGui')
@@ -226,10 +239,12 @@ for _,p in game.Players:GetPlayers() do added(p) end''' % inspection_speed)
   if n.get('md5') not in known:shared.append(copy.deepcopy(n));known.add(n.get('md5'))
  for n in landscape_shared:
   if n.get('md5') not in known:shared.append(n);known.add(n.get('md5'))
+ for n in planetlib.findall('SharedStrings/SharedString'):
+  if n.get('md5') not in known:shared.append(copy.deepcopy(n));known.add(n.get('md5'))
  root.append(shared)
  skyfile=R/'assets/maps/CafeSky.rbxmx'
  if skyfile.exists():lighting.append(copy.deepcopy(E.parse(skyfile).getroot().find('Item')))
- out=R/'dist/ReviewModels/CafeThemed-Inspection.rbxlx';E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)
+ out=R/'dist/ReviewModels/CafePlanet-Inspection.rbxlx';E.ElementTree(root).write(out,encoding='utf-8',xml_declaration=True)
  asset=E.Element('roblox',version='4');asset.append(copy.deepcopy(cafe));asset.append(copy.deepcopy(shared));E.ElementTree(asset).write(R/'assets/maps/SpaceCafeReview.rbxmx',encoding='utf-8',xml_declaration=True)
  print('CAFE_FANTASY_REVIEW',len(list(cafe.iter('Item'))),'instances; scripts in furniture:',sum(n.get('class') in ['Script','LocalScript','ModuleScript'] for n in furniture.iter('Item')))
  return out

@@ -92,8 +92,8 @@ def decorate(cafe,zones,p,rotate):
    cx,cz=x+side*95,z+38
    p('LoungeTerrace',(cx,.5,cz),(62,1,54),(91,60,103) if dark else (219,189,160),True,parent=landscape)
    p('OutdoorRug',(cx,1.03,cz),(28,.05,26),accent,parent=landscape)
-   place('Couch_Single',(cx-10,1,cz),yaw=math.pi/2,seating=True)
-   place('Couch_Single',(cx+10,1,cz),yaw=-math.pi/2,seating=True)
+   place('Couch_Single',(cx-10,1,cz),yaw=-math.pi/2,seating=True)
+   place('Couch_Single',(cx+10,1,cz),yaw=math.pi/2,seating=True)
    place('Furniture_CoffeeTable',(cx,1,cz))
    place('Furniture_FloorLamp_Off',(cx+18,1,cz-14))
    place('CafeTablePlant',(cx,2.6,cz),.8)
