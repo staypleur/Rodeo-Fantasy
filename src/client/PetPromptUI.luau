@@ -3,14 +3,14 @@ local M={}
 function M.new(gui,player)
  local package=game.ReplicatedStorage.RodeoFantasy
  local rules=require(package.LobbyRideRules)
- local presentation=require(script.Parent.RideAnimator)
+ local presentation=require(script.Parent:WaitForChild("RideAnimator"))
  local button=Instance.new("ImageButton") button.Name="PetInteract" button.Visible=false
  button.AnchorPoint=Vector2.new(.5,1) button.Position=UDim2.new(.5,-38,1,-76) button.Size=UDim2.fromOffset(64,64)
  button.BackgroundTransparency=1 button.ScaleType=Enum.ScaleType.Fit
- button.Image=require(script.Parent.HudIcons).imageId(package,"BondButtonImage")
+ button.Image=require(script.Parent:WaitForChild("HudIcons")).imageId(package,"BondButtonImage")
  button.ZIndex=10 button.Parent=gui
  local ride=button:Clone() ride.Name="PetRide" ride.Position=UDim2.new(.5,38,1,-76)
- ride.Image=require(script.Parent.HudIcons).imageId(package,"RideButtonImage") ride.Parent=gui
+ ride.Image=require(script.Parent:WaitForChild("HudIcons")).imageId(package,"RideButtonImage") ride.Parent=gui
  local ring=Instance.new("UIStroke") ring.Color=Color3.fromRGB(255,217,88) ring.Thickness=3 ring.Enabled=false ring.Parent=ride
  local current local elapsed=0
  local function nearby()

@@ -89,6 +89,7 @@ local function remember(model, existing)
 end
 
 function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
+ local social=monsters.Name=="RodeoLobby" or monsters.Name=="RodeoCafe"
  local context=contexts[monsters]
  if not context then context={poses={},visibility={},warnings={},dust={}} contexts[monsters]=context end
  poses,visibility,warnings,dust=context.poses,context.visibility,context.warnings,context.dust
@@ -131,7 +132,7 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
   end
  end
  local outlineCount=0
-	for _, model in ipairs(monsters.Name=="RodeoLobby" and lobbyModels(monsters,context) or monsters:GetChildren()) do
+	for _, model in ipairs(social and lobbyModels(monsters,context) or monsters:GetChildren()) do
   if not model:IsA("Model") then continue end
   if not model:GetAttribute("MonsterId") or model:GetAttribute("NativeMeshyAirship") then continue end
 		local root = model.PrimaryPart
@@ -191,11 +192,11 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
   if not model:GetAttribute("Occupied") then velocity=model:GetAttribute("HerdVelocity") or velocity end
   local target = pose.sample + velocity*(running and elapsed or 0)
   if not model:GetAttribute("Occupied") and not clearHerdPath(pose.sample.Position,target.Position,root) then target=pose.sample end
-  if (target.Position-pose.frame.Position).Magnitude>30 or not running then
+  if (target.Position-pose.frame.Position).Magnitude>30 or not running and not social then
    pose.frame = target
   else
-   -- The player's mount should not inherit the herd's deliberately soft follow.
-   local response=model:GetAttribute("Occupied") and 45 or 22
+   -- Social roots arrive at 10 Hz; interpolate stops and blocked turns too.
+   local response=social and 12 or model:GetAttribute("Occupied") and 45 or 22
    local blended=pose.frame:Lerp(target,1-math.exp(-response*dt))
    if not model:GetAttribute("Occupied") and not clearHerdPath(pose.frame.Position,blended.Position,root) then blended=pose.sample end
    pose.frame = blended

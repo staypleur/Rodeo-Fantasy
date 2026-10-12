@@ -1,7 +1,7 @@
 -- Shared locomotion for the supplied straight-pose S1/S3 meshes.
 -- Bone lengths come from each mesh; there are no old head/torso corrections.
 local A={}
-local quadruped=require(script.Parent.QuadrupedAnimator)
+local quadruped=require(script.Parent:WaitForChild("QuadrupedAnimator"))
 local cache=setmetatable({},{__mode="k"})
 function A.animate(model,moving)
  local body=model:FindFirstChild("Body") if not body then return end

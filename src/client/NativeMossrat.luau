@@ -89,14 +89,14 @@ function M.animate(model,phase,moving,angry)
  if not M.isTarget(model) then return end
  local body=model:FindFirstChild("Body")
  if body and model:GetAttribute("MossratUserRigRevision")=="NeutralQuadruped-v1" then
-  neutralAnimator=neutralAnimator or require(script.Parent.NeutralMossratAnimator)
+  neutralAnimator=neutralAnimator or require(script.Parent:WaitForChild("NeutralMossratAnimator"))
   neutralAnimator.animate(model,moving)
   return
  end
  -- Legacy S9 weights stretch under the full clip. Keep its existing playback
  -- until its skin is fitted to the shared skeleton; name mapping is not enough.
  if body and model:GetAttribute("MossratUserRigRevision")=="ProvidedBiped-v1" then
-  bipedAnimator=bipedAnimator or require(script.Parent.BipedAnimator)
+  bipedAnimator=bipedAnimator or require(script.Parent:WaitForChild("BipedAnimator"))
   bipedAnimator.animate(model,moving)
   return
  end

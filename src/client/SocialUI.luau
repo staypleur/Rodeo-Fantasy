@@ -4,7 +4,7 @@ local player=Players.LocalPlayer
 local UIS=game:GetService("UserInputService")
 local Run=game:GetService("RunService")
 local L=require(game.ReplicatedStorage.RodeoFantasy.Localization)
-local Portrait=require(script.Parent.MonsterPortrait)
+local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
 function S.new(gui,remote,bag,journal)
  local self={}
  local function make(class,props,parent)
