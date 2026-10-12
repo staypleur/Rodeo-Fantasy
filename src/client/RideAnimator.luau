@@ -237,6 +237,11 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
   -- body bob was fighting the single movement loop, especially in the cafe.
   if model:GetAttribute("BagItemId") and model:GetAttribute("NativeMeshyReady") then bounce=0 gallopPitch=0 end
 		local frame = facingFrame * CFrame.new(0,bounce,0)*CFrame.Angles(angry and not flying and pitch or gallopPitch, 0, lean)
+  local summoned=model:GetAttribute("SummonedAt")
+  if summoned then
+   local progress=math.clamp((clock-summoned)/.6,0,1)
+   frame*=CFrame.new(0,-.4*(1-progress)^2,0)
+  end
     if not model:GetAttribute("BagItemId") and monsters.Name~="RodeoLobby" and monsters.Name~="CafePets" and moving and not flying and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)>0.18 and #dust<80 then
    pose.lastDust=clock
    local puff=Instance.new("Part") puff.Name="LocalHerdDust" puff.Anchored=true

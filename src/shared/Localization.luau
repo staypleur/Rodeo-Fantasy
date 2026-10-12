@@ -40,7 +40,7 @@ L.entries={
  ["Sound effects"]={ko="효과음",ja="効果音"},
  ["Hunting continues while settings are open"]={ko="설정을 열어도 사냥은 계속 진행돼요",ja="設定中も狩りは続きます"},
  ["MeadowMouse"]={ko="모스랫",en="Mossrat",ja="모스랫"},
- ["GrassBoar"]={ko="브램블보어",en="브램블보어",ja="브램블보어"},
+ ["GrassBoar"]={ko="브램블보어",en="Brambleboar",ja="브램블보어"},
  ["TreeWolf"]={ko="바인팽",en="바인팽",ja="바인팽"},
  ["RockElephant"]={ko="엘레바인",en="엘레바인",ja="엘레바인"},
  ["Farthest run"]={ko="최장 거리 랭킹",ja="最長距離ランキング"},

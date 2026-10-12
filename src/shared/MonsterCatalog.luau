@@ -6,7 +6,7 @@ local C={
  Weedcrow={RunSpeed=80,HerdSpeed=55,SizeClass="Small",Flying=true,RootHeight=16,SaddleHeight=1.9,TameSeconds=5,UnlockMeters=400,IncomeSeconds=3,IncomeAmount=2,Template="WeedcrowTemplate",Visual="WeedcrowVisualTemplate"},
  RockElephant={RunSpeed=64,HerdSpeed=44,SizeClass="Large",Flying=false,RootHeight=5.3625,SaddleHeight=5.0325,TameSeconds=7,UnlockMeters=500,IncomeSeconds=3,IncomeAmount=3,Template="RockElephantTemplate",Visual="RockElephantVisualTemplate"},
 }
-C.Order={"MeadowMouse"}
+C.Order={"MeadowMouse"} -- Brambleboar activation follows visual review and asset installation.
 C.MeadowEndMeters=2000 -- One-star wildlife continues through the approved course.
 for _,id in ipairs(C.Order) do C[id].Region=C[id].Region or (C[id].Acquisition=="Breeding" and "Breeding" or "Meadow") C[id].Acquisition=C[id].Acquisition or "Hunt" end
 C.Scales={[1]=1,[3]=1.4,[6]=1.9,[9]=2.5}
@@ -25,6 +25,10 @@ function C.saddleHeight(id,stars)
  stars=stars or 1
  if id=="GrassBoar" then
   local stage=C.stage(stars)
+  local package=game and game:GetService("ReplicatedStorage"):FindFirstChild("RodeoFantasy")
+  local visual=package and package:FindFirstChild(C.visual(id,stars))
+  local fitted=visual and visual:GetAttribute("MeshyBackHeight")
+  if fitted then return fitted*C.scale(stars)/C.Scales[stage]+1.36-C[id].RootHeight*C.scale(stars) end
   local back={[1]=2.804463,[3]=3.880880,[6]=7.230789,[9]=11.021101}
   return back[stage]*C.scale(stars)/C.Scales[stage]+1.36-C[id].RootHeight*C.scale(stars)
  end

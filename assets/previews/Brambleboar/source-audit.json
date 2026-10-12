@@ -1,0 +1,202 @@
+[
+  {
+    "label": "S1_A",
+    "file": "Meshy_AI_Brambleboar_1Star_Str_1012153354_texture.glb",
+    "bytes": 27797848,
+    "sha256": "e0cde54aa1e4db918fed37bea487a70a31a3e8e4b419fc6e7556f215bcc83972",
+    "triangles": 10357,
+    "vertices": 17575,
+    "bounds": [
+      [
+        -0.3512292504310608,
+        0.0,
+        -0.5365153551101685
+      ],
+      [
+        0.3513759672641754,
+        0.8999999761581421,
+        0.535324215888977
+      ]
+    ],
+    "meshes": 1,
+    "primitives": 1,
+    "skins": 0,
+    "animations": 0,
+    "textures": [
+      {
+        "size": [
+          4096,
+          4096
+        ],
+        "encodedBytes": 18427725
+      },
+      {
+        "size": [
+          4096,
+          4096
+        ],
+        "encodedBytes": 8744001
+      }
+    ]
+  },
+  {
+    "label": "S1_B",
+    "file": "Meshy_AI_Brambleboar_1Star_Str_1012153406_texture.glb",
+    "bytes": 27975652,
+    "sha256": "b51e3ad3ad9346a477295fb4bc63f5981d0eb02d5cb1a1a5417f0ec855eb3ffa",
+    "triangles": 3115,
+    "vertices": 5074,
+    "bounds": [
+      [
+        -0.3523334860801697,
+        0.0,
+        -0.536625325679779
+      ],
+      [
+        0.3514479696750641,
+        0.8999999165534973,
+        0.5354339480400085
+      ]
+    ],
+    "meshes": 1,
+    "primitives": 1,
+    "skins": 0,
+    "animations": 0,
+    "textures": [
+      {
+        "size": [
+          4096,
+          4096
+        ],
+        "encodedBytes": 19169763
+      },
+      {
+        "size": [
+          4096,
+          4096
+        ],
+        "encodedBytes": 8623262
+      }
+    ]
+  },
+  {
+    "label": "S3",
+    "file": "Meshy_AI_Brambleboar_3Star_Rem_1012153417_texture.glb",
+    "bytes": 28987356,
+    "sha256": "ae7d2c81b7b11d3e86d814a91f14c9d551945f13ecbf44110f5fdc1d05e5684c",
+    "triangles": 10355,
+    "vertices": 15748,
+    "bounds": [
+      [
+        -0.709818959236145,
+        0.0,
+        -1.369246244430542
+      ],
+      [
+        0.7081093788146973,
+        1.9999998807907104,
+        1.3619160652160645
+      ]
+    ],
+    "meshes": 1,
+    "primitives": 1,
+    "skins": 0,
+    "animations": 0,
+    "textures": [
+      {
+        "size": [
+          4096,
+          4096
+        ],
+        "encodedBytes": 19084596
+      },
+      {
+        "size": [
+          4096,
+          4096
+        ],
+        "encodedBytes": 9335111
+      }
+    ]
+  },
+  {
+    "label": "S6",
+    "file": "Meshy_AI_Brambleboar_6Star_Rem_1012153430_texture.glb",
+    "bytes": 32335508,
+    "sha256": "fbc8fb38f9f3dcb1b9022e2708f86fd82fea892f3eac2148b001109e72b0f7c3",
+    "triangles": 10238,
+    "vertices": 19847,
+    "bounds": [
+      [
+        -1.2568122148513794,
+        -1.1920928955078125e-07,
+        -0.6949628591537476
+      ],
+      [
+        1.2567838430404663,
+        3.0,
+        0.6919115781784058
+      ]
+    ],
+    "meshes": 1,
+    "primitives": 1,
+    "skins": 0,
+    "animations": 0,
+    "textures": [
+      {
+        "size": [
+          4096,
+          4096
+        ],
+        "encodedBytes": 20675336
+      },
+      {
+        "size": [
+          4096,
+          4096
+        ],
+        "encodedBytes": 10962057
+      }
+    ]
+  },
+  {
+    "label": "S9",
+    "file": "Meshy_AI_Brambleboar_9Star_Rem_1012153441_texture.glb",
+    "bytes": 34973548,
+    "sha256": "78df3a264b2699535f744d8cb59563479567c0aaf922665a2464fbbea7321e3f",
+    "triangles": 9803,
+    "vertices": 21561,
+    "bounds": [
+      [
+        -2.761582374572754,
+        0.0,
+        -1.232822060585022
+      ],
+      [
+        2.761573553085327,
+        5.5,
+        1.3169764280319214
+      ]
+    ],
+    "meshes": 1,
+    "primitives": 1,
+    "skins": 0,
+    "animations": 0,
+    "textures": [
+      {
+        "size": [
+          4096,
+          4096
+        ],
+        "encodedBytes": 22192794
+      },
+      {
+        "size": [
+          4096,
+          4096
+        ],
+        "encodedBytes": 12030421
+      }
+    ]
+  }
+]

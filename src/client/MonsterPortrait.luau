@@ -5,7 +5,8 @@ local C=require(package.MonsterCatalog)
 local defaults={[1]="rbxassetid://136157716828140",[3]="rbxassetid://132856650627155",[6]="rbxassetid://105207783752500",[9]="rbxassetid://85299683248138"}
 function P.fill(container,id,stars,silhouette,_distanceScale)
  local stage=C.stage(stars)
- local imageId=id=="MeadowMouse" and (package:GetAttribute("MossratPortraitS"..stage) or defaults[stage]) or nil
+ local imageId=id=="MeadowMouse" and (package:GetAttribute("MossratPortraitS"..stage) or defaults[stage])
+  or id=="GrassBoar" and package:GetAttribute("BrambleboarPortraitS"..stage) or nil
  local image=Instance.new("ImageLabel") image.Name="MonsterPortraitImage"
  image.BackgroundTransparency=1 image.Size=UDim2.fromScale(1,1)
  image.ScaleType=Enum.ScaleType.Fit image.ZIndex=container.ZIndex+1

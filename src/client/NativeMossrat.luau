@@ -8,15 +8,19 @@ local neutralAnimator
 local boneCache=setmetatable({},{__mode="k"})
 function M.isTarget(model)
  local stage=C.stage(model:GetAttribute("Stars") or 1)
- local visual=package:FindFirstChild(C.visual("MeadowMouse",stage))
- return model:GetAttribute("MonsterId")=="MeadowMouse" and (stage==1 or stage==3 or stage==6 or stage==9) and visual~=nil and visual:GetAttribute("NativeMeshyMossrat")==true
+ local id=model:GetAttribute("MonsterId")
+ if id~="MeadowMouse" and id~="GrassBoar" then return false end
+ local visual=package:FindFirstChild(C.visual(id,stage))
+ return visual~=nil and visual:GetAttribute("NativeMeshyMossrat")==true
 end
 function M.apply(model)
  if not M.isTarget(model) or not model.PrimaryPart then return false end
  local stars=model:GetAttribute("Stars") or 1
  local stage=C.stage(stars)
  local suffix=stage==1 and "" or "_S"..stage
- local source=model:GetAttribute("VisualDeferred") and package:FindFirstChild("MeshyMossratHuntTemplate"..suffix) or package:FindFirstChild(C.visual("MeadowMouse",stars))
+ local id=model:GetAttribute("MonsterId")
+ local prefix=id=="GrassBoar" and "MeshyBrambleboarHuntTemplate" or "MeshyMossratHuntTemplate"
+ local source=model:GetAttribute("VisualDeferred") and package:FindFirstChild(prefix..suffix) or package:FindFirstChild(C.visual(id,stars))
  if not source then return false end
  local facingRevision=source:GetAttribute("MeshyFacingRevision") or "Original"
  local yaw=source:GetAttribute("MeshyVisualYawDegrees") or 0
@@ -74,7 +78,8 @@ function M.posePortrait(model)
 end
 function M.huntFrame(model,frame)
  local stage=C.stage(model:GetAttribute("Stars") or 1)
- local hunt=package:FindFirstChild("MeshyMossratHuntTemplate"..(stage==1 and "" or "_S"..stage))
+ local prefix=model:GetAttribute("MonsterId")=="GrassBoar" and "MeshyBrambleboarHuntTemplate" or "MeshyMossratHuntTemplate"
+ local hunt=package:FindFirstChild(prefix..(stage==1 and "" or "_S"..stage))
  if model:GetAttribute("VisualDeferred") and M.isTarget(model) and hunt and hunt:GetAttribute("FaceCourseForward") then
   return CFrame.new(frame.Position),true
  end

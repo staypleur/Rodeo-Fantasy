@@ -95,6 +95,7 @@ function M.new(context)
    elseif part:IsA("BillboardGui") then part:Destroy() end
   end
   for key,value in pairs({MonsterId=item.monsterId,Stars=item.stars,OwnerUserId=p.UserId,BagItemId=id,Running=false,RootHeight=height,RunStarted=workspace:GetServerTimeNow()}) do model:SetAttribute(key,value) end
+  if item.monsterId=="GrassBoar" then model:SetAttribute("SummonedAt",workspace:GetServerTimeNow()) end
   api.clear(p) model.Parent=folder pets[p]={model=model,id=id,height=height,following=false,blocked=0}
   p:SetAttribute("SummonedId",id)
 
