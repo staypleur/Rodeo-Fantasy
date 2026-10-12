@@ -37,7 +37,7 @@ function M.new(gui,bag,journal,remote)
  local journalButton=gui:FindFirstChild("OpenJournal")
  if journalButton then
   for _,n in ipairs(journalButton:GetChildren()) do n:Destroy() end
-  journalButton.AnchorPoint=Vector2.zero journalButton.Position=UDim2.new(0,8,.42,46) journalButton.Size=UDim2.fromOffset(64,64)
+  journalButton.AnchorPoint=Vector2.zero journalButton.Position=UDim2.new(0,8,.42,46) journalButton.Size=UDim2.fromOffset(56,56)
   journalButton.BackgroundColor3=Color3.fromRGB(15,216,255) journalButton.BackgroundTransparency=0
   make("UICorner",{CornerRadius=UDim.new(0,5)},journalButton) make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},journalButton)
   local icon=Icons.draw(journalButton,"Journal",38) icon.Position=UDim2.fromOffset(8,9)
