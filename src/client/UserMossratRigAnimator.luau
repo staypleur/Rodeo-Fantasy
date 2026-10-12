@@ -1,6 +1,7 @@
--- Plays the exact approved glTF samples through Bone.Transform; never blinks.
+-- Plays each approved glTF clip directly through Bone.Transform; never blinks.
+-- Each rig uses one fitted Walk loop while moving and its subtle Idle breathing
+-- loop while still. Do not layer a second procedural gait over these clips.
 local A={}
-local quadruped=require(script.Parent.QuadrupedAnimator)
 local data=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigData"))
 local dataS3=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigDataS3"))
 local dataS6=require(game.ReplicatedStorage.RodeoFantasy:WaitForChild("UserMossratRigDataS6"))
@@ -51,7 +52,7 @@ function A.animate(model,moving)
   if distance>70 then interval=1/10 end
  end
  if c.mode and now-c.last<interval then return end
- local dt=c.last>0 and math.min(now-c.last,.15) or 1/30 c.last=now
+ c.last=now
  local serverNow=workspace:GetServerTimeNow()
  local bondUntil=model:GetAttribute("PetBondUntil") or 0
  local bonding=not s3 and bondUntil>serverNow
@@ -82,7 +83,6 @@ function A.animate(model,moving)
    if name=="Head" or name=="Neck" then frame=CFrame.identity end
    if centerX then frame=CFrame.new(centerX*scale,0,0)*frame end
    if name=="Head" and not s3 then frame=frame*CFrame.Angles(0,math.rad(-8.2),0) end
-   -- Explicit four-leg stride also covers imported rigs whose revision attribute is absent.
    local legSide=name:sub(1,4)=="Left" and "Left" or name:sub(1,5)=="Right" and "Right" or nil
    local legLimb=name:find("Front",1,true) and "Front" or name:find("Rear",1,true) and "Rear" or nil
    if bonding and not s3 then
@@ -100,18 +100,11 @@ function A.animate(model,moving)
     elseif legLimb=="Front" and name:find("Upper",1,true) then pose=CFrame.Angles(math.rad(-50),0,0)
     elseif legLimb=="Front" and name:find("Lower",1,true) then pose=CFrame.Angles(math.rad(40),0,0) end
     frame=frame*CFrame.identity:Lerp(pose,ease)
-   elseif legSide and legLimb and moving and s6 then
-    local opposite=(legSide=="Left")~=(legLimb=="Front")
-    local beat=math.sin((now-c.started)*math.pi*6+(opposite and math.pi or 0))
-    if name:find("Upper",1,true) then frame=CFrame.Angles(beat*(s6 and (legLimb=="Front" and .22 or .45) or .65),0,0)
-    elseif name:find("Lower",1,true) then frame=CFrame.Angles(math.max(0,-beat)*(s6 and .28 or .65),0,0)
-    elseif name:find("Paw",1,true) then frame=CFrame.Angles(-beat*.25,0,0) end
    end
    local tailIndex=tonumber(name:match("^Tail(%d+)$"))
+   -- The user asked to keep tail sway only on the 1-star Mossrat.
    if tailIndex and s3 then
     frame=CFrame.identity
-   elseif tailIndex then
-    frame=frame*CFrame.Angles(0,math.sin(now*1.6-tailIndex*.45)*.12,math.sin(now*1.3-tailIndex*.3)*.035)
    end
    if bonding and data==dataS3 then
     local t=serverNow-(model:GetAttribute("PetBondStarted") or 0)
@@ -146,6 +139,5 @@ function A.animate(model,moving)
    b.Transform=(c.previous[name] or CFrame.identity):Lerp(frame,blend)
   end
  end
- if not s6 and not bonding then quadruped.apply(model,moving,dt) end
 end
 return A

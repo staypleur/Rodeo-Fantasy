@@ -1,4 +1,4 @@
-# Rodeo Fantasy — 새 프로젝트
+# Fantasy Monster Rodeo
 
 이제 **`dist/RodeoFantasy-New.rbxlx` 하나만** Roblox Studio에서 연다. 옛 맵·몬스터·비행선·중복 적용 파일은 정리했다.
 

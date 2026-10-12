@@ -1,5 +1,12 @@
 # 작업 기록
 
+## 2026-10-12 — Fantasy Monster Rodeo 이름 변경 및 모스랫 모션 검토
+
+- 사용자가 Creator Dashboard에서 체험 이름을 Fantasy Monster Rodeo로 저장 완료했다고 확인했다. 체험 공개 설정은 바꾸지 않았다.
+- 1·3·6·9성의 각 리그 데이터에 4초 Idle과 2초 Walk 클립이 있고, 리그 검증에서 동작 샘플·루프 경계·스키닝 데이터를 확인했다. `UserMossratRigAnimator`가 이동 중 추가 사족 보정과 이족 다리 덮어쓰기를 겹쳐 적용하던 부분을 제거해 등록된 각 등급 Walk 클립 하나가 다리를 구동하도록 정리했다. 정지 시 Idle 클립이 호흡에 해당하는 작은 몸통 움직임을 제공한다.
+- 통과: `tests/check_user_mossrat_rig.py`, `tests/check_hunt_mossrat_rig.py`, `tools/check_mossrat_s3_rig.py`, `tools/check_mossrat_s6_rig.py`, `tools/check_mossrat_s9_rig.py`.
+- 미완료: Roblox Studio에서의 실제 시각·재생 확인 및 실제 체험 적용/게시. 기존 사용자 수정 `dist/RodeoFantasy-New.rbxlx`는 덮어쓰지 않았다. 따라서 본 변경은 코드/에셋 검사 결과이며 실제 게임에서 자연스럽게 보이는지 확인한 결과가 아니다.
+
 ## 2026-10-12 — Rodeo Planeture 비공개 시험 체험 생성
 
 - 사용자 승인 이름 Rodeo Planeture로 puller3313 계정에 새 체험 생성. 체험 ID 10770388358. 대시보드 개요에서 액세스와 오디언스 도달 모두 **비공개**, 방문 수 0을 확인했다. 공개 전환이나 테스트 이용자 권한 부여는 하지 않았다.
