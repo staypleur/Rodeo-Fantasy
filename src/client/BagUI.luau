@@ -63,7 +63,7 @@ function UI.new(gui,remote)
  local evolveCancel=make("TextButton",{Name="CancelEvolution",Text=L.text("Cancel","en-us"),Position=UDim2.new(1,-194,0,12),Size=UDim2.fromOffset(80,34),TextSize=13,BackgroundColor3=Color3.fromRGB(164,139,107),TextColor3=Color3.new(1,1,1),ZIndex=24},evolveControls)
  local evolveConfirm=make("TextButton",{Name="ConfirmEvolution",Text=L.text("Evolve","en-us"),Position=UDim2.new(1,-108,0,12),Size=UDim2.fromOffset(100,34),TextSize=13,BackgroundColor3=Color3.fromRGB(80,134,104),TextColor3=Color3.new(1,1,1),ZIndex=24},evolveControls)
  make("UICorner",{CornerRadius=UDim.new(0,8)},evolveCancel) make("UICorner",{CornerRadius=UDim.new(0,8)},evolveConfirm)
- local scroll=make("ScrollingFrame",{Name="BagCards",BackgroundTransparency=1,BorderSizePixel=0,Position=UDim2.fromOffset(16,175),Size=UDim2.new(1,-32,1,-230),CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y,ScrollBarThickness=6,ZIndex=21},window)
+ local scroll=make("ScrollingFrame",{Name="BagCards",BackgroundTransparency=1,BorderSizePixel=0,Position=UDim2.fromOffset(16,175),Size=UDim2.new(1,-32,1,-230),CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y,ScrollBarThickness=8,Active=true,ScrollingDirection=Enum.ScrollingDirection.Y,ZIndex=21},window)
  make("UIGridLayout",{CellSize=UDim2.fromOffset(170,245),CellPadding=UDim2.fromOffset(12,12),SortOrder=Enum.SortOrder.LayoutOrder},scroll)
  local empty=make("TextLabel",{Name="EmptyBag",Text="No monsters caught yet",BackgroundTransparency=1,Position=UDim2.fromScale(.1,.45),Size=UDim2.fromScale(.8,.15),TextSize=20,TextWrapped=true,ZIndex=22},window)
  local search=make("TextBox",{Name="BagSearch",PlaceholderText="Search",Text="",ClearTextOnFocus=false,Position=UDim2.new(.32,0,0,55),Size=UDim2.new(.27,0,0,34),BackgroundColor3=Color3.fromRGB(255,250,237),TextColor3=Color3.fromRGB(71,58,40),TextSize=17,ZIndex=23},window)
@@ -75,6 +75,7 @@ function UI.new(gui,remote)
  local nextPage=make("TextButton",{Name="BagNext",Text="›",BackgroundTransparency=1,Position=UDim2.new(.65,5,1,-45),Size=UDim2.fromOffset(40,30),TextSize=24,TextColor3=Color3.fromRGB(70,58,40),ZIndex=23},window)
  function self.filter(region,query)
   self.region,self.query,self.page=region or self.region,query or self.query,1
+  scroll.CanvasPosition=Vector2.zero
   self.snapshot(self.items)
  end
  for _,region in ipairs(Query.regions(Catalog)) do
@@ -86,6 +87,7 @@ function UI.new(gui,remote)
  make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},breed)
  breed.Activated:Connect(function() if self.onBreed then self.onBreed() end end)
  local chooser
+ local layout
  local revision=0
  local function selectedCount() local n=0 for _ in pairs(self.selected) do n+=1 end return n end
  local function selectionAnchor()
@@ -132,17 +134,89 @@ function UI.new(gui,remote)
   revision+=1 local current=revision
   task.delay(.12,function() if revision==current then self.filter(nil,search.Text) end end)
  end)
- previous.Activated:Connect(function() self.page=math.max(1,self.page-1) self.snapshot(self.items) end)
- nextPage.Activated:Connect(function() self.page+=1 self.snapshot(self.items) end)
+ previous.Activated:Connect(function() self.page=math.max(1,self.page-1) scroll.CanvasPosition=Vector2.zero self.snapshot(self.items) end)
+ nextPage.Activated:Connect(function() self.page+=1 scroll.CanvasPosition=Vector2.zero self.snapshot(self.items) end)
  function self.close() window.Visible=false self.pen=nil self.setEvolutionMode(false) end
  function self.opened() Audio.ui("BagOpen") if self.onOpen then self.onOpen() end end
- chooser=make("Frame",{Name="RanchChooser",Visible=false,BackgroundTransparency=1,Position=UDim2.fromOffset(20,110),Size=UDim2.new(1,-40,1,-130),ZIndex=23},window)
+ chooser=make("ScrollingFrame",{Name="RanchChooser",Visible=false,BackgroundTransparency=1,BorderSizePixel=0,Active=true,ScrollingDirection=Enum.ScrollingDirection.Y,AutomaticCanvasSize=Enum.AutomaticSize.Y,CanvasSize=UDim2.new(),ScrollBarThickness=8,Position=UDim2.fromOffset(20,110),Size=UDim2.new(1,-40,1,-130),ZIndex=23},window)
  make("UIGridLayout",{CellSize=UDim2.new(.45,0,0,90),CellPadding=UDim2.fromOffset(18,18)},chooser)
  for index=1,4 do
   local choice=make("TextButton",{Name="RanchChoice"..index,Text="Hatchery".." "..index,BackgroundColor3=Color3.fromRGB(147,182,154),TextColor3=Color3.fromRGB(37,61,46),TextSize=22,ZIndex=24},chooser)
   make("UICorner",{CornerRadius=UDim.new(0,14)},choice)
   choice.Activated:Connect(function() if self.area=="Lobby" or self.area=="Cafe" then remote:FireServer("Manage",index) end end)
  end
+ -- Use available safe-area height, rather than a fixed desktop header.
+ layout=function()
+  if not window.Parent then return end
+  local size=gui.AbsoluteSize
+  local compact=size.Y<600 or size.X<600
+  window.Size=UDim2.fromScale(.94,compact and .94 or .84)
+  local narrow=window.AbsoluteSize.X<560
+  local row=compact and 42 or 55
+  title.Position=UDim2.fromOffset(16,4)
+  title.Size=UDim2.new(1,-76,0,compact and 32 or 40)
+  title.TextSize=compact and 20 or 26
+  close.Position=UDim2.new(1,-48,0,4) close.Size=UDim2.fromOffset(44,36)
+  window.BagMoneyIcon.Position=UDim2.fromOffset(16,row)
+  window.BagMoneyIcon.Size=UDim2.fromOffset(30,30)
+  money.Position=UDim2.fromOffset(48,row)
+  money.Size=UDim2.new(narrow and .48 or .30,-52,0,34)
+  search.Position=UDim2.new(narrow and .50 or .32,0,0,row)
+  search.Size=UDim2.new(narrow and .46 or .27,0,0,34)
+  local actionY=narrow and row+40 or row
+  breed.Position=UDim2.new(narrow and .04 or .62,0,0,actionY)
+  breed.Size=UDim2.new(narrow and .44 or .17,0,0,34)
+  evolveToggle.Position=UDim2.new(narrow and .52 or .81,0,0,actionY)
+  evolveToggle.Size=breed.Size
+  local tabsY=compact and actionY+42 or 136
+  tabs.Position=UDim2.fromOffset(16,tabsY) tabs.Size=UDim2.new(1,-32,0,34)
+  local top=tabsY+42
+  evolveControls.Position=UDim2.fromOffset(16,top)
+  if narrow then
+   evolveControls.Size=UDim2.new(1,-32,0,90)
+   evolveStatus.Size=UDim2.new(1,-64,0,38) evolveStatus.TextWrapped=true
+   evolvePreview.Position=UDim2.new(1,-54,0,2)
+   evolveCancel.Position=UDim2.new(0,8,0,48) evolveCancel.Size=UDim2.new(.45,-12,0,36)
+   evolveConfirm.Position=UDim2.new(.5,0,0,48) evolveConfirm.Size=UDim2.new(.5,-8,0,36)
+  else
+   evolveControls.Size=UDim2.new(1,-32,0,58)
+   evolveStatus.Size=UDim2.new(1,-258,1,0) evolveStatus.TextWrapped=false
+   evolvePreview.Position=UDim2.new(1,-248,0,5)
+   evolveCancel.Position=UDim2.new(1,-194,0,12) evolveCancel.Size=UDim2.fromOffset(80,34)
+   evolveConfirm.Position=UDim2.new(1,-108,0,12) evolveConfirm.Size=UDim2.fromOffset(100,34)
+  end
+  if self.evolutionMode then top+=narrow and 96 or 66 end
+  scroll.Position=UDim2.fromOffset(16,top)
+  scroll.Size=UDim2.new(1,-32,1,-top-42)
+  previous.Position=UDim2.new(.35,-45,1,-38)
+  pageLabel.Position=UDim2.new(.35,0,1,-38)
+  nextPage.Position=UDim2.new(.65,5,1,-38)
+  local grid=scroll:FindFirstChildOfClass("UIGridLayout")
+  local columns=math.max(1,math.floor((scroll.AbsoluteSize.X-10+12)/182))
+  grid.CellSize=UDim2.fromOffset(math.min(190,math.floor((scroll.AbsoluteSize.X-10-(columns-1)*12)/columns)),compact and 194 or 245)
+  for _,card in ipairs(scroll:GetChildren()) do
+   if card:IsA("Frame") then
+    local preview=card:FindFirstChild("MonsterImage")
+    if preview then preview.Size=UDim2.new(1,0,0,compact and 90 or 140) end
+    local name=card:FindFirstChild("MonsterName")
+    if name then name.Position=UDim2.fromOffset(4,compact and 90 or 140) end
+    local income=card:FindFirstChild("Income")
+    if income then income.Position=UDim2.fromOffset(4,compact and 118 or 172) end
+    for _,child in ipairs(card:GetChildren()) do
+     if child:IsA("TextButton") then child.Position=UDim2.fromOffset(8,compact and 150 or 208) child.Size=UDim2.new(1,-16,0,compact and 38 or 32) end
+    end
+   end
+  end
+  chooser.Position=UDim2.fromOffset(16,row+44)
+  chooser.Size=UDim2.new(1,-32,1,-row-58)
+  local choiceGrid=chooser:FindFirstChildOfClass("UIGridLayout")
+  local width=math.max(1,chooser.AbsoluteSize.X-10)
+  choiceGrid.CellPadding=UDim2.fromOffset(12,12)
+  choiceGrid.CellSize=UDim2.fromOffset(math.floor((width-12)/2),math.clamp(math.floor((chooser.AbsoluteSize.Y-12)/2),56,90))
+ end
+ gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
+ window:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
+ task.defer(layout)
  function self.openCompanionMenu()
   if self.area=="Hunt" then return end
   self.setEvolutionMode(false) self.mode="Companion" self.pen=nil chooser.Visible=false scroll.Visible=true
@@ -208,7 +282,6 @@ function UI.new(gui,remote)
   empty.Visible=show and #filtered==0
   empty.Text=L.text(#items==0 and "No monsters caught yet" or "No matching monsters","en-us")
   for _,tab in ipairs(tabs:GetChildren()) do if tab:IsA("TextButton") then tab.BackgroundColor3=tab.Name=="Region_"..self.region and Color3.fromRGB(167,127,79) or Color3.fromRGB(213,193,159) end end
-  scroll.CanvasPosition=Vector2.zero
   for index=(self.page-1)*12+1,math.min(self.page*12,#filtered) do
    local item=filtered[index]
    local card=make("Frame",{Name="MonsterCard",Size=UDim2.fromOffset(170,245),BackgroundColor3=Color3.fromRGB(237,225,204),ZIndex=22,LayoutOrder=index},scroll)
@@ -228,7 +301,7 @@ function UI.new(gui,remote)
    self.cards[item.id]=card
    local preview=make("Frame",{Name="MonsterImage",BackgroundTransparency=1,Size=UDim2.new(1,0,0,140),ZIndex=23},card)
    Portrait.fill(preview,item.monsterId,item.stars,false)
-   make("TextLabel",{Text=L.text(item.monsterId,"en-us").." · "..tostring(item.stars).."★",BackgroundTransparency=1,Position=UDim2.fromOffset(4,140),Size=UDim2.new(1,-8,0,28),TextSize=18,TextColor3=Color3.fromRGB(43,74,55),ZIndex=23},card)
+   make("TextLabel",{Name="MonsterName",Text=L.text(item.monsterId,"en-us").." · "..tostring(item.stars).."★",BackgroundTransparency=1,Position=UDim2.fromOffset(4,140),Size=UDim2.new(1,-8,0,28),TextSize=18,TextColor3=Color3.fromRGB(43,74,55),ZIndex=23},card)
    local income=make("Frame",{Name="Income",BackgroundTransparency=1,Position=UDim2.fromOffset(4,172),Size=UDim2.new(1,-8,0,30),ZIndex=23},card)
    make("ImageLabel",{Name="Money",Image=require(script.Parent.HudIcons).imageId(game.ReplicatedStorage.RodeoFantasy,"MoneyImage"),BackgroundTransparency=1,Position=UDim2.new(.5,-66,0,0),Size=UDim2.fromOffset(30,30),ScaleType=Enum.ScaleType.Fit,ZIndex=24},income)
    local amount=make("TextLabel",{Name="Amount",Text=tostring(item.incomeAmount),BackgroundTransparency=1,Position=UDim2.new(.5,-34,0,0),Size=UDim2.fromOffset(38,30),TextScaled=true,TextColor3=Color3.fromRGB(43,74,55),ZIndex=24},income)
@@ -273,6 +346,7 @@ function UI.new(gui,remote)
 
   end
   updateEvolutionControls()
+  layout()
  end
  function self.evolutionResult(result)
   if type(result)~="table" then return end
@@ -280,6 +354,7 @@ function UI.new(gui,remote)
    self.selected={} self.evolutionMode=false evolveControls.Visible=false
    scroll.Position=UDim2.fromOffset(16,175) scroll.Size=UDim2.new(1,-32,1,-230)
    evolveToggle.Text=L.text("Evolve","en-us")
+   layout()
   else
    local key=result.reason=="MaxStars" and "Already at max stars" or "Evolution failed"
    evolveStatus.Text=L.text(key,"en-us")

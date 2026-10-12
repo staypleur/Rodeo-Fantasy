@@ -3,6 +3,9 @@ local Icons=require(script.Parent:WaitForChild("HudIcons"))
 function H.new(gui)
  local root=Instance.new("Frame") root.Name="LobbyStats" root:SetAttribute("BottomHud",true) root.AnchorPoint=Vector2.new(0,1)
  root.Position=UDim2.new(0,8,1,-8) root.Size=UDim2.fromOffset(240,124) root.BackgroundTransparency=1 root.Parent=gui
+ local scale=Instance.new("UIScale") scale.Parent=root
+ local function layout() if not root.Parent then return end scale.Scale=gui.AbsoluteSize.Y<500 and .75 or 1 end
+ gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout) task.defer(layout)
  local function label(name,y,color)
   local n=Instance.new("TextLabel") n.Name=name n.Position=UDim2.fromOffset(48,y) n.Size=UDim2.fromOffset(186,40) n.BackgroundTransparency=1
   n.Text="0" n.TextColor3=color n.TextStrokeColor3=Color3.new(0,0,0) n.TextStrokeTransparency=0 n.Font=Enum.Font.GothamBlack n.TextSize=30 n.TextXAlignment=Enum.TextXAlignment.Left n.Parent=root return n

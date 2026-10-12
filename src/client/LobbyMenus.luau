@@ -68,24 +68,27 @@ function M.new(gui,bag,journal,remote)
   table.insert(buttons,button)
  end
  local function layout()
-  local camera=workspace.CurrentCamera
-  local compact=camera and camera.ViewportSize.Y<500
-  local factor=compact and .8 or 1
+  if not panel.Parent then return end
+  local height=gui.AbsoluteSize.Y
+  local factor=height<500 and .75 or 1
+  local step=72*factor
+  -- Reserve the lower-left currency block and lower-right native jump control.
+  local top=math.max(8,math.min(height*.24,height-140*factor-3*step-12))
   for _,button in ipairs(buttons) do
-   local scale=button:FindFirstChild("ResponsiveScale")
-   if not scale then scale=make("UIScale",{Name="ResponsiveScale"},button) end
+   local scale=button:FindFirstChild("ResponsiveScale") or make("UIScale",{Name="ResponsiveScale"},button)
    scale.Scale=factor
    local left=button.Name=="OpenShop" or button.Name=="OpenRoulette" or button.Name=="OpenCafe"
-   local offset=button.Name=="OpenCafe" and 118 or button.Name=="OpenRoulette" and -98 or button.Name=="OpenPaw" and 38 or -26
-   button.Position=UDim2.new(left and 0 or 1,left and 8 or -8,compact and (left and .25 or .36) or .42,offset*factor)
+   local row=button.Name=="OpenRoulette" and 0 or button.Name=="OpenShop" and 1 or button.Name=="OpenCafe" and 2 or button.Name=="OpenEgg" and 1 or 2
+   button.Position=UDim2.new(left and 0 or 1,left and 8 or -8,0,top+row*step)
   end
   if journalButton then
    local scale=journalButton:FindFirstChild("ResponsiveScale") or make("UIScale",{Name="ResponsiveScale"},journalButton)
-   scale.Scale=factor journalButton.Position=UDim2.new(0,8,compact and .25 or .42,46*factor)
+   scale.Scale=factor journalButton.AnchorPoint=Vector2.new(1,0)
+   journalButton.Position=UDim2.new(1,-8,0,top)
   end
  end
- if workspace.CurrentCamera then workspace.CurrentCamera:GetPropertyChangedSignal("ViewportSize"):Connect(layout) end
- layout()
+ gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout)
+ task.defer(layout)
  function api.state(data)
   local lobby=(data.area=="Lobby" or data.area=="Cafe") and (data.phase=="Idle" or data.phase=="Lobby")
   destination=data.area=="Cafe" and "GoLobby" or "GoCafe"

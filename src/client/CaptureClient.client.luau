@@ -158,14 +158,29 @@ local function jumpAction(_,inputState)
  if inputState==Enum.UserInputState.Begin then remote:FireServer("Jump") end
  return Enum.ContextActionResult.Sink
 end
+-- Reuse Roblox's arrow. One touch edge sends one action; holding cannot
+-- accidentally send the airborne lasso. Bind again when TouchGui is recreated.
+local nativeJumpBound=setmetatable({}, {__mode="k"})
+local function bindNativeJump(button)
+ if button.Name~="JumpButton" or not button:IsA("GuiButton") or nativeJumpBound[button] then return end
+ if not button:FindFirstAncestor("TouchGui") then return end
+ nativeJumpBound[button]=true
+ button.InputBegan:Connect(function(input)
+  if input.UserInputType==Enum.UserInputType.Touch then jumpAction("NativeJump",Enum.UserInputState.Begin) end
+ end)
+ button.InputEnded:Connect(function(input)
+  if input.UserInputType==Enum.UserInputType.Touch then jumpAction("NativeJump",Enum.UserInputState.End) end
+ end)
+end
+local playerGui=player:WaitForChild("PlayerGui")
+playerGui.DescendantAdded:Connect(bindNativeJump)
+for _,node in ipairs(playerGui:GetDescendants()) do bindNativeJump(node) end
 local function cameraMode(enabled)
  local camera=workspace.CurrentCamera
  if enabled and savedType==nil then
   savedType,savedSubject,savedFieldOfView=camera.CameraType,camera.CameraSubject,camera.FieldOfView
   CAS:BindActionAtPriority("RodeoSteer",keyAction,false,Enum.ContextActionPriority.High.Value+1,Enum.KeyCode.A,Enum.KeyCode.D,Enum.KeyCode.W,Enum.KeyCode.S)
-  CAS:BindActionAtPriority("RodeoJump",jumpAction,true,Enum.ContextActionPriority.High.Value+2,Enum.KeyCode.Space)
-  CAS:SetTitle("RodeoJump","Jump / Lasso")
-  CAS:SetPosition("RodeoJump",UDim2.new(1,-95,1,-160))
+  CAS:BindActionAtPriority("RodeoJump",jumpAction,false,Enum.ContextActionPriority.High.Value+2,Enum.KeyCode.Space)
   camera.CameraType=Enum.CameraType.Scriptable
   camera.FieldOfView=Config.Prototype.CameraFieldOfView
  elseif not enabled and savedType~=nil then
