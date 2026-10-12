@@ -10,6 +10,7 @@ local Course=require(game:GetService("ReplicatedStorage").RodeoFantasy.CourseGeo
 local Layout=require(script.Parent.GreenStarCourseLayout)
 local Visibility=require(game.ReplicatedStorage.RodeoFantasy.HerdVisibility)
 local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
+local SpawnPlan=require(game.ReplicatedStorage.RodeoFantasy.HerdSpawnPlan)
 local spawnSerial=0
 local crateRows={}
 
@@ -248,7 +249,7 @@ function World.visibleSet(z,aspect,viewer)
  local target=Visibility.capacity(Course.width(z))-(riding and 1 or 0)
  local previous=viewer and displayed[viewer]
  local limit=Visibility.transitionLimit(candidates,z,aspect or 1,tuning,target,previous,preferred)
- local result=Visibility.select(candidates,z,aspect or 1,tuning,limit,previous,preferred)
+ local result=Visibility.select(candidates,z,aspect or 1,tuning,limit,previous,preferred,Course.median(z)>0)
  if viewer then displayed[viewer]=result end
  return result
 end
@@ -274,11 +275,11 @@ function World.replenish(z,aspect,watchers,prime,budget)
   if -targetZ*tuning.MetersPerStud>=Catalog.MeadowEndMeters then continue end
   local id=Catalog.pick(math.max(0,-z*tuning.MetersPerStud),spawnSerial)
   if not id then break end
-  for _,range in ipairs(Course.ranges(targetZ,5)) do
-   local narrow=Course.width(targetZ)<30
-   if narrow and (offset-(prime and -12 or 0))%16~=0 then continue end
-   for laneIndex,lane in ipairs(narrow and {-0.5,0.5} or lanes) do
-    local x=(range[1]+range[2])/2+lane*(range[2]-range[1])/2
+  local narrow=Course.width(targetZ)<30
+  if narrow and (offset-(prime and -12 or 0))%16~=0 then continue end
+  local candidates=SpawnPlan.candidates(Course.ranges(targetZ,5),narrow and {-0.5,0.5} or lanes,math.floor(offset/8)%2==1)
+  for _,x in ipairs(candidates) do
+   if created>=math.min(budget or 24,Course.width(z)<30 and 16 or 24) then break end
     local onScreen=Visibility.visible(x,Catalog[id].RootHeight,targetZ-z,aspect,tuning,1.2)
     if onScreen and not prime then continue end
     local safe=true
@@ -294,8 +295,6 @@ function World.replenish(z,aspect,watchers,prime,budget)
      model:SetAttribute("OpeningScene",prime==true)
      created+=1
     end
-    if created>=math.min(budget or 24,Course.width(z)<30 and 16 or 24) then break end
-   end
   end
  end
  return created

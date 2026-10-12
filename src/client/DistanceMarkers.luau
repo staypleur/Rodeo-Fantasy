@@ -1,4 +1,5 @@
 -- Local course markings projected from the server's run distance, not global map Z.
+local Course=require(game.ReplicatedStorage.RodeoFantasy.CourseGeometry)
 local Markers={}
 local gates={}
 local function create(distance)
@@ -23,9 +24,9 @@ function Markers.update(active,distance,frame,metersPerStud)
  if not active or not frame then
   for _,gate in pairs(gates) do gate.model:Destroy() end gates={} return
  end
- local nextDistance=1000 -- only the first meadow is implemented
+ local nextDistance=Course.LengthMeters
  for value,gate in pairs(gates) do
-  if value<nextDistance-1000 or value>nextDistance then gate.model:Destroy() gates[value]=nil end
+  if value~=nextDistance then gate.model:Destroy() gates[value]=nil end
  end
  -- Keep one forthcoming marker; refresh its projection as flying changes travel speed.
  local gate=gates[nextDistance]

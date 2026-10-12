@@ -7,6 +7,7 @@ local player=Players.LocalPlayer
 local package=RS:WaitForChild("RodeoFantasy")
 local Config=require(package:WaitForChild("Config"))
 local Rules=require(package:WaitForChild("HuntRules"))
+local Course=require(package:WaitForChild("CourseGeometry"))
 local remote=package:WaitForChild("CaptureRemote")
 local animator=require(script.Parent:WaitForChild("RideAnimator"))
 local rider=require(script.Parent:WaitForChild("RiderPresentation"))
@@ -323,7 +324,7 @@ RunService:BindToRenderStep("RodeoCapturePresentation", Enum.RenderPriority.Came
   displayDistance+=math.clamp(clock-(state.sampleTime or clock),0,0.3)*speed*t.MetersPerStud
  end
  markers.update(active() or state.phase=="CourseEnd",displayDistance,visualFrame,t.MetersPerStud)
- displayDistance=math.min(displayDistance,1000)
+ displayDistance=math.min(displayDistance,Course.LengthMeters)
  distance.Visible=state.area=="Hunt"
  bag.Visible=state.area=="Lobby" or state.phase=="Idle"
  distance.Text=string.format("%dm",math.floor(displayDistance))

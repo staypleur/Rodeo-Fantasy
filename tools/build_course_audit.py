@@ -17,7 +17,7 @@ local root=Instance.new("Folder") root.Name="TemporaryCourseAuditWorld" root.Par
 local herd=Instance.new("Folder") herd.Name="Monsters" herd.Parent=root
 local ok,err=xpcall(function()
  local P=game.ReplicatedStorage.RodeoFantasy
- for _,name in ipairs({"CourseGeometry","HerdMotion","HerdVisibility","MonsterCatalog","HuntRules","Config"}) do P[name]:Clone().Parent=f end
+ for _,name in ipairs({"CourseGeometry","HerdMotion","HerdVisibility","MonsterCatalog","HuntRules","Config","HerdSpawnPlan"}) do P[name]:Clone().Parent=f end
  game.ServerScriptService.GreenStarCourseLayout:Clone().Parent=f
  local n=game.ServerScriptService.HuntWorld:Clone() n.Parent=f
  local text=n.Source
@@ -26,6 +26,7 @@ local ok,err=xpcall(function()
   if line:find("local Motion=require",1,true) then line='local Motion=require(script.Parent.HerdMotion)'
   elseif line:find("local Course=require",1,true) then line='local Course=require(script.Parent.CourseGeometry)'
   elseif line:find("local Visibility=require",1,true) then line='local Visibility=require(script.Parent.HerdVisibility)'
+  elseif line:find("local SpawnPlan=require",1,true) then line='local SpawnPlan=require(script.Parent.HerdSpawnPlan)'
   elseif line:find("local Catalog=require",1,true) then line='local Catalog=require(script.Parent.MonsterCatalog)' end
   table.insert(lines,line)
  end

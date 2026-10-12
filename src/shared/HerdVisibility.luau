@@ -23,7 +23,7 @@ function View.visible(x,y,relativeZ,aspect,t,margin)
  return math.abs(dx*rx+dz*rz)<half*aspect and math.abs(dx*ux+dy*uy+dz*uz)<half
 end
 -- Shared deterministic shortlist: only displayed wild animals can be caught/collided with.
-function View.select(candidates,z,aspect,t,limit,previous,preferred)
+function View.select(candidates,z,aspect,t,limit,previous,preferred,split)
  local visible={}
  local selected={} local count=0
  -- A rider has just left this already-visible animal. Keep it ahead of the
@@ -34,7 +34,7 @@ function View.select(candidates,z,aspect,t,limit,previous,preferred)
   end
  end
  local function entry(candidate)
-  return not previous or candidate.emerging or candidate.atDen or not View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1)
+  return split or not previous or candidate.emerging or candidate.atDen or not View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1)
  end
  for _,candidate in ipairs(candidates) do
   if not selected[candidate.key] and previous and previous[candidate.key] and count<(limit or 6) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then
@@ -46,6 +46,22 @@ function View.select(candidates,z,aspect,t,limit,previous,preferred)
   end
  end
  table.sort(visible,function(a,b) if a.score==b.score then return a.serial<b.serial end return a.score<b.score end)
+ -- At a fork, fill missing sides first without replacing retained visible animals.
+ if split then
+  for _,side in ipairs({-1,1}) do
+   local present=false
+   for _,candidate in ipairs(candidates) do
+    if selected[candidate.key] and candidate.x*side>0 then present=true break end
+   end
+   if not present then
+    for _,candidate in ipairs(visible) do
+     if count<(limit or 6) and not selected[candidate.key] and candidate.x*side>0 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then
+      selected[candidate.key]=true count+=1 break
+     end
+    end
+   end
+  end
+ end
  -- Prefer ready runners, then fill the visible herd with animals leaving caves.
  for _,candidate in ipairs(visible) do
   if not selected[candidate.key] and not candidate.emerging and count<3 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then selected[candidate.key]=true count+=1 end
