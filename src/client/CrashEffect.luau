@@ -1,7 +1,7 @@
 -- Cartoon breakup using temporary visual clones; never destroys the real avatar.
 local Effect={}
 local shards,hidden={},{}
-local character,started
+local character,started,falling
 local labels={}
 local function clear()
  for _,entry in ipairs(shards) do entry.part:Destroy() end
@@ -9,12 +9,13 @@ local function clear()
  for gui,value in pairs(labels) do if gui.Parent then gui.Enabled=value end end
  labels={}
  shards,hidden={},{}
- character,started=nil,nil
+ character,started,falling=nil,nil,nil
 end
-function Effect.start(model,clock,monsterFrame,monsterId)
+function Effect.start(model,clock,monsterFrame,monsterId,reason)
  clear()
  if not model then return end
  character,started=model,clock
+ falling=reason=="CanyonFall"
  for _,gui in ipairs(model:GetDescendants()) do if gui:IsA("BillboardGui") then local enabled=gui:GetAttribute("CrashEnabled") if enabled==nil then enabled=gui.Enabled end labels[gui]=enabled gui.Enabled=false end end
  local root=model:FindFirstChild("HumanoidRootPart")
  local center=root and root.Position or Vector3.zero
@@ -39,7 +40,7 @@ function Effect.start(model,clock,monsterFrame,monsterId)
   local radial=Vector3.new(direction.X,0,direction.Z)
   if radial.Magnitude<0.1 then radial=Vector3.new(math.cos(index*2.4),0,math.sin(index*2.4)) end
   local velocity=radial.Unit*12+Vector3.new(0,12+index%4,10)
-  table.insert(shards,{part=shard,origin=shard.CFrame,velocity=velocity,alpha=alpha,spin=Vector3.new(index%3+1,1,index%2+1)})
+  table.insert(shards,{part=shard,origin=shard.CFrame,velocity=falling and Vector3.new(0,-2,-4) or velocity,alpha=alpha,spin=falling and Vector3.zero or Vector3.new(index%3+1,1,index%2+1)})
  end
  if monsterFrame then
   local package=game.ReplicatedStorage.RodeoFantasy
@@ -56,7 +57,7 @@ function Effect.start(model,clock,monsterFrame,monsterId)
    shard.CFrame=monsterFrame*template.PrimaryPart.CFrame:ToObjectSpace(original.CFrame)
    shard.Parent=workspace
    local angle=index*2.4
-   table.insert(shards,{part=shard,origin=shard.CFrame,velocity=Vector3.new(math.cos(angle)*14,9+index%5,math.sin(angle)*14+10),alpha=original.Transparency,spin=Vector3.new(1,index%3+1,1)})
+   table.insert(shards,{part=shard,origin=shard.CFrame,velocity=falling and Vector3.new(0,-2,-4) or Vector3.new(math.cos(angle)*14,9+index%5,math.sin(angle)*14+10),alpha=original.Transparency,spin=falling and Vector3.zero or Vector3.new(1,index%3+1,1)})
   end
   template:Destroy()
  end
@@ -71,8 +72,8 @@ function Effect.update(model,phase,clock)
   local entry=shards[i]
   if elapsed>=1.15 then entry.part:Destroy() table.remove(shards,i)
   else
-   local position=entry.origin.Position+entry.velocity*elapsed+Vector3.new(0,-20*elapsed*elapsed,0)
-   position=Vector3.new(position.X,math.max(0.3,position.Y),position.Z)
+   local position=entry.origin.Position+entry.velocity*elapsed+Vector3.new(0,-(falling and 35 or 20)*elapsed*elapsed,0)
+   if not falling then position=Vector3.new(position.X,math.max(0.3,position.Y),position.Z) end
    local spin=entry.spin*elapsed*4
    entry.part.CFrame=CFrame.new(position)*entry.origin.Rotation*CFrame.Angles(spin.X,spin.Y,spin.Z)
    entry.part.Transparency=entry.alpha+(1-entry.alpha)*math.clamp((elapsed-0.65)/0.5,0,1)

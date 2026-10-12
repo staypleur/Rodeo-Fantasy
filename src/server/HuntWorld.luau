@@ -127,15 +127,41 @@ function World.ensure(z)
 		chunk.Name, chunk.Parent = "Road_" .. index, root
 		chunks[index] = chunk
 		local start = index * tuning.GroundChunkStuds
-		local meadow=part(chunk, "Meadow", Vector3.new(0,-1,start), Vector3.new(Course.width(start)*2,2,tuning.GroundChunkStuds), Color3.fromRGB(178,211,117))
-  meadow.Material=Enum.Material.SmoothPlastic
 		local random = Random.new(9101 + math.abs(index) * 137)
-  for _,fork in ipairs(Course.Forks) do
-   local lo=math.max(start-tuning.GroundChunkStuds/2,-fork[2]*Course.LayoutScale)
-   local hi=math.min(start+tuning.GroundChunkStuds/2,-fork[1]*Course.LayoutScale)
-   if hi>lo then
-    decoration(chunk,"ForkRidge",Vector3.new(0,1.5,(lo+hi)/2),Vector3.new(Course.median((lo+hi)/2)*2,3,hi-lo),Color3.fromRGB(203,143,91))
-    decoration(chunk,"ForkGrass",Vector3.new(0,3.1,(lo+hi)/2),Vector3.new(Course.median((lo+hi)/2)*2,.2,hi-lo),Color3.fromRGB(133,179,96))
+  -- Short slices follow the changing width; canyon slices have no central floor.
+  for offset=-tuning.GroundChunkStuds/2+8,tuning.GroundChunkStuds/2-8,16 do
+   local rowZ=start+offset
+   local edge=math.min(Course.width(rowZ-8),Course.width(rowZ),Course.width(rowZ+8))
+   local _,kind,t=Course.fork(rowZ)
+   local middle=Course.median(rowZ)
+   if kind=="Canyon" and middle>.1 then
+    for _,side in ipairs({-1,1}) do
+     local lane=edge-middle
+     local floor=part(chunk,"Meadow",Vector3.new(side*(middle+lane/2),-1,rowZ),Vector3.new(lane,2,16),Color3.fromRGB(178,211,117))
+     floor.Material=Enum.Material.SmoothPlastic
+     decoration(chunk,"InnerCliff",Vector3.new(side*(middle+1.5),-15,rowZ),Vector3.new(3,28,16),Color3.fromRGB(146,119,87))
+     decoration(chunk,"CliffLayer",Vector3.new(side*(middle+1.5),-22,rowZ),Vector3.new(3.2,2,16),Color3.fromRGB(106,88,68))
+    end
+    decoration(chunk,"CanyonDepth",Vector3.new(0,-32,rowZ),Vector3.new(middle*2,2,16),Color3.fromRGB(46,71,72))
+   else
+    local floor=part(chunk,"Meadow",Vector3.new(0,-1,rowZ),Vector3.new(edge*2,2,16),Color3.fromRGB(178,211,117))
+    floor.Material=Enum.Material.SmoothPlastic
+   end
+   if kind=="Mountain" and middle>.1 then
+    local h=3+10*math.sin(math.pi*t)+3*math.sin(t*5*math.pi)
+    for _,side in ipairs({-1,1}) do
+     local slope=Instance.new("WedgePart") slope.Name="MountainSlope" slope.Anchored=true
+     slope.CanCollide,slope.CanTouch,slope.CanQuery=false,false,false
+     slope.Size=Vector3.new(16,h,middle) slope.CFrame=CFrame.new(side*middle/2,h/2,rowZ)*CFrame.Angles(0,-side*math.pi/2,0)
+     slope.Color=Color3.fromRGB(110,151,80) slope.Material=Enum.Material.SmoothPlastic slope.Parent=chunk
+    end
+    if math.floor(rowZ/16)%4==0 and middle>3 then
+     decoration(chunk,"RidgeTreeTrunk",Vector3.new(0,h+1.4,rowZ),Vector3.new(.8,2.8,.8),Color3.fromRGB(146,101,70))
+     decoration(chunk,"RidgeTreeCrown",Vector3.new(0,h+3.2,rowZ),Vector3.new(3.4,2,3.4),Color3.fromRGB(112,165,85))
+     decoration(chunk,"RidgeTreeTop",Vector3.new(0,h+4.4,rowZ),Vector3.new(2.2,.7,2.2),Color3.fromRGB(153,195,105))
+    elseif math.floor(rowZ/16)%5==0 then
+     decoration(chunk,"RidgeRock",Vector3.new(0,h+.4,rowZ),Vector3.new(2,.8,1.6),Color3.fromRGB(177,157,123))
+    end
    end
   end
   local placements=Layout[index]
@@ -309,7 +335,8 @@ function World.mountedHit(from,to,mount,selected,dashing)
  local flying=mount:GetAttribute("Flying")==true
  for i=0,4 do
   local p=from:Lerp(to,i/4)
-  if not Course.contains(p.X,p.Z-half.Z,half.X,flying) or not Course.contains(p.X,p.Z+half.Z,half.X,flying) then return "Wall" end
+  local hazard=Course.hazard(p.X,p.Z-half.Z,half.X,flying) or Course.hazard(p.X,p.Z+half.Z,half.X,flying)
+  if hazard then return hazard end
  end
  for other in pairs(animals) do
   if other==mount or not other.Parent or other:GetAttribute("Flying")~=mount:GetAttribute("Flying") or (selected and not other:GetAttribute("Occupied") and not selected[other]) then continue end

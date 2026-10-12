@@ -252,7 +252,7 @@ remote.OnClientEvent:Connect(function(kind,data)
   monsters=data.huntRoot.Monsters
   monsters.DescendantAdded:Connect(function(part) if part:IsA("BasePart") then part.LocalTransparencyModifier=1 end end)
  end
- if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow(),data.monsterCrashFrame,data.monsterCrashId) end
+ if data.phase=="GameOver" and state.phase~="GameOver" and data.crash then crashEffect.start(player.Character,workspace:GetServerTimeNow(),data.monsterCrashFrame,data.monsterCrashId,data.endReason) end
  if data.phase~=state.phase then notice,noticeUntil="",0 end
  state=data
  bagUI.state(data) journalUI.state(data) socialUI.state(data) lobbyMenus.state(data)

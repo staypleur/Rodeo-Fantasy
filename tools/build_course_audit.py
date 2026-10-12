@@ -2,7 +2,7 @@
 from pathlib import Path
 import json
 R=Path(__file__).resolve().parents[1]
-data=json.loads((R/'dist/CourseReview/GreenStar-2000m-layout.json').read_text(encoding='utf8'))
+data=json.loads((R/'dist/CourseReview/VarietyV4/GreenStar-2000m-layout.json').read_text(encoding='utf8'))
 forks=data['forks']
 def left(d,x):
  for a,b in forks:

@@ -139,7 +139,7 @@ local function finish(player,reason,crashKind)
  if not state or state.phase=="GameOver" then return end
  state.crash=crashKind~=nil
  state.endReason=crashKind
- local brokenMount=(crashKind=="Wall" or crashKind=="Obstacle") and state.monster
+ local brokenMount=(crashKind=="Wall" or crashKind=="Obstacle" or crashKind=="CanyonFall") and state.monster
  if brokenMount and brokenMount.Parent then state.monsterCrashFrame=brokenMount.PrimaryPart.CFrame state.monsterCrashId=brokenMount:GetAttribute("MonsterId") end
  freeMount(state)
  if brokenMount and brokenMount.Parent then brokenMount:Destroy() end
@@ -462,7 +462,7 @@ RunService.Heartbeat:Connect(function(delta)
    end
    if blocked then finish(player,"This monster cannot break crates.","Obstacle") continue end
    local contact=World.mountedHit(before,position,state.monster,World.visibleSet(position.Z,views[player],player),dashing)
-   if contact then finish(player,contact=="Wall" and "You hit a wall." or "You hit another monster.",contact) continue end
+   if contact then finish(player,contact=="Wall" and "You hit a wall." or contact=="CanyonFall" and "You fell into the canyon." or "You hit another monster.",contact) continue end
    if World.hit(before,position,state.monster:GetAttribute("Flying"),state.monster,dashing) then finish(player,"You hit an obstacle.","Obstacle") continue end
    local tameReady,warningReady=Rules.mountTimeline(clock-state.started,Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds,Config.Hunt.AngerSeconds,tuning.AngerWarningSeconds)
    if not state.tamed and tameReady then

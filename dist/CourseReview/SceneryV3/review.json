@@ -1,0 +1,17 @@
+{
+  "status": "UNAPPROVED",
+  "oldMaximumWidthStuds": 70,
+  "widthRangeStuds": [
+    48,
+    70
+  ],
+  "segmentLengthStuds": 200,
+  "variants": {
+    "ForestMountain": 205,
+    "OpenCanyon": 273
+  },
+  "limitations": [
+    "Representative scenery only; not a playable 2 km course",
+    "No mobile performance or player collision validation"
+  ]
+}
