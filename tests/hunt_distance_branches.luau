@@ -25,7 +25,7 @@ assert(View.visible(-20,2,-30,2.15,t,1) and View.visible(20,2,-30,2.15,t,1))
 local selected=View.select(candidates,0,2.15,t,4,nil,nil,true)
 local l,r,n=0,0,0
 for _,c in ipairs(candidates) do if selected[c.key] then n+=1 if c.x<0 then l+=1 else r+=1 end end end
-assert(n<=4 and l>0 and r>0)
+assert(n==4 and l==2 and r==2,"Opening shortlist must balance left/right")
 local previous={[1]=true,[2]=true}
 selected=View.select(candidates,0,2.15,t,4,previous,nil,true)
 assert(selected[1] and selected[2],"Retained animals must not pop out")

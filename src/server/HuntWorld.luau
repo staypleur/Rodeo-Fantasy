@@ -198,7 +198,13 @@ function World.ensure(z)
     end
    end
    for i=1,3 do
-    decoration(chunk,"MeadowPatch",Vector3.new(random:NextNumber(-29,29),0.025,rowZ+random:NextNumber(-14,14)),Vector3.new(random:NextNumber(2,5),0.05,random:NextNumber(3,8)),Color3.fromRGB(187,218,128))
+    local x,z=random:NextNumber(-29,29),rowZ+random:NextNumber(-14,14)
+    local sx,sz=random:NextNumber(2,5),random:NextNumber(3,8)
+    -- Ground colour patches need support across their entire footprint.
+    if Course.contains(x-sx/2,z-sz/2,0) and Course.contains(x+sx/2,z-sz/2,0)
+     and Course.contains(x-sx/2,z+sz/2,0) and Course.contains(x+sx/2,z+sz/2,0) then
+     decoration(chunk,"MeadowPatch",Vector3.new(x,0.025,z),Vector3.new(sx,0.05,sz),Color3.fromRGB(187,218,128))
+    end
    end
 		end
 	end
@@ -294,6 +300,13 @@ end
 function World.replenish(z,aspect,watchers,prime,budget)
  aspect=aspect or 1
  local created=0
+ local counts={[-1]=0,[1]=0}
+ for model in pairs(animals) do
+  if model.Parent and not model:GetAttribute("Occupied") then
+   local p=model.PrimaryPart.Position
+   if p.Z<=z+30 and p.Z>=z-250 then counts[p.X<0 and -1 or 1]+=1 end
+  end
+ end
  local lanes={-0.72,-0.24,0.24,0.72}
  for offset=prime and -12 or 0,220,8 do
   if created>=math.min(budget or 24,Course.width(z)<30 and 16 or 24) then break end
@@ -304,8 +317,16 @@ function World.replenish(z,aspect,watchers,prime,budget)
   local narrow=Course.width(targetZ)<30
   if narrow and (offset-(prime and -12 or 0))%16~=0 then continue end
   local candidates=SpawnPlan.candidates(Course.ranges(targetZ,5),narrow and {-0.5,0.5} or lanes,math.floor(offset/8)%2==1)
+  local preferred=counts[-1]<counts[1] and -1 or counts[1]<counts[-1] and 1 or (spawnSerial%2==0 and 1 or -1)
+  table.sort(candidates,function(a,b)
+   local sa,sb=a<0 and -1 or 1,b<0 and -1 or 1
+   if sa~=sb then return sa==preferred end
+   return math.abs(a)<math.abs(b)
+  end)
   for _,x in ipairs(candidates) do
    if created>=math.min(budget or 24,Course.width(z)<30 and 16 or 24) then break end
+    local side=x<0 and -1 or 1
+    if counts[side]>counts[-side] then continue end
     local onScreen=Visibility.visible(x,Catalog[id].RootHeight,targetZ-z,aspect,tuning,1.2)
     if onScreen and not prime then continue end
     local safe=true
@@ -320,6 +341,7 @@ function World.replenish(z,aspect,watchers,prime,budget)
      model:SetAttribute("BornOutsideView",not onScreen)
      model:SetAttribute("OpeningScene",prime==true)
      created+=1
+     counts[side]+=1
     end
   end
  end

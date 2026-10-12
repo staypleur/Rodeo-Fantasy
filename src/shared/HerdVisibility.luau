@@ -48,41 +48,25 @@ function View.select(candidates,z,aspect,t,limit,previous,preferred,split)
   end
  end
  table.sort(visible,function(a,b) if a.score==b.score then return a.serial<b.serial end return a.score<b.score end)
- -- At a fork, fill missing sides first without replacing retained visible animals.
- if split then
-  for _,side in ipairs({-1,1}) do
-   local present=false
-   for _,candidate in ipairs(candidates) do
-    if selected[candidate.key] and candidate.x*side>0 then present=true break end
-   end
-   if not present then
-    for _,candidate in ipairs(visible) do
-     if count<(limit or 6) and not selected[candidate.key] and candidate.x*side>0 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then
-      selected[candidate.key]=true count+=1 break
-     end
-    end
-   end
-  end
- end
- -- Prefer ready runners, then fill the visible herd with animals leaving caves.
- for _,candidate in ipairs(visible) do
-  if not selected[candidate.key] and not candidate.emerging and count<3 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then selected[candidate.key]=true count+=1 end
- end
- for _,candidate in ipairs(visible) do
-  if not selected[candidate.key] and candidate.emerging and count<math.min(limit or 6,6) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then selected[candidate.key]=true count+=1 end
- end
- for _,candidate in ipairs(visible) do
-  if not selected[candidate.key] and count<(limit or 6) then selected[candidate.key]=true count+=1 end
- end
- -- Faster/flying herds can leave the inner window together. Fill the minimum
- -- from animals already inside the full camera, without replacing stable IDs.
- if count<3 then
+ -- Fill from eligible offscreen entries on the less populated side first.
+ -- Retained visible runners are never replaced to force a numerical balance.
+ while count<(limit or 6) do
+  local left,right=0,0
   for _,candidate in ipairs(candidates) do
-   if not selected[candidate.key] and entry(candidate) and not candidate.emerging and count<3 and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,.98) then
-    selected[candidate.key]=true count+=1
+   if selected[candidate.key] then if candidate.x<0 then left+=1 else right+=1 end end
+  end
+  local preferred=left<right and -1 or right<left and 1 or nil
+  local best
+  for _,candidate in ipairs(visible) do
+   if not selected[candidate.key] then
+    if not best then best=candidate end
+    if preferred and candidate.x*preferred>0 then best=candidate break end
    end
   end
+  if not best then break end
+  selected[best.key]=true count+=1
  end
+
  return selected
 end
 return View
