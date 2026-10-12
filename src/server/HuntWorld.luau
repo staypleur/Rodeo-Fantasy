@@ -4,7 +4,7 @@ local World = {}
 local chunks, animals, previousPositions = {}, {}, {}
 local root, monsters, obstacles, template, tuning
 local Rules
-local monsterId,rideSpeed
+local monsterId
 local Motion=require(game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy"):WaitForChild("HerdMotion"))
 local Course=require(game:GetService("ReplicatedStorage").RodeoFantasy.CourseGeometry)
 local Layout=require(script.Parent.GreenStarCourseLayout)
@@ -12,7 +12,6 @@ local Visibility=require(game.ReplicatedStorage.RodeoFantasy.HerdVisibility)
 local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
 local SpawnPlan=require(game.ReplicatedStorage.RodeoFantasy.HerdSpawnPlan)
 local spawnSerial=0
-local crateRows={}
 
 local function part(parent, name, position, size, color)
 	local item = Instance.new("Part")
@@ -72,7 +71,6 @@ end
 function World.init(world, modelTemplate, config, rules)
 	root, monsters, template, tuning, Rules = world, world.Monsters, modelTemplate, config.Prototype, rules
 	monsterId = config.Monster.Id
- rideSpeed = config.Monster.RunSpeed or tuning.ForwardStudsPerSecond
 	obstacles = Instance.new("Folder")
 	obstacles.Name, obstacles.Parent = "Obstacles", root
 	local preview = root:FindFirstChild("PreviewMonster")
@@ -258,7 +256,6 @@ function World.releaseMount(model,viewer)
  released[viewer]=released[viewer] or {}
  released[viewer][model]=true
 end
-function World.atDen() return false end
 function World.visibleSet(z,aspect,viewer)
  local candidates={}
  local riding=false
@@ -436,7 +433,6 @@ function World.cleanup(nearZ)
 			chunk:Destroy()
 			chunks[index] = nil
 			for _, rock in ipairs(obstacles:GetChildren()) do if rock:GetAttribute("Chunk") == index then rock:Destroy() end end
-			for z,owner in pairs(crateRows) do if owner==index then crateRows[z]=nil end end
 		end
 	end
 	for model in pairs(animals) do

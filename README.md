@@ -1,14 +1,13 @@
 # Fantasy Monster Rodeo
 
-이제 **`dist/RodeoFantasy-New.rbxlx` 하나만** Roblox Studio에서 연다. 옛 맵·몬스터·비행선·중복 적용 파일은 정리했다.
+현재 게임은 **Fantasy Monster Rodeo**, 카페 장소는 **Fantasy Monster Cafe**이며 비공개 시험 중입니다.
 
-- 로비: Stud 우주선, 부화실8개/알자리32개/자동문, 상점2곳/랭킹2곳/룰렛/배틀패스 자리.
-- 사냥터: Green Star 숲1,000m/폭192studs, 얇은 판 나무·바위/절벽/폭포/바람. 개인 사냥과 기존 이동·점프·줄 조작 유지.
-- 모델: 사용자 모스랫1성/로켓만 준비. Roblox 업로드는 아직 미완료이며 옛 모델로 대체하지 않는다.
-- 가방·도감·교감·거래·저장과 카페 시스템 유지. 옛 카페 맵은 삭제했고 새 맵 제작 때 실행을 연결한다.
+- 실제 게시된 로비·카페에는 최신 모스랫 모델과 공통 UI가 연결되어 있습니다.
+- Green Star 사냥터는 2,000m, 기존 최대 폭 안에서 변화하는 산·협곡 분기와 네모난 나무·바위 장애물을 사용합니다.
+- 최신 확정 기획은 `GAME_DESIGN.md`, 게시·검사 기록은 `docs/WORK_LOG.md`를 확인합니다.
+- `dist/RodeoFantasy-New.rbxlx`는 사용자 로컬 작업 파일입니다. 실제 게시된 장소와 동일 버전이라고 가정하지 않으며 임의로 덮어쓰지 않습니다.
+- 모델 원본과 재생성 도구는 보존하고, 반려된 MountainV2 검토본과 생성기는 정리했습니다. 현재 코스 검토 자료는 `dist/CourseReview/SceneryV3`와 `VarietyV4`에 있습니다.
 
-**실행·모델 연결·성공 확인:** [새 프로젝트 안내](docs/NEW_PROJECT.md).
-
-빌드: `tools/build_project.py`. 모델 설치 파일 생성: `tools/build_model_installer.py`. 가져오기 묶음: `tools/prepare_import_recovery.py`. 검사: `tests/check_new_project.py`, `tests/check_user_mossrat_rig.py`.
+빌드 도구: `tools/build_project.py`. 실행 전에 로컬 파일의 모델과 변경 사항을 보존해야 합니다. 이전 시작 안내는 `docs/NEW_PROJECT.md`이며 최신 서비스 상태는 작업 기록을 우선합니다.
 
 플레이어 DataStore 이름은 유지한다. 삭제 파일과 미커밋 작업의 로컬 복구 사본은 `.local-backup`에 보관하며 GitHub에 올리지 않는다. 코드 검사와 실제 Studio·모바일·PC 검증을 구분한다.
