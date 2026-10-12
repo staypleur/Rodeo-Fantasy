@@ -8,7 +8,7 @@ def left(d,x):
  for a,b in forks:
   if a-120<=d<=b+120:
    t=min(1,max(0,(d-a+120)/120),max(0,(b+120-d)/120));t=t*t*(3-2*t)
-   return x*(1-t)-12*t
+   return x*(1-t)-4.4*t
  return x
 points=','.join('{%.5f,%.5f}'%(r['x']*4.8,left(r['meters'],r['x'])*4.8) for r in data['routes'])
 code='''assert(not game.RunService:IsRunning())

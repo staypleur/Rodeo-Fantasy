@@ -1,11 +1,13 @@
 -- Approved natural-cluster Green Star course. Geometry uses metres at 4.8 studs/m.
 local Course={LengthStuds=9600,LayoutScale=4.8,LengthMeters=2000,Forks={{430,550},{830,990},{1250,1390},{1670,1840}}}
 function Course.width(z)
- return 21*Course.LayoutScale
+ local d=math.max(0,-z/3)
+ local function ramp(a,b) return math.clamp((d-a)/(b-a),0,1) end
+ return 35-11*ramp(256,400)+11*ramp(600,800)
 end
 function Course.median(z)
  local d=-z/Course.LayoutScale
- for _,fork in ipairs(Course.Forks) do if d>=fork[1] and d<=fork[2] then return 4*Course.LayoutScale end end
+ for _,fork in ipairs(Course.Forks) do if d>=fork[1] and d<=fork[2] then return 9 end end
  return 0
 end
 function Course.ranges(z,padding,flying)

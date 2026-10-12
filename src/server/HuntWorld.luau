@@ -133,8 +133,8 @@ function World.ensure(z)
    local lo=math.max(start-tuning.GroundChunkStuds/2,-fork[2]*Course.LayoutScale)
    local hi=math.min(start+tuning.GroundChunkStuds/2,-fork[1]*Course.LayoutScale)
    if hi>lo then
-    decoration(chunk,"ForkRidge",Vector3.new(0,1.5,(lo+hi)/2),Vector3.new(8*Course.LayoutScale,3,hi-lo),Color3.fromRGB(203,143,91))
-    decoration(chunk,"ForkGrass",Vector3.new(0,3.1,(lo+hi)/2),Vector3.new(8*Course.LayoutScale,.2,hi-lo),Color3.fromRGB(133,179,96))
+    decoration(chunk,"ForkRidge",Vector3.new(0,1.5,(lo+hi)/2),Vector3.new(Course.median((lo+hi)/2)*2,3,hi-lo),Color3.fromRGB(203,143,91))
+    decoration(chunk,"ForkGrass",Vector3.new(0,3.1,(lo+hi)/2),Vector3.new(Course.median((lo+hi)/2)*2,.2,hi-lo),Color3.fromRGB(133,179,96))
    end
   end
   local placements=Layout[index]

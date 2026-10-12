@@ -8,18 +8,24 @@ from PIL import Image,ImageDraw,ImageFont
 ROOT=Path(__file__).resolve().parents[1]
 OUT=ROOT/'dist/CourseReview';OUT.mkdir(parents=True,exist_ok=True)
 SCALE=4.8
+FORK_HALF=9/SCALE
+FORK_ROUTE=4.4
+def half_width(d):
+ t=d*SCALE/3
+ ramp=lambda a,b:min(1,max(0,(t-a)/(b-a)))
+ return (35-11*ramp(256,400)+11*ramp(600,800))/SCALE
 SIZES={'Small':1,'Medium':1.5,'Large':3}
 FORKS=[(430,550),(830,990),(1250,1390),(1670,1840)]
 SECTIONS=[(0,400,70,'초원 · 적응'),(400,800,55,'숲길 · 첫 분기'),(800,1200,40,'바위 협곡'),(1200,1600,32,'나무·바위 조합'),(1600,2000,25,'마지막 숲 · 고난도')]
 rng=random.Random(1012)
 obstacles=[];crates=[];routes=[]
 def route_x(d):
- base=math.sin(d/110)*9
+ base=math.sin(d/110)*1.5
  for a,b in FORKS:
   if a-120<=d<=b+120:
    blend=min(1,max(0,(d-(a-120))/120),max(0,((b+120)-d)/120))
    blend=blend*blend*(3-2*blend)
-   return base*(1-blend)+12*blend
+   return base*(1-blend)+FORK_ROUTE*blend
  return base
 
 def left_route(d):
@@ -27,20 +33,20 @@ def left_route(d):
   if a-120<=d<=b+120:
    blend=min(1,max(0,(d-(a-120))/120),max(0,((b+120)-d)/120))
    blend=blend*blend*(3-2*blend)
-   return route_x(d)*(1-blend)-12*blend
+   return route_x(d)*(1-blend)-FORK_ROUTE*blend
  return None
 
 def clear(o):
- # Reserve an 8 m corridor through the full obstacle depth, including turns.
+ # Reserve a 2.1 m corridor through the full obstacle depth, including turns.
  radius=o['width']/2
- if abs(o['x'])+radius>20:return False
+ if any(abs(o['x'])+radius>half_width(o['meters']+offset)-.5 for offset in (-radius,0,radius)):return False
  for offset in (-radius-2,0,radius+2):
   d=o['meters']+offset
-  if abs(o['x']-route_x(d))<4+radius:return False
+  if abs(o['x']-route_x(d))<1.05+radius:return False
   for a,b in FORKS:
-   if a-radius<=d<=b+radius and abs(o['x'])<4+radius:return False
+   if a-radius<=d<=b+radius and abs(o['x'])<FORK_HALF+radius:return False
   left=left_route(d)
-  if left is not None and abs(o['x']-left)<4+radius:return False
+  if left is not None and abs(o['x']-left)<1.05+radius:return False
  for old in obstacles:
   if math.hypot(old['x']-o['x'],old['meters']-o['meters'])<(old['width']+o['width'])/2+.4:return False
  return True
@@ -49,7 +55,7 @@ for si,(start,end,spacing,label) in enumerate(SECTIONS):
  d=start+45
  while d<end-20:
   # Irregular forest pockets and diagonal rock outcrops, never complete rows.
-  centre=rng.uniform(-17,17)
+  centre=rng.uniform(-6,6)
   kind=rng.choice(['Tree','Tree','Rock']) if si<2 else rng.choice(['Tree','Rock'])
   angle=rng.uniform(-1.1,1.1)
   for member in range(3+si):
@@ -62,14 +68,17 @@ for si,(start,end,spacing,label) in enumerate(SECTIONS):
      dx=(member-2)*2.4*math.cos(angle)+rng.uniform(-1,1)
      dd=(member-2)*4*math.sin(angle)+rng.uniform(-spacing*.3,spacing*.3)
     else:
-     dx=rng.uniform(-5,5);dd=rng.uniform(-spacing*.38,spacing*.38)
+     dx=rng.uniform(-2.5,2.5);dd=rng.uniform(-spacing*.38,spacing*.38)
     o=dict(kind=kind,tier=tier,x=round(centre+dx,2),meters=round(d+dd,2),width=width,height=height)
     if start+20<=o['meters']<end-10 and clear(o):
      obstacles.append(o);break
-    if attempt==5:centre=rng.uniform(-18,18)
+    if attempt==5:centre=rng.uniform(-6,6)
   if rng.random()<.6:
    main=route_x(d);other=left_route(d)
-   crates.append(dict(x=main+(2.5 if other is not None and other<main else -2.5),meters=d))
+   candidates=[-half_width(d)+.8,half_width(d)-.8]
+   for x in candidates:
+    if abs(x-main)>1.2 and (other is None or abs(x-other)>1.2) and not (any(a<=d<=b for a,b in FORKS) and abs(x)<FORK_HALF+.5):
+     crates.append(dict(x=x,meters=d));break
   d+=rng.uniform(spacing*.6,spacing*1.15)
 routes=[dict(meters=d,x=route_x(d),fork=any(a<=d<=b for a,b in FORKS)) for d in range(2001)]
 # At 64 forward / 32 sideways studs/s, both branches must be steerable.
@@ -81,10 +90,10 @@ for d in range(2000):
 for o in obstacles:
  radius=o['width']/2
  for d in range(max(0,math.floor(o['meters']-radius)),min(2000,math.ceil(o['meters']+radius))+1):
-  assert abs(o['x']-route_x(d))>=4+radius,('Blocked route',o,d)
+  assert abs(o['x']-route_x(d))>=1.05+radius,('Blocked route',o,d)
   left=left_route(d)
-  if left is not None:assert abs(o['x']-left)>=4+radius,('Blocked left fork',o,d)
-data=dict(status='Approval draft only',lengthMeters=2000,widthMeters=42,metersPerStud=1/SCALE,
+  if left is not None:assert abs(o['x']-left)>=1.05+radius,('Blocked left fork',o,d)
+data=dict(status='Approved layout; original width restored',lengthMeters=2000,widthStudsRange=[48,70],metersPerStud=1/SCALE,
  sizeMultipliers=SIZES,sections=SECTIONS,forks=FORKS,obstacles=obstacles,crates=crates,routes=routes)
 (OUT/'GreenStar-2000m-layout.json').write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\n',encoding='utf8')
 
@@ -93,20 +102,20 @@ im=Image.new('RGB',(1800,1030),'#102b29');dr=ImageDraw.Draw(im)
 font='C:/Windows/Fonts/malgun.ttf'
 def f(n):return ImageFont.truetype(font,n)
 dr.text((40,22),'Green Star · 2,000m 사냥 코스 검토안',font=f(36),fill='#f0eed7')
-dr.text((40,78),'승인 전 미적용 | 위에서 본 실제 배치 좌표 · 가로 폭을 넓혀 표시 | 소형 1 / 중형 1.5 / 대형 3',font=f(19),fill='#bcddcb')
+dr.text((40,78),'기존 폭 복원 | 위에서 본 실제 배치 좌표 · 가로 폭을 넓혀 표시 | 소형 1 / 중형 1.5 / 대형 3',font=f(19),fill='#bcddcb')
 for si,(start,end,spacing,label) in enumerate(SECTIONS):
  left=42+si*350;top=178;w=268;h=700
  dr.text((left,126),label,font=f(22),fill='#ffdb92')
  dr.text((left,155),f'{start}–{end}m · 불규칙 군집',font=f(16),fill='#c3ddd0')
  dr.rounded_rectangle((left,top,left+w,top+h),radius=14,fill='#89b97b',outline='#dddfaf',width=2)
- def pt(x,d):return left+w/2+x/42*w,top+(d-start)/400*h
+ def pt(x,d):return left+w/2+x/(70/SCALE)*w,top+(d-start)/400*h
  for d in range(start,end+1,100):
   _,y=pt(0,d);dr.line((left,y,left+w,y),fill='#c8d1a7',width=1)
   dr.text((left+w+6,y-9),str(d),font=f(13),fill='#d9e9db')
  for a,b in FORKS:
   lo,hi=max(start,a),min(end,b)
   if lo<hi:
-   x1,y1=pt(-4,lo);x2,y2=pt(4,hi)
+   x1,y1=pt(-FORK_HALF,lo);x2,y2=pt(FORK_HALF,hi)
    dr.rounded_rectangle((x1,y1,x2,y2),radius=10,fill='#665b4d')
    dr.text((left+6,y1+5),'분기',font=f(14),fill='#fff7ce')
  # Mark usable paths before obstacles, using the same clearance plan.
@@ -127,7 +136,7 @@ for si,(start,end,spacing,label) in enumerate(SECTIONS):
    x,y=pt(c['x'],c['meters']);dr.rectangle((x-4,y-4,x+4,y+4),fill='#f8c166',outline='#775330')
  dr.text((left,890),f'장애물 {sum(start<=o["meters"]<end for o in obstacles)}개',font=f(17),fill='#d5ead9')
 dr.text((45,945),'● 나무   ◆ 바위   ■ 상자   밝은 선: 통과 가능한 길 / 분기에서는 좌·우 선택',font=f(20),fill='#efdca8')
-dr.text((45,980),'2km 전체를 한 번에 로딩하지 않고 가까운 구간만 생성할 예정 · 실제 모바일 난이도/성능은 승인 후 주행 검사',font=f(17),fill='#b9d4c8')
+dr.text((45,980),'기존 전체 폭 48–70스터드 · 가까운 구간만 생성 · 실제 모바일 난이도/성능은 별도 검사',font=f(17),fill='#b9d4c8')
 im.save(OUT/'GreenStar-2000m-plan.png')
 
 # Standalone Roblox place. No live storage, scripts, monsters or user data.
@@ -157,9 +166,9 @@ def part(name,x,y,z,sx,sy,sz,color,cls='Part'):
  E.SubElement(ps,'token',{'name':'BottomSurface'}).text='0'
  return n
 for d in range(0,2000,100):
- part(f'Ground_{d}m',0,-1,-(d+50)*SCALE,42*SCALE,2,100*SCALE,(130,175,106))
- for side in (-1,1):part('Boundary',side*22*SCALE,5,-(d+50)*SCALE,2*SCALE,10,100*SCALE,(138,122,91))
-for a,b in FORKS:part(f'Fork_{a}_{b}m',0,4,-(a+b)/2*SCALE,8*SCALE,8,(b-a)*SCALE,(137,125,101))
+ part(f'Ground_{d}m',0,-1,-(d+50)*SCALE,half_width(d+50)*2*SCALE,2,100*SCALE,(130,175,106))
+ for side in (-1,1):part('Boundary',side*(half_width(d+50)*SCALE+5),5,-(d+50)*SCALE,2*SCALE,10,100*SCALE,(138,122,91))
+for a,b in FORKS:part(f'Fork_{a}_{b}m',0,4,-(a+b)/2*SCALE,FORK_HALF*2*SCALE,8,(b-a)*SCALE,(137,125,101))
 for i,o in enumerate(obstacles):
  x=o['x']*SCALE;z=-o['meters']*SCALE;s=SIZES[o['tier']]
  if o['kind']=='Tree':
