@@ -24,6 +24,9 @@ function A.animate(model,moving)
  local bonding=first and untilTime>time
  for name,b in pairs(c.bones) do
   local target=CFrame.identity
+  if not moving and not bonding and (name=="Spine" or name=="Chest") then
+   target=CFrame.Angles(math.sin(now*1.8)*.012,0,0)
+  end
   local tail=tonumber(name:match("^Tail(%d+)$"))
   if first and tail then target=CFrame.Angles(0,math.sin(now*1.6-tail*.45)*.075,0) end
   if bonding then
@@ -45,6 +48,6 @@ function A.animate(model,moving)
    b.Transform=b.Transform:Lerp(target,1-math.exp(-18*dt))
   end
  end
- if not bonding then quadruped.apply(model,moving,dt) end
+ if not bonding then quadruped.apply(model,moving,dt,true) end
 end
 return A

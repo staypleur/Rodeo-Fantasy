@@ -48,8 +48,8 @@ function A.animate(model,moving)
  local dt=c.last>0 and math.min(now-c.last,.15) or 0 c.last=now
  local velocity=model:GetAttribute("HerdVelocity")
  local speed=typeof(velocity)=="Vector3" and velocity.Magnitude or 0
- local running=moving and speed>18
- local clip=clips[running and "Running" or "Walking"]
+ -- One fitted movement loop, independent of walk/run speed thresholds.
+ local clip=clips.Running
  if moving then c.phase=(c.phase+dt/clip.duration)%1 end
  local sample=(moving and c.phase or 0)*(#clip.frames-1)
  local i=math.floor(sample)+1 local t=sample-math.floor(sample)
@@ -83,6 +83,9 @@ function A.animate(model,moving)
    desired=desired:Lerp(pose*e.rest.Rotation,ease)
   end
   local transform=e.localRest.Rotation:Inverse()*parentRotation:Inverse()*desired
+  if not moving and not bonding and (name=="Spine1" or name=="Spine2") then
+   transform=transform*CFrame.Angles(math.sin(now*1.8)*.012,0,0)
+  end
   local tailIndex=tonumber(name:match("^Tail(%d+)$"))
   if tailIndex then transform=CFrame.identity end
   if name=="Hips" or name=="Pelvis" then

@@ -1,5 +1,15 @@
 # 작업 기록
 
+## 2026-10-12 — 실제 장소 모션 설치 및 비공개 게시
+
+- 원격 Studio 연결을 새 창으로 복구했다. 실제 체험 10770388358의 로비 131121026461681에서 리그를 검사: S1/S3 NeutralQuadruped-v1, S6 ProvidedBiped-v1, S9 UserS9-v1. 이전 오프라인 34관절 GLB 미리보기와 실제 설치된 S1/S3/S6의 리그가 달랐으므로 실제 사용되는 애니메이터도 수정했다.
+- NeutralMossratAnimator는 단일 사족 루프와 작은 정지 호흡을 사용한다. QuadrupedAnimator의 선택 인자로 해당 경로만 고정 루프를 사용하도록 하고 기존 호출 방식은 유지했다. BipedAnimator는 속도 문턱에 따른 Walking/Running 전환 대신 제공 Running 하나를 사용하며 정지 시 작은 척추 호흡을 추가했다. S9는 기존 UserMossratRigAnimator의 Walk/Idle 단일 재생 수정본을 설치했다. 닌자 자세 자체를 새로 완성한 것으로 보고하지 않는다.
+- 검증: 변경 4개 모듈 Luau 컴파일 성공. check_shared_motion.py의 연속 발 궤적, 16,000 IK 풀이, 제공 Walking/Running 각각 61개 유한 스켈레톤 샘플·바인드·가중치 검사 통과.
+- 실제 Studio 일반 Play는 Studio 저장 API가 비활성이라 가방 로딩 단계에서 종료됐다. API/보안 설정을 변경하지 않았다. 임시 검토 장면에서 서버 Script 4개의 원래 Disabled 값을 기록한 뒤 실행을 일시 중지하여 저장 데이터와 분리했다. 실제 클라이언트에 4개 템플릿을 복제하여 이동/정지 상태를 반복 재생했고 MOTION_REVIEW_120_FRAMES 4를 확인했다. 이는 실제 서버의 탑승 조작감·모바일 성능·완전한 비주얼 승인 검사와 구분한다.
+- 게시 전에 임시 LocalScript를 제거하고 서버 Script 4개 Disabled 상태와 검토 속성을 모두 복구했다(MOTION_REVIEW_CLEANED 4). 원래 코드 백업은 ServerStorage에 보존했다. 메시·텍스처·가방 데이터·LOD 변경 없음.
+- Studio의 성공 메시지로 로비 v10(19:42), 카페 133084853508719 v9(19:46) 게시 완료를 확인했다. 기존 비공개 접근 설정은 변경하지 않았다. 새 서버 재접속으로 사용자 Roblox Player 검토 가능. 기존 사용자 수정 dist/RodeoFantasy-New.rbxlx 및 기존 증거 파일들은 커밋에 포함하지 않는다.
+- 미검증: Roblox Player에서의 실제 왕복·탑승, 모바일 실제 기기, 장시간/멀티플레이 성능. 카페와 로비의 설치 성공은 실제 조작감 검증 완료를 뜻하지 않는다.
+
 ## 2026-10-12 — Fantasy Monster Rodeo 이름 변경 및 모스랫 모션 검토
 
 - 사용자가 Creator Dashboard에서 체험 이름을 Fantasy Monster Rodeo로 저장 완료했다고 확인했다. 체험 공개 설정은 바꾸지 않았다.

@@ -1,7 +1,7 @@
 local motion=require(game.ReplicatedStorage.RodeoFantasy.QuadrupedMotion)
 local A={}
 local cache=setmetatable({},{__mode="k"})
-function A.apply(model,moving,dt)
+function A.apply(model,moving,dt,singleLoop)
  local body=model:FindFirstChild("Body") if not body then return end
  local c=cache[model]
  if not c or c.body~=body then
@@ -26,10 +26,10 @@ function A.apply(model,moving,dt)
  end
  local velocity=model:GetAttribute("HerdVelocity")
  local speed=typeof(velocity)=="Vector3" and velocity.Magnitude or 0
- local running=speed>18
+ local running=singleLoop or speed>18
  c.gait+=((running and 1 or 0)-c.gait)*(1-math.exp(-8*dt))
  c.weight+=( (moving and 1 or 0)-c.weight)*(1-math.exp(-12*dt))
- if moving then c.phase=(c.phase+dt*math.clamp(speed/math.max(body.Size.Y*2,1),.7,2.8))%1 end
+ if moving then c.phase=(c.phase+dt*(singleLoop and 1.4 or math.clamp(speed/math.max(body.Size.Y*2,1),.7,2.8)))%1 end
  for _,leg in ipairs(c.legs) do
   local length=leg.a+leg.b
   local walkZ,walkLift=motion.foot(c.phase,leg.name,false)
