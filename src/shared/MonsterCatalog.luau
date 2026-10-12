@@ -52,6 +52,8 @@ function C.pick(meters,serial)
  if meters<0 or meters>=C.MeadowEndMeters then return nil end
  local unlocked={}
  for _,id in ipairs(C.Order) do if meters>=C[id].UnlockMeters then table.insert(unlocked,id) end end
- return unlocked[serial%#unlocked+1]
+ -- Rotate each equal-share cycle so alternating left/right births do not
+ -- permanently assign one species to only one side of the road.
+ return unlocked[(serial+math.floor(serial/#unlocked))%#unlocked+1]
 end
 return C

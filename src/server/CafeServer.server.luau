@@ -38,6 +38,20 @@ local function sendBag(p)
  end
  remote:FireClient(p,"Bag",items)
 end
+require(script.Parent:WaitForChild("OperatorCommands")).register({
+ message=function(p,message) remote:FireClient(p,"SocialMessage",message) end,
+ grant=function(p,id,stars,count)
+  if not canAct(p) then remote:FireClient(p,"SocialMessage","Use this command when your bag is ready.") return end
+  local b=bags[p] local species=Catalog[id]
+  for _=1,count do
+   Bag.grant(b,id,workspace:GetServerTimeNow(),species.IncomeSeconds,species.IncomeAmount)
+   b.monsters[#b.monsters].stars=stars
+   Progress.caught(p,id,stars)
+  end
+  sendBag(p) send(p)
+  remote:FireClient(p,"SocialMessage","Added "..count.." "..require(P.Localization).text(id,"en").." ("..stars.." stars).")
+ end,
+})
 Social.start(bags,canAct,sendBag,pets.clear)
 remote.OnServerEvent:Connect(function(p,action,value)
  if type(action)~="string" or not active(p) or Store.busy(p) then return end

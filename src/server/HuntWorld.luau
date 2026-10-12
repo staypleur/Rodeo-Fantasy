@@ -12,6 +12,7 @@ local Visibility=require(game.ReplicatedStorage.RodeoFantasy.HerdVisibility)
 local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
 local SpawnPlan=require(game.ReplicatedStorage.RodeoFantasy.HerdSpawnPlan)
 local spawnSerial=0
+local viewerMeters=0
 
 local function part(parent, name, position, size, color)
 	local item = Instance.new("Part")
@@ -112,6 +113,7 @@ function World.spawn(position,speciesId,stars)
 	model.Parent = monsters
 	spawnSerial+=1 model:SetAttribute("SpawnSerial",spawnSerial)
 	animals[model] = Motion.new(position.X,spawnSerial)
+ if species.UnlockMeters>viewerMeters then model:SetAttribute("WaitingForUnlock",true) end
 	return model
 end
 
@@ -222,6 +224,13 @@ function World.step(dt)
 		if not model.Parent then animals[model] = nil previousPositions[model]=nil continue end
 		previousPositions[model] = model.PrimaryPart.Position
 		if not model:GetAttribute("Occupied") then
+   if model:GetAttribute("WaitingForUnlock") then
+    if viewerMeters<Catalog[model:GetAttribute("MonsterId")].UnlockMeters then
+     model:SetAttribute("HerdVelocity",Vector3.zero) model:SetAttribute("Running",false)
+     continue
+    end
+    model:SetAttribute("WaitingForUnlock",nil) model:SetAttribute("Running",true)
+   end
 			-- Only the authoritative root moves. Clients own all visual body poses.
    local p,half=model.PrimaryPart.Position,model.PrimaryPart.Size/2
    local movement=table.clone(tuning)
@@ -257,13 +266,15 @@ function World.releaseMount(model,viewer)
  released[viewer][model]=true
 end
 function World.visibleSet(z,aspect,viewer)
+ viewerMeters=math.max(0,-z*tuning.MetersPerStud)
  local candidates={}
  local riding=false
  for model in pairs(animals) do
   if model.Parent and model:GetAttribute("Occupied") then riding=true end
   if model.Parent and not model:GetAttribute("Occupied") then
+   if viewerMeters<Catalog[model:GetAttribute("MonsterId")].UnlockMeters then continue end
    local p=model.PrimaryPart.Position
-   table.insert(candidates,{key=model,x=p.X,y=p.Y,z=p.Z,serial=model:GetAttribute("SpawnSerial") or 0})
+   table.insert(candidates,{key=model,x=p.X,y=p.Y,z=p.Z,serial=model:GetAttribute("SpawnSerial") or 0,atDen=model:GetAttribute("WaitingForUnlock")==true})
   end
  end
  local preferred=viewer and released[viewer]
@@ -279,6 +290,26 @@ function World.visibleSet(z,aspect,viewer)
  local previous=viewer and displayed[viewer]
  local limit=Visibility.transitionLimit(candidates,z,aspect or 1,tuning,target,previous,preferred)
  local result=Visibility.select(candidates,z,aspect or 1,tuning,limit,previous,preferred,Course.median(z)>0)
+ -- At an unlock boundary the retained old herd must not occupy every display
+ -- slot. Admit one prepared new species without increasing the display cap.
+ local speciesCounts={}
+ for model in pairs(result) do local id=model:GetAttribute("MonsterId") speciesCounts[id]=(speciesCounts[id] or 0)+1 end
+ for _,candidate in ipairs(candidates) do
+  local id=candidate.key:GetAttribute("MonsterId")
+  if candidate.atDen and not speciesCounts[id] and Visibility.visible(candidate.x,candidate.y,candidate.z-z,aspect or 1,tuning,1) then
+   local replace,score
+   for model in pairs(result) do
+    if speciesCounts[model:GetAttribute("MonsterId")]>1 and not (preferred and preferred[model]) then
+     local distance=math.abs(model.PrimaryPart.Position.Z-z)
+     if not score or distance>score then replace,score=model,distance end
+    end
+   end
+   if replace then
+    local old=replace:GetAttribute("MonsterId") speciesCounts[old]-=1 result[replace]=nil
+    result[candidate.key]=true speciesCounts[id]=1
+   end
+  end
+ end
  if viewer then displayed[viewer]=result end
  return result
 end
@@ -295,6 +326,7 @@ end
 
 -- Private run: preload the opening scene; later births are strictly beyond the camera.
 function World.replenish(z,aspect,watchers,prime,budget)
+ viewerMeters=math.max(0,-z*tuning.MetersPerStud)
  aspect=aspect or 1
  local created=0
  local counts={[-1]=0,[1]=0}
@@ -309,8 +341,6 @@ function World.replenish(z,aspect,watchers,prime,budget)
   if created>=math.min(budget or 24,Course.width(z)<30 and 16 or 24) then break end
   local targetZ=z-offset
   if -targetZ*tuning.MetersPerStud>=Catalog.MeadowEndMeters then continue end
-  local id=Catalog.pick(math.max(0,-z*tuning.MetersPerStud),spawnSerial)
-  if not id then break end
   local narrow=Course.width(targetZ)<30
   if narrow and (offset-(prime and -12 or 0))%16~=0 then continue end
   local candidates=SpawnPlan.candidates(Course.ranges(targetZ,5),narrow and {-0.5,0.5} or lanes,math.floor(offset/8)%2==1)
@@ -322,6 +352,10 @@ function World.replenish(z,aspect,watchers,prime,budget)
   end)
   for _,x in ipairs(candidates) do
    if created>=math.min(budget or 24,Course.width(z)<30 and 16 or 24) then break end
+    -- Choose for each successful birth at its course position, not the viewer's
+    -- position: offscreen preloading must not delay a 300m species until 400m.
+    local id=Catalog.pick(math.max(0,-targetZ*tuning.MetersPerStud),spawnSerial)
+    if not id then break end
     local side=x<0 and -1 or 1
     if counts[side]>counts[-side] then continue end
     local onScreen=Visibility.visible(x,Catalog[id].RootHeight,targetZ-z,aspect,tuning,1.2)

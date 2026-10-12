@@ -94,7 +94,7 @@ require(script.Parent:WaitForChild("OperatorCommands")).register({
    Progress.caught(player,id,stars)
   end
   sendBag(player) send(player)
-  remote:FireClient(player,"SocialMessage","Added "..count.." Mossrat ("..stars.." stars).")
+  remote:FireClient(player,"SocialMessage","Added "..count.." "..require(P.Localization).text(id,"en").." ("..stars.." stars).")
  end,
 })
 local function clearRope(state)
