@@ -29,17 +29,19 @@ function Rules.buck(elapsed,cycle,height,triple)
 end
 
 function Rules.canKnock(size,target,dashing)
- return (size=="Large" and (target=="Small" or target=="Medium"))
+ return (size=="ExtraLarge" and (target=="Small" or target=="Medium" or target=="Large"))
+  or (size=="Large" and (target=="Small" or (target=="Medium" and dashing==true)))
   or (size=="Medium" and target=="Small" and dashing==true)
 end
 
 function Rules.canBreakObstacle(size,target,dashing)
- return size=="Large" and target=="Small" and dashing==true
+ return (size=="Large" and target=="Small")
+  or (size=="ExtraLarge" and (target=="Small" or target=="Medium"))
 end
 
 -- Wooden loot containers are distinct from rocks/trees and need no dash.
 function Rules.canBreakCrate(size)
- return size=="Medium" or size=="Large"
+ return size=="Medium" or size=="Large" or size=="ExtraLarge"
 end
 
 function Rules.progress(elapsed, duration)
