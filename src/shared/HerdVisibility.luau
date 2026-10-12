@@ -34,7 +34,9 @@ function View.select(candidates,z,aspect,t,limit,previous,preferred,split)
   end
  end
  local function entry(candidate)
-  return split or not previous or candidate.emerging or candidate.atDen or not View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1)
+  -- Fork balancing must never reveal a hidden runner inside the camera.
+  -- Reserve new runners at the outer entry band, then retain them as they enter.
+  return not previous or candidate.emerging or candidate.atDen or not View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1)
  end
  for _,candidate in ipairs(candidates) do
   if not selected[candidate.key] and previous and previous[candidate.key] and count<(limit or 6) and View.visible(candidate.x,candidate.y,candidate.z-z,aspect,t,1) then

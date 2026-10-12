@@ -29,5 +29,25 @@ assert(n<=4 and l>0 and r>0)
 local previous={[1]=true,[2]=true}
 selected=View.select(candidates,0,2.15,t,4,previous,nil,true)
 assert(selected[1] and selected[2],"Retained animals must not pop out")
-local found=false for _,c in ipairs(candidates) do if selected[c.key] and c.x>0 then found=true end end assert(found)
+for _,c in ipairs(candidates) do
+ assert(not selected[c.key] or previous[c.key],"Fork must not reveal an unseen runner in front of the player")
+end
+-- Both roads can acquire runners before they enter the visible camera.
+for _,aspect in ipairs({.6,1,2.15}) do
+ local entries={}
+ for _,x in ipairs({-20,20}) do
+  local found
+  for depth=0,220 do
+   if not View.visible(x,2,-depth,aspect,t,1) and View.visible(x,2,-depth,aspect,t,1.15) then
+    found={key=x,x=x,y=2,z=-depth,serial=x+30} break
+   end
+  end
+  assert(found,"Missing offscreen entry band") table.insert(entries,found)
+ end
+ local entering=View.select(entries,0,aspect,t,4,{},nil,true)
+ assert(entering[-20] and entering[20],"Both fork roads must preload outside the camera")
+ for _,c in ipairs(entries) do c.z=-30 end
+ local kept=View.select(entries,0,aspect,t,4,entering,nil,true)
+ for _,c in ipairs(entries) do if View.visible(c.x,c.y,c.z,aspect,t,1) then assert(kept[c.key]) end end
+end
 print("HUNT_DISTANCE_BRANCH_PASS 1001..2000m, interleaved budget, both visible sides, retained IDs")
