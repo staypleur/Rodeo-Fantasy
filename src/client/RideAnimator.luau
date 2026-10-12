@@ -233,8 +233,11 @@ function RideAnimator.update(monsters, clock, cameraPosition, dt, selected)
   local gallopPitch=moving and math.sin(phase)*0.085 or 0
   -- The supplied biped clip already contains its own hip travel.
   if model:GetAttribute("MossratUserRigRevision")=="ProvidedBiped-v1" then bounce=0 gallopPitch=0 end
+  -- Social native pets already animate their skeleton. A separate 3.5 Hz
+  -- body bob was fighting the single movement loop, especially in the cafe.
+  if model:GetAttribute("BagItemId") and model:GetAttribute("NativeMeshyReady") then bounce=0 gallopPitch=0 end
 		local frame = facingFrame * CFrame.new(0,bounce,0)*CFrame.Angles(angry and not flying and pitch or gallopPitch, 0, lean)
-    if monsters.Name~="RodeoLobby" and monsters.Name~="CafePets" and moving and not flying and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)>0.18 and #dust<80 then
+    if not model:GetAttribute("BagItemId") and monsters.Name~="RodeoLobby" and monsters.Name~="CafePets" and moving and not flying and not model:GetAttribute("Occupied") and clock-(pose.lastDust or clock-1)>0.18 and #dust<80 then
    pose.lastDust=clock
    local puff=Instance.new("Part") puff.Name="LocalHerdDust" puff.Anchored=true
    puff.CanCollide,puff.CanTouch,puff.CanQuery=false,false,false

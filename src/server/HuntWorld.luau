@@ -7,6 +7,7 @@ local Rules
 local monsterId,rideSpeed
 local Motion=require(game:GetService("ReplicatedStorage"):WaitForChild("RodeoFantasy"):WaitForChild("HerdMotion"))
 local Course=require(game:GetService("ReplicatedStorage").RodeoFantasy.CourseGeometry)
+local Layout=require(script.Parent.GreenStarCourseLayout)
 local Visibility=require(game.ReplicatedStorage.RodeoFantasy.HerdVisibility)
 local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
 local spawnSerial=0
@@ -125,18 +126,31 @@ function World.ensure(z)
 		chunk.Name, chunk.Parent = "Road_" .. index, root
 		chunks[index] = chunk
 		local start = index * tuning.GroundChunkStuds
-		local meadow=part(chunk, "Meadow", Vector3.new(0,-1,start), Vector3.new(80,2,tuning.GroundChunkStuds), Color3.fromRGB(178,211,117))
+		local meadow=part(chunk, "Meadow", Vector3.new(0,-1,start), Vector3.new(Course.width(start)*2,2,tuning.GroundChunkStuds), Color3.fromRGB(178,211,117))
   meadow.Material=Enum.Material.SmoothPlastic
 		local random = Random.new(9101 + math.abs(index) * 137)
+  for _,fork in ipairs(Course.Forks) do
+   local lo=math.max(start-tuning.GroundChunkStuds/2,-fork[2]*Course.LayoutScale)
+   local hi=math.min(start+tuning.GroundChunkStuds/2,-fork[1]*Course.LayoutScale)
+   if hi>lo then
+    decoration(chunk,"ForkRidge",Vector3.new(0,1.5,(lo+hi)/2),Vector3.new(8*Course.LayoutScale,3,hi-lo),Color3.fromRGB(203,143,91))
+    decoration(chunk,"ForkGrass",Vector3.new(0,3.1,(lo+hi)/2),Vector3.new(8*Course.LayoutScale,.2,hi-lo),Color3.fromRGB(133,179,96))
+   end
+  end
+  local placements=Layout[index]
+  if placements then
+   for _,o in ipairs(placements.obstacles) do
+    local rock=part(obstacles,"Rock",Vector3.new(o.x,o.height/2,o.z),Vector3.new(4*o.scale,o.height,4*o.scale),Color3.fromRGB(167,130,99))
+    rock:SetAttribute("Chunk",index) rock:SetAttribute("ObstacleSize",o.tier)
+    rock.CanCollide=false -- server swept collision is authoritative
+    dressObstacle(rock,o.style,o.scale)
+   end
+   for _,c in ipairs(placements.crates) do createCrate(c.x,c.z,index) end
+  end
 		for offset = -112,112,32 do
 			local rowZ = start + offset
    if rowZ < -Course.LengthStuds-160 or rowZ>128 then continue end
    local edge=Course.width(rowZ)
-   local median=Course.median(rowZ)
-   if median>0 then
-    decoration(chunk,"ForkRidge",Vector3.new(0,1.5,rowZ),Vector3.new(median*2,3,32),Color3.fromRGB(203,143,91))
-    decoration(chunk,"ForkGrass",Vector3.new(0,3.1,rowZ),Vector3.new(median*2,0.2,32),Color3.fromRGB(133,179,96))
-   end
    for _, side in ipairs({-1,1}) do
     local height=18+random:NextInteger(0,3) -- wall top remains above flying creatures
     decoration(chunk,"CanyonBase",Vector3.new(side*(edge+5),2,rowZ),Vector3.new(10,4,32),Color3.fromRGB(220,151,97))
@@ -159,49 +173,6 @@ function World.ensure(z)
    for i=1,3 do
     decoration(chunk,"MeadowPatch",Vector3.new(random:NextNumber(-29,29),0.025,rowZ+random:NextNumber(-14,14)),Vector3.new(random:NextNumber(2,5),0.05,random:NextNumber(3,8)),Color3.fromRGB(187,218,128))
    end
-			-- Leave the run launch area clear; all other rows contain moving herds.
-			if rowZ < -20 or rowZ > 30 then
-				local lanes={}
-    local ranges=Course.ranges(rowZ,4)
-    for _,range in ipairs(ranges) do
-     for i=1,4/#ranges do table.insert(lanes,range[1]+(range[2]-range[1])*i/(4/#ranges+1)) end
-    end
-    for _, x in ipairs(lanes) do
-					-- Herd spawning is coordinated across all runners below, not tied to chunk creation.
-				end
-				if random:NextNumber() < tuning.RockSpawnChance then
-					local kind=(math.abs(index)*8+math.floor((offset+112)/32))%4
-     local style=kind>=2 and "Tree" or "MossyRock"
-     local scale=kind%2==1 and 2 or 1
-     local bounds=Course.ranges(rowZ-12,2*scale+2)
-     local range=bounds[random:NextInteger(1,#bounds)]
-     local x=random:NextNumber(range[1],range[2])
-     local height=(style=="Tree" and 6 or 3)*scale
-     local rock=part(obstacles,"Rock",Vector3.new(x,height/2,rowZ-12),Vector3.new(4*scale,height,4*scale),Color3.fromRGB(167,130,99))
-     rock:SetAttribute("Chunk",index)
-     rock.CanCollide=false -- server swept collision is authoritative
-     dressObstacle(rock,style,scale)
-				end
-
-    -- Independent seeded rolls keep existing herd/rock density unchanged.
-    if rowZ < -96 then
-     local crateRandom=Random.new(33017+math.abs(math.floor(rowZ))*31)
-     if crateRandom:NextNumber()<tuning.CrateSpawnChance then
-      local clear=true
-      for existing in pairs(crateRows) do if math.abs(existing-rowZ)<192 then clear=false break end end
-      if clear then
-       local ranges=Course.ranges(rowZ,5)
-       local range=ranges[crateRandom:NextInteger(1,#ranges)]
-       local x=crateRandom:NextNumber(range[1],range[2])
-       -- Crates need their own clear footprint beside trees/rocks.
-       for _,other in ipairs(obstacles:GetChildren()) do
-        if math.abs(other.Position.Z-rowZ)<other.Size.Z/2+4 and math.abs(other.Position.X-x)<other.Size.X/2+4 then clear=false break end
-       end
-       if clear then createCrate(x,rowZ,index) crateRows[rowZ]=index end
-      end
-     end
-    end
-			end
 		end
 	end
 end

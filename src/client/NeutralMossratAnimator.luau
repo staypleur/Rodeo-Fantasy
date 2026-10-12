@@ -32,16 +32,10 @@ function A.animate(model,moving)
   if bonding then
    local t=time-(model:GetAttribute("PetBondStarted") or time)
    local weight=math.min(math.clamp(t/.35,0,1),math.clamp((untilTime-time)/.4,0,1))
-   local angle=0
-   if name=="Pelvis" then angle=-.35
-   elseif name=="Spine" then angle=-.12
-   elseif name=="Neck" then angle=.25
-   elseif name=="Head" then target=CFrame.Angles(.22,math.sin(t*4)*.10,math.sin(t*4)*.14)
-   elseif name:find("FrontUpper",1,true) then angle=-.65
-   elseif name:find("FrontLower",1,true) then angle=.55
-   elseif name:find("RearUpper",1,true) then angle=.35
-   elseif name:find("RearLower",1,true) then angle=-.40 end
-   target=CFrame.identity:Lerp(target*CFrame.Angles(angle,0,0),weight)
+   -- The supplied face blends Neck/Head weights. Rotating Head alone pulls
+   -- only the forehead. Tilt their shared parent and leave Head neutral.
+   if name=="Neck" then target=CFrame.Angles(0,0,math.sin(t*4)*.10) end
+   target=CFrame.identity:Lerp(target,weight)
   end
   -- Locomotion owns leg transforms; retain them until its smooth stop is done.
   if bonding or not name:match("Front") and not name:match("Rear") then

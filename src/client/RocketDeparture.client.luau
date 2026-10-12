@@ -43,7 +43,7 @@ local function fit()
 end
 panel:GetPropertyChangedSignal("AbsoluteSize"):Connect(fit)
 fit()
-local messages={MenuExpired="Selection expired. Hold E at the rocket again.",ApproachRocket="Try again near the rocket.",ModelPending="This monster model is coming soon.",CoursePending="This hunt is coming soon.",MonsterBusy="This monster is busy.",NotOwned="Your inventory changed. Please select again.",LaunchFailed="Unable to prepare the hunt. Please try again."}
+local messages={PlanetLocked="Run 10 km on the previous planet to unlock.",MenuExpired="Selection expired. Hold E at the rocket again.",ApproachRocket="Try again near the rocket.",ModelPending="This monster model is coming soon.",CoursePending="This hunt is coming soon.",MonsterBusy="This monster is busy.",NotOwned="Your inventory changed. Please select again.",LaunchFailed="Unable to prepare the hunt. Please try again."}
 local menu,step,selected,busy=nil,1,nil,false
 local selectedPlanet
 local rows={}
@@ -63,6 +63,7 @@ close.Activated:Connect(function() hide(true) end)
 nextButton.Activated:Connect(function()
  if not menu or busy then return end
  if not selected then status.Text="Select a planet." return end
+ if menu.travel and not menu.travel.unlocked[selected] then status.Text="Run 10 km on the previous planet to unlock." return end
  if not Planets[selected].Available then status.Text="Coming soon" return end
  busy=true status.Text="Preparing hunt…"
  local launchMenu=menu
@@ -85,7 +86,12 @@ remote.OnClientEvent:Connect(function(action,data)
    b=button("",index,function()
     if busy then return end selected=id
     for _,row in ipairs(rows) do row.BackgroundColor3=Color3.fromRGB(18,36,64) row.Outline.Thickness=2 row.Outline.Color=row:GetAttribute("Accent") end
-    b.BackgroundColor3=Color3.fromRGB(7,67,71) b.Outline.Thickness=5 b.Outline.Color=Color3.fromRGB(87,255,222) status.Text=""
+    b.BackgroundColor3=Color3.fromRGB(7,67,71) b.Outline.Thickness=5 b.Outline.Color=Color3.fromRGB(87,255,222)
+    local travel=menu.travel
+    if index>1 and travel and not travel.unlocked[id] then
+     local meters=travel.planetMeters[Planets.Order[index-1]] or 0
+     status.Text=travel.loaded and string.format("%s: %.2f / 10 km",Planets[Planets.Order[index-1]].Name,meters/1000) or "Loading distance…"
+    else status.Text=planet.Available and "" or "Coming soon" end
    end)
    b.Name="Planet_"..id
    local accents={GreenStar=Color3.fromRGB(92,242,206),Zephyrus=Color3.fromRGB(247,201,107),Phyto=Color3.fromRGB(89,221,173),Celestia=Color3.fromRGB(180,137,252)}

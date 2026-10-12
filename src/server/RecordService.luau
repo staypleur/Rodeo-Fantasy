@@ -9,12 +9,13 @@ local Catalog=require(game.ReplicatedStorage.RodeoFantasy.MonsterCatalog)
 local Planets=require(game.ReplicatedStorage.RodeoFantasy.PlanetCatalog)
 local enabled=RunService:IsRunning() and game.GameId>0
 local suffix=RunService:IsStudio() and "_Test_v1" or "_v1"
-local profile,distance,collection
+local profile,distance,collection,totalDistance
 local planetStores={}
 if enabled then
  local ok=pcall(function()
   profile=DSS:GetDataStore("RodeoRecords"..suffix)
   distance=DSS:GetOrderedDataStore("RodeoDistance"..suffix)
+  totalDistance=DSS:GetOrderedDataStore("RodeoTotalDistance"..suffix)
   -- Reuse the old index for Green Star; existing records remain visible.
   for _,id in ipairs(Planets.Order) do planetStores[id]=id=="GreenStar" and distance or DSS:GetOrderedDataStore("RodeoDistance_"..id..suffix) end
   collection=DSS:GetOrderedDataStore("RodeoCollection"..suffix)
@@ -84,7 +85,7 @@ local function refresh(board,store)
    local found,name=pcall(function() return Players:GetNameFromUserIdAsync(id) end)
    names[id]=found and name or nil
   end
-  local value=tostring(row.value)..(board.Name=="Distance" and " m" or " / "..#Catalog.Order*4)
+  local value=board.Name=="Distance" and string.format("%.3f km",row.value/1000) or tostring(row.value).." / "..#Catalog.Order*4
   table.insert(lines,string.format("%d. %s   %s",rank,names[id] or "Player",value))
  end
  label.Text=#lines>0 and table.concat(lines,"\n") or "No records yet"
@@ -92,12 +93,12 @@ local function refresh(board,store)
 end
 function Service.start()
  local boards=require(script.Parent.LobbyRankings).ensure(workspace.RodeoLobby)
- boards.Income.Ranking.Heading.Text="도감 수집"
- boards.Distance.Ranking.Heading.Text="Green Star · Distance Top 10"
+ boards.Income.Ranking.Heading.Text="Monster Index · Top 10"
+ boards.Distance.Ranking.Heading.Text="Total Distance · Top 10 (km)"
  task.spawn(function()
   while true do
    -- Each confirmed planet has its own ordered index. Only Green Star is live.
-   refresh(boards.Distance,planetStores.GreenStar) refresh(boards.Income,collection)
+   refresh(boards.Distance,totalDistance) refresh(boards.Income,collection)
    task.wait(60)
   end
  end)

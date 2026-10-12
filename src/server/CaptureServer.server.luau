@@ -10,6 +10,7 @@ local BagRules=require(package.BagRules)
 local World=require(script.Parent.HuntWorld)
 local Lobby=require(script.Parent.LobbyWorld)
 local Records=require(script.Parent.RecordService)
+local TravelProgress=require(script.Parent.TravelService)
 local Progress=require(script.Parent.ProgressService)
 local Course=require(package.CourseGeometry)
 local Store=require(script.Parent.InventoryStore)
@@ -65,7 +66,7 @@ local function send(player,message)
  local state,bag=states[player],bags[player]
  if not bag or Store.busy(player) or player:GetAttribute("Travelling") then return end
  local gains=BagRules.accrue(bag,now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
- Records.sample(player,bag.totalProduced or 0,state and state.distance or 0,"GreenStar")
+ if state then TravelProgress.sample(player,"GreenStar",state,state.distance) end
  local wildIds={}
  if state and worlds[player] then for model in pairs(worlds[player].visibleSet(state.root.Position.Z,views[player],player)) do table.insert(wildIds,model:GetAttribute("SpawnSerial")) end end
  remote:FireClient(player,"State",{summonedId=player:GetAttribute("SummonedId"),huntRoot=worldRoots[player],initialLanding=state and state.initialLanding,income=not state and gains or nil,progress=Progress.snapshot(player),wildIds=wildIds,phase=state and state.phase or "Idle",area=state and "Hunt" or "Lobby",started=state and state.started or now(),distance=state and state.distance or 0,tameSeconds=state and state.monster and Catalog[state.monster:GetAttribute("MonsterId")].TameSeconds or 5,monster=state and state.monster,previousMonster=state and state.previousMonster,tamed=state and state.tamed or false,angerAt=state and state.angerAt,count=#bag.monsters,pending=bag.pending,balance=bag.balance,gems=bag.gems or 0,message=message,endReason=state and state.endReason,crash=state and state.crash,monsterCrashFrame=state and state.monsterCrashFrame,monsterCrashId=state and state.monsterCrashId,sampleTime=now(),position=state and state.root.Position,origin=state and state.origin,launchY=state and state.launchY,landingSeconds=state and state.landingSeconds,steer=state and state.steer or 0,dashUntil=state and state.dashUntil,baseSpeed=baseSpeed(state)})
@@ -492,7 +493,7 @@ local function added(player)
  if player.UserId>0 then player.CharacterAppearanceId=player.UserId end
  local bag,message=Store.open(player)
  if not bag then Lobby.release(player) player:Kick(message) return end
- bags[player]=bag player:SetAttribute("Area","Lobby") Progress.join(player,bag)
+ bags[player]=bag player:SetAttribute("Area","Lobby") Progress.join(player,bag) TravelProgress.join(player)
  require(game.ReplicatedStorage.RodeoFantasy.LobbyIncubatorRules).migrate(bag)
  for index=1,4 do Lobby.display(player,index,bag.eggs or {}) end
  player.CharacterRemoving:Connect(function()
@@ -502,7 +503,7 @@ local function added(player)
  end)
 end
 Players.PlayerAdded:Connect(added)
-Players.PlayerRemoving:Connect(function(player) send(player) if worlds[player] then worlds[player].resetVisibility(player) end Records.leave(player) Progress.leave(player) Store.close(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil if worldRoots[player] then worldRoots[player]:Destroy() end worlds[player],worldRoots[player]=nil,nil end)
+Players.PlayerRemoving:Connect(function(player) send(player) if worlds[player] then worlds[player].resetVisibility(player) end Records.leave(player) TravelProgress.leave(player) Progress.leave(player) Store.close(player) Lobby.release(player) finish(player,"Hunt ended") states[player],bags[player],limits[player],views[player]=nil,nil,nil,nil if worldRoots[player] then worldRoots[player]:Destroy() end worlds[player],worldRoots[player]=nil,nil end)
 for _,player in ipairs(Players:GetPlayers()) do added(player) end
 
-if RunService:IsRunning() then Records.start() Progress.start() end
+if RunService:IsRunning() then Records.start() Progress.start() TravelProgress.start() end

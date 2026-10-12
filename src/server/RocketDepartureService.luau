@@ -1,6 +1,7 @@
 -- Server-authoritative selection, independent of model import and UI layout.
 local Service={}
 local Rules=require(game:GetService("ReplicatedStorage").RodeoFantasy.DepartureSelectionRules)
+local Travel=require(script.Parent.TravelService)
 function Service.new(ctx)
  local pending,lastSubmit={},{}
  local api={}
@@ -13,7 +14,7 @@ function Service.new(ctx)
   if not bag then return false end
   local token=ctx.token()
   pending[player]={token=token,expires=ctx.now()+60}
-  ctx.send(player,"DepartureMenu",{token=token,planet="GreenStar",name="Green Star"})
+  ctx.send(player,"DepartureMenu",{token=token,planet="GreenStar",name="Green Star",travel=Travel.snapshot(player)})
   return true
  end
  function api.submit(player,value)
@@ -25,6 +26,7 @@ function Service.new(ctx)
    result(player,false,"MenuExpired") return false
   end
   if not ctx.canOpen(player) then result(player,false,"ApproachRocket") return false end
+  if not Travel.canEnter(player,value.planet) then result(player,false,"PlanetLocked") return false end
   local item,reason=Rules.starter(value.planet,ctx.catalog,ctx.modelReady)
   if not item then result(player,false,reason) return false end
   if not ctx.courseReady() then result(player,false,"CoursePending") return false end

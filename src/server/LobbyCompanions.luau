@@ -174,7 +174,8 @@ function M.new(context)
     local hit=workspace:Blockcast(CFrame.new(old.X,castHeight,old.Z),Vector3.new(1.5,1.5,1.5),delta,params)
     if y and not hit and math.abs(y+pet.height-old.Y)<=6 then
      position=Vector3.new(position.X,y+pet.height,position.Z)
-     local frame=CFrame.lookAt(position,position+delta)
+     local facing=CFrame.lookAt(position,position+delta).Rotation
+     local frame=CFrame.new(position)*old.Rotation:Lerp(facing,1-math.exp(-9*step))
      pet.model:PivotTo(frame*pet.model.PrimaryPart.CFrame:Inverse()*pet.model:GetPivot())
      pet.blocked=0
     else

@@ -9,6 +9,9 @@ function T.go(player,cafe)
  local id=cafe and Config.CafePlaceId or Config.LobbyPlaceId
  if id<=0 then P.CaptureRemote:FireClient(player,"SocialMessage","Cafe is being prepared.") return end
  if game:GetService("RunService"):IsStudio() then P.CaptureRemote:FireClient(player,"SocialMessage","Server travel is available in the published game.") return end
+ if cafe and not require(script.Parent.TravelService).flush(player) then
+  P.CaptureRemote:FireClient(player,"SocialMessage","Could not save distance. Please try again.") return
+ end
  busy[player]=true player:SetAttribute("Travelling",true)
  if not Store.save(player,true) then
   busy[player]=nil player:SetAttribute("Travelling",nil)
