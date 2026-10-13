@@ -5568,6 +5568,35 @@ function J.new(gui,remote)
  local allEntries=Q.entries(C)
  local self={area="Lobby",planet="GreenStar",page=1,seen={},data={},entries=allEntries,perSpread=8,selected=1}
  local button=Buttons.iconButton(gui,"Journal","T",92)
+ local playerGui=player:WaitForChild("PlayerGui")
+ local departureGui=nil
+ local departureConnection=nil
+ local function departureOpen()
+  return departureGui~=nil and departureGui.Parent==playerGui and departureGui.Enabled
+ end
+ local function refreshButton()
+  button.Visible=self.area~="Hunt" and not departureOpen()
+  if departureOpen() and self.close then self.close() end
+ end
+ local function watchDeparture(candidate)
+  if candidate.Name~="RocketDepartureUI" or not candidate:IsA("ScreenGui") then return end
+  if departureConnection then departureConnection:Disconnect() end
+  departureGui=candidate
+  departureConnection=candidate:GetPropertyChangedSignal("Enabled"):Connect(refreshButton)
+  refreshButton()
+ end
+ local addedConnection=playerGui.ChildAdded:Connect(watchDeparture)
+ local removedConnection=playerGui.ChildRemoved:Connect(function(child)
+  if child~=departureGui then return end
+  if departureConnection then departureConnection:Disconnect() departureConnection=nil end
+  departureGui=nil refreshButton()
+ end)
+ local existingDeparture=playerGui:FindFirstChild("RocketDepartureUI")
+ if existingDeparture then watchDeparture(existingDeparture) end
+ button.Destroying:Connect(function()
+  addedConnection:Disconnect() removedConnection:Disconnect()
+  if departureConnection then departureConnection:Disconnect() end
+ end)
  local book=make("Frame",{Name="FieldJournal",Visible=false,AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromScale(.91,.82),BackgroundColor3=Color3.fromRGB(54,58,72),BorderSizePixel=0,ZIndex=40},gui)
  make("UISizeConstraint",{MaxSize=Vector2.new(1000,620)},book)
  make("UIStroke",{Color=Color3.fromRGB(8,12,19),Thickness=3},book)
@@ -5686,7 +5715,7 @@ function J.new(gui,remote)
   if self.page==page then return end self.page=page self.render() Audio.ui("PageTurn")
  end
  function self.open()
-  if self.area=="Hunt" then return end
+  if self.area=="Hunt" or departureOpen() then return end
   if book.Visible then self.close() return end
   if self.onOpen then self.onOpen() end
   book.Visible=true freeze() self.render() Audio.ui("BookOpen")
@@ -5702,7 +5731,7 @@ function J.new(gui,remote)
  function self.viewOther(data) self.other=true self.close() self.snapshot(data) self.open() end
  function self.snapshot(data) self.data=data self.seen=data.seen or self.seen if book.Visible then self.render() end end
  function self.state(data)
-  self.area=data.area button.Visible=self.area~="Hunt"
+  self.area=data.area refreshButton()
   if self.area=="Hunt" then self.close() end
   if book.Visible and not self.other and data.count~=self.lastCount then remote:FireServer("Journal") end self.lastCount=data.count
  end
