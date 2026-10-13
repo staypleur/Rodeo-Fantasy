@@ -33,14 +33,24 @@ function M.new(gui,remote,getItems,notice)
  local missing=make("TextLabel",{Name="MissingArtwork",Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(13,18,44),
   BackgroundTransparency=.1,Text=text("번식실 배경 이미지 연결이 필요합니다.","Breeding background image is not configured."),
   TextColor3=Color3.new(1,1,1),TextSize=30,ZIndex=71},art)
+ local function updateLoadStatus()
+  missing.Visible=art.Image=="" or not art.IsLoaded
+ end
  local function refreshArt()
   local id=P:GetAttribute("BreedingBackgroundImage")
-  art.Image=type(id)=="string" and id or ""
-  missing.Visible=art.Image=="" or not art.IsLoaded
+  local imageId=type(id)=="string" and id or ""
+  if art.Image~=imageId then art.Image=imageId end
+  updateLoadStatus()
+  if imageId~="" and not art.IsLoaded then
+   task.spawn(function()
+    pcall(function() game:GetService("ContentProvider"):PreloadAsync({imageId}) end)
+    if root.Parent and art.Image==imageId then updateLoadStatus() end
+   end)
+  end
  end
  local connections={}
  table.insert(connections,P:GetAttributeChangedSignal("BreedingBackgroundImage"):Connect(refreshArt))
- table.insert(connections,art:GetPropertyChangedSignal("IsLoaded"):Connect(refreshArt))
+ table.insert(connections,art:GetPropertyChangedSignal("IsLoaded"):Connect(updateLoadStatus))
  local function layout()
   local size=gui.AbsoluteSize
   scale.Scale=math.max(.01,math.min((size.X-24)/W,(size.Y-24)/H,1))

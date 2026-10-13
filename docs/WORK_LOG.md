@@ -1658,3 +1658,11 @@
 - Luau 컴파일: review fixture, BreedingUI, 생성 설치기 통과. 생성 장소는 재현 가능한 격리 검증 파일이며 운영 장소 파일은 변경하지 않음.
 
 - 재로그인 후 후속 재검증: Studio Play 재시작 및 Studio 완전 종료/재실행까지 시행. 2026-10-13 18:58 KST 새 프로세스에서도 배경 112011601018432와 기존 초상화 요청에 Authentication required to access Asset, IsLoaded=false 재현. 브라우저 로그인과 별도로 Studio 인증 확인이 필요하며 이미지/모바일 검증은 계속 미완료. 테스트는 중지함.
+
+## 2026-10-13 Studio 재로그인 후 번식실 표시 복구
+- Studio 재로그인 후 배경 및 기존 몬스터 이미지 로딩 성공(IsLoaded=true). 기존 인증 차단 해소 확인.
+- 실제 검증에서 로드 완료 뒤에도 MissingArtwork 안내가 화면을 가리는 오류 발견. IsLoaded 이벤트에서 Image를 다시 할당하지 않게 분리하고 PreloadAsync 완료 후 상태 갱신 추가. Studio 재실행 검증에서 안내 제거 및 원본 배경 표시 확인.
+- PC: 실제 그림의 하단 슬롯 클릭으로 암컷/수컷 상단 배치 확인. Breed 클릭으로 시험 전달기가 SocialRules.pair true 반환. 운영 서버 통신/알 생성은 검사하지 않음.
+- iPhone XR 가로 Studio 시뮬레이터: 배경/10개 슬롯 전체 표시, 화면 밖 잘림 없음. 원본 비율 유지에 따라 이름·페이지 화살표·교체 버튼이 작음. 모바일 사용성 합격으로 처리하지 않으며 실기기 터치 및 세로 화면 미검증.
+- 증거: docs/evidence/breeding-ui-studio-pc.png, breeding-ui-studio-mobile.png. 상단 상태 문구는 검증용이며 제품 UI가 아님.
+- Luau 컴파일 통과, 검증 장소 및 설치기 재생성. 로비/카페 설치와 게시 미실시.
