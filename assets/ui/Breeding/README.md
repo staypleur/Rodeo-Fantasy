@@ -14,13 +14,17 @@
 
 1. Creator Dashboard의 개발 아이템/이미지에서 `Background.png`를 업로드한다. 현재 체험에서 사용 가능한 **이미지 에셋 ID**를 확인한다.
 2. Roblox Studio에서 로비 장소를 열고 테스트를 중지한다.
-3. `dist/BreedingUI.commandbar.lua` 첫 설정 `local IMAGE_ID = ""`에 그 숫자를 입력한다.
+3. `dist/BreedingUI.commandbar.lua`에는 업로드한 이미지 ID `112011601018432`가 설정되어 있다. 데칼 ID `99454731920735`와 구분한다.
 4. Studio의 보기(View) 메뉴에서 명령 모음(Command Bar)을 열어 설치 파일 전체 내용을 실행한다.
 5. Output에 `BREEDING_UI_INSTALLED`가 표시되는지 확인한다. 카페 장소에도 동일하게 설치한다.
 6. Play에서 가방 → Breed를 열어 원본 배경, 암수 선택/해제, 닫기, Guide와 페이지 이동을 확인한다. Device Emulator에서 가로·세로 화면과 작은 휴대전화 화면을 확인한다.
 
-설치기는 개인 편집과 충돌할 경우 중단하며 기존 모듈을 ServerStorage에 백업한다. 자동 게시하지 않는다. 현재 이미지 업로드·Studio 설치·기기 실행 검증은 미완료다.
+설치기는 개인 편집과 충돌할 경우 중단하며 기존 모듈을 ServerStorage에 백업한다. 자동 게시하지 않는다. 이미지 업로드는 완료했지만 실제 로비·카페 설치 및 게시, 그룹 체험에서의 이미지 사용 검증은 미완료다.
 
 ## 검증
 
-원본 파일 SHA256 일치 및 Luau 컴파일 통과. 슬롯은 1448×1086 원본 좌표를 사용한다. 실제 Roblox 렌더링·모바일 터치·PC 조작은 설치 후 검증해야 한다.
+원본 파일 SHA256 일치 및 Luau 컴파일 통과. 슬롯은 1448×1086 원본 좌표를 사용한다.
+
+2026-10-13: `dist/Breeding-UI-Review.rbxlx`의 격리된 Studio Play에서 마우스로 암수 선택, 페이지 이동과 선택 유지, 선택 해제, 짝 미선택 안내, 닫기를 확인했다. Breed는 시험용 전달기를 통해 실제 SocialRules.pair를 호출하여 ID 3/4에 true를 반환했다. 실제 서버 통신·저장 테스트는 아니다.
+
+배경 및 기존 초상화는 Studio에서 `Authentication required to access Asset`(401)로 실패했다. 따라서 배경과 버튼의 시각적 정합성, 모바일 터치 검증은 **미완료**다. Studio 인증 상태를 복구한 뒤 재검증해야 한다. 이 오류만으로 그룹 권한 문제 또는 에셋 삭제라고 단정하지 않는다.

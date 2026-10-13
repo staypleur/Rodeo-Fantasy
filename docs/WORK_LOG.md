@@ -1648,3 +1648,11 @@
 ## 2026-10-13 번식실 원본 이미지 UI 코드
 - 원본 1448×1086 RGBA PNG 보존, SHA256 일치. BreedingUI 모듈 및 SocialUI 연결, 투명 버튼7개·하단 슬롯10개·암수 선택/해제·서버 짝 확인·페이지 이동·가이드·비율 유지 레이아웃 작성.
 - 3개 Luau 소스/설치기 컴파일 통과. 원본 배경 업로드 ID가 아직 없어 Studio 설치·게시 및 실제 PC/모바일 테스트는 미완료. dist/BreedingUI.commandbar.lua와 설치 안내 제공. 미정 교배 규칙·재화·보상 변경 없음.
+
+## 2026-10-13 번식실 실제 Studio 격리 검증
+- 사용자 요청: 검증 진행. 원본 Background.png를 Roblox 이미지로 등록: Image 112011601018432 / Decal 99454731920735. 설치 생성기에 Image ID 반영.
+- tools/build_breeding_review.py 및 review_breeding.client.luau로 저장/실제 서버에 접근하지 않는 23개체 검증 장소 생성.
+- 실제 Studio Play 마우스 검사 통과: 암수 선택, 다음 페이지와 선택 유지, 암컷 해제, 미선택 요청 안내, 닫기. 시험 전달기가 SocialRules.pair를 호출해 개체 3/4 짝 확인 true 반환. 실제 네트워크/저장/알 생성 검증 아님.
+- 실패: 배경과 기존 몬스터 초상화가 표시되지 않음. ContentProvider PreloadAsync Failure 및 Studio 로그의 Authentication required to access Asset, asset delivery 401 확인. 인증 또는 에셋 접근 상태 복구 필요. 원인을 그룹 권한으로 단정하지 않음.
+- 미완료: 원본 배경과 클릭 영역의 실제 시각적 정합성, 모바일 에뮬레이터/실기기, 실제 로비·카페 설치/게시. 검증을 통과했다고 보고하지 않음.
+- Luau 컴파일: review fixture, BreedingUI, 생성 설치기 통과. 생성 장소는 재현 가능한 격리 검증 파일이며 운영 장소 파일은 변경하지 않음.

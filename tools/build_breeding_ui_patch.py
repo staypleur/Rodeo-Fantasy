@@ -12,7 +12,7 @@ for name in ['BreedingUI','SocialUI']:
     source=(R/f'src/client/{name}.luau').read_text(encoding='utf8')
     rows.append('{name='+q(name)+',source='+q(source)+'}')
 code='''-- Replace this with the uploaded IMAGE asset ID, then run in Studio Command Bar.
-local IMAGE_ID = ""
+local IMAGE_ID = "112011601018432"
 assert(IMAGE_ID:match("^%d+$") and tonumber(IMAGE_ID)>0,"Set IMAGE_ID first")
 assert(not game:GetService("RunService"):IsRunning(),"Stop Play first")
 assert(game.GameId==10770388358,"Wrong experience")

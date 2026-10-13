@@ -1,0 +1,526 @@
+<?xml version='1.0' encoding='utf-8'?>
+<roblox version="4">
+  <Item class="Workspace" referent="RBXBreedReview1">
+    <Properties>
+      <string name="Name">Workspace</string>
+    </Properties>
+  </Item>
+  <Item class="ReplicatedStorage" referent="RBXBreedReview2">
+    <Properties>
+      <string name="Name">ReplicatedStorage</string>
+    </Properties>
+    <Item class="Folder" referent="RBXBreedReview3">
+      <Properties>
+        <string name="Name">RodeoFantasy</string>
+      </Properties>
+      <Item class="ModuleScript" referent="RBXBreedReview4">
+        <Properties>
+          <string name="Name">MonsterCatalog</string>
+          <ProtectedString name="Source">-- User-approved meadow species. All current wild spawns are one-star.
+local C={
+ MeadowMouse={RunSpeed=64,HerdSpeed=44,SizeClass="Small",Flying=false,RootHeight=2.05,SaddleHeight=2,TameSeconds=5,UnlockMeters=0,IncomeSeconds=3,IncomeAmount=1,Template="RodeoMonsterTemplate",Visual="VisualTemplate"},
+ GrassBoar={RunSpeed=64,HerdSpeed=44,SizeClass="Medium",Flying=false,RootHeight=3.0625,SaddleHeight=2.8125,TameSeconds=6,UnlockMeters=300,IncomeSeconds=3,IncomeAmount=2,Template="GrassBoarTemplate",Visual="GrassBoarVisualTemplate"},
+ TreeWolf={RunSpeed=76.8,HerdSpeed=52.8,SizeClass="Medium",Flying=false,RootHeight=2.9375,SaddleHeight=2.75,TameSeconds=6,UnlockMeters=300,TripleHop=true,IncomeSeconds=3,IncomeAmount=2,Template="TreeWolfTemplate",Visual="TreeWolfVisualTemplate"},
+ Weedcrow={RunSpeed=80,HerdSpeed=55,SizeClass="Small",Flying=true,RootHeight=16,SaddleHeight=1.9,TameSeconds=5,UnlockMeters=400,IncomeSeconds=3,IncomeAmount=2,Template="WeedcrowTemplate",Visual="WeedcrowVisualTemplate"},
+ RockElephant={RunSpeed=64,HerdSpeed=44,SizeClass="Large",Flying=false,RootHeight=5.3625,SaddleHeight=5.0325,TameSeconds=7,UnlockMeters=500,IncomeSeconds=3,IncomeAmount=3,Template="RockElephantTemplate",Visual="RockElephantVisualTemplate"},
+}
+C.Order={"MeadowMouse","GrassBoar"} -- Supplied models and shared motion reviewed and installed.
+C.MeadowEndMeters=2000 -- One-star wildlife continues through the approved course.
+for _,id in ipairs(C.Order) do C[id].Region=C[id].Region or (C[id].Acquisition=="Breeding" and "Breeding" or "Meadow") C[id].Acquisition=C[id].Acquisition or "Hunt" end
+C.Scales={[1]=1,[3]=1.4,[6]=1.9,[9]=2.5}
+function C.stage(stars) return stars&gt;=9 and 9 or stars&gt;=6 and 6 or stars&gt;=3 and 3 or 1 end
+function C.scale(stars)
+ stars=math.clamp(tonumber(stars) or 1,1,10)
+ local lower=C.stage(stars)
+ if lower==9 then return 2.5+(stars-9)*.2 end
+ local upper=lower==1 and 3 or lower+3
+ local alpha=(stars-lower)/(upper-lower)
+ return C.Scales[lower]+(C.Scales[upper]-C.Scales[lower])*alpha
+end
+function C.visual(id,stars) local stage=C.stage(stars or 1) return C[id].Visual..(stage==1 and "" or "_S"..stage) end
+function C.template(id,stars) local stage=C.stage(stars or 1) return C[id].Template..(stage==1 and "" or "_S"..stage) end
+function C.saddleHeight(id,stars)
+ stars=stars or 1
+ if id=="GrassBoar" then
+  local stage=C.stage(stars)
+  local package=game and game:GetService("ReplicatedStorage"):FindFirstChild("RodeoFantasy")
+  local visual=package and package:FindFirstChild(C.visual(id,stars))
+  local fitted=visual and visual:GetAttribute("MeshyBackHeight")
+  if fitted then return fitted*C.scale(stars)/C.Scales[stage]+1.36-C[id].RootHeight*C.scale(stars) end
+  local back={[1]=2.804463,[3]=3.880880,[6]=7.230789,[9]=11.021101}
+  return back[stage]*C.scale(stars)/C.Scales[stage]+1.36-C[id].RootHeight*C.scale(stars)
+ end
+ if id=="MeadowMouse" then
+  local stage=C.stage(stars)
+  if stage==1 or stage==3 then
+   local package=game and game:GetService("ReplicatedStorage"):FindFirstChild("RodeoFantasy")
+   local visual=package and package:FindFirstChild(C.visual(id,stars))
+   local back=visual and visual:GetAttribute("MeshyBackHeight")
+   if back then return back*C.scale(stars)/C.Scales[stage]+1.36-C[id].RootHeight*C.scale(stars) end
+   return 1.2*C.scale(stars)
+  end
+  -- Meshes already contain their approved stage size. Seat above the back,
+  -- with a constant clearance for the unscaled player rather than its crown.
+  local back={[3]=2.212572,[6]=3.232653,[9]=7.460891}
+  return back[stage]*C.scale(stars)/C.Scales[stage]+1.36-C[id].RootHeight*C.scale(stars)
+ end
+ return C[id].SaddleHeight*C.scale(stars)
+end
+function C.pick(meters,serial)
+ if meters&lt;0 or meters&gt;=C.MeadowEndMeters then return nil end
+ local unlocked={}
+ for _,id in ipairs(C.Order) do if meters&gt;=C[id].UnlockMeters then table.insert(unlocked,id) end end
+ -- Rotate each equal-share cycle so alternating left/right births do not
+ -- permanently assign one species to only one side of the road.
+ return unlocked[(serial+math.floor(serial/#unlocked))%#unlocked+1]
+end
+return C
+</ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBXBreedReview5">
+        <Properties>
+          <string name="Name">Localization</string>
+          <ProtectedString name="Source">local L={}
+L.entries={
+ ["교감 E"]={en="Bond E",ko="교감 E"},
+ ["교감"]={en="Bond",ko="교감"},
+ ["펫 인덱스"]={en="Pet Index",ko="펫 인덱스"},
+ ["초원"]={en="Meadow",ko="초원"},
+ ["행성\nGreen Star"]={en="Planet\nGreen Star",ko="행성\nGreen Star"},
+ ["수집하면 정보가 공개됩니다"]={en="Collect to reveal details",ko="수집하면 정보가 공개됩니다"},
+ ["Unlocked"]={ko="잠금 해제"},
+ ["행성 선택"]={en="Select Planet",ko="행성 선택"},
+ ["출발할 몬스터 선택"]={en="Choose Your Mount",ko="출발할 몬스터 선택"},
+ ["로켓으로 떠날 행성을 선택해 주세요."]={en="Choose a planet to visit.",ko="로켓으로 떠날 행성을 선택해 주세요."},
+ ["다음"]={en="Next",ko="다음"},
+ ["다음 · 몬스터 선택"]={en="Next · Choose Mount",ko="다음 · 몬스터 선택"},
+ ["탑승하고 출발"]={en="Mount and Depart",ko="탑승하고 출발"},
+ ["몬스터 한 마리를 선택해 주세요."]={en="Select one of your monsters.",ko="몬스터 한 마리를 선택해 주세요."},
+ ["Green Star를 선택해 주세요."]={en="Please select Green Star.",ko="Green Star를 선택해 주세요."},
+ ["Green Star를 선택했어요."]={en="Green Star selected.",ko="Green Star를 선택했어요."},
+ ["Green Star\n숲 · 1,000m"]={en="Green Star\nForest · 1,000m",ko="Green Star\n숲 · 1,000m"},
+ ["Green Star · 숲 1,000m\n내 가방의 몬스터를 타고 시작해요."]={en="Green Star · Forest 1,000m\nStart riding a monster from your bag.",ko="Green Star · 숲 1,000m\n내 가방의 몬스터를 타고 시작해요."},
+ ["사냥터를 준비하고 있어요…"]={en="Preparing the hunt…",ko="사냥터를 준비하고 있어요…"},
+ ["Green Star · Distance Top 10"]={ko="Green Star · 거리 랭킹 TOP 10"},
+ ["도감 수집"]={en="Collection",ko="도감 수집"},
+ ["Ocean"]={ko="바다",ja="海"},
+ ["Swamp"]={ko="늪지",ja="沼地"},
+ ["Forest"]={ko="숲",ja="森"},
+ ["Total caught"]={ko="총 포획",ja="総捕獲"},
+ ["Caught"]={ko="포획 수",ja="捕獲数"},
+ ["Found at"]={ko="발견 위치",ja="発見場所"},
+ ["Taming (1 star)"]={ko="1성 길들이기",ja="1つ星の捕獲"},
+ ["Seconds"]={ko="초",ja="秒"},
+ ["Region not released yet"]={ko="아직 공개되지 않은 지역이에요",ja="まだ公開されていない地域です"},
+ ["Male"]={ko="수컷",ja="オス"},
+ ["Female"]={ko="암컷",ja="メス"},
+ ["Unknown sex"]={ko="미확인",ja="不明"},
+ ["Collection discoveries"]={ko="도감 수집 랭킹",ja="図鑑収集ランキング"},
+ ["Settings"]={ko="설정",ja="設定"},
+ ["Sound settings"]={ko="소리 설정",ja="サウンド設定"},
+ ["Background music"]={ko="배경 음악",ja="背景音楽"},
+ ["Sound effects"]={ko="효과음",ja="効果音"},
+ ["Hunting continues while settings are open"]={ko="설정을 열어도 사냥은 계속 진행돼요",ja="設定中も狩りは続きます"},
+ ["MeadowMouse"]={ko="모스랫",en="Mossrat",ja="모스랫"},
+ ["GrassBoar"]={ko="브램블보어",en="Brambleboar",ja="브램블보어"},
+ ["TreeWolf"]={ko="바인팽",en="바인팽",ja="바인팽"},
+ ["RockElephant"]={ko="엘레바인",en="엘레바인",ja="엘레바인"},
+ ["Farthest run"]={ko="최장 거리 랭킹",ja="最長距離ランキング"},
+ ["Total produced"]={ko="누적 생산액 랭킹",ja="累計生産ランキング"},
+ ["Loading records..."]={ko="기록 불러오는 중…",ja="記録を読み込み中…"},
+ ["No records yet"]={ko="아직 기록이 없어요",ja="まだ記録がありません"},
+ ["Publish to enable rankings"]={ko="게시 후 랭킹을 사용할 수 있어요",ja="公開後にランキングが使えます"},
+ ["Records temporarily unavailable"]={ko="기록을 잠시 불러올 수 없어요",ja="記録を一時的に読み込めません"},
+ ["Farthest run"]={ko="최장 거리 랭킹",ja="最長距離ランキング"},
+ ["Total produced"]={ko="누적 생산액 랭킹",ja="累計生産ランキング"},
+ ["No records yet"]={ko="아직 기록이 없어요",ja="まだ記録がありません"},
+ ["Publish to enable rankings"]={ko="게시 후 랭킹을 사용할 수 있어요",ja="公開後にランキングが使えます"},
+ ["Records temporarily unavailable"]={ko="기록을 잠시 불러올 수 없어요",ja="記録を一時的に読み込めません"},
+ ["Manage ranch"]={ko="목장 관리",ja="牧場を管理"},
+ ["Choose ranch"]={ko="관리할 목장 선택",ja="管理する牧場を選ぶ"},
+ ["Weedcrow"]={ko="쏜크로",en="쏜크로",ja="쏜크로"},
+ ["Monster tamed! Added to your bag."]={ko="길들이기 성공! 가방에 추가됐어요.",ja="仲間にしました！バッグに追加。"},
+ ["Place monsters"]={ko="몬스터 배치",ja="モンスターを配置"},
+ ["Ranch"]={ko="목장",ja="牧場"},
+ ["Place"]={ko="배치",ja="配置"},
+ ["Return to bag"]={ko="가방으로 돌려놓기",ja="バッグに戻す"},
+ ["Placed"]={ko="배치됨",ja="配置済み"},
+ ["Full"]={ko="가득 참",ja="満員"},
+ ["This server holds up to 8 players."]={ko="이 서버는 8명까지 입장할 수 있어요.",ja="このサーバーは8人までです。"},
+ ["Start hunt"]={ko="사냥 시작",ja="狩りを始める"},
+ ["Hunt again"]={ko="다시 사냥하기",ja="もう一度狩る"},
+ ["Return to lobby"]={ko="로비로 돌아가기",ja="ロビーに戻る"},
+ ["Jump / Lasso"]={ko="점프 / 줄",ja="ジャンプ / ロープ"},
+ ["Hunt ended"]={ko="사냥 종료",ja="狩り終了"},
+ ["Next region coming soon"]={ko="다음 지역 준비 중",ja="次のエリアは準備中"},
+ ["You hit an obstacle."]={ko="장애물에 부딪혔어요.",ja="障害物にぶつかりました。"},
+ ["You missed the next monster."]={ko="다음 몬스터를 잡지 못했어요.",ja="次のモンスターをつかめませんでした。"},
+ ["You lost your mount."]={ko="몬스터를 놓쳤어요.",ja="乗っていたモンスターを失いました。"},
+ ["This monster cannot break crates."]={ko="상자를 부술 수 없는 몬스터예요.",ja="このモンスターは木箱を壊せません。"},
+ ["You hit a wall."]={ko="벽에 부딪혔어요.",ja="壁にぶつかりました。"},
+ ["You hit another monster."]={ko="다른 몬스터에 부딪혔어요.",ja="別のモンスターにぶつかりました。"},
+ ["Welcome back to the lobby."]={ko="로비로 돌아왔어요.",ja="ロビーに戻りました。"},
+ ["Approach the airship to start."]={ko="비행장에서 사냥터로 출발하세요.",ja="飛行船に近づくと出発します。"},
+ ["Lumidon tamed! Added to your bag."]={ko="루미돈 길들이기 성공! 가방에 추가됐어요.",ja="ルミドンを仲間にしました！バッグに追加。"},
+ ["Lumidon"]={ko="루미돈",ja="ルミドン"},
+ ["Angry! Press Space to jump!"]={ko="화났어요! 스페이스바로 점프하세요!",ja="怒っています！スペースでジャンプ！"},
+ ["Tamed · Keep riding"]={ko="길들이기 성공 · 계속 타고 달리세요",ja="仲間になった · そのまま走ろう"},
+ ["Taming Lumidon ♥"]={ko="루미돈 길들이는 중 ♥",ja="ルミドンを仲間にしています ♥"},
+ ["A/D to steer · Space to jump / again to lasso"]={ko="A·D로 좌우 이동 · 스페이스바로 점프 / 공중에서 다시 누르면 줄",ja="A/Dで左右 · スペースでジャンプ / 空中でもう一度ロープ"},
+ ["Press Space to catch the next monster!"]={ko="스페이스바로 다음 몬스터를 잡으세요!",ja="スペースで次のモンスターをつかもう！"},
+ ["Lasso a monster inside the yellow ring"]={ko="노란 원 안에 몬스터가 들어오면 줄이 연결됩니다",ja="黄色い輪の中のモンスターにロープを投げよう"},
+ ["Flying to your next mount…"]={ko="날아가서 탑승하는 중…",ja="次のモンスターに飛び乗っています…"},
+ ["Keep riding after landing"]={ko="탑승 후 계속 타고 달릴 수 있어요",ja="着地後も乗り続けられます"},
+ ["1,000m · Next region coming soon"]={ko="1,000m · 다음 지역 준비 중",ja="1,000m · 次のエリアは準備中"},
+ ["Meadow complete · Start again or return"]={ko="초원 시험 구간이 끝났어요 · 사냥 시작으로 다시 달릴 수 있어요",ja="草原クリア · 再挑戦またはロビーへ"},
+ ["Try again · Your bag income is kept"]={ko="다시 사냥하기로 재도전 · 가방 수익은 유지",ja="再挑戦 · バッグの収入は残ります"},
+ ["Bag"]={ko="가방",ja="バッグ"},
+ ["Close"]={ko="닫기",ja="閉じる"},
+ ["No monsters caught yet"]={ko="아직 포획한 몬스터가 없어요",ja="まだモンスターがいません"},
+ ["Uncollected coins"]={ko="모인 돈",ja="未受取コイン"},
+ ["Shop · Coming soon"]={ko="상점 · 준비 중",ja="ショップ · 準備中"},
+ ["Hunting grounds"]={ko="사냥터",ja="狩りエリア"},
+ ["Airship"]={ko="비행선",ja="飛行船"},
+ ["Fly to hunt"]={ko="사냥터로 출발",ja="狩りに出発"},
+ ["All"]={ko="전체",ja="すべて"},
+ ["Meadow"]={ko="초원",ja="草原"},
+ ["Breeding"]={ko="배합",ja="交配"},
+ ["Search monsters"]={ko="몬스터 검색",ja="モンスターを検索"},
+ ["No matching monsters"]={ko="검색 결과가 없어요",ja="該当するモンスターがいません"},
+ ["Field journal"]={ko="몬스터 도감",ja="モンスター図鑑"},
+ ["Explorer's field journal"]={ko="탐험가의 몬스터 도감",ja="探検家のモンスター図鑑"},
+ ["Discovered"]={ko="발견",ja="発見"},
+ ["Hover an entry for field notes"]={ko="몬스터에 커서를 올리면 획득 방법을 볼 수 있어요",ja="モンスターにカーソルを合わせると入手方法を表示"},
+ ["No entries here yet"]={ko="아직 등록된 몬스터가 없는 분류예요",ja="この分類にはまだ項目がありません"},
+ ["Breeding details not announced yet"]={ko="배합 방법은 아직 공개되지 않았어요",ja="交配方法はまだ公開されていません"},
+ ["Evolve"]={ko="진화",ja="進化",en="Evolve"},
+ ["Cancel"]={ko="취소",ja="キャンセル",en="Cancel"},
+ ["Select"]={ko="선택",ja="選択",en="Select"},
+ ["Selected"]={ko="선택됨",ja="選択済み",en="Selected"},
+ ["Select three matching monsters"]={ko="같은 종류·같은 별 3마리를 선택하세요",ja="同種・同じ星の3匹を選んでください",en="Select three matching monsters"},
+ ["Evolution failed"]={ko="진화할 수 없어요. 가방을 새로 확인해 주세요.",ja="進化できません。バッグを確認してください。",en="Evolution failed. Refresh your bag and try again."},
+ ["Already at max stars"]={ko="10성이 된 몬스터는 더 진화할 수 없어요.",ja="10星のモンスターは進化できません。",en="A 10-star monster cannot evolve further."},
+ ["Loading progress"]={ko="기록을 불러오는 중",ja="記録を読み込み中"},
+ ["Progress saved"]={ko="기록 저장됨",ja="記録を保存済み"},
+ ["Progress loaded"]={ko="기록 불러옴",ja="記録を読み込み済み"},
+ ["Session progress"]={ko="이번 접속의 기록",ja="今回の記録"},
+ ["Progress temporarily unavailable"]={ko="기록 저장 연결을 기다리는 중",ja="記録の接続待ち"},
+}
+function L.text(source,locale)
+ local lang=string.lower(string.sub(locale or "en",1,2))
+ local row=L.entries[source]
+ return row and (row[lang] or row.en) or source
+end
+function L.stats(count,money,locale)
+ local lang=string.sub(locale or "en",1,2)
+ local pattern=lang=="ko" and "가방: %d마리 · 모인 돈: %d" or lang=="ja" and "バッグ: %d匹 · 未受取コイン: %d" or "Bag: %d · Uncollected coins: %d"
+ return string.format(pattern,count,money)
+end
+function L.income(amount,seconds,locale)
+ local lang=string.sub(locale or "en",1,2)
+ local pattern=lang=="ko" and "%s초마다 %s코인" or lang=="ja" and "%s秒ごとに%sコイン" or (amount==1 and "%s coin every %ss" or "%s coins every %ss")
+ if lang=="ko" or lang=="ja" then return string.format(pattern,tostring(seconds),tostring(amount)) end
+ return string.format(pattern,tostring(amount),tostring(seconds))
+end
+function L.levelLabel(level,current,required,locale)
+ local lang=string.sub(locale or "en",1,2)
+ local name=lang=="ko" and "레벨" or lang=="ja" and "レベル" or "Lv."
+ return name.." "..level..(required==0 and " · MAX" or " · "..current.."/"..required.." XP")
+end
+function L.huntHint(meters,seconds,locale)
+ local lang=string.sub(locale or "en",1,2)
+ local pattern=lang=="ko" and "초원 %dm부터 등장. 점프 후 다시 Space로 줄을 던지고 %d초 동안 타세요." or lang=="ja" and "草原%dmから出現。ジャンプ後Spaceで投げ縄を使い、%d秒乗り続けよう。" or "Found in the meadow from %dm. Jump, press Space again to lasso, then ride for %ds."
+ return string.format(pattern,meters,seconds)
+end
+function L.evolutionHint(stars,locale)
+ local lang=string.sub(locale or "en",1,2)
+ local pattern=lang=="ko" and "가방에서 같은 종류·같은 별 3마리를 선택해 %d성으로 진화시키세요." or lang=="ja" and "バッグで同種・同じ星の3匹を選び、%d星に進化させよう。" or "Select three of the same species and star in your bag to evolve to %d stars."
+ return string.format(pattern,stars)
+end
+return L
+</ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBXBreedReview6">
+        <Properties>
+          <string name="Name">SocialRules</string>
+          <ProtectedString name="Source">-- Pure ownership rules used by both servers. No client-authored monster data.
+local R={}
+local function find(bag,id)
+ if type(id)~="number" or id~=id or id%1~=0 then return nil end
+ for _,m in ipairs(bag.monsters) do if m.id==id then return m end end
+end
+R.find=find
+function R.available(m) return m and not m.breedingTeam and not m.tradeLock end
+function R.profile(bag,ids)
+ if type(ids)~="table" or #ids&gt;5 then return nil end
+ local result,used={},{}
+ for _,id in ipairs(ids) do
+  if used[id] or not find(bag,id) then return nil end
+  used[id]=true table.insert(result,id)
+ end
+ return result
+end
+function R.pair(bag,ids)
+ if type(ids)~="table" or #ids~=2 or ids[1]==ids[2] then return false,"Select one female and one male." end
+ local a,b=find(bag,ids[1]),find(bag,ids[2])
+ if not R.available(a) or not R.available(b) then return false,"A selected monster is busy." end
+ if not ((a.sex=="Male" and b.sex=="Female") or (a.sex=="Female" and b.sex=="Male")) then return false,"A female and a male are required." end
+ local teams=0 for _ in pairs(bag.breedingTeams or {}) do teams+=1 end
+ if teams&gt;=4 then return false,"Up to four breeding pairs are allowed." end
+ return true,"Breeding is coming soon. Pairing does not start breeding yet."
+end
+function R.egg(bag,id,slot,remove)
+ if type(slot)~="number" or slot%1~=0 or slot&lt;1 or slot&gt;4 then return false end
+ local target
+ for _,egg in ipairs(bag.eggs or {}) do
+  if egg.id==id then target=egg end
+  if not remove and egg.assignedPen==slot then return false end
+ end
+ if not target then return false end
+ if remove then if target.assignedPen~=slot then return false end target.assignedPen=nil
+ else if target.assignedPen then return false end target.assignedPen=slot end
+ return true
+end
+function R.offer(bag,offer)
+ if type(offer)~="table" or type(offer.ids)~="table" or #offer.ids&gt;100 then return nil end
+ local coins=offer.coins
+ if type(coins)~="number" or coins~=coins or coins&lt;0 or coins%1~=0 or coins&gt;9e12 or coins&gt;(bag.pending or 0)+(bag.balance or 0) then return nil end
+ local selected,used={},{}
+ for _,id in ipairs(offer.ids) do
+  local m=find(bag,id)
+  if not R.available(m) or used[id] then return nil end
+  used[id]=true table.insert(selected,m)
+ end
+ return {coins=coins,ids=table.clone(offer.ids),monsters=selected}
+end
+function R.exchange(a,b,offerA,offerB)
+ local x,y=R.offer(a,offerA),R.offer(b,offerB)
+ if not x or not y then return nil,"Your inventory or monster status has changed." end
+ if (x.coins==0 and #x.ids==0) or (y.coins==0 and #y.ids==0) then return nil,"Both players must offer something." end
+ if #x.ids+#y.ids==0 then return nil,"A trade must include a monster." end
+ local function transfer(bag,outgoing,incoming)
+  local result=table.clone(bag) result.monsters={} result.profile={}
+  local remove={} for _,id in ipairs(outgoing.ids) do remove[id]=true end
+  for _,m in ipairs(bag.monsters) do if not remove[m.id] then table.insert(result.monsters,table.clone(m)) end end
+  for _,id in ipairs(bag.profile or {}) do if not remove[id] then table.insert(result.profile,id) end end
+  for _,m in ipairs(incoming.monsters) do
+   result.serial+=1 local copy=table.clone(m) copy.id=result.serial copy.assignedPen=nil copy.tradeLock=nil
+   table.insert(result.monsters,copy)
+  end
+  result.balance=(bag.balance or 0)+(bag.pending or 0)-outgoing.coins+incoming.coins result.pending=0
+  return result
+ end
+ return {transfer(a,x,y),transfer(b,y,x)}
+end
+return R
+</ProtectedString>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+  <Item class="StarterGui" referent="RBXBreedReview7">
+    <Properties>
+      <string name="Name">StarterGui</string>
+    </Properties>
+  </Item>
+  <Item class="StarterPlayer" referent="RBXBreedReview8">
+    <Properties>
+      <string name="Name">StarterPlayer</string>
+    </Properties>
+    <Item class="StarterPlayerScripts" referent="RBXBreedReview9">
+      <Properties>
+        <string name="Name">StarterPlayerScripts</string>
+      </Properties>
+      <Item class="ModuleScript" referent="RBXBreedReview10">
+        <Properties>
+          <string name="Name">BreedingUI</string>
+          <ProtectedString name="Source">-- Artwork coordinates are measured on the unchanged 1448 x 1086 source PNG.
+local M={}
+local UIS=game:GetService("UserInputService")
+local P=game.ReplicatedStorage:WaitForChild("RodeoFantasy")
+local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
+local L=require(P:WaitForChild("Localization"))
+local W,H=1448,1086
+M.Regions={Close={1225,143,118,110},Female={375,295,196,176},Male={879,295,196,176},
+ FemaleReset={546,452,60,60},MaleReset={1050,452,60,60},Breed={484,530,475,98},Guide={992,541,242,84}}
+M.Slots={}
+for _,y in ipairs({673,843}) do
+ for _,x in ipairs({155,390,632,875,1115}) do table.insert(M.Slots,{x,y,181,122}) end
+end
+local function make(class,props,parent)
+ local n=Instance.new(class) for k,v in pairs(props) do n[k]=v end n.Parent=parent return n
+end
+function M.new(gui,remote,getItems,notice)
+ local self={} local selected={} local page=1 local items={} local lastSend=-math.huge
+ local ko=game.Players.LocalPlayer.LocaleId:sub(1,2)=="ko"
+ local function text(a,b) return ko and a or b end
+ local root=make("Frame",{Name="BreedingOverlay",Visible=false,BackgroundTransparency=1,
+  AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(W,H),ZIndex=70},gui)
+ local scale=make("UIScale",{},root)
+ local art=make("ImageLabel",{Name="Background",BackgroundTransparency=1,Size=UDim2.fromScale(1,1),
+  ScaleType=Enum.ScaleType.Stretch,Image="",ZIndex=70},root)
+ local missing=make("TextLabel",{Name="MissingArtwork",Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(13,18,44),
+  BackgroundTransparency=.1,Text=text("번식실 배경 이미지 연결이 필요합니다.","Breeding background image is not configured."),
+  TextColor3=Color3.new(1,1,1),TextSize=30,ZIndex=71},art)
+ local function refreshArt()
+  local id=P:GetAttribute("BreedingBackgroundImage")
+  art.Image=type(id)=="string" and id or ""
+  missing.Visible=art.Image=="" or not art.IsLoaded
+ end
+ local connections={}
+ table.insert(connections,P:GetAttributeChangedSignal("BreedingBackgroundImage"):Connect(refreshArt))
+ table.insert(connections,art:GetPropertyChangedSignal("IsLoaded"):Connect(refreshArt))
+ local function layout()
+  local size=gui.AbsoluteSize
+  scale.Scale=math.max(.01,math.min((size.X-24)/W,(size.Y-24)/H,1))
+ end
+ table.insert(connections,gui:GetPropertyChangedSignal("AbsoluteSize"):Connect(layout))
+ local function hit(name,rect,z)
+  return make("ImageButton",{Name=name,Image="",ImageTransparency=1,BackgroundTransparency=1,
+   AutoButtonColor=false,Position=UDim2.fromOffset(rect[1],rect[2]),Size=UDim2.fromOffset(rect[3],rect[4]),ZIndex=z or 75},root)
+ end
+ local buttons={} for name,rect in pairs(M.Regions) do buttons[name]=hit(name,rect) end
+ local function label(parent,value)
+  return make("TextLabel",{Text=value,BackgroundTransparency=1,Position=UDim2.new(0,0,1,-30),Size=UDim2.new(1,0,0,28),
+   TextScaled=true,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),TextStrokeTransparency=.25,ZIndex=78},parent)
+ end
+ local portraits={}
+ local function draw(button,m)
+  if portraits[button] then portraits[button]:Destroy() portraits[button]=nil end
+  if not m then return end
+  local box=make("Frame",{Name="Monster",BackgroundTransparency=1,Size=UDim2.fromScale(1,1),ZIndex=76},button)
+  portraits[button]=box
+  local visual=make("Frame",{BackgroundTransparency=1,Size=UDim2.new(1,0,1,-28),ZIndex=76},box)
+  Portrait.fill(visual,m.monsterId,m.stars,false)
+  label(box,(m.sex=="Female" and "♀ " or m.sex=="Male" and "♂ " or "")..L.text(m.monsterId,ko and "ko" or "en-us").." "..tostring(m.stars).."★")
+ end
+ local slots={} local render
+ local function available(m) return m and not m.breedingTeam and not m.tradeLock end
+ for i,rect in ipairs(M.Slots) do
+  local b=hit("MonsterSlot"..i,rect) slots[i]=b
+  b.Activated:Connect(function()
+   local m=items[(page-1)*10+i]
+   if not available(m) then notice(text("사용 중인 몬스터는 선택할 수 없습니다.","This monster is unavailable.")) return end
+   if m.sex~="Female" and m.sex~="Male" then notice(text("성별이 정해진 몬스터를 선택하세요.","Choose a monster with a known sex.")) return end
+   selected[m.sex]=selected[m.sex]==m.id and nil or m.id render()
+  end)
+ end
+ -- Side rails give touch paging a larger target without covering the ten slots.
+ local previous=hit("PreviousPage",{34,753,96,150}) label(previous,"‹")
+ local nextPage=hit("NextPage",{1318,753,96,150}) label(nextPage,"›")
+ local pageLabel=label(hit("PageNumber",{630,634,188,24}),"")
+ render=function()
+  items=table.clone(getItems() or {})
+  table.sort(items,function(a,b) if a.stars~=b.stars then return a.stars&gt;b.stars end return a.id&lt;b.id end)
+  local found={} for _,m in ipairs(items) do if available(m) and selected[m.sex]==m.id then found[m.sex]=m end end
+  for _,sex in ipairs({"Female","Male"}) do if not found[sex] then selected[sex]=nil end draw(buttons[sex],found[sex]) end
+  local pages=math.max(1,math.ceil(#items/10)) page=math.clamp(page,1,pages)
+  pageLabel.Text=tostring(page).." / "..tostring(pages)
+  previous.Visible=page&gt;1 nextPage.Visible=page&lt;pages
+  for i,b in ipairs(slots) do
+   local m=items[(page-1)*10+i] draw(b,m)
+   b.Active=m~=nil b.Selectable=m~=nil
+   local stroke=b:FindFirstChild("Selected") or make("UIStroke",{Name="Selected",Color=Color3.new(1,1,1),Thickness=3},b)
+   stroke.Enabled=m~=nil and (selected.Female==m.id or selected.Male==m.id)
+  end
+ end
+ previous.Activated:Connect(function() page-=1 render() end)
+ nextPage.Activated:Connect(function() page+=1 render() end)
+ function self.close() root.Visible=false end
+ buttons.Close.Activated:Connect(self.close)
+ for _,sex in ipairs({"Female","Male"}) do
+  local function clear() selected[sex]=nil render() end
+  buttons[sex].Activated:Connect(clear) buttons[sex.."Reset"].Activated:Connect(clear)
+ end
+ buttons.Breed.Activated:Connect(function()
+  render() -- Recheck current ownership/locks before sending IDs; server is authoritative.
+  if not selected.Female or not selected.Male then notice(text("암컷과 수컷을 한 마리씩 선택하세요.","Select one female and one male.")) return end
+  if os.clock()-lastSend&lt;1 then return end lastSend=os.clock()
+  remote:FireServer("Breed",{selected.Female,selected.Male})
+ end)
+ buttons.Guide.Activated:Connect(function()
+  notice(text("암컷·수컷을 선택하고 Breed를 누르세요. 현재는 짝 확인만 가능합니다. 교배서는 상자 드롭·행성 완주로 해금할 예정이며 조합과 확률은 준비 중입니다.",
+   "Select a female and male, then Breed to check the pair. Breeding is not active yet. Recipe unlocks are planned for crates and course completion; combinations and rates are pending."))
+ end)
+ table.insert(connections,UIS.InputBegan:Connect(function(input,processed)
+  if not root.Visible or processed or UIS:GetFocusedTextBox() then return end
+  if input.KeyCode==Enum.KeyCode.Escape or input.KeyCode==Enum.KeyCode.ButtonB then self.close() end
+ end))
+ table.insert(connections,remote.OnClientEvent:Connect(function(kind)
+  if kind=="Bag" and root.Visible then task.defer(function() if root.Parent then render() end end) end
+ end))
+ function self.open() selected={} page=1 root.Visible=true refreshArt() layout() render() remote:FireServer("Bag") end
+ function self.destroy() for _,c in ipairs(connections) do c:Disconnect() end root:Destroy() end
+ refreshArt() layout()
+ return self
+end
+return M
+</ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="ModuleScript" referent="RBXBreedReview11">
+        <Properties>
+          <string name="Name">MonsterPortrait</string>
+          <ProtectedString name="Source">-- Shared 2D portraits: inventory/catalog never clone 3D rigs or cameras.
+local P={}
+local package=game.ReplicatedStorage.RodeoFantasy
+local C=require(package.MonsterCatalog)
+local defaults={[1]="rbxassetid://136157716828140",[3]="rbxassetid://132856650627155",[6]="rbxassetid://105207783752500",[9]="rbxassetid://85299683248138"}
+function P.fill(container,id,stars,silhouette,_distanceScale)
+ local stage=C.stage(stars)
+ local imageId=id=="MeadowMouse" and (package:GetAttribute("MossratPortraitS"..stage) or defaults[stage])
+  or id=="GrassBoar" and package:GetAttribute("BrambleboarPortraitS"..stage) or nil
+ local image=Instance.new("ImageLabel") image.Name="MonsterPortraitImage"
+ image.BackgroundTransparency=1 image.Size=UDim2.fromScale(1,1)
+ image.ScaleType=Enum.ScaleType.Fit image.ZIndex=container.ZIndex+1
+ image.Image=type(imageId)=="string" and imageId or ""
+ image.ImageColor3=silhouette and Color3.new(0,0,0) or Color3.new(1,1,1)
+ image.Parent=container
+ if image.Image=="" then
+  local label=Instance.new("TextLabel") label.BackgroundTransparency=1 label.Size=UDim2.fromScale(1,1)
+  label.Text="?" label.TextScaled=true label.TextColor3=Color3.fromRGB(160,180,170) label.Parent=container
+ end
+ return image
+end
+return P
+</ProtectedString>
+        </Properties>
+      </Item>
+      <Item class="LocalScript" referent="RBXBreedReview12">
+        <Properties>
+          <string name="Name">BreedingReview</string>
+          <ProtectedString name="Source">-- Local isolated review: no production scripts, remotes, or DataStore access.
+local player=game.Players.LocalPlayer
+local P=game.ReplicatedStorage:WaitForChild("RodeoFantasy")
+P:SetAttribute("BreedingBackgroundImage","rbxassetid://112011601018432")
+for stage,id in pairs({[1]=109234225323915,[3]=86751563747627,[6]=75209703574739,[9]=134420784707320}) do P:SetAttribute("BrambleboarPortraitS"..stage,"rbxassetid://"..id) end
+local gui=Instance.new("ScreenGui") gui.Name="BreedingReview" gui.ResetOnSpawn=false gui.Parent=player:WaitForChild("PlayerGui")
+local notice=Instance.new("TextLabel") notice.Name="ReviewStatus" notice.Size=UDim2.new(1,0,0,36) notice.BackgroundColor3=Color3.fromRGB(12,15,28) notice.TextColor3=Color3.new(1,1,1) notice.TextSize=16 notice.ZIndex=200 notice.Parent=gui
+local items={}
+for i=1,23 do table.insert(items,{id=i,monsterId=i%2==0 and "GrassBoar" or "MeadowMouse",stars=({1,3,6,9})[(i-1)%4+1],sex=i%2==0 and "Male" or "Female",tradeLock=i==23}) end
+local event=Instance.new("BindableEvent") local remote={OnClientEvent=event.Event}
+local rules=require(P.SocialRules)
+function remote:FireServer(action,value)
+ if action=="Breed" then
+  local ok,message=rules.pair({monsters=items},value)
+  notice.Text="SERVER RULES: "..tostring(ok).." | "..message
+  print("BREEDING_REVIEW_PAIR",ok,value[1],value[2],message)
+ elseif action=="Bag" then event:Fire("Bag",items) end
+end
+local ui=require(script.Parent:WaitForChild("BreedingUI")).new(gui,remote,function() return items end,function(message) notice.Text=message print("BREEDING_REVIEW_NOTICE",message) end)
+ui.open()
+local reopen=Instance.new("TextButton") reopen.Text="Open Breeding" reopen.Size=UDim2.fromOffset(130,36) reopen.Position=UDim2.fromOffset(0,36) reopen.ZIndex=200 reopen.Parent=gui
+reopen.Activated:Connect(ui.open)
+task.delay(10,function()
+ local root=gui.BreedingOverlay local a=root.Background
+ print("BREEDING_REVIEW_LOADED",a.IsLoaded,a.Image,gui.AbsoluteSize,root.AbsoluteSize,root.UIScale.Scale)
+ notice.Text="UI review | artwork loaded: "..tostring(a.IsLoaded).." | 23 test monsters | no saved data"
+end)
+</ProtectedString>
+        </Properties>
+      </Item>
+    </Item>
+  </Item>
+</roblox>

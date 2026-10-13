@@ -1,5 +1,5 @@
 -- Replace this with the uploaded IMAGE asset ID, then run in Studio Command Bar.
-local IMAGE_ID = ""
+local IMAGE_ID = "112011601018432"
 assert(IMAGE_ID:match("^%d+$") and tonumber(IMAGE_ID)>0,"Set IMAGE_ID first")
 assert(not game:GetService("RunService"):IsRunning(),"Stop Play first")
 assert(game.GameId==10770388358,"Wrong experience")
