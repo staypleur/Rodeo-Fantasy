@@ -1656,3 +1656,5 @@
 - 실패: 배경과 기존 몬스터 초상화가 표시되지 않음. ContentProvider PreloadAsync Failure 및 Studio 로그의 Authentication required to access Asset, asset delivery 401 확인. 인증 또는 에셋 접근 상태 복구 필요. 원인을 그룹 권한으로 단정하지 않음.
 - 미완료: 원본 배경과 클릭 영역의 실제 시각적 정합성, 모바일 에뮬레이터/실기기, 실제 로비·카페 설치/게시. 검증을 통과했다고 보고하지 않음.
 - Luau 컴파일: review fixture, BreedingUI, 생성 설치기 통과. 생성 장소는 재현 가능한 격리 검증 파일이며 운영 장소 파일은 변경하지 않음.
+
+- 재로그인 후 후속 재검증: Studio Play 재시작 및 Studio 완전 종료/재실행까지 시행. 2026-10-13 18:58 KST 새 프로세스에서도 배경 112011601018432와 기존 초상화 요청에 Authentication required to access Asset, IsLoaded=false 재현. 브라우저 로그인과 별도로 Studio 인증 확인이 필요하며 이미지/모바일 검증은 계속 미완료. 테스트는 중지함.
