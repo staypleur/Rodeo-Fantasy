@@ -5,6 +5,7 @@ local UIS=game:GetService("UserInputService")
 local Run=game:GetService("RunService")
 local L=require(game.ReplicatedStorage.RodeoFantasy.Localization)
 local Portrait=require(script.Parent:WaitForChild("MonsterPortrait"))
+local BreedingUI=require(script.Parent:WaitForChild("BreedingUI"))
 function S.new(gui,remote,bag,journal)
  local self={}
  local function make(class,props,parent)
@@ -22,15 +23,17 @@ function S.new(gui,remote,bag,journal)
  local message=make("TextLabel",{Text="",Visible=false,AnchorPoint=Vector2.new(.5,0),Position=UDim2.fromScale(.5,.08),Size=UDim2.new(.84,0,0,70),BackgroundColor3=Color3.fromRGB(44,70,52),TextColor3=Color3.fromRGB(255,242,204),TextSize=18,TextWrapped=true,ZIndex=100},gui)
  local noticeVersion=0
  function self.message(text) noticeVersion+=1 local v=noticeVersion message.Text=text message.Visible=true task.delay(5,function() if v==noticeVersion then message.Visible=false end end) end
+ local breeding=BreedingUI.new(gui,remote,function() return bag.items end,self.message)
  local controls=make("Frame",{Position=UDim2.fromOffset(18,63),Size=UDim2.new(1,-36,0,40),BackgroundTransparency=1,ZIndex=62},window)
  local footer=make("Frame",{Position=UDim2.new(0,18,1,-56),Size=UDim2.new(1,-36,0,42),BackgroundTransparency=1,ZIndex=62},window)
  local mode,selected,other,trade=nil,{},nil,nil
  local function clear(parent) for _,n in ipairs(parent:GetChildren()) do if not n:IsA("UIGridLayout") then n:Destroy() end end end
  local function open(name)
+  breeding.close()
   if self.onOpen then self.onOpen() end
   bag.close() journal.close() window.Visible=true title.Text=name clear(content) clear(controls) clear(footer)
  end
- function self.close() window.Visible=false end
+ function self.close() window.Visible=false breeding.close() end
  local function ids() local out={} for id in pairs(selected) do table.insert(out,id) end table.sort(out) return out end
  local function card(m,fn)
   local frame=make("Frame",{BackgroundColor3=selected[m.id] and Color3.fromRGB(183,208,155) or Color3.fromRGB(251,243,224),Size=UDim2.fromOffset(170,205),ZIndex=62},content)
@@ -49,7 +52,10 @@ function S.new(gui,remote,bag,journal)
   end) end
   button(mode=="Breed" and "Check pairing" or "Save profile",.5,0,.5,footer,function() remote:FireServer(mode=="Breed" and "Breed" or "ProfileSave",ids()) end)
  end
- function self.breed() mode="Breed" selected={} renderSelection() end
+ function self.breed()
+  if self.onOpen then self.onOpen() end
+  bag.close() journal.close() window.Visible=false mode="Breed" breeding.open()
+ end
  function self.edit() mode="Profile" selected={} for _,id in ipairs(self.profile or {}) do selected[id]=true end renderSelection() end
  local close=button("×",.93,10,.07,window,function() window.Visible=false if trade then remote:FireServer("TradeDecline") end end)
  close.Size=UDim2.fromOffset(38,38)
