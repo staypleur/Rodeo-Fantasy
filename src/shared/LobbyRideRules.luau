@@ -12,7 +12,7 @@ function R.turn(forward,target,dt)
 end
 function R.speed(stars)
  stars=math.clamp(tonumber(stars) or 1,1,10)
- return 26+(stars-1)*3
+ return 26*(stars>=9 and 1.5 or stars>=6 and 1.3 or stars>=3 and 1.2 or 1)
 end
 function R.direction(value)
  if typeof(value)~="Vector3" or value.X~=value.X or value.Y~=value.Y or value.Z~=value.Z then return nil end

@@ -224,6 +224,10 @@ function World.step(dt)
 		if not model.Parent then animals[model] = nil previousPositions[model]=nil continue end
 		previousPositions[model] = model.PrimaryPart.Position
 		if not model:GetAttribute("Occupied") then
+   if model:GetAttribute("PreparedHerd") and -model.PrimaryPart.Position.Z*tuning.MetersPerStud-viewerMeters>22 then
+    model:SetAttribute("HerdVelocity",Vector3.zero) model:SetAttribute("Running",false) continue
+   end
+   model:SetAttribute("Running",true)
    if model:GetAttribute("WaitingForUnlock") then
     if viewerMeters<Catalog[model:GetAttribute("MonsterId")].UnlockMeters then
      model:SetAttribute("HerdVelocity",Vector3.zero) model:SetAttribute("Running",false)
@@ -257,60 +261,18 @@ function World.step(dt)
 	end
 end
 
-local displayed=setmetatable({},{__mode="k"})
-local released=setmetatable({},{__mode="k"})
-function World.resetVisibility(viewer) displayed[viewer]=nil released[viewer]=nil end
-function World.releaseMount(model,viewer)
- if not model or not model.Parent or not animals[model] or not viewer then return end
- released[viewer]=released[viewer] or {}
- released[viewer][model]=true
-end
+-- Fixed segment herds enter presentation well outside the widest mobile view.
+function World.resetVisibility(viewer) end
+function World.releaseMount(model,viewer) end
 function World.visibleSet(z,aspect,viewer)
  viewerMeters=math.max(0,-z*tuning.MetersPerStud)
- local candidates={}
- local riding=false
+ local result={}
  for model in pairs(animals) do
-  if model.Parent and model:GetAttribute("Occupied") then riding=true end
   if model.Parent and not model:GetAttribute("Occupied") then
-   if viewerMeters<Catalog[model:GetAttribute("MonsterId")].UnlockMeters then continue end
-   local p=model.PrimaryPart.Position
-   table.insert(candidates,{key=model,x=p.X,y=p.Y,z=p.Z,serial=model:GetAttribute("SpawnSerial") or 0,atDen=model:GetAttribute("WaitingForUnlock")==true})
+   local dz=model.PrimaryPart.Position.Z-z
+   if dz<160 and dz>-380 then result[model]=true end
   end
  end
- local preferred=viewer and released[viewer]
- if preferred then
-  for model in pairs(preferred) do
-   local p=model.Parent and model.PrimaryPart and model.PrimaryPart.Position
-   if not p or model:GetAttribute("Occupied") or not Visibility.visible(p.X,p.Y,p.Z-z,aspect or 1,tuning,1) then preferred[model]=nil end
-  end
- end
- -- Reserve the occupied runner's slot before launch, so releasing it cannot
- -- evict a different wild runner that is still in the middle of the screen.
- local target=Visibility.capacity(Course.width(z))-(riding and 1 or 0)
- local previous=viewer and displayed[viewer]
- local limit=Visibility.transitionLimit(candidates,z,aspect or 1,tuning,target,previous,preferred)
- local result=Visibility.select(candidates,z,aspect or 1,tuning,limit,previous,preferred,Course.median(z)>0)
- -- At an unlock boundary the retained old herd must not occupy every display
- -- slot. Admit one prepared new species without increasing the display cap.
- local speciesCounts={}
- for model in pairs(result) do local id=model:GetAttribute("MonsterId") speciesCounts[id]=(speciesCounts[id] or 0)+1 end
- for _,candidate in ipairs(candidates) do
-  local id=candidate.key:GetAttribute("MonsterId")
-  if candidate.atDen and not speciesCounts[id] and Visibility.visible(candidate.x,candidate.y,candidate.z-z,aspect or 1,tuning,1) then
-   local replace,score
-   for model in pairs(result) do
-    if speciesCounts[model:GetAttribute("MonsterId")]>1 and not (preferred and preferred[model]) then
-     local distance=math.abs(model.PrimaryPart.Position.Z-z)
-     if not score or distance>score then replace,score=model,distance end
-    end
-   end
-   if replace then
-    local old=replace:GetAttribute("MonsterId") speciesCounts[old]-=1 result[replace]=nil
-    result[candidate.key]=true speciesCounts[id]=1
-   end
-  end
- end
- if viewer then displayed[viewer]=result end
  return result
 end
 function World.nearest(position, excluded, selected)
@@ -324,62 +286,54 @@ function World.nearest(position, excluded, selected)
 	return best
 end
 
--- Private run: preload the opening scene; later births are strictly beyond the camera.
-function World.replenish(z,aspect,watchers,prime,budget)
- viewerMeters=math.max(0,-z*tuning.MetersPerStud)
- aspect=aspect or 1
- local created=0
- local counts={[-1]=0,[1]=0}
- for model in pairs(animals) do
-  if model.Parent and not model:GetAttribute("Occupied") then
-   local p=model.PrimaryPart.Position
-   if p.Z<=z+30 and p.Z>=z-250 then counts[p.X<0 and -1 or 1]+=1 end
+-- Prepare deterministic positions once. Instantiate only the approaching segments.
+local planned=nil
+local function prepareHerds()
+ planned={}
+ local placed={}
+ for meters=0,1900,100 do
+  local baseZ=-meters/tuning.MetersPerStud
+  local ranges=Course.ranges(baseZ,5)
+  local width=0 for _,r in ipairs(ranges) do width+=r[2]-r[1] end
+  local count=width<24 and 3 or width<42 and 4 or 5
+  for slot=1,count do
+   local found=nil
+   -- Stagger through the segment, alternate branches, and avoid approved obstacles.
+   for attempt=0,49 do
+    local z=baseZ-(slot-1)*14-math.floor(attempt/5)*8
+    local lanes=SpawnPlan.candidates(Course.ranges(z,5),{-.65,0,.65},slot%2==0)
+    if #lanes==0 then continue end
+    local x=lanes[attempt%#lanes+1]
+    local safe=Course.contains(x,z,5)
+    for _,chunk in pairs(Layout) do
+     for _,o in ipairs(chunk.obstacles) do
+      if math.abs(o.x-x)<2*o.scale+5 and math.abs(o.z-z)<2*o.scale+8 then safe=false break end
+     end
+     for _,c in ipairs(chunk.crates) do if math.abs(c.x-x)<7 and math.abs(c.z-z)<10 then safe=false break end end
+     if not safe then break end
+    end
+    for _,other in ipairs(placed) do if math.abs(other.x-x)<9 and math.abs(other.z-z)<18 then safe=false break end end
+    if safe then found={x=x,z=z,id=Catalog.pick(meters,#placed),meters=meters} break end
+   end
+   if found then table.insert(planned,found) table.insert(placed,found) end
   end
  end
- local lanes={-0.72,-0.24,0.24,0.72}
- for offset=prime and -12 or 0,220,8 do
-  if created>=math.min(budget or 24,Course.width(z)<30 and 16 or 24) then break end
-  local targetZ=z-offset
-  if -targetZ*tuning.MetersPerStud>=Catalog.MeadowEndMeters then continue end
-  local narrow=Course.width(targetZ)<30
-  if narrow and (offset-(prime and -12 or 0))%16~=0 then continue end
-  local candidates=SpawnPlan.candidates(Course.ranges(targetZ,5),narrow and {-0.5,0.5} or lanes,math.floor(offset/8)%2==1)
-  local preferred=counts[-1]<counts[1] and -1 or counts[1]<counts[-1] and 1 or (spawnSerial%2==0 and 1 or -1)
-  table.sort(candidates,function(a,b)
-   local sa,sb=a<0 and -1 or 1,b<0 and -1 or 1
-   if sa~=sb then return sa==preferred end
-   return math.abs(a)<math.abs(b)
-  end)
-  for _,x in ipairs(candidates) do
-   if created>=math.min(budget or 24,Course.width(z)<30 and 16 or 24) then break end
-    -- Choose for each successful birth at its course position, not the viewer's
-    -- position: offscreen preloading must not delay a 300m species until 400m.
-    local id=Catalog.pick(math.max(0,-targetZ*tuning.MetersPerStud),spawnSerial)
-    if not id then break end
-    local side=x<0 and -1 or 1
-    if counts[side]>counts[-side] then continue end
-    local onScreen=Visibility.visible(x,Catalog[id].RootHeight,targetZ-z,aspect,tuning,1.2)
-    if onScreen and not prime then continue end
-    local safe=true
-    for other in pairs(animals) do
-     if other.Parent then local p=other.PrimaryPart.Position if math.abs(p.X-x)<8 and math.abs(p.Z-targetZ)<18 then safe=false break end end
-    end
-    for _,rock in ipairs(obstacles:GetChildren()) do
-     if not Catalog[id].Flying and not rock:GetAttribute("Broken") and math.abs(rock.Position.X-x)<rock.Size.X/2+5 and math.abs(rock.Position.Z-targetZ)<rock.Size.Z/2+10 then safe=false break end
-    end
-    if safe then
-     local model=World.spawn(Vector3.new(x,2,targetZ),id)
-     model:SetAttribute("BornOutsideView",not onScreen)
-     model:SetAttribute("OpeningScene",prime==true)
-     created+=1
-     counts[side]+=1
-    end
+end
+function World.replenish(z,aspect,watchers,prime,budget)
+ viewerMeters=math.max(0,-z*tuning.MetersPerStud)
+ if not planned then prepareHerds() end
+ local created=0
+ for _,entry in ipairs(planned) do
+  if not entry.spawned and entry.z>=z-400 and entry.z<=z+40 then
+   local model=World.spawn(Vector3.new(entry.x,2,entry.z),entry.id)
+   model:SetAttribute("PreparedHerd",true)
+   entry.spawned=true created+=1
   end
  end
  return created
 end
 function World.maintain(watchers)
- for _,watch in ipairs(watchers) do World.replenish(watch.z,watch.aspect,nil,false,12) end
+ for _,watch in ipairs(watchers) do World.replenish(watch.z,watch.aspect) end
 end
 
 -- Contact while riding: include moving herds and the visible inner canyon face.

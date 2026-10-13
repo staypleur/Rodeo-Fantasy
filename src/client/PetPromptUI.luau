@@ -36,6 +36,10 @@ function M.new(gui,player)
   local pet=nearby()
   if player:GetAttribute("LobbyRiding") or pet and rules.canRide(pet:GetAttribute("Stars")) then package.CaptureRemote:FireServer("RidePet",pet and pet:GetAttribute("BagItemId")) end
  end)
+ local input=game:GetService("UserInputService")
+ local jumpConnection=input.JumpRequest:Connect(function()
+  if player:GetAttribute("LobbyRiding") and not input:GetFocusedTextBox() then package.CaptureRemote:FireServer("RideJump") end
+ end)
  local rs=game:GetService("RunService") local oldCamera local inputTime=0 local lastInput
  local cameraTarget local cameraHeading local cameraPet
  local stepName="LobbyRideCamera_"..player.UserId
@@ -89,6 +93,6 @@ function M.new(gui,player)
    inputTime=0 lastInput=nil cameraTarget=nil cameraHeading=nil cameraPet=nil
   end
  end)
- gui.Destroying:Connect(function() connection:Disconnect() rs:UnbindFromRenderStep(stepName) current=nil end)
+ gui.Destroying:Connect(function() connection:Disconnect() jumpConnection:Disconnect() rs:UnbindFromRenderStep(stepName) current=nil end)
 end
 return M

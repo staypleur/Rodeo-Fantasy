@@ -7,23 +7,18 @@ local function content(parent,amount)
  label.Text="+"..amount label.TextSize=28 label.Font=Enum.Font.GothamBlack
  label.TextColor3=Color3.fromRGB(255,230,117) label.TextStrokeColor3=Color3.fromRGB(44,64,39) label.TextStrokeTransparency=0
  label.ZIndex=parent:IsA("GuiObject") and parent.ZIndex+1 or 2 label.Parent=parent
- local coin=Instance.new("Frame") coin.Name="GoldCoin" coin.Size=UDim2.fromOffset(25,25) coin.Position=UDim2.new(0,0,.5,-12)
- coin.BackgroundColor3=Color3.fromRGB(250,197,72) coin.BorderSizePixel=0 coin.ZIndex=label.ZIndex coin.Parent=parent
- local corner=Instance.new("UICorner") corner.CornerRadius=UDim.new(1,0) corner.Parent=coin
- local stroke=Instance.new("UIStroke") stroke.Color=Color3.fromRGB(170,113,38) stroke.Thickness=2 stroke.Parent=coin
- local shine=Instance.new("Frame") shine.Size=UDim2.fromOffset(4,16) shine.Position=UDim2.fromOffset(10,4)
- shine.BackgroundColor3=Color3.fromRGB(255,239,157) shine.BorderSizePixel=0 shine.ZIndex=label.ZIndex+1 shine.Parent=coin
- return label,coin,shine,stroke
+ local coin=Instance.new("ImageLabel") coin.Name="MoneyGainIcon" coin.Size=UDim2.fromOffset(28,28) coin.Position=UDim2.new(0,0,.5,-14)
+ coin.BackgroundTransparency=1 coin.ScaleType=Enum.ScaleType.Fit coin.ZIndex=label.ZIndex
+ coin.Image=require(script.Parent:WaitForChild("HudIcons")).imageId(game.ReplicatedStorage.RodeoFantasy,"MoneyImage") coin.Parent=parent
+ return label,coin
 end
 local function animate(node,amount,goal)
  active[node]=true
- local label,coin,shine,stroke=content(node,amount)
+ local label,coin=content(node,amount)
  local info=TweenInfo.new(1,Enum.EasingStyle.Quad,Enum.EasingDirection.Out)
  local motion=Tween:Create(node,info,goal) motion:Play()
  Tween:Create(label,info,{TextTransparency=1,TextStrokeTransparency=1}):Play()
- Tween:Create(coin,info,{BackgroundTransparency=1}):Play()
- Tween:Create(shine,info,{BackgroundTransparency=1}):Play()
- Tween:Create(stroke,info,{Transparency=1}):Play()
+ Tween:Create(coin,info,{ImageTransparency=1}):Play()
  motion.Completed:Connect(function() active[node]=nil node:Destroy() end)
  return node
 end

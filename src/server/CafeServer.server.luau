@@ -20,7 +20,7 @@ local function canAct(p)
  return active(p) and not Store.busy(p) and not Social.trading(p) and h and h.Health>0
 end
 local activities=require(script.Parent.CafeActivities).start(map,canAct)
-local pets=require(script.Parent.LobbyCompanions).new({map=map,streamingMode=Enum.ModelStreamingMode.Atomic,
+local pets=require(script.Parent.LobbyCompanions).new({map=map,speedMultiplier=2,streamingMode=Enum.ModelStreamingMode.Atomic,
  bag=function(p) return bags[p] end,inLobby=active,canAct=canAct,canSummon=canAct})
 local function accrue(b)
  return Bag.accrue(b,workspace:GetServerTimeNow(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
@@ -43,19 +43,21 @@ require(script.Parent:WaitForChild("OperatorCommands")).register({
  grant=function(p,id,stars,count)
   if not canAct(p) then remote:FireClient(p,"SocialMessage","Use this command when your bag is ready.") return end
   local b=bags[p] local species=Catalog[id]
+  local added=0
   for _=1,count do
-   Bag.grant(b,id,workspace:GetServerTimeNow(),species.IncomeSeconds,species.IncomeAmount)
-   b.monsters[#b.monsters].stars=stars
+   local granted=Bag.grant(b,id,workspace:GetServerTimeNow(),species.IncomeSeconds,species.IncomeAmount)
+   if not granted then break end
+   granted.stars=stars added+=1
    Progress.caught(p,id,stars)
   end
   sendBag(p) send(p)
-  remote:FireClient(p,"SocialMessage","Added "..count.." "..require(P.Localization).text(id,"en").." ("..stars.." stars).")
+  remote:FireClient(p,"SocialMessage","Added "..added.." "..require(P.Localization).text(id,"en").." ("..stars.." stars).")
  end,
 })
 Social.start(bags,canAct,sendBag,pets.clear)
 remote.OnServerEvent:Connect(function(p,action,value)
  if type(action)~="string" or not active(p) or Store.busy(p) then return end
- local allowed={Sync=true,Bag=true,Summon=true,BondPet=true,RidePet=true,RideInput=true,GoLobby=true,Journal=true,Evolve=true,Manage=true,PlaceEgg=true,RemoveEgg=true}
+ local allowed={Sync=true,Bag=true,Summon=true,BondPet=true,RidePet=true,RideInput=true,RideJump=true,Discard=true,GoLobby=true,Journal=true,Evolve=true,Manage=true,PlaceEgg=true,RemoveEgg=true}
  if not allowed[action] then return end
  local stamps=limits[p] or {} limits[p]=stamps
  local interval=action=="RideInput" and .05 or .25
@@ -67,6 +69,13 @@ remote.OnServerEvent:Connect(function(p,action,value)
  elseif action=="Summon" then pets.summon(p,value) send(p)
  elseif action=="BondPet" then pets.bond(p,value)
  elseif action=="RidePet" then pets.ride(p,value)
+ elseif action=="RideJump" then pets.jump(p)
+ elseif action=="Discard" and canAct(p) then
+  local gains=accrue(bags[p])
+  if Bag.discard(bags[p],value) then
+   if p:GetAttribute("SummonedId")==value then pets.clear(p) end
+   sendBag(p) send(p,gains)
+  end
  elseif action=="RideInput" then pets.input(p,value)
  elseif action=="Evolve" and canAct(p) then
   local gains=accrue(bags[p]);local evolved,reason=Bag.evolve(bags[p],value,workspace:GetServerTimeNow())

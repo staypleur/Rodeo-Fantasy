@@ -88,13 +88,15 @@ require(script.Parent:WaitForChild("OperatorCommands")).register({
    remote:FireClient(player,"SocialMessage","Use this command in the lobby when your bag is ready.") return
   end
   local species=Catalog[id]
+  local added=0
   for _=1,count do
-   BagRules.grant(bag,id,now(),species.IncomeSeconds,species.IncomeAmount)
-   bag.monsters[#bag.monsters].stars=stars
+   local granted=BagRules.grant(bag,id,now(),species.IncomeSeconds,species.IncomeAmount)
+   if not granted then break end
+   granted.stars=stars added+=1
    Progress.caught(player,id,stars)
   end
   sendBag(player) send(player)
-  remote:FireClient(player,"SocialMessage","Added "..count.." "..require(P.Localization).text(id,"en").." ("..stars.." stars).")
+  remote:FireClient(player,"SocialMessage","Added "..added.." "..require(P.Localization).text(id,"en").." ("..stars.." stars).")
  end,
 })
 local function clearRope(state)
@@ -284,7 +286,7 @@ Lobby.connectPens(function(player)
 end)
 remote.OnServerEvent:Connect(function(player,action,value)
  if type(action)~="string" or not bags[player] or Store.busy(player) or player:GetAttribute("Travelling") then return end
- if action~="GoCafe" and action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" and action~="PlaceEgg" and action~="RemoveEgg" and action~="Summon" and action~="BondPet" and action~="RidePet" and action~="RideInput" then return end
+ if action~="GoCafe" and action~="Sync" and action~="Start" and action~="Jump" and action~="Steer" and action~="View" and action~="ReturnLobby" and action~="Bag" and action~="Manage" and action~="Place" and action~="Remove" and action~="Evolve" and action~="Journal" and action~="PlaceEgg" and action~="RemoveEgg" and action~="Summon" and action~="BondPet" and action~="RidePet" and action~="RideInput" and action~="RideJump" and action~="Discard" then return end
  local stamps=limits[player]
  if not stamps then stamps={} limits[player]=stamps end
  -- Ignore key-repeat bursts; capture transitions are always server-authoritative.
@@ -295,6 +297,16 @@ remote.OnServerEvent:Connect(function(player,action,value)
   local hum=player.Character and player.Character:FindFirstChildOfClass("Humanoid")
   if player:GetAttribute("Area")~="Lobby" or states[player] or Social.trading(player) or not hum or hum.Health<=0 then return end
   Travel.go(player,true) return
+ end
+ if action=="RideJump" then companions.jump(player) return end
+ if action=="Discard" then
+  if states[player] or Social.trading(player) then return end
+  BagRules.accrue(bags[player],now(),Config.BagIncome.IncomeSeconds,Config.BagIncome.IncomeAmount)
+  if BagRules.discard(bags[player],value) then
+   if player:GetAttribute("SummonedId")==value then companions.clear(player) end
+   sendBag(player) send(player)
+  end
+  return
  end
  if action=="BondPet" then companions.bond(player,value) return end
  if action=="RidePet" then companions.ride(player,value) return end
@@ -468,7 +480,7 @@ RunService.Heartbeat:Connect(function(delta)
    if not state.tamed and tameReady then
     local id=state.monster:GetAttribute("MonsterId") or Config.Monster.Id
     local species=Catalog[id]
-    state.tamed=true BagRules.grant(bags[player],id,clock,species.IncomeSeconds,species.IncomeAmount) Progress.caught(player,id,1) send(player,"Monster tamed! Added to your bag.")
+    state.tamed=true local granted=BagRules.grant(bags[player],id,clock,species.IncomeSeconds,species.IncomeAmount) Progress.caught(player,id,1) send(player,granted and "Monster tamed! Added to your bag." or "Bag full (30/30). Caught monster released.")
     state.monster:SetAttribute("Tamed_"..player.UserId,true)
    end
    if Config.Hunt.AngerEnabled and warningReady then

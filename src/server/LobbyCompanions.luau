@@ -19,7 +19,7 @@ function M.new(context)
  function api.dismount(p)
   local pet=pets[p] local ride=pet and pet.ride
   if not ride then return end
-  pet.ride=nil pet.input=Vector3.zero
+  pet.ride=nil pet.input=Vector3.zero pet.jumpAt=nil pet.jumpHeight=nil
   p:SetAttribute("LobbyRiding",nil) pet.model:SetAttribute("RiderUserId",nil)
   local r,h=ride.root,ride.humanoid
   if r.Parent and h.Parent then
@@ -48,6 +48,11 @@ function M.new(context)
   h:ChangeState(Enum.HumanoidStateType.Seated)
   pet.model:SetAttribute("RiderUserId",p.UserId) p:SetAttribute("LobbyRiding",true)
   return true
+ end
+ function api.jump(p)
+  local pet=pets[p]
+  if not pet or not pet.ride or pet.jumpAt or not context.canAct(p) then return end
+  pet.jumpAt=os.clock() pet.jumpHeight=0
  end
  function api.input(p,value)
   local pet=pets[p] if not pet or not pet.ride then return end
@@ -112,9 +117,9 @@ function M.new(context)
     local ride=pet.ride
     if r~=ride.root or not ride.humanoid.Parent or ride.humanoid.Health<=0 then api.dismount(p) continue end
     local direction=context.canAct(p) and Rules.available(Rules.find(context.bag(p),pet.id)) and os.clock()-pet.inputAt<.5 and pet.input or Vector3.zero
-    local old=pet.model.PrimaryPart.CFrame
+    local old=pet.model.PrimaryPart.CFrame-Vector3.new(0,pet.jumpHeight or 0,0)
     local heading=RideRules.turn(old.LookVector,direction,step)
-    local delta=heading*direction.Magnitude*RideRules.speed(pet.model:GetAttribute("Stars"))*step
+    local delta=heading*direction.Magnitude*RideRules.speed(pet.model:GetAttribute("Stars"))*(context.speedMultiplier or 1)*step
     local position=old.Position+delta
     local frame=old local moving=delta.Magnitude>.01
     if moving then
@@ -129,6 +134,13 @@ function M.new(context)
      end
      if frame~=old then pet.model:PivotTo(frame*pet.model.PrimaryPart.CFrame:Inverse()*pet.model:GetPivot()) end
     end
+    local lift=0
+    if pet.jumpAt then
+     local t=(os.clock()-pet.jumpAt)/.8
+     if t>=1 then pet.jumpAt=nil else lift=math.sin(math.pi*t)*5 end
+    end
+    pet.jumpHeight=lift frame+=Vector3.new(0,lift,0)
+    pet.model:PivotTo(frame*pet.model.PrimaryPart.CFrame:Inverse()*pet.model:GetPivot())
     local stage=Catalog.stage(pet.model:GetAttribute("Stars"))
     local body=pet.model:FindFirstChild("Body") local tall=body and body.Size.Y or pet.height*2
     local offset=stage>=6 and Vector3.new(0,tall*.62-pet.height,1.35) or Vector3.new(0,tall*.62-pet.height+1.25,.15)

@@ -1,13 +1,16 @@
 -- Session-only bag income. Summoning/display never affects income.
 local BagRules = {}
+BagRules.Capacity=30
 
 function BagRules.new()
  return { monsters = {}, eggs={}, breedingTeams={}, profile={}, pending = 0, balance = 0, gems = 0, serial = 0, totalProduced = 0 }
 end
 
 function BagRules.grant(session, monsterId, clock, incomeSeconds, incomeAmount)
+ if #session.monsters>=BagRules.Capacity then return nil,"BagFull" end
 	session.serial=(session.serial or 0)+1
 	table.insert(session.monsters, { id=session.serial, monsterId = monsterId, stars = 1, lastIncome = clock, incomeSeconds=incomeSeconds, incomeAmount=incomeAmount,sex=BagRules.sexForRoll(math.random()) })
+ return session.monsters[#session.monsters]
 end
 function BagRules.sexForRoll(roll) return roll<.5 and "Male" or "Female" end
 
@@ -32,6 +35,21 @@ end
 function BagRules.find(session,id)
  if type(id)~="number" or id~=id or id%1~=0 then return nil end
  for _,item in ipairs(session.monsters) do if item.id==id then return item end end
+end
+function BagRules.discard(session,id)
+ local item=BagRules.find(session,id)
+ if not item or item.breedingTeam or item.tradeLock then return false end
+ for index,m in ipairs(session.monsters) do if m==item then table.remove(session.monsters,index) break end end
+ for index=#(session.profile or {}),1,-1 do if session.profile[index]==id then table.remove(session.profile,index) end end
+ return true
+end
+function BagRules.offline(session,seconds)
+ local amount=session.offlineRemainder or 0
+ for _,m in ipairs(session.monsters) do amount+=math.max(0,seconds)*.3*BagRules.income(m,1)/(m.incomeSeconds or 3) end
+ local whole=math.floor(amount)
+ session.offlineRemainder=amount-whole session.pending+=whole
+ session.totalProduced=(session.totalProduced or 0)+whole
+ return whole
 end
 function BagRules.place(session,id,pen)
  if type(pen)~="number" or pen~=pen or pen%1~=0 or pen<1 or pen>4 then return false end

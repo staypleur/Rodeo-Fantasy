@@ -33,7 +33,8 @@ local function normalize(data)
  data.eggs=data.eggs or {} data.profile=data.profile or {} data.breedingTeams=data.breedingTeams or {}
  data.gems=data.gems or 0
  data.balance=data.balance or 0 data.pending=data.pending or 0 data.serial=data.serial or 0
- -- No unapproved offline income; begin the next interval on this server.
+ -- Migrate stored income settings before awarding the offline fraction.
+ for _,m in ipairs(data.monsters) do local c=Catalog[m.monsterId] if c then m.incomeSeconds=c.IncomeSeconds m.incomeAmount=c.IncomeAmount end end
  for _,m in ipairs(data.monsters) do m.lastIncome=workspace:GetServerTimeNow() m.assignedPen=nil m.tradeLock=nil end
  return data
 end
@@ -61,7 +62,16 @@ function S.open(player)
   end)
   if not resolved or not saved then return nil,"거래 복구 중입니다. 잠시 후 다시 접속해주세요." end
  end
- local data=normalize(result.data)
+ local claimed,claim=pcall(function()
+  return store:UpdateAsync(tostring(player.UserId),function(old)
+   if not old or not old.lock or old.lock.token~=token or old.pendingTrade then return nil end
+   local data=normalize(old.data)
+   if old.savedAt then Rules.offline(data,math.max(0,os.time()-old.savedAt)) end
+   old.data=data old.savedAt=os.time() return old
+  end)
+ end)
+ if not claimed or not claim then return nil,"오프라인 수익을 안전하게 불러오지 못했습니다. 다시 접속해주세요." end
+ local data=normalize(claim.data)
  player:SetAttribute("StarterMossratGranted",data.profile.starterMossratGranted==true)
  entries[player]={token=token,data=data} return data
 end
@@ -75,7 +85,7 @@ function S.save(player,release)
   ok,result=pcall(function()
    return store:UpdateAsync(tostring(player.UserId),function(old)
     if not old or not old.lock or old.lock.token~=e.token or old.pendingTrade then return nil end
-    old.data=snapshot old.lock=not release and {token=e.token,expires=os.time()+120} or nil return old
+    old.data=snapshot old.savedAt=os.time() old.lock=not release and {token=e.token,expires=os.time()+120} or nil return old
    end)
   end)
  end
@@ -96,7 +106,7 @@ function S.trade(a,b,after)
     local e=entries[p]
     local written=store:UpdateAsync(tostring(p.UserId),function(old)
      if not old or not old.lock or old.lock.token~=e.token or old.pendingTrade then return nil end
-     old.data=copy(e.data) old.pendingTrade={id=id,after=copy(after[i])}
+     old.data=copy(e.data) old.savedAt=os.time() old.pendingTrade={id=id,after=copy(after[i])}
      old.lock.expires=os.time()+120 return old
     end)
     assert(written and written.pendingTrade and written.pendingTrade.id==id,"Trade checkpoint rejected")

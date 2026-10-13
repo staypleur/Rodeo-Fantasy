@@ -86,6 +86,17 @@ function UI.new(gui,remote)
  local breed=make("TextButton",{Name="Breed",Text="Breed",Position=UDim2.new(.62,0,0,55),Size=UDim2.new(.17,0,0,34),TextSize=16,BackgroundColor3=Color3.fromRGB(110,133,91),TextColor3=Color3.new(1,1,1),ZIndex=23},window)
  make("UIStroke",{Color=Color3.new(0,0,0),Thickness=2},breed)
  breed.Activated:Connect(function() if self.onBreed then self.onBreed() end end)
+ local discardId=nil
+ local confirm=make("Frame",{Name="DiscardConfirmation",Visible=false,Active=true,Size=UDim2.fromScale(1,1),BackgroundColor3=Color3.fromRGB(30,24,18),BackgroundTransparency=.12,ZIndex=70},window)
+ local prompt=make("TextLabel",{Text="",TextWrapped=true,TextSize=20,TextColor3=Color3.new(1,1,1),BackgroundTransparency=1,Position=UDim2.fromScale(.1,.2),Size=UDim2.fromScale(.8,.35),ZIndex=71},confirm)
+ local cancel=make("TextButton",{Text="취소",Position=UDim2.fromScale(.1,.62),Size=UDim2.fromScale(.35,.2),TextSize=20,ZIndex=71},confirm)
+ local accept=make("TextButton",{Text="버리기",BackgroundColor3=Color3.fromRGB(190,65,65),TextColor3=Color3.new(1,1,1),Position=UDim2.fromScale(.55,.62),Size=UDim2.fromScale(.35,.2),TextSize=20,ZIndex=71},confirm)
+ cancel.Activated:Connect(function() discardId=nil confirm.Visible=false end)
+ accept.Activated:Connect(function()
+  local id=discardId discardId=nil confirm.Visible=false
+  if id and self.area~="Hunt" then remote:FireServer("Discard",id) end
+ end)
+ window:GetPropertyChangedSignal("Visible"):Connect(function() if not window.Visible then discardId=nil confirm.Visible=false end end)
  local chooser
  local layout
  local revision=0
@@ -203,7 +214,7 @@ function UI.new(gui,remote)
     local income=card:FindFirstChild("Income")
     if income then income.Position=UDim2.fromOffset(4,compact and 118 or 172) end
     for _,child in ipairs(card:GetChildren()) do
-     if child:IsA("TextButton") then child.Position=UDim2.fromOffset(8,compact and 150 or 208) child.Size=UDim2.new(1,-16,0,compact and 38 or 32) end
+     if child:IsA("TextButton") and child.Name~="DiscardMonster" then child.Position=UDim2.fromOffset(8,compact and 150 or 208) child.Size=UDim2.new(1,-16,0,compact and 38 or 32) end
     end
    end
   end
@@ -298,6 +309,10 @@ function UI.new(gui,remote)
    end
    if male then line("MaleStem",14,4,9,2,-45) line("ArrowTop",18,2,6,2) line("ArrowRight",22,2,2,6)
    elseif female then line("FemaleStem",10,15,2,7) line("FemaleCross",7,18,8,2) end
+   local discard=make("TextButton",{Name="DiscardMonster",Text="×",Position=UDim2.fromOffset(4,4),Size=UDim2.fromOffset(40,40),TextSize=30,BackgroundColor3=Color3.fromRGB(190,65,65),TextColor3=Color3.new(1,1,1),ZIndex=29,Visible=self.area~="Hunt" and not self.evolutionMode and not item.breedingTeam},card)
+   discard.Activated:Connect(function()
+    discardId=item.id prompt.Text=L.text(item.monsterId,"en-us").." · "..item.stars.."★\n정말 버릴까요? 되돌릴 수 없습니다." confirm.Visible=true
+   end)
    self.cards[item.id]=card
    local preview=make("Frame",{Name="MonsterImage",BackgroundTransparency=1,Size=UDim2.new(1,0,0,140),ZIndex=23},card)
    Portrait.fill(preview,item.monsterId,item.stars,false)

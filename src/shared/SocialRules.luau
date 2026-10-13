@@ -51,6 +51,7 @@ end
 function R.exchange(a,b,offerA,offerB)
  local x,y=R.offer(a,offerA),R.offer(b,offerB)
  if not x or not y then return nil,"Your inventory or monster status has changed." end
+ if #a.monsters-#x.ids+#y.ids>30 or #b.monsters-#y.ids+#x.ids>30 then return nil,"Bag capacity is 30 monsters." end
  if (x.coins==0 and #x.ids==0) or (y.coins==0 and #y.ids==0) then return nil,"Both players must offer something." end
  if #x.ids+#y.ids==0 then return nil,"A trade must include a monster." end
  local function transfer(bag,outgoing,incoming)
