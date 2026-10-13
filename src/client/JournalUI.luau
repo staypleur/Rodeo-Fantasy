@@ -76,7 +76,7 @@ function J.new(gui,remote)
  local previous=make("TextButton",{Name="JournalPrevious",Text="‹",Size=UDim2.fromOffset(40,40),Position=UDim2.fromOffset(2,0),BackgroundTransparency=1,TextSize=30,ZIndex=46},bottom)
  local nextPage=make("TextButton",{Name="JournalNext",Text="›",AnchorPoint=Vector2.new(1,0),Position=UDim2.new(1,-2,0,0),Size=UDim2.fromOffset(40,40),BackgroundTransparency=1,TextSize=30,ZIndex=46},bottom)
  local pageNumber=label(bottom,"JournalPage","",.79,0,.12,1,15)
- local planetTab=make("Frame",{Name="PlanetTabs",Position=UDim2.fromScale(1.025,.17),Size=UDim2.fromScale(.18,.68),BackgroundTransparency=1,ZIndex=46},book)
+ local planetTab=make("ScrollingFrame",{Name="PlanetTabs",Active=true,BorderSizePixel=0,ScrollBarThickness=5,CanvasSize=UDim2.new(),ClipsDescendants=true,Position=UDim2.fromScale(1.025,.17),Size=UDim2.fromScale(.18,.68),BackgroundTransparency=1,ZIndex=46},book)
  local planetButtons={}
  for index,id in ipairs(Planets.Order) do
   local p=Planets[id]
@@ -192,9 +192,13 @@ function J.new(gui,remote)
    progress.Position=UDim2.fromScale(.18,.72) progress.Size=UDim2.fromScale(.50,.12)
    detail.Position=UDim2.fromScale(.70,.16) detail.Size=UDim2.fromScale(.28,.42) info.Visible=true
   end
+  planetTab.ScrollingDirection=compact and Enum.ScrollingDirection.X or Enum.ScrollingDirection.Y
+  local extent=compact and 140 or 86
+  planetTab.CanvasSize=compact and UDim2.fromOffset(#planetButtons*extent,0) or UDim2.fromOffset(0,#planetButtons*extent)
+  planetTab.CanvasPosition=Vector2.zero
   for index,tab in ipairs(planetButtons) do
-   tab.Position=compact and UDim2.fromScale((index-1)/4,0) or UDim2.fromScale(0,(index-1)/4)
-   tab.Size=compact and UDim2.fromScale(.24,1) or UDim2.fromScale(1,.23)
+   tab.Position=compact and UDim2.fromOffset((index-1)*extent+2,2) or UDim2.fromOffset(2,(index-1)*extent+2)
+   tab.Size=compact and UDim2.new(0,extent-8,1,-10) or UDim2.new(1,-10,0,extent-8)
   end
   if book.Visible then self.render() end
  end

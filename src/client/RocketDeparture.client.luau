@@ -95,11 +95,12 @@ remote.OnClientEvent:Connect(function(action,data)
    end)
    b.Name="Planet_"..id
    local accents={GreenStar=Color3.fromRGB(92,242,206),Zephyrus=Color3.fromRGB(247,201,107),Phyto=Color3.fromRGB(89,221,173),Celestia=Color3.fromRGB(180,137,252)}
-   b:SetAttribute("Accent",accents[id])
-   make("UIStroke",{Name="Outline",Color=accents[id],Thickness=2,ApplyStrokeMode=Enum.ApplyStrokeMode.Border},b)
+   local accent=accents[id] or Color3.fromRGB(145,205,255)
+   b:SetAttribute("Accent",accent)
+   make("UIStroke",{Name="Outline",Color=accent,Thickness=2,ApplyStrokeMode=Enum.ApplyStrokeMode.Border},b)
    make("UIGradient",{Rotation=90,Color=ColorSequence.new(Color3.new(1,1,1),Color3.fromRGB(145,180,235))},b)
    make("ImageLabel",{Name=id.."Artwork",Image=planet.Image,BackgroundTransparency=1,Position=UDim2.fromScale(.05,.02),Size=UDim2.fromScale(.90,.80),ScaleType=Enum.ScaleType.Fit},b)
-   make("TextLabel",{Name="PlanetLabel",Text=planet.Name,BackgroundTransparency=1,Position=UDim2.fromScale(.05,.82),Size=UDim2.fromScale(.90,.14),TextScaled=true,TextWrapped=true,Font=Enum.Font.GothamBold,TextColor3=accents[id]},b)
+   make("TextLabel",{Name="PlanetLabel",Text=planet.Name,BackgroundTransparency=1,Position=UDim2.fromScale(.05,.82),Size=UDim2.fromScale(.90,.14),TextScaled=true,TextWrapped=true,Font=Enum.Font.GothamBold,TextColor3=accent},b)
   end
  elseif action=="DepartureResult" and gui.Enabled then
   busy=false

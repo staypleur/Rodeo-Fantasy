@@ -1666,3 +1666,13 @@
 - iPhone XR 가로 Studio 시뮬레이터: 배경/10개 슬롯 전체 표시, 화면 밖 잘림 없음. 원본 비율 유지에 따라 이름·페이지 화살표·교체 버튼이 작음. 모바일 사용성 합격으로 처리하지 않으며 실기기 터치 및 세로 화면 미검증.
 - 증거: docs/evidence/breeding-ui-studio-pc.png, breeding-ui-studio-mobile.png. 상단 상태 문구는 검증용이며 제품 UI가 아님.
 - Luau 컴파일 통과, 검증 장소 및 설치기 재생성. 로비/카페 설치와 게시 미실시.
+
+## 2026-10-13 행성 이미지 16장·선택 순서 19개
+
+- 사용자 원본 PNG 16장을 assets/ui/Planets에 그대로 보관하고 SHA256 및 Roblox Image ID를 manifest에 기록했다. Creator Dashboard에서 16/16 업로드 완료 후 이미지 유형 목록에서 실제 Image ID를 확인했다(업로드 결과 Decal ID와 구분). 현재 업로드 소유자는 puller3313이다.
+- PlanetCatalog에 확정 19개 순서와 테마 설명을 적용했다. 기존 4개 이미지는 유지하고 Cherry는 순서 밖 예비 자산으로 보관했다. 미제작 사냥터는 Available=false, 전 행성 누적 10,000m 해금을 유지했다.
+- 기존 행성 선택 카드의 새 행성 색상 누락 오류를 방지했다. 도감의 4칸 고정 탭을 PC 세로·좁은 화면 가로 스크롤로 바꿨다. 새 UI 디자인은 사용자 제공 대기다.
+- 검증: tests/check_planet_catalog.py 통과(정확한 순서, 18개 해금 경계 9,999/10,000m, 미제작 행성 차단, 원본 16장 SHA256, 변경 Luau 3개 컴파일).
+- Studio 분리 검토본에서 19개 Catalog 로딩까지 확인했으나 ContentProvider는 기존 이미지까지 19개 모두 Failure를 반환했다. 검토 스크립트의 모듈 준비 대기와 캐릭터 낙하 시 UI 소실도 보정했다. 이미지 실제 표시, PC/모바일 탐색, 실제 그룹 게임 적용 및 게시 검증은 아직 미완료. 사용자 입력이 Studio 명령창과 겹쳐 입력 중지 가능 여부를 질문했다.
+- 성능: 원본 이미지 16장 약 41MB(파일 기준, 실제 전송·메모리 측정 아님). 신규 3D 모델·프레임 반복 작업·주행 네트워크는 추가하지 않는다. 실제 기기 이미지 메모리/성능은 측정하지 않았다.
+- 배포용 dist/PlanetUpdate.commandbar.lua는 지정 Universe, 기존 스크립트 원문을 검사한 후 3개만 교체하며 백업/실패 복구를 제공한다. 원래 dist/RodeoFantasy-New.rbxlx의 사용자 변경은 건드리지 않았다.
